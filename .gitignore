@@ -1,0 +1,14 @@
+*.o
+*.a
+*.so
+*.out
+
+*.dSYM/
+
+build/
+bin/
+
+compile_commands.json
+
+.vscode/
+.idea/
