@@ -9,6 +9,7 @@
 // A Response is created using the Request and the Resource
 // Connection is kept alive or closed depending on configuration/Request
 // Flow: Server -> Connection -> Request -> Resource -> Response -> Connection -> Server
+// State communication flow: Socket -> Connection -> Server
 
 // An active server listening for connections
 class Server {
@@ -28,17 +29,19 @@ class Connection {
 class Request {
 	// Headers
 	// Build itself from received client request
-	// Parse itself after receiving complete request data
+	// Parse itself after receiving complete request data, validating its format
 };
 
 class Response {
 	// Headers
 	// Status code + description
-	// Build itself from Request and Resource
+	// Build itself from Request analysis and Resource
 };
 
 // Socket abstraction
 class Socket {
+	// Methods for manipulating a socket
+	// State
 };
 
 // Request/Response headers
