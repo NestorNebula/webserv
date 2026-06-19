@@ -13,6 +13,7 @@
 #include "Headers.hpp"
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 
 // Methods
 bool Headers::has(const std::string &key) const {
@@ -24,12 +25,19 @@ void Headers::insert(const std::string &key, const std::string &value) {
 	_container.insert(Header(key, value));
 }
 
+void Headers::remove(const std::string &key) {
+	_container.erase(key);
+}
+
 Headers::const_iterator Headers::find(const std::string &key) const {
 	return _container.find(key);
 }
 
-void Headers::remove(const std::string &key) {
-	_container.erase(key);
+std::string Headers::str() const {
+	std::stringstream oss;
+	for (const_iterator it = begin(), ite = end(); it != ite; it++)
+		oss << it->first << ": " << it->second << '\n';
+	return oss.str();
 }
 
 void Headers::clear() {
