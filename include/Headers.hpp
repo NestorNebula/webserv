@@ -41,8 +41,9 @@ public:
 	// Methods
 	bool has(const std::string &key) const;
 	void insert(const std::string &key, const std::string &value);
-	const_iterator find(const std::string &key) const;
 	void remove(const std::string &key);
+	const_iterator find(const std::string &key) const;
+	std::string str() const;
 	void clear();
 
 	// Iterators
