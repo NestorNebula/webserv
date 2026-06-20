@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:29:47 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/20 11:17:47 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/20 14:56:16 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ public:
 	const_iterator find(const std::string &key) const;
 	std::string str() const;
 	void clear();
+	HeadersContainer::size_type size() const;
 
 	// Iterators
 	iterator begin() {
