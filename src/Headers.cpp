@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 12:45:09 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/20 11:17:35 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/20 14:56:32 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,8 @@ std::string Headers::str() const {
 
 void Headers::clear() {
 	_container.clear();
+}
+
+HeadersContainer::size_type Headers::size() const {
+	return _container.size();
 }
