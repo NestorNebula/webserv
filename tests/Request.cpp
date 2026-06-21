@@ -100,6 +100,11 @@ TEST(Request, CutHeader) {
 
   req.append("GET / HTTP/1.1\r\n"
              "Host: loca");
+  EXPECT_TRUE(req.hasMethod());
+  EXPECT_TRUE(req.hasURL());
+  EXPECT_FALSE(req.hasQuery());
+  EXPECT_TRUE(req.hasVersion());
+  EXPECT_FALSE(req.hasHeaders());
   req.append("lhost\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
@@ -127,6 +132,7 @@ TEST(Request, CutBody) {
              "\r\n"
              "Hel");
   req.append("lo");
+  EXPECT_TRUE(req.hasBody());
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ((int) req.getBody().size(), 5);
   EXPECT_EQ(req.getBody(), "Hello");
