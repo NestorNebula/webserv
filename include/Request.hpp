@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/20 15:36:25 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/21 10:58:08 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 class Request {
 public:
-	Request(): _state(EMPTY) {}
+	Request(): _state(EMPTY), _lineStart(0) {}
 
 	// Methods
 	void append(const std::string data);
@@ -56,4 +56,11 @@ private:
 	std::string _version;
 	Headers _headers;
 	std::string _body;
+	std::string::size_type _lineStart;
+	std::string::size_type _remainingBody;
+
+	// Private methods
+	void handleStartLine(std::string startLine, std::string::size_type eol);
+	void handleHeaderLine(std::string headerLine, std::string::size_type eol);
+	void handleBodyLine(std::string bodyLine, std::string::size_type eol);
 };
