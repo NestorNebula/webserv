@@ -6,13 +6,39 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/20 15:48:22 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/21 15:56:50 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include "helpers.hpp"
+#include <cstdlib>
+#include <sstream>
 
-// void Request::append(const std::string data);
+void Request::append(const std::string data) {
+	if (_state == COMPLETE || _state == INVALID)
+		return;
+	_raw += data;
+	for (;;) {
+		std::string::size_type eol(_raw.find("\r\n", _lineStart));
+		std::string line = (eol != std::string::npos) ? _raw.substr(_lineStart, eol - _lineStart + 2) : _raw.substr(_lineStart);
+		switch (_state) {
+			case EMPTY: case START_LINE:
+				handleStartLine(line, eol);
+				break;
+			case HEADERS:
+				handleHeaderLine(line, eol);
+				break;
+			case BODY:
+				handleBodyLine(line, eol);
+				break;
+			default:
+				return;
+		}
+		if (eol == std::string::npos)
+			break;
+	}
+}
 
 const std::string &Request::getRaw() const {
 	return _raw;
@@ -75,4 +101,59 @@ bool Request::hasBody() const {
 
 const std::string &Request::getBody() const {
 	return _body;
+}
+
+void Request::handleStartLine(std::string startLine, std::string::size_type eol) {
+	if (_state == EMPTY)
+		_state = START_LINE;
+	if (eol == std::string::npos)
+		return;
+	std::istringstream iss(trim(startLine, " \t\r\n"));
+	if (!(iss >> _method) || !(iss >> _url) || !(iss >> _version) || !iss.eof()) {
+		_state = INVALID;
+		return ;
+	}
+	std::string::size_type qIndex = _url.find("?");
+	if (qIndex != std::string::npos) {
+		_query = _url.substr(qIndex + 1);
+		_url.erase(qIndex);
+	}
+	_state = HEADERS;
+	_lineStart = eol + 2;
+}
+void Request::handleHeaderLine(std::string headerLine, std::string::size_type eol) {
+	if (eol == std::string::npos)
+		return;
+	if (headerLine == "\r\n") {
+		_lineStart = eol + 2;
+		_state = (hasHeader("Content-Length") || hasHeader("Transfer-Encoding")) ? BODY : COMPLETE;
+		if (_state == BODY && hasHeader("Content-Length"))
+			_remainingBody = std::atoi(_headers.find("Content-Length")->second.c_str());
+		return;
+	}
+	std::string::size_type sep = headerLine.find(":");
+	if (sep == std::string::npos) {
+		_state = INVALID;
+		return;
+	}
+	Header header(trim(headerLine.substr(0, sep), " \t\r\n"), trim(headerLine.substr(sep + 1), " \t\r\n"));
+	if (header.first.empty() || header.second.empty() || hasHeader(header.first)) {
+		_state = INVALID;
+		return;
+	}
+	_headers.insert(header);
+	_lineStart = eol + 2;
+}
+void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
+	(void)eol;
+	if (bodyLine.size() > _remainingBody) {
+		_state = INVALID;
+		return;
+	}
+	_body += bodyLine;
+	_remainingBody -= bodyLine.size();
+	if (_remainingBody == 0)
+		_state = COMPLETE;
+	else
+		_lineStart += bodyLine.size();
 }
