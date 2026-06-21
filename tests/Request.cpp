@@ -60,15 +60,15 @@ TEST(Request, BasicPost) {
 
   req.append("POST /login HTTP/1.1\r\n"
              "Host: localhost\r\n"
-             "Content-Length: 32\r\n"
+             "Content-Length: 29\r\n"
              "\r\n"
              "username=nhoussie&password=42");
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ(req.getMethod(), "POST");
   EXPECT_EQ((int) req.getHeaders().size(), 2);
   expectHeader(req.getHeaders(), "Host", "localhost");
-  expectHeader(req.getHeaders(), "Content-Length", "32");
-  EXPECT_EQ((int) req.getBody().size(), 32);
+  expectHeader(req.getHeaders(), "Content-Length", "29");
+  EXPECT_EQ((int) req.getBody().size(), 29);
   EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
 }
 
@@ -165,7 +165,7 @@ TEST(Request, MultipleHeadersPost) {
              "Host: localhost\r\n"
              "User-Agent: Chrome\r\n"
              "Content-Type: application/x-www-form-urlencoded\r\n"
-             "Content-Length: 32\r\n"
+             "Content-Length: 29\r\n"
              "\r\n"
              "username=nhoussie&password=42");
   EXPECT_TRUE(req.isComplete());
@@ -174,7 +174,7 @@ TEST(Request, MultipleHeadersPost) {
   expectHeader(req.getHeaders(), "User-Agent", "Chrome");
   expectHeader(req.getHeaders(), "Content-Type",
                "application/x-www-form-urlencoded");
-  expectHeader(req.getHeaders(), "Content-Length", "32");
-  EXPECT_EQ((int) req.getBody().size(), 32);
+  expectHeader(req.getHeaders(), "Content-Length", "29");
+  EXPECT_EQ((int) req.getBody().size(), 29);
   EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
 }
