@@ -21,7 +21,7 @@ GTEST_OBJ = .obj/gtest-all.o
 
 GTEST_CXXFLAGS = -std=c++98
 
-PROJECT_SRC = ../src/Headers.cpp ../src/Request.cpp
+PROJECT_SRC = ../src/Headers.cpp ../src/helpers.cpp ../src/Request.cpp
 
 TEST_SRC = Request.cpp main.cpp
 
