@@ -23,11 +23,18 @@ public:
 	const std::string &getRaw() const;
 	bool isComplete() const;
 	bool isInvalid() const;
+	bool hasMethod() const;
 	const std::string &getMethod() const;
+	bool hasURL() const;
 	const std::string &getURL() const;
+	bool hasQuery() const;
 	const std::string &getQuery() const;
+	bool hasVersion() const;
 	const std::string &getVersion() const;
+	bool hasHeader(const std::string &) const;
+	bool hasHeaders() const;
 	const Headers &getHeaders() const;
+	bool hasBody() const;
 	const std::string &getBody() const;
 
 private:
