@@ -16,7 +16,7 @@
 
 class Request {
 public:
-  Request() : _state(EMPTY), _lineStart(0), _remainingBody(std::string::npos){}
+  Request() : _state(EMPTY), _lineStart(0), _remainingBody(std::string::npos) {}
 
   // Methods
   void append(const std::string data);

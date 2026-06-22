@@ -122,12 +122,12 @@ void Request::handleHeaderLine(std::string headerLine,
                  ? BODY
                  : COMPLETE;
     if (_state == BODY && hasHeader("Content-Length")) {
-	bool err;
-      _remainingBody =
-          getLong(_headers.find("Content-Length")->second.c_str(), &err, 0, INT_MAX);
-	  if (err)
-		  _state = INVALID;
-	}
+      bool err;
+      _remainingBody = getLong(_headers.find("Content-Length")->second.c_str(),
+                               &err, 0, INT_MAX);
+      if (err)
+        _state = INVALID;
+    }
     return;
   }
   std::string::size_type sep = headerLine.find(":");
@@ -173,7 +173,7 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
   }
   if (_remainingBody == std::string::npos) {
     bool err;
-	_remainingBody = getLong(bodyLine.c_str(), &err, 0, INT_MAX, 16, '\r');
+    _remainingBody = getLong(bodyLine.c_str(), &err, 0, INT_MAX, 16, '\r');
     if (err) {
       _state = INVALID;
       return;

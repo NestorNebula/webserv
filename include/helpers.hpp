@@ -20,4 +20,5 @@ std::string trim(std::string s, std::string set);
 void capitalize(std::string &s);
 std::string capitalize(const std::string &s);
 
-long getLong(const std::string &s, bool *err, long min = LONG_MIN, long max = LONG_MAX, int base = 10, char endc = '\0');
+long getLong(const std::string &s, bool *err, long min = LONG_MIN,
+             long max = LONG_MAX, int base = 10, char endc = '\0');
