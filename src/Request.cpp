@@ -12,6 +12,7 @@
 
 #include "Request.hpp"
 #include "helpers.hpp"
+#include <climits>
 #include <cstdlib>
 #include <sstream>
 
@@ -33,7 +34,7 @@ void Request::append(const std::string data) {
       handleHeaderLine(line, eol);
       break;
     case BODY:
-      handleBodyLine(line, eol);
+      handleBody(line, eol);
       break;
     default:
       return;
@@ -128,16 +129,44 @@ void Request::handleHeaderLine(std::string headerLine,
   _headers.insert(header);
   _lineStart = eol + 2;
 }
-void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
-  (void)eol;
-  if (bodyLine.size() > _remainingBody) {
+
+void Request::handleBody(std::string body, std::string::size_type eol) {
+  if (_headers.has("Content-Length")) {
+    if (body.size() > _remainingBody) {
+      _state = INVALID;
+      return;
+    }
+    _body += body;
+    _remainingBody -= body.size();
+    if (_remainingBody == 0)
+      _state = COMPLETE;
+    else
+      _lineStart += body.size();
+  } else if (_headers.has("Transfer-Encoding"))
+    handleBodyLine(body, eol);
+  else
     _state = INVALID;
+}
+
+void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
+  static std::string::size_type chunkSize = std::string::npos;
+  if (eol == std::string::npos)
+    return;
+  if (bodyLine == "\r\n") {
+    _state = COMPLETE;
     return;
   }
-  _body += bodyLine;
-  _remainingBody -= bodyLine.size();
-  if (_remainingBody == 0)
-    _state = COMPLETE;
-  else
-    _lineStart += bodyLine.size();
+  if (chunkSize == std::string::npos) {
+    char *endptr = NULL;
+    chunkSize = std::strtol(bodyLine.c_str(), &endptr, 16);
+    if (*endptr != '\r' || chunkSize > INT_MAX) {
+      _state = INVALID;
+      return;
+    }
+  } else if (eol - _lineStart != chunkSize) {
+    _state = INVALID;
+  } else {
+    _body.append(bodyLine, 0, eol - _lineStart);
+    chunkSize = std::string::npos;
+  }
 }

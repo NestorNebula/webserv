@@ -62,5 +62,6 @@ private:
   // Private methods
   void handleStartLine(std::string startLine, std::string::size_type eol);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
+  void handleBody(std::string body, std::string::size_type eol);
   void handleBodyLine(std::string bodyLine, std::string::size_type eol);
 };
