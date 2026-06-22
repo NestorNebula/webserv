@@ -14,23 +14,23 @@
 #include <cctype>
 
 std::string trim(std::string s, std::string set) {
-	std::string::size_type start, end;
-	start = s.find_first_not_of(set);
-	end = s.find_last_not_of(set);
-	if (start == std::string::npos || end == std::string::npos)
-		return s;
-	return std::string(s, start, end - start + 1);
+  std::string::size_type start, end;
+  start = s.find_first_not_of(set);
+  end = s.find_last_not_of(set);
+  if (start == std::string::npos || end == std::string::npos)
+    return s;
+  return std::string(s, start, end - start + 1);
 }
 
 void capitalize(std::string &s) {
-	for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) {
-		if (it == s.begin() || !std::isalpha(*(it - 1)))
-			*it = std::toupper(*it);
-	}
+  for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) {
+    if (it == s.begin() || !std::isalpha(*(it - 1)))
+      *it = std::toupper(*it);
+  }
 }
 
 std::string capitalize(const std::string &s) {
-	std::string copy(s);
-	capitalize(copy);
-	return copy;
+  std::string copy(s);
+  capitalize(copy);
+  return copy;
 }
