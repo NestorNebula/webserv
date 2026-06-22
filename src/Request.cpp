@@ -89,7 +89,7 @@ void Request::clear() {
   _version.clear();
   _body.clear();
   _lineStart = 0;
-  _remainingBody = 0;
+  _remainingBody = std::string::npos;
   _headers.clear();
   _state = EMPTY;
 }
@@ -162,24 +162,24 @@ void Request::handleBody(std::string body, std::string::size_type eol) {
 }
 
 void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
-  static std::string::size_type chunkSize = std::string::npos;
   if (eol == std::string::npos)
     return;
   if (bodyLine == "\r\n") {
     _state = COMPLETE;
     return;
   }
-  if (chunkSize == std::string::npos) {
+  if (_remainingBody == std::string::npos) {
     char *endptr = NULL;
-    chunkSize = std::strtol(bodyLine.c_str(), &endptr, 16);
-    if (*endptr != '\r' || chunkSize > INT_MAX) {
+    _remainingBody = std::strtol(bodyLine.c_str(), &endptr, 16);
+    if (*endptr != '\r' || _remainingBody > INT_MAX) {
       _state = INVALID;
       return;
     }
-  } else if (eol - _lineStart != chunkSize) {
+  } else if (eol - _lineStart != _remainingBody) {
     _state = INVALID;
   } else {
     _body.append(bodyLine, 0, eol - _lineStart);
-    chunkSize = std::string::npos;
+    _remainingBody = std::string::npos;
   }
+_lineStart = eol + 2;
 }
