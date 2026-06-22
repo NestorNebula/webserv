@@ -165,7 +165,7 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
   if (eol == std::string::npos)
     return;
   if (bodyLine == "\r\n") {
-    _state = COMPLETE;
+    _state = _remainingBody == 0 ? COMPLETE : INVALID;
     return;
   }
   if (_remainingBody == std::string::npos) {
@@ -181,5 +181,5 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
     _body.append(bodyLine, 0, eol - _lineStart);
     _remainingBody = std::string::npos;
   }
-_lineStart = eol + 2;
+  _lineStart = eol + 2;
 }
