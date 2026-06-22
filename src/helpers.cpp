@@ -37,14 +37,17 @@ std::string capitalize(const std::string &s) {
   return copy;
 }
 
-long getLong(const std::string &s, bool *err, long min, long max, int base, char endc) {
-	char *endptr = NULL;
-	errno = 0;
-	long n = std::strtol(s.c_str(), &endptr, base);
-	if (err) *err = true;
-	if (*endptr != endc || ((n == LONG_MIN || n == LONG_MAX) && errno == ERANGE)
-	|| (n < min || n > max))
-		return n;
-	*err = false;
-	return n;
+long getLong(const std::string &s, bool *err, long min, long max, int base,
+             char endc) {
+  char *endptr = NULL;
+  errno = 0;
+  long n = std::strtol(s.c_str(), &endptr, base);
+  if (err)
+    *err = true;
+  if (*endptr != endc ||
+      ((n == LONG_MIN || n == LONG_MAX) && errno == ERANGE) ||
+      (n < min || n > max))
+    return n;
+  *err = false;
+  return n;
 }
