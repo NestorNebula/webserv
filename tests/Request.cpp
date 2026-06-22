@@ -19,7 +19,7 @@ TEST(Request, BasicGet) {
   EXPECT_EQ(req.getMethod(), "GET");
   EXPECT_EQ(req.getURL(), "/");
   EXPECT_EQ(req.getVersion(), "HTTP/1.1");
-  EXPECT_EQ((int) req.getHeaders().size(), 1);
+  EXPECT_EQ((int)req.getHeaders().size(), 1);
   expectHeader(req.getHeaders(), "Host", "localhost");
   EXPECT_EQ(req.getRaw(), "GET / HTTP/1.1 \r\n"
                           "Host: localhost\r\n"
@@ -37,7 +37,7 @@ TEST(Request, MultipleHeaders) {
              "\r\n");
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ(req.getURL(), "/index.html");
-  EXPECT_EQ((int) req.getHeaders().size(), 4);
+  EXPECT_EQ((int)req.getHeaders().size(), 4);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "User-Agent", "Firefox");
   expectHeader(req.getHeaders(), "Accept", "text/html");
@@ -65,10 +65,10 @@ TEST(Request, BasicPost) {
              "username=nhoussie&password=42");
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ(req.getMethod(), "POST");
-  EXPECT_EQ((int) req.getHeaders().size(), 2);
+  EXPECT_EQ((int)req.getHeaders().size(), 2);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  EXPECT_EQ((int) req.getBody().size(), 29);
+  EXPECT_EQ((int)req.getBody().size(), 29);
   EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
 }
 
@@ -91,7 +91,7 @@ TEST(Request, BasicDelete) {
              "\r\n");
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ(req.getMethod(), "DELETE");
-  EXPECT_EQ((int) req.getHeaders().size(), 1);
+  EXPECT_EQ((int)req.getHeaders().size(), 1);
   expectHeader(req.getHeaders(), "Host", "localhost");
 }
 
@@ -108,7 +108,7 @@ TEST(Request, CutHeader) {
   req.append("lhost\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ((int) req.getHeaders().size(), 1);
+  EXPECT_EQ((int)req.getHeaders().size(), 1);
   expectHeader(req.getHeaders(), "Host", "localhost");
 }
 
@@ -134,7 +134,7 @@ TEST(Request, CutBody) {
   req.append("lo");
   EXPECT_TRUE(req.hasBody());
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ((int) req.getBody().size(), 5);
+  EXPECT_EQ((int)req.getBody().size(), 5);
   EXPECT_EQ(req.getBody(), "Hello");
 }
 
@@ -169,12 +169,55 @@ TEST(Request, MultipleHeadersPost) {
              "\r\n"
              "username=nhoussie&password=42");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ((int) req.getHeaders().size(), 4);
+  EXPECT_EQ((int)req.getHeaders().size(), 4);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "User-Agent", "Chrome");
   expectHeader(req.getHeaders(), "Content-Type",
                "application/x-www-form-urlencoded");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  EXPECT_EQ((int) req.getBody().size(), 29);
+  EXPECT_EQ((int)req.getBody().size(), 29);
+  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+}
+
+TEST(Request, ChunkedPost) {
+  Request req;
+
+  req.append("POST /form HTTP/1.1\r\n"
+             "Host: localhost\r\n"
+             "User-Agent: Chrome\r\n"
+             "Content-Type: application/x-www-form-urlencoded\r\n"
+             "Transfer-Encoding: chunked\r\n"
+             "\r\n"
+             "11\r\n"
+             "username=nhoussie\r\n"
+             "c\r\n"
+             "&password=42\r\n"
+             "0\r\n"
+             "\r\n");
+  EXPECT_TRUE(req.isComplete());
+  EXPECT_EQ((int)req.getHeaders().size(), 4);
+  expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
+  EXPECT_EQ((int)req.getBody().size(), 29);
+  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+}
+
+TEST(Request, CutChunkedPost) {
+  Request req;
+
+  req.append("POST /form HTTP/1.1\r\n"
+             "Host: localhost\r\n"
+             "User-Agent: Chrome\r\n"
+             "Content-Type: application/x-www-form-urlencoded\r\n"
+             "Transfer-Encoding: chunked\r\n"
+             "\r\n");
+  req.append("11\r\n"
+             "username=nhoussie\r\n"
+             "c\r\n");
+  req.append("&password=42\r\n"
+             "0\r\n"
+             "\r\n");
+  EXPECT_TRUE(req.isComplete());
+  expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
+  EXPECT_EQ((int)req.getBody().size(), 29);
   EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
 }
