@@ -13,7 +13,6 @@
 #include "Request.hpp"
 #include "helpers.hpp"
 #include <climits>
-#include <cstdlib>
 #include <sstream>
 
 void Request::append(const std::string data) {
@@ -122,9 +121,13 @@ void Request::handleHeaderLine(std::string headerLine,
     _state = (hasHeader("Content-Length") || hasHeader("Transfer-Encoding"))
                  ? BODY
                  : COMPLETE;
-    if (_state == BODY && hasHeader("Content-Length"))
+    if (_state == BODY && hasHeader("Content-Length")) {
+	bool err;
       _remainingBody =
-          std::atoi(_headers.find("Content-Length")->second.c_str());
+          getLong(_headers.find("Content-Length")->second.c_str(), &err, 0, INT_MAX);
+	  if (err)
+		  _state = INVALID;
+	}
     return;
   }
   std::string::size_type sep = headerLine.find(":");
@@ -169,9 +172,9 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
     return;
   }
   if (_remainingBody == std::string::npos) {
-    char *endptr = NULL;
-    _remainingBody = std::strtol(bodyLine.c_str(), &endptr, 16);
-    if (*endptr != '\r' || _remainingBody > INT_MAX) {
+    bool err;
+	_remainingBody = getLong(bodyLine.c_str(), &err, 0, INT_MAX, 16, '\r');
+    if (err) {
       _state = INVALID;
       return;
     }
