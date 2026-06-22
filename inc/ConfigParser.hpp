@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/22 14:03:44 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/22 15:41:37 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,5 +42,63 @@ struct ServerConfig {
 
 	ServerConfig();
 };
+
+enum TokenType {
+	TOKEN_WORD,
+	TOKEN_LBRACE,
+	TOKEN_RBRACE,
+	TOKEN_COLON,
+	TOKEN_COMMA,
+	TOKKEN_NEWLINE,
+	TOKEN_EOF
+};
+
+struct Token {
+	TokenType	type;
+	std::string	value;
+	size_t		line;
+};
+
+class ConfigParser {
+	private:
+		std::vector<Token>			_tokens;
+		size_t						_pos;
+		std::vector<ServerConfig>	_servers;
+
+		/* Parser Tools */
+		void	tokenize(const std::string& content);
+		Token	peek();
+		Token	consume();
+		Token	expect(TokenType type);
+		void	skipNewlines();
+
+		/* Work Logical */
+		void	parseServer();
+		void	parseRoute();
+		void	parseDirective(std::map<std::string, std::string>& directives_map,
+								std::set<std::string>& seen_directives);
+		size_t	parseSize(const std::string& sizeStr);
+
+		/* Validation */
+		void	validateServerConfig(const ServerConfig& server);
+		void	validateRouteConfig(const RouteConfig& route);
+
+	public:
+		ConfigParser();
+		~ConfigParser();
+
+		void	parseFile(const std::string& filename);
+
+		const std::vector<ServerConfig>& getServers() const { return _servers; }
+
+		class ConfigException : public std::exception {
+			private:
+				std::string _msg;
+			public:
+				ConfigException(const std::string& msg);
+				virtual ~ConfigException() throw();
+				virtual const char* what() const throw();
+		};
+	};
 
 #endif
