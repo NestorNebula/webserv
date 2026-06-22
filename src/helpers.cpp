@@ -12,6 +12,8 @@
 
 #include "helpers.hpp"
 #include <cctype>
+#include <cerrno>
+#include <cstdlib>
 
 std::string trim(std::string s, std::string set) {
   std::string::size_type start, end;
@@ -33,4 +35,16 @@ std::string capitalize(const std::string &s) {
   std::string copy(s);
   capitalize(copy);
   return copy;
+}
+
+long getLong(const std::string &s, bool *err, long min, long max, int base, char endc) {
+	char *endptr = NULL;
+	errno = 0;
+	long n = std::strtol(s.c_str(), &endptr, base);
+	if (err) *err = true;
+	if (*endptr != endc || ((n == LONG_MIN || n == LONG_MAX) && errno == ERANGE)
+	|| (n < min || n > max))
+		return n;
+	*err = false;
+	return n;
 }
