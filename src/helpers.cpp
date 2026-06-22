@@ -48,6 +48,7 @@ long getLong(const std::string &s, bool *err, long min, long max, int base,
       ((n == LONG_MIN || n == LONG_MAX) && errno == ERANGE) ||
       (n < min || n > max))
     return n;
-  *err = false;
+  if (err)
+    *err = false;
   return n;
 }
