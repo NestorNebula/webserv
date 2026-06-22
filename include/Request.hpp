@@ -36,6 +36,7 @@ public:
   const Headers &getHeaders() const;
   bool hasBody() const;
   const std::string &getBody() const;
+  void clear();
 
 private:
   Request(const Request &);

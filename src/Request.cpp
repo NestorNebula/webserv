@@ -81,6 +81,19 @@ bool Request::hasBody() const { return _state == COMPLETE && !_body.empty(); }
 
 const std::string &Request::getBody() const { return _body; }
 
+void Request::clear() {
+  _raw.clear();
+  _method.clear();
+  _url.clear();
+  _query.clear();
+  _version.clear();
+  _body.clear();
+  _lineStart = 0;
+  _remainingBody = 0;
+  _headers.clear();
+  _state = EMPTY;
+}
+
 void Request::handleStartLine(std::string startLine,
                               std::string::size_type eol) {
   if (_state == EMPTY)
