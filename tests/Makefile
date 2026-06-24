@@ -27,6 +27,7 @@ PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 TEST_SRC_DIR = .
 
 TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
+		   $(TEST_SRC_DIR)/Response.cpp \
 		   $(TEST_SRC_DIR)/main.cpp
 
 GTEST_SRC = $(GTEST_DIR)/googletest/src/gtest-all.cc
