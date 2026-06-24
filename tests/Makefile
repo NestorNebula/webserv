@@ -3,52 +3,63 @@ NAME = unit_tests
 CXX = c++
 
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
-
-CPPFLAGS = -I../include $(GTEST_INC)
-
-RM = rm -rf
-
-MKDIR = mkdir -p
-
-GTEST_DIR = gtest
-
-GTEST_SRC = $(GTEST_DIR)/googletest/src/gtest-all.cc
-
-GTEST_INC = -I$(GTEST_DIR)/googletest \
-	-I$(GTEST_DIR)/googletest/include
-  
-GTEST_OBJ = .obj/gtest-all.o
-
 GTEST_CXXFLAGS = -std=c++98
 
-PROJECT_SRC = ../src/Headers.cpp ../src/helpers.cpp ../src/Request.cpp
+CPPFLAGS = -I../include \
+		   -Igtest/googletest \
+		   -Igtest/googletest/include \
+		   -Igtest/googlemock \
+		   -Igtest/googlemock/include
 
-TEST_SRC = Request.cpp main.cpp
+RM = rm -rf
+MKDIR = mkdir -p
 
 OBJ_DIR = .obj
 
-PROJECT_OBJ = $(patsubst ../src/%.cpp,$(OBJ_DIR)/src/%.o,$(PROJECT_SRC))
+GTEST_DIR = gtest
 
-TEST_OBJ    = $(patsubst %.cpp,$(OBJ_DIR)/tests/%.o,$(TEST_SRC))
+SRC_DIR = ../src
+
+PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
+			  $(SRC_DIR)/helpers.cpp \
+			  $(SRC_DIR)/Request.cpp
+
+TEST_SRC_DIR = .
+
+TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
+		   $(TEST_SRC_DIR)/main.cpp
+
+GTEST_SRC = $(GTEST_DIR)/googletest/src/gtest-all.cc
+GMOCK_SRC = $(GTEST_DIR)/googlemock/src/gmock-all.cc
+
+PROJECT_OBJ = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/src/%.o,$(PROJECT_SRC))
+TEST_OBJ    = $(patsubst $(TEST_SRC_DIR)/%.cpp,$(OBJ_DIR)/tests/%.o,$(TEST_SRC))
+
+GTEST_OBJ = $(OBJ_DIR)/gtest-all.o
+GMOCK_OBJ = $(OBJ_DIR)/gmock-all.o
 
 OBJ = $(PROJECT_OBJ) $(TEST_OBJ)
 
 all: $(NAME)
 
-$(NAME): $(OBJ) $(GTEST_OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) $(GTEST_OBJ) -o $@
+$(NAME): $(OBJ) $(GTEST_OBJ) $(GMOCK_OBJ)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(OBJ_DIR)/src/%.o: $(SRC_DIR)/%.cpp
+	@$(MKDIR) $(dir $@)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/tests/%.o: %.cpp
+	@$(MKDIR) $(dir $@)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(GTEST_OBJ): $(GTEST_SRC)
 	@$(MKDIR) $(dir $@)
 	$(CXX) $(GTEST_CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
-.obj/src/%.o: ../src/%.cpp
+$(GMOCK_OBJ): $(GMOCK_SRC)
 	@$(MKDIR) $(dir $@)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
-
-.obj/tests/%.o: %.cpp
-	@$(MKDIR) $(dir $@)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(GTEST_CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 clean:
 	$(RM) $(OBJ_DIR)
@@ -57,3 +68,5 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+.PHONY: all clean fclean re
