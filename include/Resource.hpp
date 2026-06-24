@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:16:46 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 12:43:11 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/24 15:47:10 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,10 @@ class Resource {
 public:
 	virtual ~Resource() = 0;
 
-	virtual std::string &getContent() const = 0; // or char *getContent() const;
+	virtual const std::string &getContent() const = 0; // or char *getContent() const;
 
-private:
+protected:
 	std::string _content; // or char *content;
 };
+
+inline Resource::~Resource() {}
