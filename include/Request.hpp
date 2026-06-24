@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/21 10:58:08 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/24 16:26:05 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,22 +20,24 @@ public:
 
   // Methods
   void append(const std::string data);
-  const std::string &getRaw() const;
-  bool isComplete() const;
-  bool isInvalid() const;
-  bool hasMethod() const;
-  const std::string &getMethod() const;
-  bool hasURL() const;
-  const std::string &getURL() const;
-  bool hasQuery() const;
-  const std::string &getQuery() const;
-  bool hasVersion() const;
-  const std::string &getVersion() const;
-  bool hasHeader(const std::string &) const;
-  bool hasHeaders() const;
-  const Headers &getHeaders() const;
-  bool hasBody() const;
-  const std::string &getBody() const;
+  const std::string &getRaw() const { return _raw; }
+  bool isComplete() const { return _state == COMPLETE; }
+  bool isInvalid() const { return _state == INVALID; }
+  bool hasMethod() const { return _state > START_LINE; }
+  const std::string &getMethod() const { return _method; }
+  bool hasURL() const { return _state > START_LINE; }
+  const std::string &getURL() const { return _url; }
+  bool hasQuery() const { return _state > START_LINE && !_query.empty(); }
+  const std::string &getQuery() const { return _query; }
+  bool hasVersion() const { return _state > START_LINE; }
+  const std::string &getVersion() const { return _version; }
+  bool hasHeader(const std::string &key) const {
+    return _state >= HEADERS && _headers.has(key);
+  }
+  bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
+  const Headers &getHeaders() const { return _headers; }
+  bool hasBody() const { return _state == COMPLETE && !_body.empty(); }
+  const std::string &getBody() const { return _body; }
   void clear();
 
 private:
