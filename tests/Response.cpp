@@ -1,28 +1,16 @@
-#include "MockResource.hpp"
+#include "FakeResource.hpp"
 #include "Response.hpp"
 #include <gtest/gtest.h>
 
-using ::testing::ReturnRef;
-
-std::string defaultContent = "Content";
-
-static MockResource getResource(std::string &content = defaultContent) {
-	MockResource resource;
-	(void) content;
-
-	EXPECT_CALL(resource, getContent()).WillOnce(ReturnRef(defaultContent));
-	return resource;
-}
-
 TEST(Response, EmptyResponse) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	EXPECT_FALSE(response.isReady());
 }
 
 TEST(Response, MissingVersion) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setCode(200);
@@ -31,7 +19,7 @@ TEST(Response, MissingVersion) {
 }
 
 TEST(Response, MissingCode) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -40,7 +28,7 @@ TEST(Response, MissingCode) {
 }
 
 TEST(Response, MissingReason) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -49,7 +37,7 @@ TEST(Response, MissingReason) {
 }
 
 TEST(Response, Generate200) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -63,7 +51,7 @@ TEST(Response, Generate200) {
 }
 
 TEST(Response, Generate404) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -77,7 +65,7 @@ TEST(Response, Generate404) {
 }
 
 TEST(Response, GenerateOneHeader) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -93,7 +81,7 @@ TEST(Response, GenerateOneHeader) {
 }
 
 TEST(Response, GenerateMultipleHeaders) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 	Headers headers;
 
@@ -115,8 +103,7 @@ TEST(Response, GenerateMultipleHeaders) {
 }
 
 TEST(Response, GenerateEmptyBody) {
-	std::string content("");
-	MockResource resource = getResource(content);
+	FakeResource resource("");
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -129,8 +116,7 @@ TEST(Response, GenerateEmptyBody) {
 }
 
 TEST(Response, GenerateMultilineBody) {
-	std::string content("Hello\nThere!\n");
-	MockResource resource = getResource(content);
+	FakeResource resource("Hello\nThere!\n");
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -145,7 +131,7 @@ TEST(Response, GenerateMultilineBody) {
 }
 
 TEST(Response, ActionAfterGenerate) {
-	MockResource resource = getResource();
+	FakeResource resource;
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
