@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 12:45:09 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 14:09:34 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/24 16:16:45 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,10 @@ Headers::const_iterator Headers::find(const std::string key) const {
   return _container.find(capitalize(key));
 }
 
-std::string Headers::str() const {
+std::string Headers::str(const std::string eol) const {
   std::stringstream oss;
   for (const_iterator it = begin(), ite = end(); it != ite; it++)
-    oss << it->first << ": " << it->second << '\n';
+    oss << it->first << ": " << it->second << eol;
   return oss.str();
 }
 
