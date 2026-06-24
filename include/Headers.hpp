@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:29:47 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 14:09:12 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/24 16:16:52 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ public:
   void insert(Header header);
   void remove(const std::string key);
   const_iterator find(const std::string key) const;
-  std::string str() const;
+  std::string str(const std::string eol = "\r\n") const;
   void clear();
   HeadersContainer::size_type size() const;
 
