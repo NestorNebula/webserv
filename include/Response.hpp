@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:08:55 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 14:05:01 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/24 15:05:38 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,21 @@ class Response {
 public:
   typedef unsigned int StatusCode;
 
-  Response(Resource &resource);
-  ~Response();
+  Response(Resource &resource): _code(0), _resource(resource), _generated(false) {}
 
-  const std::string &getVersion() const;
+  const std::string &getVersion() const { return _version; }
   void setVersion(std::string version);
-  StatusCode getCode() const;
+  StatusCode getCode() const { return _code; }
   void setCode(StatusCode code);
-  const std::string &getReason() const;
+  const std::string &getReason() const { return _reason; }
   void setReason(std::string reason);
-  const Headers &getHeaders() const;
+  const Headers &getHeaders() const { return _headers; }
   void addHeader(Header header);
   void addHeaders(Headers::const_iterator begin, Headers::const_iterator end);
-  const Resource &getResource() const;
-  const std::string &getRaw() const; // or char *getRaw() const;
+  const Resource &getResource() const { return _resource; }
+
+  // or char *getRaw() const;
+  const std::string &getRaw() const { return _raw; }
 
   bool isReady() const;
   void generate();
@@ -47,4 +48,5 @@ private:
   Resource &_resource;
   std::string _raw; // or char *_raw;
   bool _generated;
+  void throwIfGenerated() const;
 };
