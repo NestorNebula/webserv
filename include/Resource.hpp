@@ -1,0 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Resource.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/24 11:16:46 by nhoussie          #+#    #+#             */
+/*   Updated: 2026/06/24 12:43:11 by nhoussie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
+
+#include <string>
+
+class Resource {
+public:
+	virtual ~Resource() = 0;
+
+	virtual std::string &getContent() const = 0; // or char *getContent() const;
+
+private:
+	std::string _content; // or char *content;
+};
