@@ -18,6 +18,10 @@ class Resource {
 public:
 	virtual ~Resource() = 0;
 
+	virtual void generate() = 0;
+	virtual bool done() const = 0;
+	virtual bool inProgress() const = 0;
+	virtual bool failed() const = 0;
 	virtual const std::string &getContent() const = 0; // or char *getContent() const;
 };
 
