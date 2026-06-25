@@ -2,7 +2,7 @@ NAME = unit_tests
 
 CXX = c++
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
 GTEST_CXXFLAGS = -std=c++98
 
 CPPFLAGS = -I../include \
@@ -42,6 +42,8 @@ GMOCK_OBJ = $(OBJ_DIR)/gmock-all.o
 
 OBJ = $(PROJECT_OBJ) $(TEST_OBJ)
 
+DEP = $(OBJ:.o=.d)
+
 all: $(NAME)
 
 $(NAME): $(OBJ) $(GTEST_OBJ) $(GMOCK_OBJ)
@@ -70,5 +72,7 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+-include $(DEP)
 
 .PHONY: all clean fclean re
