@@ -23,7 +23,8 @@ SRC_DIR = ../src
 PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 			  $(SRC_DIR)/helpers.cpp \
 			  $(SRC_DIR)/Request.cpp \
-			  $(SRC_DIR)/Response.cpp
+			  $(SRC_DIR)/Response.cpp \
+			  $(SRC_DIR)/StaticResource.cpp
 
 TEST_SRC_DIR = .
 
