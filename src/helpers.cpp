@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/21 15:13:17 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:36:19 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ std::string trim(std::string s, std::string set) {
   start = s.find_first_not_of(set);
   end = s.find_last_not_of(set);
   if (start == std::string::npos || end == std::string::npos)
-    return s;
+    return std::string();
   return std::string(s, start, end - start + 1);
 }
 
