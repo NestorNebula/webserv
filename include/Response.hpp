@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:08:55 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 15:05:38 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:25:51 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,14 @@ public:
 private:
   Response(const Response &);
   Response &operator=(const Response &);
+
   std::string _version;
   StatusCode _code;
   std::string _reason;
   Headers _headers;
   Resource &_resource;
   std::string _raw; // or char *_raw;
+
   bool _generated;
   void throwIfGenerated() const;
 };
