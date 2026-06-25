@@ -19,9 +19,6 @@ public:
 	virtual ~Resource() = 0;
 
 	virtual const std::string &getContent() const = 0; // or char *getContent() const;
-
-protected:
-	std::string _content; // or char *content;
 };
 
 inline Resource::~Resource() {}
