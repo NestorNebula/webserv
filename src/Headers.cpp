@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 12:45:09 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 16:16:45 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:16:14 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,3 @@ std::string Headers::str(const std::string eol) const {
     oss << it->first << ": " << it->second << eol;
   return oss.str();
 }
-
-void Headers::clear() { _container.clear(); }
-
-HeadersContainer::size_type Headers::size() const { return _container.size(); }
