@@ -9,4 +9,5 @@ public:
   virtual const std::string &getContent() const { return _content; }
   
 private:
+  std::string _content;
 };
