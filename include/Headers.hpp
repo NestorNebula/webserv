@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:29:47 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 16:16:52 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:21:24 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,17 @@
 #include <map>
 #include <string>
 
-typedef std::string Key;
-typedef std::string Value;
-typedef std::pair<Key, Value> Header;
-typedef std::map<Key, Value> HeadersContainer;
+typedef std::pair<std::string, std::string> Header;
 
 class Headers {
 public:
-  // Canonical Form
-  Headers() {}
-  Headers(const Headers &headers) : _container(headers._container) {}
-  Headers &operator=(const Headers &headers) {
-    if (this != &headers)
-      _container = headers._container;
-    return *this;
-  }
-  ~Headers() {}
+  typedef std::map<std::string, std::string> Container;
+  typedef Container::size_type size_type;
 
-  typedef HeadersContainer::iterator iterator;
-  typedef HeadersContainer::const_iterator const_iterator;
-  typedef HeadersContainer::reverse_iterator reverse_iterator;
-  typedef HeadersContainer::const_reverse_iterator const_reverse_iterator;
+  typedef Container::iterator iterator;
+  typedef Container::const_iterator const_iterator;
+  typedef Container::reverse_iterator reverse_iterator;
+  typedef Container::const_reverse_iterator const_reverse_iterator;
 
   // Methods
   bool has(const std::string &key) const;
@@ -44,8 +34,8 @@ public:
   void remove(const std::string key);
   const_iterator find(const std::string key) const;
   std::string str(const std::string eol = "\r\n") const;
-  void clear();
-  HeadersContainer::size_type size() const;
+  void clear() { _container.clear(); }
+  size_type size() const { return _container.size(); }
 
   // Iterators
   iterator begin() { return _container.begin(); }
@@ -58,5 +48,5 @@ public:
   const_reverse_iterator rend() const { return _container.rend(); }
 
 private:
-  HeadersContainer _container;
+  Container _container;
 };
