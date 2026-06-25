@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 12:07:55 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:02:21 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,7 @@
 
 class StaticResource: public Resource {
 public:
-	StaticResource(const std::string &filepath): _filepath(filepath), _state(DEFAULT) {
-		_file.open(filepath.c_str());
-	}
+	StaticResource(const std::string &filepath): _filepath(filepath), _state(DEFAULT), _file(filepath.c_str()) {}
 	~StaticResource() {
 		if (_file.is_open())
 			_file.close();

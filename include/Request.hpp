@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 16:26:05 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:26:01 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ public:
 private:
   Request(const Request &);
   Request &operator=(const Request &);
+
   typedef enum eInternalState {
     EMPTY,
     START_LINE,
@@ -51,6 +52,7 @@ private:
     COMPLETE,
     INVALID,
   } InternalState;
+
   std::string _raw;
   InternalState _state;
   std::string _method;
@@ -59,10 +61,10 @@ private:
   std::string _version;
   Headers _headers;
   std::string _body;
+
   std::string::size_type _lineStart;
   std::string::size_type _remainingBody;
 
-  // Private methods
   void handleStartLine(std::string startLine, std::string::size_type eol);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
   void handleBody(std::string body, std::string::size_type eol);
