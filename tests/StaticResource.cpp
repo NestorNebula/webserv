@@ -84,7 +84,7 @@ TEST(StaticResource, AccessBeforeGenerate) {
 	EXPECT_THROW(resource.getContent(), std::logic_error);
 }
 
-TEST(Static, AccessAfterFail) {
+TEST(StaticResource, AccessAfterFail) {
 	StaticResource resource("files/nosuchfile.txt");
 
 	resource.generate();
