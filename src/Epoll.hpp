@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 19:03:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 22:40:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@
 typedef enum
 {
 	EPC_SERV,
-	EPC_CONN
+	EPC_CONN,
+	EPC_CGI
 }	epc_typ;
 
 class EpollClient

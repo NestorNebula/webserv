@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 21:43:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 22:51:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,14 @@
 
 Connection::Connection (int _fd, Server &_serv) : EpollClient(EPC_CONN, _fd), serv(_serv), 
 	lact(0), 
+	cgi(NULL),
 	req_cnt(0)
 {
 };
 
 Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv), 
 	lact(0),
+	cgi(NULL),
 	req_cnt(0)
 {
 }
@@ -166,6 +168,9 @@ if (ibuf.find(hed_end) != std::string::npos)
 #if 1
 		// int p[2];
 		// err = pipe(p);
+
+		// cgi->ifd : write end of p1 .. read end => STDIN
+		// cgi->ofd : read  end of p2 .. write end <= STDOUT
 		if (err < 0)
 		{
 			return (-1);

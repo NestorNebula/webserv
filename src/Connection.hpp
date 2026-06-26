@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 21:48:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 22:55:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@
 
 
 class Server;
+class CgiPipes;
 
 typedef enum
 {
@@ -50,6 +51,8 @@ typedef enum
 class Connection : public EpollClient
 {
 public:
+	Server			&serv;
+	
 	Connection (int _fd, Server &_serv);
 	Connection (const Connection & that);
 	Connection & operator = (const Connection & that);
@@ -61,13 +64,13 @@ public:
 	e_conn_state	get_state(void) const { return (this->state); }
 	
 private:
-	Server			&serv;
 	std::string		ibuf;
 	std::string		obuf;
 	time_t			lact;
 	int				timeout(void);
 	int				shutdown(void);
 
+	CgiPipes		*cgi;
 	int				recv(void);
 	int				send(std::string & buf);
 	e_conn_state	state;
@@ -77,6 +80,100 @@ private:
 
 std::ostream& operator << (std::ostream & os, Connection & obj);
 
+class CgiPipes : public EpollClient
+{
+private:
+	CgiPipes (const CgiPipes & that) : EpollClient(EPC_CGI, that.fd), conn(that.conn) {};
+	CgiPipes & operator = (const CgiPipes & that) { return (*this); }
+public:
+	CgiPipes (Connection & _conn) : EpollClient(EPC_CGI, -1), conn(_conn)
+	{
+		int	err;
+
+		err = this->init();
+		if (err < 0)
+			throw (std::runtime_error("Cgi : bad create"));
+	}
+	~CgiPipes() {}
+	
+	int		pollin(void);
+	int		pollout(void);
+
+	int		ifd(void) const { return (this->p1[1]); }
+	int		ofd(void) const { return (this->p2[0]); }
+private:
+	Connection	&conn;
+	int			p1[2];
+	int			p2[2];
+	int			init(void)
+	{
+		int	err;
+
+		err = pipe(p1);
+		if (err < 0)
+			return (err);
+		err = pipe(p2);
+		if (err < 0)
+			return (err);
+	}
+	int			prep(void)
+	{
+		// from conn.body
+		// env
+		// cmd_args
+		return (0);
+	}
+	int			exec(void) // post-fork
+	{
+		int	err;
+		
+		pid_t pid = fork();
+		if (pid == -1)
+			return (-1);
+		if (pid == 0)
+		{
+			close(p1[1]);
+			err = dup2(p1[0], STDIN_FILENO);
+			if (err)
+				return (err);
+			close(p1[0]);
+			
+			close(p2[0]);
+			err = dup2(p2[1], STDOUT_FILENO);
+			if (err)
+				return (err);
+			close(p2[1]);
+
+			// if (this->conn.serv.get_port() == 8080)
+			// {
+			// 	char	bin[] = "/usr/bin/python";
+			// 	char	fil[] = "test.py";
+			// 	char * args[] = 
+			// 	{
+			// 		bin,
+			// 		fil,
+			// 		NULL
+			// 	};
+			// 	execve(bin, args, NULL);
+			// }
+			// else
+			// {
+			// 	char	bin[] = "/usr/bin/perl";
+			// 	char	fil[] = "test.pl";
+			// 	char * args[] = 
+			// 	{
+			// 		bin,
+			// 		fil,
+			// 		NULL
+			// 	};
+			// 	execve(bin, args, NULL);				
+			// }			
+		}
+		
+
+		
+	}
+};
 
 // CgiPipe
 	// pollin
@@ -85,6 +182,7 @@ std::ostream& operator << (std::ostream & os, Connection & obj);
 	// pollout
 		// write to STDIN   of cgi-script
 			// FROM : Connection::ibuf (?)
+			
 // fuck : every pipefd going through epoll (?)
 	// cgi-in : can read : write from ibuf
 	// cgi-in : can write .. not really : dup'ed
