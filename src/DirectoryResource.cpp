@@ -13,10 +13,23 @@
 #include "DirectoryResource.hpp"
 #include <stdexcept>
 
-void DirectoryResource::generate() {}
+void DirectoryResource::generate() {
+	if (_state != DEFAULT)
+		throw std::logic_error("generate called multiple times");
+	
+	if (_dir)
+		buildList();
+	_state = (_dir != NULL) ? DONE : FAIL;
+}
 
 const std::string &DirectoryResource::getContent() const {
 	if (_state != DONE)
 		throw std::logic_error("Content not available");
 	return _content;
+}
+
+void DirectoryResource::buildList() {
+	dirent *dirFile;
+	while ((dirFile = readdir(_dir)) != NULL)
+		(_content += dirFile->d_name) += "\n";
 }
