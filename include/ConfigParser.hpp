@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/22 15:41:37 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/26 13:08:45 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include <map>
 # include <set>
 # include <exception>
+
+
 
 struct RouteConfig {
 	std::string	path;
@@ -49,7 +51,7 @@ enum TokenType {
 	TOKEN_RBRACE,
 	TOKEN_COLON,
 	TOKEN_COMMA,
-	TOKKEN_NEWLINE,
+	TOKEN_NEWLINE,
 	TOKEN_EOF
 };
 
@@ -72,7 +74,7 @@ class ConfigParser {
 		Token	expect(TokenType type);
 		void	skipNewlines();
 
-		/* Work Logical */
+		/* Logical Work */
 		void	parseServer();
 		void	parseRoute();
 		void	parseDirective(std::map<std::string, std::string>& directives_map,
