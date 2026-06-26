@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/20 23:45:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 10:32:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,12 @@ Epoll & Epoll::operator = (const Epoll & that)
 
 Epoll::~Epoll()
 {
+	// remove all connection (?)
+	// do we need to track them elsewhere (?)
+	// 
 	if (this->epfd != -1)
 		close(this->epfd);
+	
 };
 
 // EpollClient * .. WOULD NEED protected (fd)
@@ -98,6 +102,84 @@ struct epoll_event	*Epoll::get_evt(int idx)
 	return (this->evts + idx);
 }
 
+int	Epoll::loop(void)
+{
+	int					err;
+	int					e;
+	struct epoll_event	*evt;
+	EpollClient 		*epc;
+	
+    while (1)
+    {
+        e = this->exec();
+        if (e == 0)
+            ; // timeout
+        else if (e < 0)
+        {
+			// Epoll : FAIL
+			// CLEANUP
+			return (1);
+		}
+        while (e--) 
+        {
+            // struct epoll_event	*
+			evt = this->get_evt(e);
+			if (evt == NULL)
+			{
+				std::cerr << "epoll: evt NULL\n";
+				continue;
+			}
+            evt_typ(evt);
+			epc = reinterpret_cast<EpollClient*>(evt->data.ptr);
+            if (evt->events & EPOLLRDHUP)
+            {
+                // ep.del() // need fd .. 
+                // remove "Connection" from "Server"
+                // ep.hup .. 
+                // then .. delete it -- is that a good idea (?)
+                // or .. delete Connection -- 
+                    // removes itself from the Server in destructor ..
+                    // assumes : Server still exists (?)
+                // POLLIN -- also set .. but ... 
+                // read returns (0) .. so .. 
+                // ready-to-read .. but returns (0) .. means
+                // EOF reached on INPUT 
+#if 0                    
+                int rfd = epc->get_fd();
+                epc->pollout();
+                // NOT QUITE -- we can still write to it ...
+                ep.del(rfd);
+                close(rfd);
+                // EOF 
+                // CLOSE CONNECTION HERE
+
+                continue;
+#endif                
+            }
+
+
+            if (evt->events & EPOLLIN)
+            {
+                if (epc)
+                {
+                    err = epc->pollin();
+					(void)err;
+					// or : check something to decide what to do here .. 
+					// nothing more to read .. may still have somethign to write
+                }
+            }
+            if (evt->events & EPOLLOUT)
+            {
+                if (epc)
+                {
+                    err = epc->pollout();
+					(void)err;
+                }
+            }
+        }
+    }
+	return (0);
+}
 int	Epoll::exec(void)
 {
 	// struct timespec	epto;

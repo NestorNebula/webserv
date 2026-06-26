@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/20 22:17:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 10:29:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Connection;
 class Server : public EpollClient
 {
 public:
-	Epoll		 		&ep;
+	Epoll		 		&ep; // (?) for passing to .. Connection ? 
 	
 	// Server (void); // Q: empty reference (?)
 	Server (Epoll & epoll, unsigned short p);
@@ -48,7 +48,7 @@ private:
 	struct sockaddr_in	addr;
 	unsigned short		port;
 
-	std::vector<Connection *> conn;
+	std::vector<Connection *> conn; // or not .. stocked with Epoll
 	// std::vector<Route> route;
 
 };

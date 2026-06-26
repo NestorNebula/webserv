@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/21 14:38:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 10:16:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int	Connection::pollin(void)
 		// does getting here .. really mean .. EOF
 		// yeah .. done .. on this end ..
 		// whether we shut down
-		// depeds on what else we have to do
+		// depends on what else we have to do
 		return (err);
 	}
 	if (err == CONN_BUF_SIZ)

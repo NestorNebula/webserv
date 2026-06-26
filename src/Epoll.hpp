@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/20 23:46:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 10:32:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ public:
 	virtual int pollout(void) = 0;
 };
 
+
+
 class Epoll
 {
 public:
@@ -40,15 +42,16 @@ public:
 	Epoll & operator = (const Epoll & that);
 	~Epoll();
 
-	int		exec(void);
+	int		loop(void);
 	
-	int		add(int fd, int e, void *data);
+	int		add(int fd, int e, void *data); // EpollClient*
 	int		mod(int fd, int e, void *data);
 	int		del(int fd);
 	
 	struct epoll_event	*get_evt(int idx);
 	
 private:
+	int					exec(void);
 	int					epfd;
 	int					ecnt;
 	struct epoll_event	evts[EPOLL_MAX_EVT];
