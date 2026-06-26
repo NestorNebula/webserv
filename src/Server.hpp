@@ -6,16 +6,12 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 10:29:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 21:18:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
-
-# ifndef DBG_CANON
-#  define DBG_CANON 0
-# endif
 
 # include <iostream>
 # include <unistd.h>		/* close(fd) */
@@ -23,32 +19,43 @@
 # include <fcntl.h>
 
 # include "Epoll.hpp"
-# include <vector>
+
+# ifndef DBG_SERV
+#  define DBG_SERV 0
+# endif
+
+	// The backlog argument defines the maximum length to which the queue
+	// of pending connections for sockfd may grow.  If a connection
+	// request arrives when the queue is full, the client may receive an
+	// error with an indication of ECONNREFUSED or, if the underlying
+	// protocol supports retransmission, the request may be ignored so
+	// that a later reattempt at connection succeeds.	
+# ifndef SERV_BACKLOG
+#  define SERV_BACKLOG 256
+# endif
+
 
 class Connection;
 
 class Server : public EpollClient
 {
 public:
-	Epoll		 		&ep; // (?) for passing to .. Connection ? 
+	Epoll	&ep; // Connections want this ..
 	
-	// Server (void); // Q: empty reference (?)
 	Server (Epoll & epoll, unsigned short p);
 	Server (const Server & that);
 	Server & operator = (const Server & that);
 	~Server();
 
-	int		init(void);
-	int		get_fd(void);
-	int		pollin(void);
-	int		pollout(void);
+	int				pollin(void);
+	int				pollout(void);
 	
+	unsigned short	get_port(void) const { return (this->port); }
 private:
-	int					fd;
 	struct sockaddr_in	addr;
 	unsigned short		port;
-
-	std::vector<Connection *> conn; // or not .. stocked with Epoll
+	
+	int					init(void);
 	// std::vector<Route> route;
 
 };

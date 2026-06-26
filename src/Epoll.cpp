@@ -6,20 +6,63 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 10:32:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/26 20:21:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Epoll.hpp"
+#include "Server.hpp"
+#include "Connection.hpp"
 
-Epoll::Epoll (void) : epfd(-1)
+volatile sig_atomic_t stop = 0;
+
+static void sigint_handler(int signo)
 {
-	this->epfd = epoll_create1(0); // EPOLL_CLOEXEC
+    (void)signo;
+	std::cerr << "SIGINT\n";
+    stop = 1;
+}
+
+#if 0
+https://man7.org/linux/man-pages/man7/epoll.7.html
+https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
+#endif
+
+
+// https://copyconstruct.medium.com/the-method-to-epolls-madness-d9d2d6378642
+
+// The epoll_create system call returns a file descriptor to the newly created epoll kernel data structure. 
+
+// When the EPOLL_CLOEXEC flag is set, any child process forked by the current process will close the epoll descriptor before it execs, so the child process won’t have access to the epoll instance anymore.
+
+// Avoid forking, and if you must: close all epoll-registered file descriptors before calling execve. Explicitly deregister affected file descriptors from epoll set before calling dup/dup2/dup3 or close.
+
+// https://idea.popcount.org/2017-03-20-epoll-is-fundamentally-broken-22/
+
+// epoll_ctl(EPOLL_CTL_ADD) doesn't actually register a file descriptor. Instead it registers a tuple1 of a file descriptor and a pointer to underlying kernel object. Most confusingly the lifetime of an epoll subscription is not tied to the lifetime of a file descriptor. It's tied to the life of the kernel object.
+
+
+Epoll::Epoll (void) : epfd(-1), ecnt(0)
+{
+	// this->epfd = epoll_create1(0); //  : execve will close this ... 
+	this->epfd = epoll_create1(EPOLL_CLOEXEC); 
 	if (this->epfd < 0)
 		throw (std::runtime_error("Epoll : bad create"));
+		
+	signal(SIGINT, sigint_handler);
+
+#if 0 // ILLEGAL FUNCTIONS
+		// use this with wait_mask
+		// wait_mask .. will REPLACE the current sigset
+		// for the duration of the epoll_pwait() call
+    sigset_t block_mask;
+    sigemptyset(&block_mask);
+    sigaddset(&block_mask, SIGINT);
+    sigprocmask(SIG_BLOCK, &block_mask, NULL);
+#endif
 };
 
-Epoll::Epoll(const Epoll & that) : epfd(-1)
+Epoll::Epoll(const Epoll & that) : epfd(that.epfd), ecnt(0)
 {
 	*this = that;
 }
@@ -28,77 +71,120 @@ Epoll & Epoll::operator = (const Epoll & that)
 {
 	if (this == &that)
 		return (*this);
-	// KILL : 
+	// UGLY : KILL SOMETHING HERE (?)
 	this->epfd = that.epfd;
 	return (*this);
 }
 
 Epoll::~Epoll()
 {
-	// remove all connection (?)
-	// do we need to track them elsewhere (?)
-	// 
 	if (this->epfd != -1)
 		close(this->epfd);
 	
+	std::set<EpollClient*>::iterator it = this->conn.begin();
+	while (it != this->conn.end())
+	{
+		delete (*it);
+		it++;
+	}
+	this->conn.clear();
 };
 
-// EpollClient * .. WOULD NEED protected (fd)
-int	Epoll::add(int fd, int e, void *data)
-{
-	int err;
 
-	struct epoll_event evt;
+// track EpollClients here (?)
+// CgiPipe .. 
+	// TWO FD ? 
+	// or
+	// TWO different EpollClient
+	// pipe
+		// wfd : can we write (?) should have std::string& to write from
+		// rfd : 
+	// two pipes (?)
+int	Epoll::add(EpollClient *cli, int e)
+{
+	int					err;
+	struct epoll_event	evt;
 
 	evt.events = e; // POLLIN / POLLOUT
 	evt.events |= EPOLLRDHUP; // BOTH (in && rdhup) returned 
 	// evt.events |= EPOLLET; // edge-triggered .. ONCE PER EVENT
-	evt.data.ptr = data;
+	evt.data.ptr = cli;
 
-	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &evt);
+	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		std::cerr << "epoll : failed ctl\n";
+		std::cerr << "epoll : failed (add) fd " << cli->get_fd() << std::endl;
+		if (cli->get_typ() == EPC_CONN)
+			delete (cli);
+	}
+	else if (cli->get_typ() == EPC_CONN)
+	{
+		this->conn.insert(cli);
 	}
 	return (err);
 }
 
-int	Epoll::mod(int fd, int e, void *data)
+int	Epoll::mod(EpollClient *cli, int e)
 {
-	int err;
-
-	struct epoll_event evt;
+	int					err;
+	struct epoll_event	evt; // should this be WITH EpollClient (?) ctl .. copies ..
 
 	evt.events = e; // POLLIN / POLLOUT
 	evt.events |= EPOLLRDHUP; // BOTH (in && rdhup) returned 
-	evt.data.ptr = data;
+	evt.data.ptr = cli;
 
-	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, &evt);
+	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		std::cerr << "epoll : failed ctl\n";
+		std::cerr << "epoll : failed (mod) fd " << cli->get_fd() << std::endl;
 	}
 	return (err);
 }
 
-int	Epoll::del(int fd)
+#define DBG_EPOLL_DEL 0 
+int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, NULL);
+#if DBG_EPOLL_DEL
+	std::cerr << "epoll : del " << cli->get_fd() << std::endl;
+#endif
+	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
 	if (err < 0)
 	{
-		std::cerr << "epoll : failed ctl\n";
+		std::cerr << "epoll : failed (del) fd " << cli->get_fd() << std::endl;
 	}
+#if DBG_EPOLL_DEL
+	std::cerr << "epoll : del " << cli->get_fd() << std::endl;
+#endif
 	return (err);
+}
+
+int	Epoll::rem(EpollClient *cli)
+{
+	if (cli->get_typ() != EPC_CONN)
+		return (0);
+
+#if DBG_EPOLL_DEL
+	std::cerr << "epoll: rem CONN\n";
+#endif
+	std::set<EpollClient*>::iterator it = this->conn.find(cli);
+	if (it != this->conn.end())
+	{
+#if DBG_EPOLL_DEL
+		std::cerr << "epoll: rem CONN\n";
+#endif			
+		delete (cli);
+		this->conn.erase(it);
+	}
+
+	return (0);
 }
 
 struct epoll_event	*Epoll::get_evt(int idx)
 {
 	if (idx < 0 || idx >= this->ecnt)
-	{
 		return (NULL);
-	}
 	return (this->evts + idx);
 }
 
@@ -109,46 +195,47 @@ int	Epoll::loop(void)
 	struct epoll_event	*evt;
 	EpollClient 		*epc;
 	
-    while (1)
+    while (!stop)
     {
         e = this->exec();
         if (e == 0)
-            ; // timeout
+		{
+			// timeout
+		}
         else if (e < 0)
         {
 			// Epoll : FAIL
-			// CLEANUP
+			// capture signal in exec (?)
+			// CLEANUP (?)
+			// restart (?)
+			// copy fds (?)
 			return (1);
 		}
         while (e--) 
         {
-            // struct epoll_event	*
 			evt = this->get_evt(e);
 			if (evt == NULL)
 			{
 				std::cerr << "epoll: evt NULL\n";
 				continue;
 			}
+#if DBG_EPOLL
             evt_typ(evt);
+#endif			
 			epc = reinterpret_cast<EpollClient*>(evt->data.ptr);
+			if (epc == NULL)
+			{
+				std::cerr << "epoll: epc NULL\n";
+				continue;
+			}
             if (evt->events & EPOLLRDHUP)
             {
-                // ep.del() // need fd .. 
-                // remove "Connection" from "Server"
-                // ep.hup .. 
-                // then .. delete it -- is that a good idea (?)
-                // or .. delete Connection -- 
-                    // removes itself from the Server in destructor ..
-                    // assumes : Server still exists (?)
-                // POLLIN -- also set .. but ... 
-                // read returns (0) .. so .. 
-                // ready-to-read .. but returns (0) .. means
-                // EOF reached on INPUT 
+				// std::cerr << "epoll: epc HUP\n";
 #if 0                    
                 int rfd = epc->get_fd();
                 epc->pollout();
                 // NOT QUITE -- we can still write to it ...
-                ep.del(rfd);
+            	this->del(epc);
                 close(rfd);
                 // EOF 
                 // CLOSE CONNECTION HERE
@@ -160,55 +247,58 @@ int	Epoll::loop(void)
 
             if (evt->events & EPOLLIN)
             {
-                if (epc)
-                {
-                    err = epc->pollin();
-					(void)err;
-					// or : check something to decide what to do here .. 
-					// nothing more to read .. may still have somethign to write
-                }
+				err = epc->pollin();
+				if (err <= 0) // && state
+				{
+					// this->del(epc); // bad idea
+					this->rem(epc);
+				}
             }
             if (evt->events & EPOLLOUT)
             {
-                if (epc)
-                {
-                    err = epc->pollout();
-					(void)err;
-                }
-            }
+				err = epc->pollout();
+				if (err <= 0) // && state ... 
+				{
+					this->rem(epc);
+				}
+			}
         }
     }
 	return (0);
 }
+
+
 int	Epoll::exec(void)
 {
-	// struct timespec	epto;
-	// sigset_t			sigs;
-	
+#if 1
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000); // to_ms
-	// err = epoll_pwait2(this->epfd, this->evts, EPOLL_MAX_EVT,
-// int epfd, struct epoll_event events[n], int n,
-// const struct timespec *_Nullable timeout,
-// const sigset_t *_Nullable sigmask);
+#else
+// epoll_pwait() allows an application to safely
+//        wait until either a file descriptor becomes ready or until a
+//        signal is caught.
+
+	sigset_t wait_mask;
+    sigemptyset(&wait_mask); // mask for DURING epoll_pwait
+// pthread_sigmask(SIG_SETMASK, &sigmask, &origmask);
+// ready = epoll_wait(epfd, &events, n, timeout);
+// pthread_sigmask(SIG_SETMASK, &origmask, NULL);
+	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
+#endif
 	if (this->ecnt < 0)
 	{
+		// SIGINT not "caught" .. if events are still waiting to process
+		std::cerr << "epoll: < 0\n";
 		return (this->ecnt);
 	}
-	if (this->ecnt == 0)
+	if (this->ecnt == 0) // timeout
 	{
-		// TIMEOUT -- something to do here (?)
-		// check state .. of all active fds 
-		return (0);
+		return (0); // this->ecnt
 	}
+#if DBG_EPOLL
 	std::cerr << "epoll : ecnt " << this->ecnt << std::endl;
-	// if (serv) no accept ... 
-	// keeps getting called 
-	// with EPOLLET -- only ONE EVENT triggered 
+#endif
 	return (this->ecnt);
 }
-
-// The ready list is dynamically populated by the kernel as
-// a result of I/O activity on those file descriptors.
 
 std::ostream& operator << (std::ostream & os, Epoll & obj)
 {
@@ -250,15 +340,6 @@ std::ostream& operator << (std::ostream & os, Epoll & obj)
 // EPOLLONESHOT	:
 // EPOLLWAKEUP	:
 // EXPOLLECLUSIVE
-
-// struct epoll_event events[MAX_EVENTS];
-
-// int epoll_pwait2(int n;
-// int epfd, struct epoll_event events[n], int n,
-// const struct timespec *_Nullable timeout,
-// const sigset_t *_Nullable sigmask);
-
-
 
 void	evt_typ(struct epoll_event *evt)
 {
