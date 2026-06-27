@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 22:51:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/27 23:01:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,16 @@
 
 Connection::Connection (int _fd, Server &_serv) : EpollClient(EPC_CONN, _fd), serv(_serv), 
 	lact(0), 
-	cgi(NULL),
+	cgi_in(NULL),
+	cgi_out(NULL),
 	req_cnt(0)
 {
 };
 
 Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv), 
 	lact(0),
-	cgi(NULL),
+	cgi_in(NULL),
+	cgi_out(NULL),
 	req_cnt(0)
 {
 }
@@ -37,10 +39,13 @@ Connection & Connection::operator = (const Connection & that)
 }
 Connection::~Connection()
 {
-	// NEED THIS : to implicitly "DEL" from (epoll)
-	if (this->fd != -1)
-		close(this->fd);
+	// if (this->fd != -1)
+	// 	close(this->fd);
 	// std::cerr << "~conn : req cnt " << this->req_cnt << std::endl;
+	if (this->cgi_in)
+		delete (this->cgi_in);
+	if (this->cgi_out)
+		delete (this->cgi_out);
 };
 
 
@@ -70,6 +75,7 @@ int	Connection::timeout(void)
 	return (err);
 }
 
+#if 0
 int	Connection::shutdown(void)
 {
 	return (0);
@@ -79,55 +85,7 @@ int	Connection::shutdown(void)
 	this->fd = -1;
 	return (0);
 }
-
-
-int	Connection::recv(void)
-{
-	int	err = 0;
-
-	char	buf[CONN_BUF_SIZ + 1];
-	err = read(this->fd, buf, CONN_BUF_SIZ);
-#if DBG_CONN_READ
-	std::cerr << "conn  : read\n";
-	std::cerr << "read  : " << err << std::endl;
 #endif
-	if (err < 0)
-	{
-		this->state = CONN_STATE_ERROR;
-		this->shutdown();
-		return (err);
-	}
-	if (err == 0)
-	{
-#if DBG_CONN_READ
-		std::cerr << "conn  : read [0]\n";
-#endif		
-		this->state = CONN_STATE_SHUTDOWN;
-		this->shutdown();
-		return (err);
-	}
-	buf[err] = '\0';
-#if DBG_CONN_READ
-	std::cerr << "****  : data\n" << buf << std::endl;
-#endif	
-
-	if (err == CONN_BUF_SIZ)
-	{
-		// more to read
-	}
-
-	// depends on state
-	// Request
-	// could also be reading from a cgi pipe (?)
-
-	// when done / ready
-	// MOD (epoll) to POLLOUT
-	// make sure 
-	// we are ready to write
-	// and we have data (state) to write 
-	ibuf += std::string(buf);
-	return (err);
-}
 
 int	Connection::pollin(void)
 {
@@ -158,64 +116,25 @@ if (ibuf.find(hed_end) != std::string::npos)
 // Warning: Connection-specific header fields such as Connection and Keep-Alive are prohibited in HTTP/2 and HTTP/3. 
 		this->req_cnt++;
 		
-		obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
+			// empty reply -- but .. something is sent (?
+		// obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
 		ibuf = std::string("");
 
-
+		err = this->exec_cgi();
+		if (err)
+			return (err);
+		
 		// Resource::generate()
 			// may fail here .. bad file, directory
 			
-#if 1
-		// int p[2];
-		// err = pipe(p);
-
-		// cgi->ifd : write end of p1 .. read end => STDIN
-		// cgi->ofd : read  end of p2 .. write end <= STDOUT
-		if (err < 0)
-		{
-			return (-1);
-		}
-		pid_t pid = fork();
-		if (pid == 0)
-		{
-			// dup2(fd, STDIN_FILENO);
-			// close(STDIN_FILENO);
-			dup2(fd, STDOUT_FILENO); // write directly .. 
-			close(fd);
-		// but .. they said we had to go through epoll
-
-// CGI SPEC
-		// https://www.ietf.org/rfc/rfc3875
-
-			// chdir
-			// env
-			if (this->serv.get_port() == 8080)
-			{
-				char	bin[] = "/usr/bin/python";
-				char	fil[] = "test.py";
-				char * args[] = 
-				{
-					bin,
-					fil,
-					NULL
-				};
-				execve(bin, args, NULL);
-			}
-			else
-			{
-				char	bin[] = "/usr/bin/perl";
-				char	fil[] = "test.pl";
-				char * args[] = 
-				{
-					bin,
-					fil,
-					NULL
-				};
-				execve(bin, args, NULL);				
-			}
-		}
-#endif
-
+		// so .. maybe .. CgiPipe .. is NOT an EPOLL_CLIENT
+		// CgiInput
+			// pollin
+			// write from (ibuf) of (conn)
+		// CgiOutput
+			// pollout
+			// write to (obuf) of conn
+			
 // multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
 		// write rest of BODY to cgi->ifd;
 // 		A request-body is supplied with the request if the CONTENT_LENGTH is
@@ -230,8 +149,8 @@ if (ibuf.find(hed_end) != std::string::npos)
 		
 		// may get more body here 
 
-		waitpid(pid, 0, 0); // UGLY
-
+			// crash without this 
+			// gets .. deleted (?)
 		this->serv.ep.mod(this, EPOLLOUT);
 }
 
@@ -240,49 +159,6 @@ if (ibuf.find(hed_end) != std::string::npos)
 		// so .. pollwrite .. write FROM ibuf
 		// and . pollread .. write TO obuf
 			// which .. should get echo'ed .. directly .. to parent Connection (?)
-	return (err);
-}
-
-
-
-int	Connection::send(std::string & buf)
-{
-	int err;
-#if DBG_CONN_WRITE
-	std::cerr << "conn  : pollout\n";
-#endif
-
-	size_t osiz = CONN_OUT_SIZ;
-	if (osiz > buf.size())
-		osiz = buf.size();
-	err = write(this->fd, buf.c_str(), osiz);
-	// BYTES WRITTEN !!
-
-#if DBG_CONN_WRITE
-	std::cerr << "conn  : write\n";
-	std::cerr << "write : " << err << std::endl;
-#endif	
-	if (err < 0)
-	{
-		this->state = CONN_STATE_ERROR;
-		this->shutdown();
-		return (err);
-	}
-	if (err == 0)
-	{
-#if DBG_CONN_WRITE
-		std::cerr << "conn  : write [0]\n";
-#endif
-		this->state = CONN_STATE_SHUTDOWN;
-		this->shutdown();
-		return (err);
-	}
-	buf.erase(0, err);
-
-	// if (err == obuf.size())
-	// {
-		
-	// }
 	return (err);
 }
 
@@ -300,6 +176,8 @@ int	Connection::pollout(void)
 	if (obuf.size() == 0)
 	{
 		// waiting for cgi data (?)
+		std::cerr << "conn : pollout (0)\n"; // we get stuck here ..
+		return (1);
 	}
 
 	
@@ -322,7 +200,7 @@ int	Connection::pollout(void)
 #else
 		// fucking ep.del WORKED HERE ..
 		// but not up in ep::loop 
-		this->state = CONN_STATE_SHUTDOWN;
+		this->state = EPC_STATE_SHUTDOWN;
 		this->shutdown();
 		return (0);
 #endif
@@ -332,3 +210,113 @@ int	Connection::pollout(void)
 }
 
 // hup : tell server to delete me (?)
+
+
+
+int	Connection::exec_cgi(void)
+{
+	int			err;
+
+	std::string	path;
+	std::string	file;
+	
+	if (this->serv.get_port() == 8080)
+	{
+		path = std::string("/usr/bin/python");
+		file = std::string("test.py");
+	}
+	else
+	{
+		path = std::string("/usr/bin/perl");
+		file = std::string("test.pl");
+	}
+
+	int		p1[2];
+	int		p2[2];
+
+	err = pipe(p1);
+	if (err < 0)
+		return (err);
+	err = pipe(p2);
+	if (err < 0)
+		return (err);
+
+
+	pid_t pid = fork();
+	if (pid == -1)
+		return (-1);
+	if (pid == 0)
+	{
+		// close(p1[1]);
+		// err = dup2(p1[0], STDIN_FILENO);
+		// if (err < 0)
+		// 	return (err);
+		// close(p1[0]);
+		
+		close(p2[0]);
+		err = dup2(p2[1], STDOUT_FILENO);
+		if (err < 0)
+			return (err);
+		close(p2[1]);
+
+		// const char *args[3];
+		char const * args[3];
+		args[0] = path.c_str();
+		args[1] = file.c_str();
+		args[2] = NULL;
+
+		std::cerr << "fork : exec\n";
+		err = execve(args[0], (char* const*) args, NULL);
+		return (err);	
+	}		
+	close(p1[0]);
+	close(p2[1]);
+
+		// epoll error (?)
+	this->cgi_in  = new CgiPipe(p1[1], *this);
+	this->cgi_out = new CgiPipe(p2[0], *this);
+
+	err = this->serv.ep.add(this->cgi_in, EPOLLOUT);
+	if (err)
+	{
+		return (err);
+	}
+	err = this->serv.ep.add(this->cgi_out, EPOLLIN);
+	if (err)
+	{
+		return (err);
+	}
+	std::cerr << "conn : exec_cgi\n";
+	return (err);
+}
+
+
+CgiPipe::CgiPipe (int _fd, Connection & _conn) : EpollClient(EPC_CGI, _fd), conn(_conn)
+{
+}
+	
+int		CgiPipe::pollin(void)
+{
+	int	err = 0;
+
+	// this->timeout(); // EpollClient
+	
+	std::cerr << "cgi  : pollin\n";
+	err = this->recv();
+	if (err <= 0)
+		return (err);
+	// this (fd) .. can READ
+	// output from CGI (?)
+	// to conn.obuf
+		
+	return (0);
+}
+
+int		CgiPipe::pollout(void)
+{
+	// this (fd) .. can WRITE
+	// input TO CGI .. from conn.ibuf
+
+	std::cerr << "cgi  : pollout\n";
+	return (0);
+}

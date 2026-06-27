@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 18:15:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/27 22:21:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ Server & Server::operator = (const Server & that)
 Server::~Server()
 {
 	this->ep.del(this); // (ep) MUST STILL EXIST
-	if (this->fd != -1)
-		close(this->fd);
+	// if (this->fd != -1)
+	// 	close(this->fd);
 };
 
 std::ostream& operator << (std::ostream & os, Server & obj)
@@ -98,8 +98,6 @@ int Server::init(void)
 	return (err);
 }
 
-// clr ; siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=10 --concurrent=10 --no-parser
-// clr ; siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser 
 int	Server::pollin(void)
 {
 	int	err;

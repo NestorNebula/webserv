@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 22:43:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/27 22:58:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ Epoll::~Epoll()
 	std::set<EpollClient*>::iterator it = this->conn.begin();
 	while (it != this->conn.end())
 	{
-		delete (*it);
+		delete (*it); // Cgi Problem -- also .. epoll returns error
 		it++;
 	}
 	this->conn.clear();
@@ -114,13 +114,16 @@ int	Epoll::add(EpollClient *cli, int e)
 	if (err < 0)
 	{
 		std::cerr << "epoll : failed (add) fd " << cli->get_fd() << std::endl;
-		if (cli->get_typ() == EPC_CONN)
+		if (cli->get_typ() != EPC_SERV)
 			delete (cli);
 	}
-	else if (cli->get_typ() == EPC_CONN)
+	else if (cli->get_typ() != EPC_SERV)
 	{
 		this->conn.insert(cli);
 	}
+	std::cerr << "epoll: add ";
+	epc_type(cli);
+	
 	return (err);
 }
 
@@ -162,7 +165,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	if (cli->get_typ() != EPC_CONN)
+	if (cli->get_typ() == EPC_SERV)
 		return (0);
 
 #if DBG_EPOLL_DEL
@@ -228,9 +231,12 @@ int	Epoll::loop(void)
 				std::cerr << "epoll: epc NULL\n";
 				continue;
 			}
+#if DBG_EPOLL
+            epc_type(epc);
+#endif		
             if (evt->events & EPOLLRDHUP)
             {
-				// std::cerr << "epoll: epc HUP\n";
+				std::cerr << "epoll: epc HUP\n";
 #if 0                    
                 int rfd = epc->get_fd();
                 epc->pollout();
@@ -288,6 +294,7 @@ int	Epoll::exec(void)
 	{
 		// SIGINT not "caught" .. if events are still waiting to process
 		std::cerr << "epoll: < 0\n";
+		std::cerr << strerror(errno) << std::endl;
 		return (this->ecnt);
 	}
 	if (this->ecnt == 0) // timeout
@@ -355,4 +362,108 @@ void	evt_typ(struct epoll_event *evt)
 		std::cerr << "epoll : err\n";
 	if (evt->events & EPOLLHUP)
 		std::cerr << "epoll : hup\n";
+}
+
+
+
+
+int	EpollClient::recv(void)
+{
+	int	err = 0;
+
+	char	buf[CONN_BUF_SIZ + 1];
+	err = read(this->fd, buf, CONN_BUF_SIZ);
+#if DBG_CONN_READ
+	std::cerr << "conn  : read\n";
+	std::cerr << "read  : " << err << std::endl;
+#endif
+	if (err < 0)
+	{
+		this->state = EPC_STATE_ERROR;
+		// this->shutdown();
+		return (err);
+	}
+	if (err == 0)
+	{
+#if DBG_CONN_READ
+		std::cerr << "conn  : read [0]\n";
+#endif		
+		this->state = EPC_STATE_SHUTDOWN;
+		// this->shutdown();
+		return (err);
+	}
+	buf[err] = '\0';
+#if DBG_CONN_READ
+	std::cerr << "****  : data\n" << buf << std::endl;
+#endif	
+
+	if (err == CONN_BUF_SIZ)
+	{
+		// more to read
+	}
+
+	// depends on state
+	// Request
+	// could also be reading from a cgi pipe (?)
+
+	// when done / ready
+	// MOD (epoll) to POLLOUT
+	// make sure 
+	// we are ready to write
+	// and we have data (state) to write 
+	ibuf += std::string(buf);
+	return (err);
+}
+
+
+void epc_type(EpollClient *epc)
+{
+	epc_typ t = epc->get_typ();
+	if (t == EPC_SERV)
+		std::cerr << "epc  : serv\n";
+	if (t == EPC_CONN)
+		std::cerr << "epc  : conn\n";
+	if (t == EPC_CGI)
+		std::cerr << "epc  : cgi\n";
+}
+
+int	EpollClient::send(std::string & buf)
+{
+	int err;
+#if DBG_CONN_WRITE
+	std::cerr << "conn  : pollout\n";
+#endif
+
+	size_t osiz = CONN_OUT_SIZ;
+	if (osiz > buf.size())
+		osiz = buf.size();
+	err = write(this->fd, buf.c_str(), osiz);
+	// BYTES WRITTEN !!
+
+#if DBG_CONN_WRITE
+	std::cerr << "conn  : write\n";
+	std::cerr << "write : " << err << std::endl;
+#endif	
+	if (err < 0)
+	{
+		this->state = EPC_STATE_ERROR;
+		// this->shutdown();
+		return (err);
+	}
+	if (err == 0)
+	{
+#if DBG_CONN_WRITE
+		std::cerr << "conn  : write [0]\n";
+#endif
+		this->state = EPC_STATE_SHUTDOWN;
+		// this->shutdown();
+		return (err);
+	}
+	buf.erase(0, err);
+
+	// if (err == obuf.size())
+	// {
+		
+	// }
+	return (err);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/26 21:18:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/27 19:56:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class Connection;
 class Server : public EpollClient
 {
 public:
-	Epoll	&ep; // Connections want this ..
+	Epoll	&ep;
 	
 	Server (Epoll & epoll, unsigned short p);
 	Server (const Server & that);
@@ -57,7 +57,6 @@ private:
 	
 	int					init(void);
 	// std::vector<Route> route;
-
 };
 
 std::ostream& operator << (std::ostream & os, Server & obj);

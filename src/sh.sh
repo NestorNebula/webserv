@@ -1,7 +1,19 @@
 #!/bin/bash
 
-curl -X POST http://localhost:8080
+
+
+# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=10 --concurrent=10 --no-parser
+# echo
+# exit 0
+
+# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser 
+
+
+curl -X POST http://localhost:8084
 echo
+exit 0
+
+
 curl -X POST http://localhost:8080 \
 	 -d "p1=one&p2=two"
 echo
@@ -21,3 +33,4 @@ echo
 curl -X POST http://localhost:8081 \
 	-H "Transfer-Encoding: chunked" \
 	-d @sh.sh
+
