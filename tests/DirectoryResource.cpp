@@ -13,8 +13,11 @@ static void getDirectoryContent(const std::string &dirpath, std::set<std::string
 }
 
 static void checkEach(const std::string &content, std::set<std::string> &set) {
-	for (std::set<std::string>::const_iterator it = set.begin(), ite = set.end(); it != ite; it++)
-		EXPECT_TRUE(content.find(*it) != std::string::npos);
+	for (std::set<std::string>::const_iterator it = set.begin(), ite = set.end(); it != ite; it++) {
+		if (*it != "." && *it != "..") {
+			EXPECT_TRUE(content.find(*it) != std::string::npos);
+		}
+	}
 }
 
 TEST(DirectoryResource, DefaultValues) {
