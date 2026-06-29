@@ -21,10 +21,8 @@ void Request::append(const std::string data) {
     return;
   _raw += data;
   for (;;) {
-    std::string::size_type eol(_raw.find("\r\n", _lineStart));
-    std::string line = (eol != std::string::npos)
-                           ? _raw.substr(_lineStart, eol - _lineStart + 2)
-                           : _raw.substr(_lineStart);
+    std::string::size_type eol(_raw.find("\r\n"));
+	std::string line = (eol != std::string::npos) ? _raw.substr(0, eol + 2) : _raw;
     switch (_state) {
     case EMPTY:
     case START_LINE:
@@ -40,7 +38,7 @@ void Request::append(const std::string data) {
       return;
     }
     if (eol == std::string::npos)
-      break;
+		break;
   }
 }
 
@@ -50,15 +48,14 @@ void Request::clear() {
   _url.clear();
   _query.clear();
   _version.clear();
-  // _body.clear(); TODO
-  _lineStart = 0;
   _remainingBody = std::string::npos;
   _headers.clear();
+  delete _body;
+  _body = NULL;
   _state = EMPTY;
 }
 
-void Request::handleStartLine(std::string startLine,
-                              std::string::size_type eol) {
+void Request::handleStartLine(std::string startLine, std::string::size_type eol) {
   if (_state == EMPTY)
     _state = START_LINE;
   if (eol == std::string::npos)
@@ -74,14 +71,13 @@ void Request::handleStartLine(std::string startLine,
     _url.erase(qIndex);
   }
   _state = HEADERS;
-  _lineStart = eol + 2;
+  _raw.erase(0, eol + 2);
 }
-void Request::handleHeaderLine(std::string headerLine,
-                               std::string::size_type eol) {
+void Request::handleHeaderLine(std::string headerLine, std::string::size_type eol) {
   if (eol == std::string::npos)
     return;
   if (headerLine == "\r\n") {
-    _lineStart = eol + 2;
+	_raw.erase(0, 2);
 	setupBody();
     return;
   }
@@ -98,7 +94,7 @@ void Request::handleHeaderLine(std::string headerLine,
     return;
   }
   _headers.insert(header);
-  _lineStart = eol + 2;
+  _raw.erase(0, eol + 2);
 }
 
 void Request::setupBody() {
@@ -136,16 +132,17 @@ void Request::handleBody(std::string body, std::string::size_type eol) {
       return;
     }
     *_body << body;
+	_bodySize += body.size();
     _remainingBody -= body.size();
-    if (_remainingBody == 0)
+    if (_remainingBody == 0) {
       _state = COMPLETE;
-    else
-      _lineStart += body.size();
+	} else if (eol != std::string::npos) {
+		_raw.erase(0, eol + 2);
+	} else _raw.clear();
   } else if (_headers.has("Transfer-Encoding"))
     handleBodyLine(body, eol);
   else
     _state = INVALID;
-  _bodySize += body.size();
 }
 
 void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
@@ -162,11 +159,12 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
       _state = INVALID;
       return;
     }
-  } else if (eol - _lineStart != _remainingBody) {
+  } else if (eol != _remainingBody) {
     _state = INVALID;
   } else {
-	  _body->write(bodyLine.c_str(), eol - _lineStart);
+	  _body->write(bodyLine.c_str(), eol);
+	_bodySize += _remainingBody;
     _remainingBody = std::string::npos;
   }
-  _lineStart = eol + 2;
+  _raw.erase(0, eol + 2);
 }
