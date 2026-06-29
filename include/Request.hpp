@@ -19,7 +19,7 @@
 
 class Request {
 public:
-  Request() : _state(EMPTY), _lineStart(0), _bodySize(0) {}
+  Request() : _state(EMPTY), _body(NULL), _bodySize(0) {}
 
   // Methods
   void append(const std::string data);
@@ -39,7 +39,11 @@ public:
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
   const Headers &getHeaders() const { return _headers; }
   bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
-  Stream *getBody() { return _body; }
+  Stream *getBody() { 
+	  if (_body == NULL)
+		  throw std::logic_error("accessing null body Stream");
+	  return _body; 
+  }
   void clear();
 
 private:
@@ -64,7 +68,6 @@ private:
   Headers _headers;
   Stream *_body;
 
-  std::string::size_type _lineStart;
   std::string::size_type _remainingBody;
   bool _hasLargeBody;
   std::string::size_type _bodySize;
