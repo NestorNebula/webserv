@@ -25,7 +25,8 @@ PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 			  $(SRC_DIR)/Request.cpp \
 			  $(SRC_DIR)/Response.cpp \
 			  $(SRC_DIR)/StaticResource.cpp \
-			  $(SRC_DIR)/DirectoryResource.cpp
+			  $(SRC_DIR)/DirectoryResource.cpp \
+			  $(SRC_DIR)/Stream.cpp
 
 TEST_SRC_DIR = .
 
