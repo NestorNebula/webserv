@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/29 14:15:49 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/29 15:30:24 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ class ConfigParser {
 
 		/* Logical Work */
 		void	parseServer();
-		void	parseRoute();
+		void	parseRoute(ServerConfig& current_server);
 		void	parseDirective(std::map<std::string, std::string>& directives_map,
 								std::set<std::string>& seen_directives);
 		size_t	parseSize(const std::string& sizeStr);
