@@ -6,12 +6,11 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/26 12:05:04 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 14:27:41 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "DirectoryResource.hpp"
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -27,7 +26,6 @@ void DirectoryResource::generate() {
 const std::string &DirectoryResource::getContent() const {
 	if (_state != DONE)
 		throw std::logic_error("Content not available");
-	std::cout << "Content: " << _content;
 	return _content;
 }
 
