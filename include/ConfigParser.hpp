@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/26 13:08:45 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/29 14:15:49 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 # include <map>
 # include <set>
 # include <exception>
-
-
 
 struct RouteConfig {
 	std::string	path;

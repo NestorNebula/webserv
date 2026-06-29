@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ConfigParser.cpp                                   :+:      :+:    :+:   */
+/*   Tokenizer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/26 13:10:38 by mamarti          ###   ########.fr       */
+/*   Created: 2026/06/29 14:15:36 by mamarti           #+#    #+#             */
+/*   Updated: 2026/06/29 14:19:14 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ConfigParser.hpp"
+#include "ConfigParser.hpp"
 
 # define SPACE		' '
 # define TAB		'\t'
@@ -44,7 +44,7 @@ static bool isSeparator(char c)
 	return (false);
 }
 
-void ConfigParser::tokenize(const std::string& content)
+void	ConfigParser::tokenize(const std::string& content)
 {
 	size_t i = 0;
 	size_t line = 1;
@@ -123,6 +123,3 @@ void ConfigParser::tokenize(const std::string& content)
 	eof.line = line;
 	_tokens.push_back(eof);
 }
-
-
-
