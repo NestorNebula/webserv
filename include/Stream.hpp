@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 11:13:20 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 11:44:04 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ public:
 	typedef std::streamoff streamoff;
 	typedef std::ios_base ios_base;
 	typedef std::streambuf streambuf;
+
+	// Stream becomes the owner of the given stream
+	void adoptStream(std::iostream *stream);
 
 	// istream methods
 	Stream &getline(char *s, streamsize n, char delim = '\n');
