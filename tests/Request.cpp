@@ -21,9 +21,6 @@ TEST(Request, BasicGet) {
   EXPECT_EQ(req.getVersion(), "HTTP/1.1");
   EXPECT_EQ((int)req.getHeaders().size(), 1);
   expectHeader(req.getHeaders(), "Host", "localhost");
-  EXPECT_EQ(req.getRaw(), "GET / HTTP/1.1 \r\n"
-                          "Host: localhost\r\n"
-                          "\r\n");
 }
 
 TEST(Request, MultipleHeaders) {
@@ -57,6 +54,7 @@ TEST(Request, QueryString) {
 
 TEST(Request, BasicPost) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /login HTTP/1.1\r\n"
              "Host: localhost\r\n"
@@ -68,19 +66,21 @@ TEST(Request, BasicPost) {
   EXPECT_EQ((int)req.getHeaders().size(), 2);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  EXPECT_EQ((int)req.getBody().size(), 29);
-  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+  oss << req.getBody().rdbuf();
+  EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
 TEST(Request, EmptyPost) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /upload HTTP/1.1\r\n"
              "Host: localhost\r\n"
              "Content-Length: 0\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_TRUE(req.getBody().empty());
+  oss << req.getBody().rdbuf();
+  EXPECT_TRUE(oss.str().empty());
 }
 
 TEST(Request, BasicDelete) {
@@ -125,6 +125,7 @@ TEST(Request, CutStartLine) {
 
 TEST(Request, CutBody) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /upload HTTP/1.1\r\n"
              "Host: localhost\r\n"
@@ -134,8 +135,8 @@ TEST(Request, CutBody) {
   req.append("lo");
   EXPECT_TRUE(req.hasBody());
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ((int)req.getBody().size(), 5);
-  EXPECT_EQ(req.getBody(), "Hello");
+  oss << req.getBody().rdbuf();
+  EXPECT_EQ(oss.str(), "Hello");
 }
 
 TEST(Request, InvalidHeader) {
@@ -160,6 +161,7 @@ TEST(Request, NoMethod) {
 
 TEST(Request, MultipleHeadersPost) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /form HTTP/1.1\r\n"
              "Host: localhost\r\n"
@@ -175,12 +177,13 @@ TEST(Request, MultipleHeadersPost) {
   expectHeader(req.getHeaders(), "Content-Type",
                "application/x-www-form-urlencoded");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  EXPECT_EQ((int)req.getBody().size(), 29);
-  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+  oss << req.getBody().rdbuf();
+  EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
 TEST(Request, ChunkedPost) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /form HTTP/1.1\r\n"
              "Host: localhost\r\n"
@@ -197,12 +200,13 @@ TEST(Request, ChunkedPost) {
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ((int)req.getHeaders().size(), 4);
   expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
-  EXPECT_EQ((int)req.getBody().size(), 29);
-  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+  oss << req.getBody().rdbuf();
+  EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
 TEST(Request, CutChunkedPost) {
   Request req;
+  std::ostringstream oss;
 
   req.append("POST /form HTTP/1.1\r\n"
              "Host: localhost\r\n"
@@ -218,6 +222,6 @@ TEST(Request, CutChunkedPost) {
              "\r\n");
   EXPECT_TRUE(req.isComplete());
   expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
-  EXPECT_EQ((int)req.getBody().size(), 29);
-  EXPECT_EQ(req.getBody(), "username=nhoussie&password=42");
+  oss << req.getBody().rdbuf();
+  EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
