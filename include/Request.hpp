@@ -6,14 +6,14 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 09:44:27 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 11:28:27 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Headers.hpp"
-#include <iostream>
+#include "Stream.hpp"
 
 class Request {
 public:
@@ -37,8 +37,8 @@ public:
   }
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
   const Headers &getHeaders() const { return _headers; }
-  // bool hasBody() const { return _state == COMPLETE && !_body.empty(); } TODO
-  std::iostream &getBody() { return _body; }
+  bool hasBody() const { return _state == COMPLETE && !_body.empty(); }
+  const std::string &getBody() { return _body; }
   void clear();
 
 private:
@@ -61,7 +61,7 @@ private:
   std::string _query;
   std::string _version;
   Headers _headers;
-  std::iostream _body;
+  Stream &_body;
 
   std::string::size_type _lineStart;
   std::string::size_type _remainingBody;
