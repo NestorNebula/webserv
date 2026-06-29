@@ -17,6 +17,7 @@
 # include <unistd.h>
 # include <sys/epoll.h>
 # include <signal.h>
+# include <cerrno>
 # include <set>
 
 # ifndef EPOLL_MAX_EVT
@@ -60,15 +61,16 @@ public:
 	int			recv(void);
 	int			send(std::string & buf);
 	
-	int			get_fd(void) const { return (this->fd); }
-	epc_typ		get_typ(void) const { return (this->typ); }
-	epc_state	get_state(void) const { return (this->state); }
+	int			get_fd(void)	const { return (this->fd); }
+	epc_typ		get_typ(void)	const { return (this->typ); }
+	epc_state	get_state(void)	const { return (this->state); }
 protected:
 	epc_typ		typ;
 	int			fd;
 	epc_state	state;
 	int			error;
 
+public:
 	std::string		ibuf;
 	std::string		obuf;
 };

@@ -24,14 +24,14 @@ int main (void)
     Server *serv[2];
     
     // attn : CATCH each (bind) FAIL ...
-    serv[0] = new Server(ep, 8084);
-    // serv[1] = new Server(ep, 8083);
+    serv[0] = new Server(ep, 8080);
+    serv[1] = new Server(ep, 8081);
     
     err = ep.loop();
 
     std::cerr << "exit  : " << err << std::endl;
 
-    delete (serv[0]);
+    // delete (serv[0]);
     // delete (serv[1]);
     
     return (err);

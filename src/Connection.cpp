@@ -41,11 +41,14 @@ Connection::~Connection()
 {
 	// if (this->fd != -1)
 	// 	close(this->fd);
-	// std::cerr << "~conn : req cnt " << this->req_cnt << std::endl;
-	if (this->cgi_in)
-		delete (this->cgi_in);
-	if (this->cgi_out)
-		delete (this->cgi_out);
+	// std::cerr << "~conn  : req cnt " << this->req_cnt << std::endl;
+	
+// LET (epoll) take care of this (?)
+
+	// if (this->cgi_in)
+	// 	delete (this->cgi_in);
+	// if (this->cgi_out)
+	// 	delete (this->cgi_out);
 };
 
 
@@ -94,8 +97,12 @@ int	Connection::pollin(void)
 	this->timeout();
 	
 	err = this->recv();
-	if (err <= 0)
-		return (err);
+	if (err <= 0) // hm ... 
+	{
+		std::cerr << "conn  : recv error " << strerror(errno) << std::endl;
+		// NOT SURE (0) should always return (-1)
+		return (-1); // err);
+	}
 		
 #if DBG_CONN_READ
 	std::cerr << "****  : ibuf\n" << ibuf << std::endl;
@@ -118,12 +125,16 @@ if (ibuf.find(hed_end) != std::string::npos)
 		
 			// empty reply -- but .. something is sent (?
 		// obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
+
 		ibuf = std::string("");
 
+#if 1 // CGI
 		err = this->exec_cgi();
 		if (err)
+		{
+			std::cerr << "conn  : exec cgi error " << strerror(errno) << std::endl;
 			return (err);
-		
+		}
 		// Resource::generate()
 			// may fail here .. bad file, directory
 			
@@ -151,6 +162,8 @@ if (ibuf.find(hed_end) != std::string::npos)
 
 			// crash without this 
 			// gets .. deleted (?)
+		// or >> (DEL) .. until cgi has written stuff
+#endif
 		this->serv.ep.mod(this, EPOLLOUT);
 }
 
@@ -172,18 +185,27 @@ int	Connection::pollout(void)
 	// if CgiPipeOut -- read from c
 	// OR : write .. here .. checks if cgi has read data
 	this->timeout();
-	
 	if (obuf.size() == 0)
 	{
 		// waiting for cgi data (?)
-		std::cerr << "conn : pollout (0)\n"; // we get stuck here ..
-		return (1);
+		// we get STUCK HERE 
+		// need to send ..something (?)
+		std::cerr << "conn  : pollout (0)\n"; // we get stuck here ..
+		// this feels DANGEROUS
+
+		this->serv.ep.del(this); // , EPOLLOUT);
+		return (0);
 	}
 
 	
 	err = this->send(obuf);
 	if (err <= 0)
-		return (err);
+	{
+		std::cerr << "conn  : send error " << err << std::endl;
+
+		// NOT SURE (0) should always return (-1)
+		return (-1); // err);
+	}
 	// but .. what if we want to come back and write more (?)
 	// do we need to re-add .. MOD .. to kinda .. "reset" the event in the epoll
 		
@@ -265,7 +287,7 @@ int	Connection::exec_cgi(void)
 		args[1] = file.c_str();
 		args[2] = NULL;
 
-		std::cerr << "fork : exec\n";
+		std::cerr << "fork  : exec\n";
 		err = execve(args[0], (char* const*) args, NULL);
 		return (err);	
 	}		
@@ -286,7 +308,7 @@ int	Connection::exec_cgi(void)
 	{
 		return (err);
 	}
-	std::cerr << "conn : exec_cgi\n";
+	std::cerr << "conn  : exec_cgi\n";
 	return (err);
 }
 
@@ -301,14 +323,31 @@ int		CgiPipe::pollin(void)
 
 	// this->timeout(); // EpollClient
 	
-	std::cerr << "cgi  : pollin\n";
 	err = this->recv();
-	if (err <= 0)
+	std::cerr << "cgi   : pollin " << err << std::endl;
+	if (err < 0)
+	{
+
 		return (err);
+	}
+	std::cerr << "data\n" << this->ibuf << std::endl;
 	// this (fd) .. can READ
 	// output from CGI (?)
 	// to conn.obuf
+	// we ARE GETTING THE DATA ... 
+	// tell our "parent" Conn we can start writing
 		
+	this->conn.obuf = this->ibuf;
+	// which we should cleanup
+	// or .. have written to to begin with
+	// add as one-shot (?)
+
+	this->conn.serv.ep.add(&this->conn, EPOLLOUT);
+
+	// when we are DONE .. 
+	// so .. try again 
+	this->conn.serv.ep.rem(this);
+
 	return (0);
 }
 
@@ -317,6 +356,9 @@ int		CgiPipe::pollout(void)
 	// this (fd) .. can WRITE
 	// input TO CGI .. from conn.ibuf
 
-	std::cerr << "cgi  : pollout\n";
+	std::cerr << "cgi   : pollout\n";
+	// nothing to write ... 
+	// Conn decides .. 
+	this->conn.serv.ep.rem(this);
 	return (0);
 }

@@ -121,7 +121,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	{
 		this->conn.insert(cli);
 	}
-	std::cerr << "epoll: add ";
+	std::cerr << "epoll : add ";
 	epc_type(cli);
 	
 	return (err);
@@ -169,13 +169,13 @@ int	Epoll::rem(EpollClient *cli)
 		return (0);
 
 #if DBG_EPOLL_DEL
-	std::cerr << "epoll: rem CONN\n";
+	std::cerr << "epoll : rem CONN\n";
 #endif
 	std::set<EpollClient*>::iterator it = this->conn.find(cli);
 	if (it != this->conn.end())
 	{
 #if DBG_EPOLL_DEL
-		std::cerr << "epoll: rem CONN\n";
+		std::cerr << "epoll : rem CONN\n";
 #endif			
 		delete (cli);
 		this->conn.erase(it);
@@ -219,7 +219,7 @@ int	Epoll::loop(void)
 			evt = this->get_evt(e);
 			if (evt == NULL)
 			{
-				std::cerr << "epoll: evt NULL\n";
+				std::cerr << "epoll : evt NULL\n";
 				continue;
 			}
 #if DBG_EPOLL
@@ -228,7 +228,7 @@ int	Epoll::loop(void)
 			epc = reinterpret_cast<EpollClient*>(evt->data.ptr);
 			if (epc == NULL)
 			{
-				std::cerr << "epoll: epc NULL\n";
+				std::cerr << "epoll : epc NULL\n";
 				continue;
 			}
 #if DBG_EPOLL
@@ -236,7 +236,7 @@ int	Epoll::loop(void)
 #endif		
             if (evt->events & EPOLLRDHUP)
             {
-				std::cerr << "epoll: epc HUP\n";
+				std::cerr << "epoll : epc HUP\n";
 #if 0                    
                 int rfd = epc->get_fd();
                 epc->pollout();
@@ -254,17 +254,23 @@ int	Epoll::loop(void)
             if (evt->events & EPOLLIN)
             {
 				err = epc->pollin();
-				if (err <= 0) // && state
+				if (err < 0) // && state
 				{
 					// this->del(epc); // bad idea
+					// ATTN : return values for CgiPipe !!
+// LOGGER !!!!!
+// 
+// NOT NECESSARILY on (0)
+					std::cerr << "epoll : error " << err << " pollin\n";
 					this->rem(epc);
 				}
             }
             if (evt->events & EPOLLOUT)
             {
 				err = epc->pollout();
-				if (err <= 0) // && state ... 
+				if (err < 0) // && state ... 
 				{
+					std::cerr << "epoll : error " << err << " pollout\n";
 					this->rem(epc);
 				}
 			}
@@ -293,7 +299,7 @@ int	Epoll::exec(void)
 	if (this->ecnt < 0)
 	{
 		// SIGINT not "caught" .. if events are still waiting to process
-		std::cerr << "epoll: < 0\n";
+		std::cerr << "epoll : < 0\n";
 		std::cerr << strerror(errno) << std::endl;
 		return (this->ecnt);
 	}
@@ -302,7 +308,7 @@ int	Epoll::exec(void)
 		return (0); // this->ecnt
 	}
 #if DBG_EPOLL
-	std::cerr << "epoll : ecnt " << this->ecnt << std::endl;
+	std::cerr << "\nepoll : ecnt " << this->ecnt << std::endl;
 #endif
 	return (this->ecnt);
 }
@@ -380,6 +386,8 @@ int	EpollClient::recv(void)
 	if (err < 0)
 	{
 		this->state = EPC_STATE_ERROR;
+		std::cerr << "epc   : read error " << strerror(errno) << std::endl;
+		epc_type(this);
 		// this->shutdown();
 		return (err);
 	}
@@ -389,6 +397,8 @@ int	EpollClient::recv(void)
 		std::cerr << "conn  : read [0]\n";
 #endif		
 		this->state = EPC_STATE_SHUTDOWN;
+		std::cerr << "epc   : read error 0\n";
+		epc_type(this);
 		// this->shutdown();
 		return (err);
 	}
@@ -415,16 +425,16 @@ int	EpollClient::recv(void)
 	return (err);
 }
 
-
+// SegFault -- if deleted (?) by whom (?) forked process (?)
 void epc_type(EpollClient *epc)
 {
 	epc_typ t = epc->get_typ();
 	if (t == EPC_SERV)
-		std::cerr << "epc  : serv\n";
+		std::cerr << "epc   : serv\n";
 	if (t == EPC_CONN)
-		std::cerr << "epc  : conn\n";
+		std::cerr << "epc   : conn\n";
 	if (t == EPC_CGI)
-		std::cerr << "epc  : cgi\n";
+		std::cerr << "epc   : cgi\n";
 }
 
 int	EpollClient::send(std::string & buf)
@@ -448,6 +458,8 @@ int	EpollClient::send(std::string & buf)
 	{
 		this->state = EPC_STATE_ERROR;
 		// this->shutdown();
+		std::cerr << "epc   : send error " << strerror(errno) << std::endl;
+		epc_type(this);
 		return (err);
 	}
 	if (err == 0)
@@ -457,6 +469,8 @@ int	EpollClient::send(std::string & buf)
 #endif
 		this->state = EPC_STATE_SHUTDOWN;
 		// this->shutdown();
+		std::cerr << "epc   : read error 0\n";
+		epc_type(this);
 		return (err);
 	}
 	buf.erase(0, err);

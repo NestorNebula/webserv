@@ -9,8 +9,12 @@
 # siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser 
 
 
-curl -X POST http://localhost:8084
+curl -X POST http://localhost:8080
 echo
+
+# curl -X POST http://localhost:8081
+# echo
+
 exit 0
 
 
