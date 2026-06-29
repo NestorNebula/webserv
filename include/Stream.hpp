@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 10:30:09 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 11:13:20 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,16 @@
 
 #include <iostream>
 
-using std::streamsize, std::streampos, std::streamoff, std::ios_base, std::streambuf;
-
 class Stream {
 public:
-	Stream();
-	~Stream();
+	Stream(): _stream(NULL) {}
+	~Stream() { delete _stream; }
+
+	typedef std::streamsize streamsize;
+	typedef std::streampos streampos;
+	typedef std::streamoff streamoff;
+	typedef std::ios_base ios_base;
+	typedef std::streambuf streambuf;
 
 	// istream methods
 	Stream &getline(char *s, streamsize n, char delim = '\n');
@@ -41,15 +45,26 @@ public:
 	bool operator!() const;
 	operator void*() const;
 	streambuf *rdbuf() const;
-	streambuf *rdbuf(streambuf *sb) const;
+	streambuf *rdbuf(streambuf *sb);
+
+	template <typename T>
+	Stream &operator>>(T &t) {
+		throwIfNull();
+		_stream >> t;
+		return *this;
+	}
+
+	template <typename T>
+	Stream &operator<<(T const &t) {
+		throwIfNull();
+		_stream << t;
+		return *this;
+	}
 
 private:
 	Stream(const Stream &);
 	Stream &operator=(const Stream &);
+
+	std::iostream *_stream;
+	void throwIfNull() const;
 };
-
-template <typename T>
-Stream &operator>>(Stream &stream, T const &t);
-
-template <typename T>
-Stream &operator<<(Stream &stream, T const &t);
