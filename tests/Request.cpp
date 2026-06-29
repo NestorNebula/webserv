@@ -66,7 +66,7 @@ TEST(Request, BasicPost) {
   EXPECT_EQ((int)req.getHeaders().size(), 2);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
@@ -79,7 +79,7 @@ TEST(Request, EmptyPost) {
              "Content-Length: 0\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_TRUE(oss.str().empty());
 }
 
@@ -135,7 +135,7 @@ TEST(Request, CutBody) {
   req.append("lo");
   EXPECT_TRUE(req.hasBody());
   EXPECT_TRUE(req.isComplete());
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_EQ(oss.str(), "Hello");
 }
 
@@ -177,7 +177,7 @@ TEST(Request, MultipleHeadersPost) {
   expectHeader(req.getHeaders(), "Content-Type",
                "application/x-www-form-urlencoded");
   expectHeader(req.getHeaders(), "Content-Length", "29");
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
@@ -200,7 +200,7 @@ TEST(Request, ChunkedPost) {
   EXPECT_TRUE(req.isComplete());
   EXPECT_EQ((int)req.getHeaders().size(), 4);
   expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
 
@@ -222,6 +222,6 @@ TEST(Request, CutChunkedPost) {
              "\r\n");
   EXPECT_TRUE(req.isComplete());
   expectHeader(req.getHeaders(), "Transfer-Encoding", "chunked");
-  oss << req.getBody().rdbuf();
+  oss << req.getBody()->rdbuf();
   EXPECT_EQ(oss.str(), "username=nhoussie&password=42");
 }
