@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 13:52:50 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 14:21:57 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,14 +54,14 @@ public:
 	template <typename T>
 	Stream &operator>>(T &t) {
 		throwIfNull();
-		_stream >> t;
+		*_stream >> t;
 		return *this;
 	}
 
 	template <typename T>
 	Stream &operator<<(T const &t) {
 		throwIfNull();
-		_stream << t;
+		*_stream << t;
 		return *this;
 	}
 
