@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 11:44:04 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 12:38:16 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,11 @@ public:
 		return *this;
 	}
 
+protected:
+	std::iostream *_stream;
+	void throwIfNull() const;
+
 private:
 	Stream(const Stream &);
 	Stream &operator=(const Stream &);
-
-	std::iostream *_stream;
-	void throwIfNull() const;
 };
