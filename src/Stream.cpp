@@ -6,11 +6,16 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 11:13:38 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 11:44:33 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Stream.hpp>
+
+void Stream::adoptStream(std::iostream *stream) {
+	delete _stream;
+	_stream = stream;
+}
 
 Stream &Stream::getline(char *s, streamsize n, char delim) {
 	throwIfNull();
