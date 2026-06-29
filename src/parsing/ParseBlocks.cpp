@@ -6,11 +6,11 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/29 16:17:30 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/29 16:31:08 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/ConfigParser.hpp"
+#include "ConfigParser.hpp"
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {

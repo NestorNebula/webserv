@@ -6,11 +6,11 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/29 16:16:58 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/29 16:31:03 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/ConfigParser.hpp"
+#include "ConfigParser.hpp"
 #include <fstream>
 #include <sstream>
 

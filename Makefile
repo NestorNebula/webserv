@@ -6,7 +6,7 @@
 #    By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/29 15:47:03 by mamarti           #+#    #+#              #
-#    Updated: 2026/06/29 16:07:48 by mamarti          ###   ########.fr        #
+#    Updated: 2026/06/29 16:30:57 by mamarti          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ DEPS			=	$(OBJS:.o=.d)
 
 NAME			=	webserv
 CC				=	c++
-CFLAGS			=	-Wall -Wextra -Werror -MMD -MP -std=c++98
+CFLAGS			=	-Wall -Wextra -Werror -Iinclude -MMD -MP -std=c++98
 
 all:			$(NAME)
 
