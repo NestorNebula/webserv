@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 12:38:16 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/06/29 13:52:50 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 class Stream {
 public:
 	Stream(): _stream(NULL) {}
+	Stream(std::iostream *stream): _stream(stream) {}
 	~Stream() { delete _stream; }
 
 	typedef std::streamsize streamsize;
