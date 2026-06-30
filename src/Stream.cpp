@@ -17,6 +17,11 @@ void Stream::adoptStream(std::iostream *stream) {
 	_stream = stream;
 }
 
+Stream::streamsize Stream::gcount() const {
+	throwIfNull();
+	return _stream->gcount();
+}
+
 Stream &Stream::getline(char *s, streamsize n, char delim) {
 	throwIfNull();
 	_stream->getline(s, n, delim);
