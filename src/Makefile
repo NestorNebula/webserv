@@ -22,6 +22,7 @@ DEFS += -DTEST="$(TEST)"
 endif
 
 FILES = \
+	WsLog.cpp \
 	Epoll.cpp \
 	Server.cpp \
 	Connection.cpp \

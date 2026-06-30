@@ -1,0 +1,84 @@
+epoll : add client: serv
+epoll : add client: serv
+epoll : 
+
+epoll : ecnt
+epoll : 2
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : 
+
+epoll : ecnt
+epoll : 4
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : evt target: conn
+epoll : evt type  : in 
+epc   : recv
+epc   : 173
+epc   : data
+epc   : 
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/4.0.7
+Connection: close
+
+
+epc   : ibuf
+epc   : 
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8080
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/4.0.7
+Connection: close
+
+
+epoll : mod client: conn
+epoll : evt target: conn
+epoll : evt type  : in 
+epc   : recv
+epc   : 173
+epc   : data
+epc   : 
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8081
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/4.0.7
+Connection: close
+
+
+epc   : ibuf
+epc   : 
+GET /index.html HTTP/1.1
+Host: 127.0.0.1:8081
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/4.0.7
+Connection: close
+
+
+epoll : mod client: conn
+epoll : 
+
+epoll : ecnt
+epoll : 6
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : evt target: serv
+epoll : evt type  : in 
+epoll : add client: conn
+epoll : evt target: conn
+epoll : evt type  : out 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 23:01:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 15:35:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,16 +97,16 @@ int	Connection::pollin(void)
 	this->timeout();
 	
 	err = this->recv();
-	if (err <= 0) // hm ... 
+	if (err < 0)
 	{
-		std::cerr << "conn  : recv error " << strerror(errno) << std::endl;
-		// NOT SURE (0) should always return (-1)
-		return (-1); // err);
+		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
+		return (err);
 	}
-		
-#if DBG_CONN_READ
-	std::cerr << "****  : ibuf\n" << ibuf << std::endl;
-#endif
+	if (err == 0)
+	{
+		this->state = EPC_STATE_SHUTDOWN;
+		return (-1);
+	}
 
 	// may may be writing this data to an UPLOAD file .. 
 
@@ -114,8 +114,6 @@ int	Connection::pollin(void)
 		// add sides of pipe to epoll 
 		// what happens when it gets forked (?)
 	
-
-		
 	std::string hed_end("\r\n\r\n");
 if (ibuf.find(hed_end) != std::string::npos)
 {
@@ -124,11 +122,13 @@ if (ibuf.find(hed_end) != std::string::npos)
 		this->req_cnt++;
 		
 			// empty reply -- but .. something is sent (?
-		// obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
 
 		ibuf = std::string("");
+#if 1
+		obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
 
-#if 1 // CGI
+		this->serv.ep.mod(this, EPOLLOUT);
+#else // CGI
 		err = this->exec_cgi();
 		if (err)
 		{
@@ -164,7 +164,6 @@ if (ibuf.find(hed_end) != std::string::npos)
 			// gets .. deleted (?)
 		// or >> (DEL) .. until cgi has written stuff
 #endif
-		this->serv.ep.mod(this, EPOLLOUT);
 }
 
 	// CgiPipe
@@ -179,6 +178,8 @@ int	Connection::pollout(void)
 {
 	int	err = 0;
 
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+	
 	// test cgi state here (?)
 	// backwards
 	// if CgiPipeIn -- read from "parent" and write to cgi->input
@@ -187,44 +188,39 @@ int	Connection::pollout(void)
 	this->timeout();
 	if (obuf.size() == 0)
 	{
-		// waiting for cgi data (?)
-		// we get STUCK HERE 
-		// need to send ..something (?)
-		std::cerr << "conn  : pollout (0)\n"; // we get stuck here ..
-		// this feels DANGEROUS
-
-		this->serv.ep.del(this); // , EPOLLOUT);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: obuf.size() == 0");
+		this->serv.ep.del(this);
 		return (0);
 	}
 
-	
 	err = this->send(obuf);
-	if (err <= 0)
+	if (err < 0)
 	{
-		std::cerr << "conn  : send error " << err << std::endl;
-
-		// NOT SURE (0) should always return (-1)
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 		return (-1); // err);
 	}
+	if (err == 0)
+	{
+		this->state = EPC_STATE_SHUTDOWN;
+		return (-1);
+	}
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent");
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, obuf);
 	// but .. what if we want to come back and write more (?)
 	// do we need to re-add .. MOD .. to kinda .. "reset" the event in the epoll
 		
 	// sure (?) pickup hup (?) before we get to write back (?)
 	if (obuf.size() == 0)
 	{
-#if DBG_CONN_WRITE
-		std::cerr << "conn  : write DONE\n";
-#endif
-		
-#if 1 // KEEP_ALIVE
+#if 0 // KEEP_ALIVE
 		// see more HUP => read [0] with THIS .. AND NOT siege.conf
 		this->serv.ep.mod(this, EPOLLIN); // something more here ..
 #else
 		// fucking ep.del WORKED HERE ..
 		// but not up in ep::loop 
-		this->state = EPC_STATE_SHUTDOWN;
-		this->shutdown();
-		return (0);
+		// this->state = EPC_STATE_SHUTDOWN;
+		// this->shutdown();
+		// return (err);
 #endif
 	// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
 	}
@@ -258,22 +254,26 @@ int	Connection::exec_cgi(void)
 
 	err = pipe(p1);
 	if (err < 0)
-		return (err);
+		return (err); // return WsLog::_err(TGT, "pipe")
 	err = pipe(p2);
 	if (err < 0)
 		return (err);
 
 
 	pid_t pid = fork();
-	if (pid == -1)
+	if (pid < 0)
+	{
 		return (-1);
+	}
 	if (pid == 0)
 	{
-		// close(p1[1]);
-		// err = dup2(p1[0], STDIN_FILENO);
-		// if (err < 0)
-		// 	return (err);
-		// close(p1[0]);
+		// this->serv.ep.copied(); // UGLY
+
+		close(p1[1]);
+		err = dup2(p1[0], STDIN_FILENO);
+		if (err < 0)
+			return (err);
+		close(p1[0]);
 		
 		close(p2[0]);
 		err = dup2(p2[1], STDOUT_FILENO);
@@ -287,8 +287,14 @@ int	Connection::exec_cgi(void)
 		args[1] = file.c_str();
 		args[2] = NULL;
 
-		std::cerr << "fork  : exec\n";
+		// ah -- not seeing this 
+		std::cerr << "\nFORK  : exec\n";
+// sys.excepthook is missing
+// lost sys.stderr
+		// close(STDERR_FILENO); 
+		// is (envp) important (?)
 		err = execve(args[0], (char* const*) args, NULL);
+		std::cout << "\n\nwtf\n\n";
 		return (err);	
 	}		
 	close(p1[0]);
@@ -299,18 +305,24 @@ int	Connection::exec_cgi(void)
 	this->cgi_out = new CgiPipe(p2[0], *this);
 
 	err = this->serv.ep.add(this->cgi_in, EPOLLOUT);
-	if (err)
-	{
+	if (err < 0)
 		return (err);
-	}
 	err = this->serv.ep.add(this->cgi_out, EPOLLIN);
 	if (err)
-	{
 		return (err);
-	}
-	std::cerr << "conn  : exec_cgi\n";
+	std::cerr << "\nconn  : exec_cgi\n";
+	// why TWO here ?
+	this->serv.ep.mod(this, 0);
 	return (err);
 }
+
+
+
+
+
+
+
+
 
 
 CgiPipe::CgiPipe (int _fd, Connection & _conn) : EpollClient(EPC_CGI, _fd), conn(_conn)
@@ -342,11 +354,8 @@ int		CgiPipe::pollin(void)
 	// or .. have written to to begin with
 	// add as one-shot (?)
 
-	this->conn.serv.ep.add(&this->conn, EPOLLOUT);
-
-	// when we are DONE .. 
-	// so .. try again 
-	this->conn.serv.ep.rem(this);
+	// hm .. 
+	this->conn.serv.ep.mod(&this->conn, EPOLLOUT);
 
 	return (0);
 }
@@ -355,10 +364,12 @@ int		CgiPipe::pollout(void)
 {
 	// this (fd) .. can WRITE
 	// input TO CGI .. from conn.ibuf
-
-	std::cerr << "cgi   : pollout\n";
-	// nothing to write ... 
-	// Conn decides .. 
-	this->conn.serv.ep.rem(this);
-	return (0);
+	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "pollout");
+	
+	this->conn.serv.ep.del(this);
+	// maybe .. clsing the (fd) .. is enough
+	// so .. mod(0) .. would "silence" ... 
+	// but .. keep error (?)
+	// this->conn.serv.ep.rem(this); /// SegFault
+	return (-1); // remove -- SegFAULT
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 22:58:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 15:29:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,6 @@
 # include <iostream>
 # include <sys/wait.h>
 # include <cstring>
-
-
-# ifndef DBG_CONN_READ
-#  define DBG_CONN_READ 0
-# endif
-
-# ifndef DBG_CONN_WRITE
-#  define DBG_CONN_WRITE 0
-# endif
-
 
 # ifndef CONN_BUF_SIZ
 #  define CONN_BUF_SIZ 4096

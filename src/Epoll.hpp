@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 22:52:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 15:29:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,10 @@
 # include <cerrno>
 # include <set>
 
+# include "WsLog.hpp"
+
 # ifndef EPOLL_MAX_EVT
 #  define EPOLL_MAX_EVT 128
-# endif
-
-# ifndef DBG_EPOLL
-#  define DBG_EPOLL 1
 # endif
 
 typedef enum
@@ -34,8 +32,6 @@ typedef enum
 	EPC_CONN,
 	EPC_CGI
 }	epc_typ;
-
-
 
 typedef enum
 {
@@ -52,6 +48,7 @@ public:
 	
 	virtual ~EpollClient()
 	{
+		WsLog::_(LVL_ERR, TGT_EPC, "delete");
 		if (this->fd != -1)
 			close(this->fd);
 	}
@@ -75,7 +72,7 @@ public:
 	std::string		obuf;
 };
 
-void epc_type(EpollClient *epc);
+const char *epc_type(EpollClient *epc); // silly : internal
 
 
 class Epoll
@@ -93,6 +90,8 @@ public:
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
 	
+	void	copied(void);
+	
 private:
 	int					epfd;
 	int					ecnt;
@@ -105,8 +104,6 @@ private:
 };
 
 std::ostream& operator << (std::ostream & os, Epoll & obj);
-
-void	evt_typ(struct epoll_event *evt);
 
 #endif
 

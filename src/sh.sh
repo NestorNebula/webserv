@@ -2,19 +2,18 @@
 
 
 
-# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=10 --concurrent=10 --no-parser
+siege --delay=0.5 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=100 --no-parser
+echo
+exit 0
+
+# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=2 --no-parser 
 # echo
 # exit 0
 
-# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser 
-
-
 curl -X POST http://localhost:8080
 echo
-
-# curl -X POST http://localhost:8081
-# echo
-
+curl -X POST http://localhost:8081
+echo
 exit 0
 
 

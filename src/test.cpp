@@ -6,9 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 22:13:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 15:29:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "WsLog.hpp"
 
 #include "Epoll.hpp"
 #include "Server.hpp"
@@ -18,6 +20,20 @@
 int main (void)
 {
     int     err;
+    
+    WsLog::lvl = 
+        LVL_NONE
+        | LVL_ERR 
+        | LVL_INFO
+        | LVL_DBG
+        | LVL_WARN
+    ;
+    WsLog::tgt = 
+        TGT_NONE
+        | TGT_EPOLL 
+        | TGT_CONN
+        | TGT_EPC
+    ;
     
     Epoll   ep;
 
@@ -36,3 +52,8 @@ int main (void)
     
     return (err);
 }
+
+
+// close failed in file object destructor:
+// sys.excepthook is missing
+// lost sys.stderr
