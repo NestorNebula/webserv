@@ -15,47 +15,67 @@
 #include <stdexcept>
 
 void Response::setVersion(std::string version) {
-	throwIfGenerated();
 	_version = version;
 }
 
 void Response::setCode(StatusCode code) {
-	throwIfGenerated();
 	_code = code;
 }
 
 void Response::setReason(std::string reason) {
-	throwIfGenerated();
 	_reason = reason;
 }
 
 void Response::addHeader(Header header) {
-	throwIfGenerated();
 	_headers.insert(header);
 }
 
 void Response::addHeaders(Headers::const_iterator begin, Headers::const_iterator end) {
-	throwIfGenerated();
 	while (begin != end)
 		_headers.insert(*begin++);
 }
 
-bool Response::isReady() const {
-	return !_version.empty() && _code && !_reason.empty() && !_generated;
+const Resource &Response::getResource() const {
+	if (_resource == NULL)
+		throw std::logic_error("No resource available");
+	return *_resource;
 }
 
-void Response::generate() {
+void Response::setResource(Resource *resource) {
+	_resource = resource;
+}
+
+std::string Response::getHead() const {
 	std::ostringstream oss;
 
-	throwIfGenerated();
+	throwIfNotReady();
 	oss << _version << " " << _code << " " << _reason << "\r\n";
 	oss << _headers.str() << "\r\n";
-	oss << _resource.getContent();
-	_raw = oss.str();
-	_generated = true;
+	return oss.str();
 }
 
-void Response::throwIfGenerated() const {
-	if (_generated)
-		throw(std::logic_error("Response already generated"));
+Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
+	throwIfNotReady();
+	if (!hasBody())
+		throw std::logic_error("Response does not have body");
+
+	_resource->stream().read(buf, bufsize - 1);
+	if (!_resource->stream() && !_resource->stream().eof())
+		return -1;
+	Stream::streamsize readCount = _resource->stream().gcount();
+	buf[readCount] = '\0';
+	return readCount;
+}
+
+bool Response::isReady() const {
+	return !_version.empty() && _code && !_reason.empty() && (!_resource || hasBody());
+}
+
+bool Response::hasBody() const {
+	return _resource && _resource->done();
+}
+
+void Response::throwIfNotReady() const {
+	if (!isReady())
+		throw std::logic_error("Response not in readable state");
 }
