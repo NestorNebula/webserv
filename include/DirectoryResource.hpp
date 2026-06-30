@@ -26,7 +26,7 @@ public:
 	virtual bool done() const { return _state == DONE; }
 	virtual bool inProgress() const { return false; }
 	virtual bool failed() const { return _state == FAIL; }
-	virtual const std::string &getContent() const;
+	virtual Stream &stream();
 
 private:
 	typedef enum eInternalState {
