@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 19:56:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 19:22:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <fcntl.h>
 
 # include "Epoll.hpp"
+# include "EpollClient.hpp"
 
 # ifndef DBG_SERV
 #  define DBG_SERV 0

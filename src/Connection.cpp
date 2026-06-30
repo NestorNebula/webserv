@@ -6,25 +6,20 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 15:35:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 23:15:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Connection.hpp"
 #include "Server.hpp"
+#include "CgiPipe.hpp"
 
 Connection::Connection (int _fd, Server &_serv) : EpollClient(EPC_CONN, _fd), serv(_serv), 
-	lact(0), 
-	cgi_in(NULL),
-	cgi_out(NULL),
 	req_cnt(0)
 {
 };
 
-Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv), 
-	lact(0),
-	cgi_in(NULL),
-	cgi_out(NULL),
+Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv),
 	req_cnt(0)
 {
 }
@@ -33,22 +28,17 @@ Connection & Connection::operator = (const Connection & that)
 {
 	if (this == &that)
 		return (*this);
+
+	WsLog::_(LVL_DBG, TGT_CONN, "(=) Connection");
 	// FREE DATA : this
 	// COPY DATA : this->val = that.val
 	return (*this);
 }
+
 Connection::~Connection()
 {
-	// if (this->fd != -1)
-	// 	close(this->fd);
-	// std::cerr << "~conn  : req cnt " << this->req_cnt << std::endl;
-	
-// LET (epoll) take care of this (?)
-
-	// if (this->cgi_in)
-	// 	delete (this->cgi_in);
-	// if (this->cgi_out)
-	// 	delete (this->cgi_out);
+	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
+	// WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 };
 
 
@@ -58,37 +48,10 @@ std::ostream& operator << (std::ostream & os, Connection & obj)
 	return (os);
 }
 
-#define CONN_TO_SECS 5
 
-int	Connection::timeout(void)
-{
-	int	err = 0;
-
-	time_t now = time(&now);
-	if (this->lact)
-	{
-		double secs = ((double) (now - lact));
-		if (secs > CONN_TO_SECS)
-		{
-			std::cerr << "conn  : timed out\n";
-			err = 1;
-		}
-	}
-	this->lact = now;
-	return (err);
-}
-
-#if 0
-int	Connection::shutdown(void)
-{
-	return (0);
-	
-	this->serv.ep.del(this);
-	close(this->fd);
-	this->fd = -1;
-	return (0);
-}
-#endif
+// GET Requests: The encoded string is appended to the URL and passed to the CGI script via the QUERY_STRING environment variable. 
+// POST Requests: The encoded data is sent in the request body. The script must read the number of bytes specified by the CONTENT_LENGTH environment variable from standard input (stdin). 
+// Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
 int	Connection::pollin(void)
 {
@@ -104,18 +67,32 @@ int	Connection::pollin(void)
 	}
 	if (err == 0)
 	{
-		this->state = EPC_STATE_SHUTDOWN;
+		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: zero");
+		// this->state = EPC_STATE_SHUTDOWN;
 		return (-1);
 	}
 
+	this->istr += std::string(this->ibuf);
+    
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
+
+
+	
+	// perhaps -- handle istr += (buf) here .. 
+	// we might be writing it out (file, cgi)
+		// so spare us a copy
+	// 
+	
 	// may may be writing this data to an UPLOAD file .. 
 
 	// Resource -- CGI .. create here (?) or in Epoll::loop()
 		// add sides of pipe to epoll 
 		// what happens when it gets forked (?)
 	
+		
 	std::string hed_end("\r\n\r\n");
-if (ibuf.find(hed_end) != std::string::npos)
+if (istr.find(hed_end) != std::string::npos)
 {
 // ATTN : KEEP_ALIVE
 // Warning: Connection-specific header fields such as Connection and Keep-Alive are prohibited in HTTP/2 and HTTP/3. 
@@ -123,29 +100,33 @@ if (ibuf.find(hed_end) != std::string::npos)
 		
 			// empty reply -- but .. something is sent (?
 
-		ibuf = std::string("");
-#if 1
-		obuf = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
+// ATTN : body (!)
+		istr = std::string("");
+#if 0 // basic text
+		ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 8\r\n\r\nGotcha!\n");
 
 		this->serv.ep.mod(this, EPOLLOUT);
-#else // CGI
+#else // EXEC_CGI
 		err = this->exec_cgi();
-		if (err)
+		if (err) // < 0
 		{
-			std::cerr << "conn  : exec cgi error " << strerror(errno) << std::endl;
+			WsLog::_(LVL_ERR, TGT_CONN, "exec cgi: ", strerror(errno));
 			return (err);
 		}
+		
 		// Resource::generate()
 			// may fail here .. bad file, directory
 			
 		// so .. maybe .. CgiPipe .. is NOT an EPOLL_CLIENT
 		// CgiInput
 			// pollin
-			// write from (ibuf) of (conn)
+			// write from (istr) of (conn)
 		// CgiOutput
 			// pollout
-			// write to (obuf) of conn
+			// write to (ostr) of conn
 			
+// the CONTENT_LENGTH environment variable needs to be set
+
 // multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
 		// write rest of BODY to cgi->ifd;
 // 		A request-body is supplied with the request if the CONTENT_LENGTH is
@@ -168,11 +149,12 @@ if (ibuf.find(hed_end) != std::string::npos)
 
 	// CgiPipe
 		// mode write ..
-		// so .. pollwrite .. write FROM ibuf
-		// and . pollread .. write TO obuf
+		// so .. pollwrite .. write FROM istr
+		// and . pollread .. write TO ostr
 			// which .. should get echo'ed .. directly .. to parent Connection (?)
 	return (err);
 }
+
 
 int	Connection::pollout(void)
 {
@@ -185,49 +167,55 @@ int	Connection::pollout(void)
 	// if CgiPipeIn -- read from "parent" and write to cgi->input
 	// if CgiPipeOut -- read from c
 	// OR : write .. here .. checks if cgi has read data
+
+	// ostr : is filled by RESOURCE 
+	// read large file -- 
+	// read here .. then write
+	// read 
 	this->timeout();
-	if (obuf.size() == 0)
+	if (ostr.size() == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: obuf.size() == 0");
-		this->serv.ep.del(this);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
+		// idea : let (CGI) tell us to read 
+		// does (del) close the (fd) ?
+		// this->serv.ep.del(this); // dangerous (?)
+		// or .. only register for HUP
+
+		// wait for CGI to write data
+		// and set our POLLOUT to TRUE
+		this->serv.ep.mod(this, 0);
 		return (0);
 	}
 
-	err = this->send(obuf);
+	err = this->send(ostr);
 	if (err < 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-		return (-1); // err);
-	}
+		return WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
 	if (err == 0)
 	{
-		this->state = EPC_STATE_SHUTDOWN;
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: zero");
+		// this->state = EPC_STATE_SHUTDOWN;
 		return (-1);
 	}
+	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent");
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, obuf);
-	// but .. what if we want to come back and write more (?)
-	// do we need to re-add .. MOD .. to kinda .. "reset" the event in the epoll
-		
-	// sure (?) pickup hup (?) before we get to write back (?)
-	if (obuf.size() == 0)
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, ostr);
+
+	// may need to wait for more bytes ... 
+	if (ostr.size() == 0)
 	{
 #if 0 // KEEP_ALIVE
 		// see more HUP => read [0] with THIS .. AND NOT siege.conf
 		this->serv.ep.mod(this, EPOLLIN); // something more here ..
 #else
-		// fucking ep.del WORKED HERE ..
-		// but not up in ep::loop 
+// simulate "done"
 		// this->state = EPC_STATE_SHUTDOWN;
-		// this->shutdown();
-		// return (err);
 #endif
-	// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
+
 	}
 	return (err); // (!) bytes written
 }
 
-// hup : tell server to delete me (?)
+
 
 
 
@@ -247,6 +235,9 @@ int	Connection::exec_cgi(void)
 	{
 		path = std::string("/usr/bin/perl");
 		file = std::string("test.pl");
+
+		// path = std::string("/usr/bin/php");
+		// file = std::string("test.php");
 	}
 
 	int		p1[2];
@@ -254,64 +245,108 @@ int	Connection::exec_cgi(void)
 
 	err = pipe(p1);
 	if (err < 0)
-		return (err); // return WsLog::_err(TGT, "pipe")
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipe");
 	err = pipe(p2);
 	if (err < 0)
-		return (err);
+	{
+		// cleanup
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipe");
+	}
 
 
 	pid_t pid = fork();
 	if (pid < 0)
 	{
-		return (-1);
+		// cleanup
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 	}
 	if (pid == 0)
 	{
-		// this->serv.ep.copied(); // UGLY
+		// this->serv.ep.copied(); // CLOEXEC
 
 		close(p1[1]);
 		err = dup2(p1[0], STDIN_FILENO);
 		if (err < 0)
-			return (err);
+		{
+			// cleanup
+			return WsLog::_errno(LVL_ERR, TGT_CONN, "dup2");
+		}
 		close(p1[0]);
 		
 		close(p2[0]);
 		err = dup2(p2[1], STDOUT_FILENO);
 		if (err < 0)
-			return (err);
+		{
+			// cleanup
+			return WsLog::_errno(LVL_ERR, TGT_CONN, "dup2");
+		}
 		close(p2[1]);
 
-		// const char *args[3];
-		char const * args[3];
+		char const *args[3];
 		args[0] = path.c_str();
 		args[1] = file.c_str();
 		args[2] = NULL;
 
-		// ah -- not seeing this 
-		std::cerr << "\nFORK  : exec\n";
-// sys.excepthook is missing
-// lost sys.stderr
-		// close(STDERR_FILENO); 
-		// is (envp) important (?)
-		err = execve(args[0], (char* const*) args, NULL);
+		// std::string qs("QUERY_STRING=p1=one&p2=two");
+		// char const *envp[2];
+		// envp[0] = qs.c_str();
+		// envp[1] = NULL;
+
+		// for POST - need to have CONTENT_LENGTH in (env)
+		// and then .. send data to cgi-stdin
+		std::string cl("CONTENT_LENGTH=13");
+		char const *envp[2];
+		envp[0] = cl.c_str();
+		envp[1] = NULL;
+
+		// so .. read FROM cgi .. until (ostr) is full
+		// then we can slap the headers on (?)
+
+		err = execve(args[0], (char* const*) args,
+			// NULL);
+			(char* const*) envp);
 		std::cout << "\n\nwtf\n\n";
 		return (err);	
 	}		
+	
+	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
+
 	close(p1[0]);
 	close(p2[1]);
 
-		// epoll error (?)
-	this->cgi_in  = new CgiPipe(p1[1], *this);
-	this->cgi_out = new CgiPipe(p2[0], *this);
+	int			cgifd;
+	EpollClient	*epc_cgi;
 
-	err = this->serv.ep.add(this->cgi_in, EPOLLOUT);
+#if 0
+	cgifd = dup(p1[1]);
+	if (cgifd < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
+	close (p1[1]);
+
+	epc_cgi = new CgiPipe(cgifd, *this);
+	err = this->serv.ep.add(epc_cgi, EPOLLOUT);
 	if (err < 0)
 		return (err);
-	err = this->serv.ep.add(this->cgi_out, EPOLLIN);
-	if (err)
+		
+#else
+	close(p1[1]);
+#endif
+
+	cgifd = dup(p2[0]);
+	if (cgifd < 0)
+	{
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
+	}
+	close (p2[0]);
+	
+	epc_cgi = new CgiPipe(cgifd, *this);
+	err = this->serv.ep.add(epc_cgi, EPOLLIN);
+	if (err < 0)
+	{
 		return (err);
-	std::cerr << "\nconn  : exec_cgi\n";
-	// why TWO here ?
+	}
+	// ATTN : may have more to read ... 
+	// to send to cgi-stdin
 	this->serv.ep.mod(this, 0);
 	return (err);
 }
@@ -323,53 +358,3 @@ int	Connection::exec_cgi(void)
 
 
 
-
-
-CgiPipe::CgiPipe (int _fd, Connection & _conn) : EpollClient(EPC_CGI, _fd), conn(_conn)
-{
-}
-	
-int		CgiPipe::pollin(void)
-{
-	int	err = 0;
-
-	// this->timeout(); // EpollClient
-	
-	err = this->recv();
-	std::cerr << "cgi   : pollin " << err << std::endl;
-	if (err < 0)
-	{
-
-		return (err);
-	}
-	std::cerr << "data\n" << this->ibuf << std::endl;
-	// this (fd) .. can READ
-	// output from CGI (?)
-	// to conn.obuf
-	// we ARE GETTING THE DATA ... 
-	// tell our "parent" Conn we can start writing
-		
-	this->conn.obuf = this->ibuf;
-	// which we should cleanup
-	// or .. have written to to begin with
-	// add as one-shot (?)
-
-	// hm .. 
-	this->conn.serv.ep.mod(&this->conn, EPOLLOUT);
-
-	return (0);
-}
-
-int		CgiPipe::pollout(void)
-{
-	// this (fd) .. can WRITE
-	// input TO CGI .. from conn.ibuf
-	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "pollout");
-	
-	this->conn.serv.ep.del(this);
-	// maybe .. clsing the (fd) .. is enough
-	// so .. mod(0) .. would "silence" ... 
-	// but .. keep error (?)
-	// this->conn.serv.ep.rem(this); /// SegFault
-	return (-1); // remove -- SegFAULT
-}

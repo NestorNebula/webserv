@@ -23,9 +23,11 @@ endif
 
 FILES = \
 	WsLog.cpp \
+	EpollClient.cpp \
 	Epoll.cpp \
 	Server.cpp \
 	Connection.cpp \
+	CgiPipe.cpp \
 	test.cpp
 
 TPP = 

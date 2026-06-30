@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 15:29:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 23:14:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,54 +26,7 @@
 #  define EPOLL_MAX_EVT 128
 # endif
 
-typedef enum
-{
-	EPC_SERV,
-	EPC_CONN,
-	EPC_CGI
-}	epc_typ;
-
-typedef enum
-{
-	EPC_STATE_INIT,
-	EPC_STATE_SHUTDOWN,
-	EPC_STATE_ERROR,
-	EPC_STATE_MAX
-}	epc_state;
-
-class EpollClient
-{
-public:
-	EpollClient(epc_typ _typ, int _fd) : typ(_typ), fd(_fd), state(EPC_STATE_INIT), error(0) {}
-	
-	virtual ~EpollClient()
-	{
-		WsLog::_(LVL_ERR, TGT_EPC, "delete");
-		if (this->fd != -1)
-			close(this->fd);
-	}
-	virtual int	pollin(void) = 0;
-	virtual int pollout(void) = 0;
-
-	int			recv(void);
-	int			send(std::string & buf);
-	
-	int			get_fd(void)	const { return (this->fd); }
-	epc_typ		get_typ(void)	const { return (this->typ); }
-	epc_state	get_state(void)	const { return (this->state); }
-protected:
-	epc_typ		typ;
-	int			fd;
-	epc_state	state;
-	int			error;
-
-public:
-	std::string		ibuf;
-	std::string		obuf;
-};
-
-const char *epc_type(EpollClient *epc); // silly : internal
-
+class EpollClient;
 
 class Epoll
 {
@@ -89,6 +42,8 @@ public:
 	int		mod(EpollClient *cli, int e);
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
+	
+	EpollClient	*get_epc(void *cli);
 	
 	void	copied(void);
 	

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/27 22:21:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 20:02:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,10 @@ Server & Server::operator = (const Server & that)
 
 Server::~Server()
 {
-	this->ep.del(this); // (ep) MUST STILL EXIST
+	WsLog::_(LVL_DBG, TGT_SERV, "(~) Server");
+	// strange
+	// hm
+	// this->ep.del(this); // (ep) MUST STILL EXIST
 	// if (this->fd != -1)
 	// 	close(this->fd);
 };
@@ -54,45 +57,30 @@ int Server::init(void)
 
 	if (this->port == 0)
 	{
-		std::cerr << "serv : bad port\n";
+		WsLog::_(LVL_ERR, TGT_SERV, "bad port");
 		return (-1);
 	}
 	
 	this->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->fd < 0)
-	{
-		std::cerr << "serv : failed socket\n"; // strerror
-		// strerror
-		return (-1);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "socket"));
+	
 	const int reuse = 1;
 	err = setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int));
 	if (err < 0)
-	{
-		std::cerr << "serv : failed reuse\n"; // strerror
-		return (err);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "setsockopt"));
 					
 	err = bind(this->fd, (struct sockaddr *)&addr, sizeof(addr));
 	if (err < 0)
-	{
-		std::cerr << "serv : failed bind\n"; // strerror
-		return (err);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "bind"));
 
 	err = sock_non_block(this->fd);
 	if (err < 0)
-	{
-		std::cerr << "serv : failed fcntl\n"; // strerror
-		return (err);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
 	
 	err = listen(this->fd, SERV_BACKLOG); 
 	if (err < 0)
-	{
-		std::cerr << "serv : failed listen\n"; // strerror
-		return (err);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "listen"));
 
 	err = this->ep.add(this, EPOLLIN);
 	return (err);
@@ -104,21 +92,16 @@ int	Server::pollin(void)
 
 	int conn_fd = accept(this->fd, NULL, NULL); // peer_addr 
 	if (conn_fd < 0)
-	{
-		std::cerr << "serv : failed accept\n"; // strerror
-		return (conn_fd);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "accept"));
+	
 	err = sock_non_block(conn_fd);
 	if (err < 0)
-	{
-		return (err);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
+	
 	Connection *c = new Connection(conn_fd, *this);
 	
 	err = this->ep.add(c, EPOLLIN);
-#if DBG_SERV
-	std::cerr << "serv  : accept " << conn_fd << std::endl;
-#endif
+	
 	return (err);
 }
 

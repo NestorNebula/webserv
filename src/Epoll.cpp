@@ -6,11 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 15:35:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 22:57:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Epoll.hpp"
+#include "EpollClient.hpp"
+
 #include "Server.hpp"
 #include "Connection.hpp"
 
@@ -19,7 +21,8 @@ volatile sig_atomic_t stop = 0;
 static void sigint_handler(int signo)
 {
     (void)signo;
-	std::cerr << "SIGINT\n";
+	WsLog::_(LVL_ERR, TGT_EPOLL, "");
+	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
     stop = 1;
 }
 
@@ -52,10 +55,13 @@ static const char *evt_name[] =
 	NULL
 };
 
-// MULTIPLE (1)
 static std::string evt_type(struct epoll_event *evt)
 {
-	std::string typ;
+	std::string typ("");
+
+	if (evt == NULL)
+		return (typ);
+	
 	if (evt->events & EPOLLIN)
 		typ += (evt_name[0]);
 	if (evt->events & EPOLLOUT)
@@ -74,8 +80,8 @@ static std::string evt_type(struct epoll_event *evt)
 
 Epoll::Epoll (void) : epfd(-1), ecnt(0)
 {
-	// this->epfd = epoll_create1(0); //  : execve will close this ... 
-	this->epfd = epoll_create1(EPOLL_CLOEXEC); 
+	// with CLOEXEC .. no need for "copied")
+	this->epfd = epoll_create1(EPOLL_CLOEXEC);
 	if (this->epfd < 0)
 		throw (std::runtime_error("Epoll : bad create"));
 		
@@ -106,80 +112,87 @@ Epoll & Epoll::operator = (const Epoll & that)
 	return (*this);
 }
 
+
+// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
 Epoll::~Epoll()
 {
-	if (this->epfd != -1)
-		close(this->epfd);
-	
+	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
+
 	std::set<EpollClient*>::iterator it = this->conn.begin();
 	while (it != this->conn.end())
 	{
-		delete (*it); // Cgi Problem -- also .. epoll returns error
+		delete (*it);
 		it++;
 	}
 	this->conn.clear();
+	
+	if (this->epfd != -1)
+		close(this->epfd); // closes all in interest list (?)
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+	
 };
 
 void	Epoll::copied(void)
 {
-	std::set<EpollClient*>::iterator it = this->conn.begin();
-	while (it != this->conn.end())
-	{
-		close ( (*it)->get_fd());
-	}
+
+	if (this->epfd != -1)
+		close(this->epfd);
+	// std::set<EpollClient*>::iterator it = this->conn.begin();
+	// while (it != this->conn.end())
+	// {
+	// 	close ( (*it)->get_fd());
+	// }
 }
 
-// track EpollClients here (?)
-// CgiPipe .. 
-	// TWO FD ? 
-	// or
-	// TWO different EpollClient
-	// pipe
-		// wfd : can we write (?) should have std::string& to write from
-		// rfd : 
-	// two pipes (?)
 int	Epoll::add(EpollClient *cli, int e)
 {
 	int					err;
 	struct epoll_event	evt;
 
-	evt.events = e; // POLLIN / POLLOUT
-	evt.events |= EPOLLRDHUP; // BOTH (in && rdhup) returned 
+	evt.events = e;
+	evt.events |= EPOLLRDHUP;
 	// evt.events |= EPOLLET; // edge-triggered .. ONCE PER EVENT
 	evt.data.ptr = cli;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add client: ", epc_type(cli));
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
+	if (this->conn.find(cli) != this->conn.end())
+	{
+		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
+		// Q: mod()
+	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add failed: ", strerror(errno));
-		
-		// if (cli->get_typ() != EPC_SERV)
-			delete (cli);
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : ", strerror(errno));
+		delete (cli);
 	}
-	else // if (cli->get_typ() != EPC_SERV)
+	else 
 	{
 		this->conn.insert(cli);
 	}
-
-	
 	return (err);
 }
 
 int	Epoll::mod(EpollClient *cli, int e)
 {
 	int					err;
-	struct epoll_event	evt; // should this be WITH EpollClient (?) ctl .. copies ..
+	struct epoll_event	evt;
 
-	evt.events = e; // POLLIN / POLLOUT
-	evt.events |= EPOLLRDHUP; // BOTH (in && rdhup) returned 
+	evt.events = e; 
+	evt.events |= EPOLLRDHUP;
 	evt.data.ptr = cli;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod client: ", epc_type(cli));
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+	if (this->conn.find(cli) == this->conn.end())
+	{
+		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
+	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod failed: ", strerror(errno));	
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod cli  : ", strerror(errno));	
 	}
 	return (err);
 }
@@ -188,29 +201,51 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del client: ", epc_type(cli));
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
+	if (this->conn.find(cli) == this->conn.end())
+	{
+		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
+		return (0);
+	}
+
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "del failed: ", strerror(errno));
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "del cli  : ", strerror(errno));
 	}
 	return (err);
 }
 
+
 int	Epoll::rem(EpollClient *cli)
 {
-	// if (cli->get_typ() == EPC_SERV)
-	// 	return (0);
-
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem client: ", epc_type(cli));
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->conn.find(cli);
 	if (it != this->conn.end())
 	{
+		this->del(cli); // VERY IMPORTANT
 		delete (cli);
 		this->conn.erase(it);
 	}
+	else
+	{
+		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem cli  : does not exist");
+	}
 
 	return (0);
+}
+
+EpollClient	*Epoll::get_epc(void *cli)
+{
+	EpollClient	*epc;
+	if (cli == NULL)
+		return (NULL);
+	epc = reinterpret_cast<EpollClient*>(cli);
+	if (epc == NULL)
+		return (NULL);
+	// if (this->conn.find(epc) == this->conn.end())
+	// 	return (NULL);
+	return (epc);
 }
 
 struct epoll_event	*Epoll::get_evt(int idx)
@@ -223,8 +258,9 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
+	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\nwait\n");
 #if 1
-	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000); // to_ms
+	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, 10000); // to_ms
 #else
 // epoll_pwait() allows an application to safely
 //        wait until either a file descriptor becomes ready or until a
@@ -236,19 +272,15 @@ int	Epoll::exec(void)
 // ready = epoll_wait(epfd, &events, n, timeout);
 // pthread_sigmask(SIG_SETMASK, &origmask, NULL);
 	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
+
+	// SIGINT not "caught" .. if events are still waiting to process
 #endif
 	if (this->ecnt < 0)
-	{
-		// SIGINT not "caught" .. if events are still waiting to process
-		WsLog::_(LVL_ERR, TGT_EPOLL, "wait: ", strerror(errno));
-		return (-1);
-	}
+		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait: ");
+		
 	if (this->ecnt == 0) // timeout
-	{
 		return (0);
-	}
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\n");
 	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "ecnt");
 	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, this->ecnt);
 	
@@ -271,14 +303,7 @@ int	Epoll::loop(void)
 			// timeout
 		}
         else if (e < 0)
-        {
-			// Epoll : FAIL
-			// capture signal in exec (?)
-			// CLEANUP (?)
-			// restart (?)
-			// copy fds (?)
 			return (1);
-		}
 		for (int k=0; k < e; k++) 
         {
 			evt = this->get_evt(k);
@@ -287,30 +312,51 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
 				continue;
 			}
-			epc = reinterpret_cast<EpollClient*>(evt->data.ptr);
+            if (evt->events & EPOLLERR)
+			{
+				this->rem(epc);
+				// epc->state = EPC_STATE_SHUTDOWN;
+				continue;
+			}
+#if 0
+			if (evt->events & EPOLLRDHUP)
+			{
+				this->rem(epc);
+				// epc->state = EPC_STATE_SHUTDOWN;
+				continue;
+			} 
+            if (evt->events & EPOLLHUP)
+			{
+				this->rem(epc);
+				// epc->state = EPC_STATE_SHUTDOWN;
+				continue;
+			}
+#endif
+			epc = this->get_epc(evt->data.ptr);
 			if (epc == NULL)
 			{
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
-			// had event .. on something we deleted 
-// Cgi SegFault .. deleted (?)
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt target: ", epc_type(epc));
-
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt type  : ", evt_type(evt));
-		
-            if (evt->events & EPOLLHUP)
+#if 0 // TESTING
+			if (this->conn.find(epc) == this->conn.end())
 			{
-				this->rem(epc);
+				std::cerr << "\nEXPECT SHIT\n\n";
 				continue;
 			}
+#endif
+
+WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
+WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
+WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
+
             if (evt->events & EPOLLIN)
             {
 				err = epc->pollin();
 				if (err < 0) // && state
 				{
-					// this->del(epc); // bad idea
 					this->rem(epc);
+					// epc->state = EPC_STATE_SHUTDOWN;
 					continue;
 				}
             }
@@ -319,17 +365,48 @@ int	Epoll::loop(void)
 				err = epc->pollout();
 				if (err < 0) // && state ... 
 				{
-					// this->del(epc); // bad idea
 					this->rem(epc);
+					// epc->state = EPC_STATE_SHUTDOWN;
 					continue;
 				}
 			}
-			if (evt->events & EPOLLRDHUP)
+#if 1
+			if (evt->events == EPOLLRDHUP)
 			{
 				this->rem(epc);
+				// epc->state = EPC_STATE_SHUTDOWN;
+				continue;
+			} 
+            if (evt->events == EPOLLHUP)
+			{
+				this->rem(epc);
+				// epc->state = EPC_STATE_SHUTDOWN;
 				continue;
 			}
+#endif
         }
+
+#if 0 // SHUTDOWN / rem()
+		for (int k=0; k < e; k++) 
+		{
+			evt = this->get_evt(k);
+			if (evt == NULL)
+			{
+				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
+				continue;
+			}
+			epc = this->get_epc(evt->data.ptr);
+			// reinterpret_cast<EpollClient*>(evt->data.ptr);
+			if (evt->data.ptr == NULL || epc == NULL)
+			{
+				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
+				continue;
+			}
+			// does not exist 
+			if (epc->state == EPC_STATE_SHUTDOWN)
+				this->rem(epc);
+		}
+#endif
     }
 	return (0);
 }
@@ -377,106 +454,3 @@ std::ostream& operator << (std::ostream & os, Epoll & obj)
 // EXPOLLECLUSIVE
 
 
-
-
-// SegFault -- if deleted (?) by whom (?) forked process (?)
-static const char *epc_str[] = 
-{
-	"serv",
-	"conn",
-	"cgi",
-	NULL
-};
-
-const char *epc_type(EpollClient *epc)
-{
-	epc_typ t = epc->get_typ();
-	return (epc_str[t]);
-}
-
-
-int	EpollClient::recv(void)
-{
-	int	err = 0;
-
-	char	buf[CONN_BUF_SIZ + 1];
-	err = read(this->fd, buf, CONN_BUF_SIZ);
-	
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "recv");
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, err);
-	
-	if (err < 0)
-	{
-		this->state = EPC_STATE_ERROR;
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: ", strerror(errno));
-		// this->shutdown();
-		return (err);
-	}
-	if (err == 0)
-	{
-		this->state = EPC_STATE_SHUTDOWN;
-		// this->shutdown();
-		return (-1);
-	}
-	buf[err] = '\0';
-
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "data");
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "\n", buf);
-
-	if (err == CONN_BUF_SIZ)
-	{
-		// more to read
-		// epoll should let us know 
-	}
-
-	// depends on state
-	// Request
-	// could also be reading from a cgi pipe (?)
-
-	// when done / ready
-	// MOD (epoll) to POLLOUT
-	// make sure 
-	// we are ready to write
-	// and we have data (state) to write 
-	ibuf += std::string(buf);
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "ibuf");
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "\n", ibuf);
-	
-	return (err);
-}
-
-int	EpollClient::send(std::string & buf)
-{
-	int err;
-	
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, "send");
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, buf.size());
-
-	size_t osiz = CONN_OUT_SIZ;
-	if (osiz > buf.size())
-		osiz = buf.size();
-	err = write(this->fd, buf.c_str(), osiz);
-
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, "sent");
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, err);
-
-	if (err < 0)
-	{
-		this->state = EPC_STATE_ERROR;
-		WsLog::_(LVL_ERR, TGT_EPC_SEND, "send: ", strerror(errno));
-		// this->shutdown();
-		return (err);
-	}
-	if (err == 0)
-	{
-		this->state = EPC_STATE_SHUTDOWN;
-		return (-1);
-	}
-	buf.erase(0, err);
-
-	// if (err == obuf.size())
-	// {
-		
-	// }
-	return (err);
-}

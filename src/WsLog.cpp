@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 13:41:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 19:20:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@ static const char *tgt_str[] =
 {
     "epoll : ",
     "epc   : ",
-    "serv  : ",
     "conn  : ",
     "cgi   : ",
+    "serv  : ",
     NULL
 };
 static const char *tgt_prefix(log_tgt tgt)
@@ -30,12 +30,12 @@ static const char *tgt_prefix(log_tgt tgt)
         return (tgt_str[0]);
     if (tgt & TGT_EPC)
         return (tgt_str[1]);
-    // if (tgt & TGT_SERV)
-    //     return (tgt_str[1]);
-    // if (tgt & TGT_CONN)
-    //     return (tgt_str[2]);
-    // if (tgt & TGT_CGI)
-    //     return (tgt_str[3]);
+    if (tgt & TGT_CONN)
+        return (tgt_str[2]);
+    if (tgt & TGT_CGI)
+        return (tgt_str[3]);
+    if (tgt & TGT_SERV)
+        return (tgt_str[4]);
 
     return (NULL);
 }
@@ -58,6 +58,14 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::cerr << tgt_prefix(msg_tgt) << msg << std::endl;
 }
 
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, int n)
+{
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return;
+
+    std::cerr << tgt_prefix(msg_tgt) << msg << "[" << n << "]" << std::endl;
+}
+
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str)
 {
     if (WsLog::nolog(msg_lvl, msg_tgt))
@@ -72,4 +80,14 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, int n)
         return;
 
     std::cerr << tgt_prefix(msg_tgt) << n << std::endl;
+}
+
+int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
+{
+    // if (WsLog::nolog(msg_lvl, msg_tgt))
+    //     return (-1);
+    msg_lvl = LVL_ERR;
+
+    std::cerr << tgt_prefix(msg_tgt) << msg << strerror(errno) << std::endl;
+    return (-1);
 }

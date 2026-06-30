@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 15:29:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/30 22:53:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,20 @@ int main (void)
     WsLog::tgt = 
         TGT_NONE
         | TGT_EPOLL 
-        | TGT_CONN
+        // | TGT_EPOLL_EVT
+        // | TGT_EPOLL_CTL
+        
         | TGT_EPC
+        // | TGT_EPC_RECV
+        // | TGT_EPC_SEND
+        
+        | TGT_CONN
+        | TGT_CONN_RECV
+        | TGT_CONN_SEND
+
+        | TGT_CGI
+        | TGT_CGI_RECV
+        | TGT_CGI_SEND
     ;
     
     Epoll   ep;
@@ -45,6 +57,7 @@ int main (void)
     
     err = ep.loop();
 
+    // TGT_MAIN
     std::cerr << "exit  : " << err << std::endl;
 
     // delete (serv[0]);
@@ -52,8 +65,3 @@ int main (void)
     
     return (err);
 }
-
-
-// close failed in file object destructor:
-// sys.excepthook is missing
-// lost sys.stderr
