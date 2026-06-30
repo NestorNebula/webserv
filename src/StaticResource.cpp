@@ -12,29 +12,19 @@
 
 #include "StaticResource.hpp"
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 
 void StaticResource::generate() {
 	if (_state != DEFAULT)
 		throw std::logic_error("generate called multiple times");
 
-	_state = (_file.is_open() && readContent()) ? DONE : FAIL;
+	std::fstream *fs = new std::fstream(_filepath.c_str());
+	_stream = new Stream(fs);
+	_state = fs->is_open() ? DONE : FAIL;
 }
 
-const std::string &StaticResource::getContent() const {
-	if (_state != DONE)
-		throw std::logic_error("Content not available");
-	return _content;
-}
-
-bool StaticResource::readContent() {
-	std::ostringstream oss;
-	if (_file.peek() != EOF) {
-		oss << _file.rdbuf();
-		if (_file.fail() || oss.fail())
-			return false;
-		_content = oss.str();
-	}
-	return true;
+Stream &StaticResource::stream() {
+	if (!_stream || _state != DONE)
+		throw std::logic_error("stream not accessible");
+	return *_stream;
 }
