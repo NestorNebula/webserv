@@ -5,16 +5,19 @@
 
 class FakeResource: public Resource {
 public:
-  FakeResource(std::string content = "Content") {
-	  _content = content;
+  FakeResource(const std::string &content = "Content") {
+	  if (content.size()) {
+		_stream.adoptStream(new std::stringstream());
+		_stream.write(content.c_str(), content.size());
+	  }
   }
   virtual ~FakeResource() {}
   MOCK_METHOD0(generate, void());
   MOCK_CONST_METHOD0(done, bool());
   MOCK_CONST_METHOD0(inProgress, bool());
   MOCK_CONST_METHOD0(failed, bool());
-  virtual const std::string &getContent() const { return _content; }
+  virtual Stream &stream() { return _stream; }
   
 private:
-  std::string _content;
+  Stream _stream;
 };
