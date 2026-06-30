@@ -19,7 +19,7 @@ class Response {
 public:
   typedef unsigned int StatusCode;
 
-  Response(Resource &resource): _code(0), _resource(resource) {}
+  Response(Resource *resource = NULL): _code(0), _resource(resource) {}
 
   const std::string &getVersion() const { return _version; }
   void setVersion(std::string version);
@@ -30,7 +30,8 @@ public:
   const Headers &getHeaders() const { return _headers; }
   void addHeader(Header header);
   void addHeaders(Headers::const_iterator begin, Headers::const_iterator end);
-  const Resource &getResource() const { return _resource; }
+  const Resource &getResource() const;
+  void setResource(Resource *resource);
 
   // or char *getHead() const;
   std::string getHead() const;
@@ -48,5 +49,7 @@ private:
   StatusCode _code;
   std::string _reason;
   Headers _headers;
-  Resource &_resource;
+  Resource *_resource;
+
+  void throwIfNotReady() const;
 };
