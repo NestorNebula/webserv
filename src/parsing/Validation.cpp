@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:25:39 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:28:27 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ HttpMethod	stringToMethod(const std::string& string)
 	return (METHOD_UNKNOWN);
 }
 
-std::string	methodToString(const HttpMethod& method)
+std::string	methodToString(HttpMethod method)
 {
 	switch (method)
 	{
