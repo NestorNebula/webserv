@@ -30,6 +30,7 @@ public:
 	void adoptStream(std::iostream *stream);
 
 	// istream methods
+	streamsize gcount() const;
 	Stream &getline(char *s, streamsize n, char delim = '\n');
 	Stream &read(char *s, streamsize n);
 	Stream &seekg(streampos pos);
