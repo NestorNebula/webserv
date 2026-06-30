@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <string>
+#include "Stream.hpp"
 
 class Resource {
 public:
@@ -22,7 +22,7 @@ public:
 	virtual bool done() const = 0;
 	virtual bool inProgress() const = 0;
 	virtual bool failed() const = 0;
-	virtual const std::string &getContent() const = 0; // or char *getContent() const;
+	virtual Stream &stream() = 0;
 };
 
 inline Resource::~Resource() {}
