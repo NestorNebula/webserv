@@ -21,12 +21,19 @@ class Request {
 public:
   Request() : _state(EMPTY), _body(NULL), _bodySize(0) {}
 
+  typedef enum eMethod {
+	  GET,
+	  POST,
+	  DELETE,
+	  UNKNOWN,
+  } Method;
+
   // Methods
   void append(const std::string data);
   bool isComplete() const { return _state == COMPLETE; }
   bool isInvalid() const { return _state == INVALID; }
   bool hasMethod() const { return _state > START_LINE; }
-  const std::string &getMethod() const { return _method; }
+  Method getMethod() const { return _method; }
   bool hasURL() const { return _state > START_LINE; }
   const std::string &getURL() const { return _url; }
   bool hasQuery() const { return _state > START_LINE && !_query.empty(); }
@@ -61,7 +68,7 @@ private:
 
   std::string _raw;
   InternalState _state;
-  std::string _method;
+  Method _method;
   std::string _url;
   std::string _query;
   std::string _version;
