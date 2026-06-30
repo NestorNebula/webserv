@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 10:58:08 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:10:33 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
     	route.root = directives["root"];
 	if (directives.count("autoindex"))
 		route.autoindex = (directives["autoindex"] == "on");
+	if (directives.count("max_body_size"))
+		route.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("methods"))
 	{
 		std::string			value = directives["methods"];
@@ -160,6 +162,8 @@ void	ConfigParser::parseServer()
 			server.routes[i].root = server.root;
 		if (server.routes[i].methods.empty())
 			server.routes[i].methods = server.methods;
+		if (server.routes[i].max_body_size == 0)
+			server.routes[i].max_body_size = server.max_body_size;
 	}
 
 	validateServerConfig(server);

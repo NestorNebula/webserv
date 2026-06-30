@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:51:20 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 10:39:19 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:11:33 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static void	printServer(const ServerConfig& server, size_t index)
 	std::cout << "   port			: " << server.port << std::endl;
 	std::cout << "	 max_body_size	: " << server.max_body_size << std::endl;
 	std::cout << "   root			: " << server.root << std::endl;
-	std::cout << "   upload			: " << (server.upload ? "on" : "off") << std::endl;
+	std::cout << "   upload		: " << (server.upload ? "on" : "off") << std::endl;
 	std::cout << "   upload_dir		: " << server.upload_dir << std::endl;
 
 	std::cout << "   error_pages	: " << std::endl;
@@ -36,6 +36,7 @@ static void	printServer(const ServerConfig& server, size_t index)
 		std::cout << "			root		: " << route.root << std::endl;
 		std::cout << "			autoindex	: " << (route.autoindex ? "on" : "off") <<std::endl;
 		std::cout << "			upload		: " << (route.upload ? "on" : "off") << std::endl;
+		std::cout << "			max_body_size  : " << route.max_body_size << std::endl;
 	}
 }
 
