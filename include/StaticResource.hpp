@@ -13,14 +13,13 @@
 #pragma once
 
 #include "Resource.hpp"
-#include <fstream>
 
 class StaticResource: public Resource {
 public:
-	StaticResource(const std::string &filepath): _filepath(filepath), _state(DEFAULT), _file(filepath.c_str()) {}
+	StaticResource(const std::string &filepath): _filepath(filepath), _state(DEFAULT), 
+	_stream(NULL) {}
 	~StaticResource() {
-		if (_file.is_open())
-			_file.close();
+		delete _stream;
 	}
 	virtual void generate();
 	virtual bool done() const { return _state == DONE; }
@@ -40,8 +39,5 @@ private:
 
 	std::string _filepath;
 	InternalState _state;
-	std::string _content;
-	std::ifstream _file;
-
-	bool readContent();
+	Stream *_stream;
 };
