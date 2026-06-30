@@ -18,21 +18,20 @@ void DirectoryResource::generate() {
 	if (_state != DEFAULT)
 		throw std::logic_error("generate called multiple times");
 	
+	_stream = new Stream(new std::stringstream());
 	if (_dir)
 		buildList();
-	_state = (_dir != NULL) ? DONE : FAIL;
+	_state = (_dir != NULL && _stream->good()) ? DONE : FAIL;
 }
 
-const std::string &DirectoryResource::getContent() const {
-	if (_state != DONE)
-		throw std::logic_error("Content not available");
-	return _content;
+Stream &DirectoryResource::stream() {
+	if (!_stream || _state != DONE)
+		throw std::logic_error("stream not accessible");
+	return *_stream;
 }
 
 void DirectoryResource::buildList() {
-	std::ostringstream oss;
-
-	oss << "<!DOCTYPE html>\n"
+	*_stream << "<!DOCTYPE html>\n"
 		"<html lang=\"en\">\n"
 		"<head>\n"
 		"<meta charset=\"utf-8\">\n"
@@ -49,14 +48,13 @@ void DirectoryResource::buildList() {
 		if (name != "." && name != "..") {
 			if (dirFile->d_type ==  DT_DIR)
 				name += '/';
-			oss << "<li>\n" 
+			*_stream << "<li>\n" 
 				"<a href=\"" << name << "\">" << name << "</a>\n"
 				"</li>\n";
 		}
 	}
-	oss << "</ul>\n"
+	*_stream << "</ul>\n"
 		"<hr>\n"
 		"</body>\n"
 	"</html>\n";
-	_content = oss.str();
 }

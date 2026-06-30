@@ -17,9 +17,10 @@
 
 class DirectoryResource: public Resource {
 public:
-	DirectoryResource(const std::string &dirpath): _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())) {}
+	DirectoryResource(const std::string &dirpath): _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())), _stream(NULL) {}
 	~DirectoryResource() {
 		closedir(_dir);
+		delete _stream;
 	}
 
 	virtual void generate();
@@ -40,8 +41,8 @@ private:
 
 	std::string _dirpath;
 	InternalState _state;
-	std::string _content;
 	DIR *_dir;
+	Stream *_stream;
 
 	void buildList();
 };
