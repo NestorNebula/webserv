@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 10:36:52 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 10:58:08 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,10 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	}
 	expect(TOKEN_RBRACE);
 
-	route.root = directives.count("root")
-		? directives["root"] : current_server.root;
-	route.upload = directives.count("upload")
-		? (directives["upload"] == "on") : current_server.upload;
+	if (directives.count("root"))
+    	route.root = directives["root"];
 	if (directives.count("autoindex"))
 		route.autoindex = (directives["autoindex"] == "on");
-
 	if (directives.count("methods"))
 	{
 		std::string			value = directives["methods"];
@@ -67,8 +64,42 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives_map,
 			std::set<std::string>& seen_directives)
 {
-	(void) directives_map;
-	(void) seen_directives;
+	Token		keyToken = expect(TOKEN_WORD);
+	std::string	full_key = keyToken.value;
+
+	if (peek().type == TOKEN_WORD)
+	{
+		Token	argToken = consume();
+		full_key += " " + argToken.value;
+	}
+
+	if (seen_directives.count(full_key))
+	{
+		std::stringstream	ss;
+		ss << "Duplicate directives found: " << full_key
+			<< " at line " << keyToken.line;
+		throw	ConfigException(ss.str());
+	}
+	seen_directives.insert(full_key);
+	expect(TOKEN_COLON);
+
+	std::string	value = "";
+	while (peek().type != TOKEN_NEWLINE && peek().type != TOKEN_EOF
+		&& peek().type != TOKEN_RBRACE)
+	{
+		Token	vToken = consume();
+
+		if (vToken.type == TOKEN_COLON)
+			value += ",";
+		else
+			value += value.empty() ? vToken.value : " " + vToken.value;
+	}
+
+	if (value.empty())
+		throw	ConfigException("Empty value for directive: " + full_key);
+	directives_map[full_key] = value;
+	if (peek().type == TOKEN_NEWLINE)
+		consume();
 }
 
 void	ConfigParser::parseServer()
@@ -123,6 +154,14 @@ void	ConfigParser::parseServer()
 			server.error_pages[code] = it->second;
 		}
 	}
+	for (size_t i = 0; i < server.routes.size(); ++i)
+	{
+		if (server.routes[i].root.empty())
+			server.routes[i].root = server.root;
+		if (server.routes[i].methods.empty())
+			server.routes[i].methods = server.methods;
+	}
+
 	validateServerConfig(server);
 	_servers.push_back(server);
 }
