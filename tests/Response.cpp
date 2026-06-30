@@ -157,7 +157,7 @@ TEST(Response, MultilineBody) {
 	EXPECT_TRUE(response.isReady());
 	EXPECT_EQ(response.getHead(), "HTTP/1.1 200 OK\r\n"
 			"\r\n");
-	EXPECT_EQ(response.readBody(buf, BUFSIZE), static_cast<long>(std::string("Content").size()));
+	EXPECT_EQ(response.readBody(buf, BUFSIZE), static_cast<long>(std::string("Hello\nThere!\n").size()));
 	EXPECT_STREQ(buf, "Hello\nThere!\n");
 	EXPECT_TRUE(response.hasBody());
 }
