@@ -43,10 +43,12 @@ TEST(DirectoryResource, ClassicDirectory) {
 	getDirectoryContent("files", files);
 
 	resource.generate();
+	std::stringstream oss;
+	oss << resource.stream().rdbuf();
 	EXPECT_TRUE(resource.done());
 	EXPECT_FALSE(resource.inProgress());
 	EXPECT_FALSE(resource.failed());
-	checkEach(resource.getContent(), files);
+	checkEach(oss.str(), files);
 }
 
 TEST(DirectoryResource, AsInterfacePtr) {
@@ -55,10 +57,12 @@ TEST(DirectoryResource, AsInterfacePtr) {
 	getDirectoryContent("files", files);
 
 	resource->generate();
+	std::stringstream oss;
+	oss << resource->stream().rdbuf();
 	EXPECT_TRUE(resource->done());
 	EXPECT_FALSE(resource->inProgress());
 	EXPECT_FALSE(resource->failed());
-	checkEach(resource->getContent(), files);
+	checkEach(oss.str(), files);
 }
 
 TEST(DirectoryResource, MultipleGenerate) {
@@ -71,12 +75,12 @@ TEST(DirectoryResource, MultipleGenerate) {
 TEST(DirectoryResource, AccessBeforeGenerate) {
 	DirectoryResource resource("files");
 
-	EXPECT_THROW(resource.getContent(), std::logic_error);
+	EXPECT_THROW(resource.stream(), std::logic_error);
 }
 
 TEST(DirectoryResource, AccessAfterFail) {
 	DirectoryResource resource("files/nosuchdir");
 
 	resource.generate();
-	EXPECT_THROW(resource.getContent(), std::logic_error);
+	EXPECT_THROW(resource.stream(), std::logic_error);
 }
