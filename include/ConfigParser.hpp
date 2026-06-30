@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 10:18:25 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 10:21:24 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,8 @@ class ConfigParser {
 				virtual ~ConfigException() throw();
 				virtual const char* what() const throw();
 		};
-	};
+};
+
+HttpMethod	stringToMethod(const std::string& string);
 
 #endif

@@ -6,22 +6,22 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:15:36 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/29 16:31:13 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 10:22:54 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 
-# define SPACE		' '
-# define TAB		'\t'
-# define CRLF		'\r'
-# define NEWLINE	'\n'
-# define HASHTAG	'#'
-# define LBRACE		'{'
-# define RBRACE		'}'
-# define COLON		':'
-# define COMMA		','
-# define EOFILE		"EOF"
+#define SPACE		' '
+#define TAB			'\t'
+#define CRLF		'\r'
+#define NEWLINE		'\n'
+#define HASHTAG		'#'
+#define LBRACE		'{'
+#define RBRACE		'}'
+#define COLON		':'
+#define COMMA		','
+#define EOFILE		"EOF"
 
 static bool	isSpace(char c)
 {
