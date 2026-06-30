@@ -6,10 +6,8 @@
 class FakeResource: public Resource {
 public:
   FakeResource(const std::string &content = "Content") {
-	  if (content.size()) {
-		_stream.adoptStream(new std::stringstream());
-		_stream.write(content.c_str(), content.size());
-	  }
+	  _stream.adoptStream(new std::stringstream());
+	  _stream.write(content.c_str(), content.size());
   }
   virtual ~FakeResource() {}
   MOCK_METHOD0(generate, void());
