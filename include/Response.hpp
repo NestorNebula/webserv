@@ -19,7 +19,7 @@ class Response {
 public:
   typedef unsigned int StatusCode;
 
-  Response(Resource &resource): _code(0), _resource(resource), _generated(false) {}
+  Response(Resource &resource): _code(0), _resource(resource) {}
 
   const std::string &getVersion() const { return _version; }
   void setVersion(std::string version);
@@ -32,11 +32,13 @@ public:
   void addHeaders(Headers::const_iterator begin, Headers::const_iterator end);
   const Resource &getResource() const { return _resource; }
 
-  // or char *getRaw() const;
-  const std::string &getRaw() const { return _raw; }
+  // or char *getHead() const;
+  std::string getHead() const;
+
+  Stream::streamsize readBody(char *buf, Stream::streamsize bufsize);
 
   bool isReady() const;
-  void generate();
+  bool hasBody() const;
 
 private:
   Response(const Response &);
@@ -47,8 +49,4 @@ private:
   std::string _reason;
   Headers _headers;
   Resource &_resource;
-  std::string _raw; // or char *_raw;
-
-  bool _generated;
-  void throwIfGenerated() const;
 };
