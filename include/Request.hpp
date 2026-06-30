@@ -80,6 +80,7 @@ private:
   std::string::size_type _bodySize;
 
   void handleStartLine(std::string startLine, std::string::size_type eol);
+  void setMethod(const std::string &method);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
   void setupBody();
   void handleBody(std::string body, std::string::size_type eol);

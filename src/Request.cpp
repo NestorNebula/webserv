@@ -44,7 +44,6 @@ void Request::append(const std::string data) {
 
 void Request::clear() {
   _raw.clear();
-  _method.clear();
   _url.clear();
   _query.clear();
   _version.clear();
@@ -61,10 +60,12 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
   if (eol == std::string::npos)
     return;
   std::istringstream iss(trim(startLine, " \t\r\n"));
-  if (!(iss >> _method) || !(iss >> _url) || !(iss >> _version) || !iss.eof()) {
+  std::string methodStr;
+  if (!(iss >> methodStr) || !(iss >> _url) || !(iss >> _version) || !iss.eof()) {
     _state = INVALID;
     return;
   }
+  setMethod(methodStr);
   std::string::size_type qIndex = _url.find("?");
   if (qIndex != std::string::npos) {
     _query = _url.substr(qIndex + 1);
@@ -73,6 +74,15 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
   _state = HEADERS;
   _raw.erase(0, eol + 2);
 }
+
+void Request::setMethod(const std::string &method) {
+	static const std::string methods[] = {"GET", "POST", "DELETE", ""};
+
+	int i = 0;
+	while (!methods[i].empty() && method != methods[i]) i++;
+	_method = static_cast<Request::Method>(i);
+}
+
 void Request::handleHeaderLine(std::string headerLine, std::string::size_type eol) {
   if (eol == std::string::npos)
     return;
