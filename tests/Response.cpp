@@ -16,7 +16,7 @@ static void setupMocks(FakeResource &resource) {
 TEST(Response, EmptyResponse) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 
 	EXPECT_FALSE(response.isReady());
 }
@@ -24,7 +24,7 @@ TEST(Response, EmptyResponse) {
 TEST(Response, MissingVersion) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 
 	response.setCode(200);
 	response.setReason("OK");
@@ -34,7 +34,7 @@ TEST(Response, MissingVersion) {
 TEST(Response, MissingCode) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 
 	response.setVersion("HTTP/1.1");
 	response.setReason("OK");
@@ -44,18 +44,15 @@ TEST(Response, MissingCode) {
 TEST(Response, MissingReason) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 
 	response.setVersion("HTTP/1.1");
 	response.setCode(200);
 	EXPECT_FALSE(response.isReady());
 }
 
-/*
 TEST(Response, Basic200) {
-	FakeResource resource("");
-	setupMocks(resource);
-	Response response(resource);
+	Response response;
 
 	response.setVersion("HTTP/1.1");
 	response.setCode(200);
@@ -65,12 +62,11 @@ TEST(Response, Basic200) {
 			"\r\n");
 	EXPECT_FALSE(response.hasBody());
 }
-*/
 
 TEST(Response, Basic200WithBody) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 	char buf[BUFSIZE];
 
 	response.setVersion("HTTP/1.1");
@@ -87,7 +83,7 @@ TEST(Response, Basic200WithBody) {
 TEST(Response, Basic404WithBody) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 	char buf[BUFSIZE];
 
 	response.setVersion("HTTP/1.1");
@@ -104,7 +100,7 @@ TEST(Response, Basic404WithBody) {
 TEST(Response, OneHeaderWithBody) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 	char buf[BUFSIZE];
 
 	response.setVersion("HTTP/1.1");
@@ -123,7 +119,7 @@ TEST(Response, OneHeaderWithBody) {
 TEST(Response, MultipleHeadersWithBody) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 	Headers headers;
 	char buf[BUFSIZE];
 
@@ -148,7 +144,7 @@ TEST(Response, MultipleHeadersWithBody) {
 TEST(Response, MultilineBody) {
 	FakeResource resource("Hello\nThere!\n");
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 	char buf[BUFSIZE];
 
 	response.setVersion("HTTP/1.1");
@@ -165,17 +161,14 @@ TEST(Response, MultilineBody) {
 TEST(Response, AccessNonReadyResponse) {
 	FakeResource resource;
 	setupMocks(resource);
-	Response response(resource);
+	Response response(&resource);
 
 	EXPECT_FALSE(response.isReady());
 	EXPECT_THROW(response.getHead(), std::logic_error);
 }
 
-/*
-TEST(Response, ReadEmptyBody) {
-	FakeResource resource("");
-	setupMocks(resource);
-	Response response(resource);
+TEST(Response, AccessNonExistentResource) {
+	Response response;
 	char buf[BUFSIZE];
 
 	response.setVersion("HTTP/1.1");
@@ -185,6 +178,6 @@ TEST(Response, ReadEmptyBody) {
 	EXPECT_EQ(response.getHead(), "HTTP/1.1 200 OK\r\n"
 			"\r\n");
 	EXPECT_FALSE(response.hasBody());
+	EXPECT_THROW(response.getResource(), std::logic_error);
 	EXPECT_THROW(response.readBody(buf, BUFSIZE), std::logic_error);
 }
-*/
