@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/29 15:30:24 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 10:18:25 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,23 +19,32 @@
 # include <set>
 # include <exception>
 
+enum	HttpMethod {
+	METHOD_GET,
+	METHOD_POST,
+	METHOD_DELETE,
+	METHOD_UNKNOWN	// for invalid or unknown method
+};
+
 struct RouteConfig {
-	std::string	path;
-	std::string	root;
-	bool		autoindex;
-	bool		upload;
-	size_t		max_body_size;
+	std::string				path;
+	std::string				root;
+	bool					autoindex;
+	bool					upload;
+	size_t					max_body_size;
+	std::set<HttpMethod>	methods;
 
 	RouteConfig();
 };
 
 struct ServerConfig {
-	std::string	host;
-	int			port;
-	size_t		max_body_size;
-	std::string	root;
-	bool		upload;
-	std::string	upload_dir;
+	std::string				host;
+	int						port;
+	size_t					max_body_size;
+	std::string				root;
+	bool					upload;
+	std::string				upload_dir;
+	std::set<HttpMethod>	methods;
 
 	std::map<std::string, std::string>	error_pages;
 	std::vector<RouteConfig>			routes;
