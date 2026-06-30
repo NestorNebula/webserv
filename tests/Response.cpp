@@ -1,11 +1,21 @@
 #include "FakeResource.hpp"
 #include "Response.hpp"
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #define BUFSIZE 4096 // DO NOT DECREASE
 
+using ::testing::Return;
+
+static void setupMocks(FakeResource &resource) {
+	EXPECT_CALL(resource, done()).WillRepeatedly(Return(true));
+	EXPECT_CALL(resource, inProgress()).WillRepeatedly(Return(false));
+	EXPECT_CALL(resource, failed()).WillRepeatedly(Return(false));
+}
+
 TEST(Response, EmptyResponse) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 
 	EXPECT_FALSE(response.isReady());
@@ -13,6 +23,7 @@ TEST(Response, EmptyResponse) {
 
 TEST(Response, MissingVersion) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 
 	response.setCode(200);
@@ -22,6 +33,7 @@ TEST(Response, MissingVersion) {
 
 TEST(Response, MissingCode) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -31,6 +43,7 @@ TEST(Response, MissingCode) {
 
 TEST(Response, MissingReason) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -41,6 +54,7 @@ TEST(Response, MissingReason) {
 /*
 TEST(Response, Basic200) {
 	FakeResource resource("");
+	setupMocks(resource);
 	Response response(resource);
 
 	response.setVersion("HTTP/1.1");
@@ -55,6 +69,7 @@ TEST(Response, Basic200) {
 
 TEST(Response, Basic200WithBody) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 	char buf[BUFSIZE];
 
@@ -71,6 +86,7 @@ TEST(Response, Basic200WithBody) {
 
 TEST(Response, Basic404WithBody) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 	char buf[BUFSIZE];
 
@@ -87,6 +103,7 @@ TEST(Response, Basic404WithBody) {
 
 TEST(Response, OneHeaderWithBody) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 	char buf[BUFSIZE];
 
@@ -105,6 +122,7 @@ TEST(Response, OneHeaderWithBody) {
 
 TEST(Response, MultipleHeadersWithBody) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 	Headers headers;
 	char buf[BUFSIZE];
@@ -129,6 +147,7 @@ TEST(Response, MultipleHeadersWithBody) {
 
 TEST(Response, MultilineBody) {
 	FakeResource resource("Hello\nThere!\n");
+	setupMocks(resource);
 	Response response(resource);
 	char buf[BUFSIZE];
 
@@ -145,6 +164,7 @@ TEST(Response, MultilineBody) {
 
 TEST(Response, AccessNonReadyResponse) {
 	FakeResource resource;
+	setupMocks(resource);
 	Response response(resource);
 
 	EXPECT_FALSE(response.isReady());
@@ -154,6 +174,7 @@ TEST(Response, AccessNonReadyResponse) {
 /*
 TEST(Response, ReadEmptyBody) {
 	FakeResource resource("");
+	setupMocks(resource);
 	Response response(resource);
 	char buf[BUFSIZE];
 
