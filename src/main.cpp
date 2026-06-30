@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:51:20 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:11:33 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:18:04 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,16 @@ static void	printServer(const ServerConfig& server, size_t index)
 		std::cout << "			root		: " << route.root << std::endl;
 		std::cout << "			autoindex	: " << (route.autoindex ? "on" : "off") <<std::endl;
 		std::cout << "			upload		: " << (route.upload ? "on" : "off") << std::endl;
-		std::cout << "			max_body_size  : " << route.max_body_size << std::endl;
+		std::cout << "			max_body_size	: " << route.max_body_size << std::endl;
+		std::cout << "			methods		: ";
+		std::set<HttpMethod>::const_iterator	mit;
+		for (mit = route.methods.begin(); mit != route.methods.end(); ++mit)
+		{
+			if (mit != route.methods.begin())
+				std::cout << ", ";
+			std::cout << methodToString(*mit);
+		}
+		std::cout << std::endl;
 	}
 }
 

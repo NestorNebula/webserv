@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 10:21:24 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:25:55 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,5 +111,8 @@ class ConfigParser {
 };
 
 HttpMethod	stringToMethod(const std::string& string);
+std::string	methodToString(const HttpMethod& method);
+
+std::set<HttpMethod>	parseMethods(const std::string& value);
 
 #endif

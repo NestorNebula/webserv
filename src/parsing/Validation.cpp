@@ -6,11 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:03:35 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:25:39 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
+#include <sstream>
 
 #define GET		"GET"
 #define POST	"POST"
@@ -25,6 +26,39 @@ HttpMethod	stringToMethod(const std::string& string)
 	if (string == DELETE)
 		return (METHOD_DELETE);
 	return (METHOD_UNKNOWN);
+}
+
+std::string	methodToString(const HttpMethod& method)
+{
+	switch (method)
+	{
+		case	METHOD_GET:		return ("GET");
+		case	METHOD_POST:	return ("POST");
+		case	METHOD_DELETE:	return ("DELETE");
+		default:				return ("UNKNOWN");
+	}
+}
+
+std::set<HttpMethod>	parseMethods(const std::string& value)
+{
+	std::set<HttpMethod>	result;
+	std::stringstream		ss(value);
+	std::string				token;
+
+	while (std::getline(ss, token, ','))
+	{
+		size_t	start = token.find_first_not_of(" \t");
+		size_t	end = token.find_last_not_of(" \t");
+		if (start == std::string::npos)
+			continue;
+		std::string	clean = token.substr(start, end - start + 1);
+
+		HttpMethod	method = stringToMethod(clean);
+		if (method == METHOD_UNKNOWN)
+			throw	ConfigParser::ConfigException("Invalid HTTP method: " + clean);
+		result.insert(method);
+	}
+	return (result);
 }
 
 size_t	ConfigParser::parseSize(const std::string& sizeStr)

@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:10:33 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/06/30 11:25:24 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,28 +38,7 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	if (directives.count("max_body_size"))
 		route.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("methods"))
-	{
-		std::string			value = directives["methods"];
-		std::stringstream	ss(value);
-		std::string			token;
-
-		while (std::getline(ss, token, ','))
-		{
-			size_t	start = token.find_first_not_of(" \t"); // Trim
-			size_t	end = token.find_last_not_of(" \t");
-
-			if (start == std::string::npos)
-				continue;
-			std::string	clean = token.substr(start, end - start + 1);
-
-			HttpMethod	method = stringToMethod(clean);
-			if (method == METHOD_UNKNOWN)
-				throw ConfigException("Invalid HTTP Method: " + clean);
-			route.methods.insert(method);
-		}
-	} else {
-		route.methods = current_server.methods; // Legacy
-	}
+		route.methods = parseMethods(directives["methods"]);
 	current_server.routes.push_back(route);
 }
 
@@ -145,6 +124,8 @@ void	ConfigParser::parseServer()
 		server.upload = true;
 	if (directives.count("upload_dir"))
 		server.upload_dir = directives["upload_dir"];
+	if (directives.count("methods"))
+		server.methods = parseMethods(directives["methods"]);
 
 	// Extraction of error pages
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
@@ -169,3 +150,5 @@ void	ConfigParser::parseServer()
 	validateServerConfig(server);
 	_servers.push_back(server);
 }
+
+
