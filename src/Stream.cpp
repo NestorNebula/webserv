@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 11:44:33 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/01 12:40:42 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@ Stream &Stream::read(char *s, streamsize n) {
 	return *this;
 }
 
+Stream::streampos Stream::tellg() {
+	throwIfNull();
+	return _stream->tellg();
+}
+
 Stream &Stream::seekg(streampos pos) {
 	throwIfNull();
 	_stream->seekg(pos);
@@ -46,11 +51,15 @@ Stream &Stream::seekg(streamoff off, ios_base::seekdir way) {
 	return *this;
 }
 
-// ostream methods
 Stream &Stream::write(const char *s, streamsize n) {
 	throwIfNull();
 	_stream->write(s, n);
 	return *this;
+}
+
+Stream::streampos Stream::tellp() {
+	throwIfNull();
+	return _stream->tellp();
 }
 
 Stream &Stream::seekp(streampos pos) {
@@ -71,7 +80,6 @@ Stream &Stream::flush() {
 	return *this;
 }
 
-// ios methods
 bool Stream::good() const {
 	throwIfNull();
 	return _stream->good();

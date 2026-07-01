@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 14:21:57 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/01 12:33:17 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,13 @@ public:
 	streamsize gcount() const;
 	Stream &getline(char *s, streamsize n, char delim = '\n');
 	Stream &read(char *s, streamsize n);
+	streampos tellg();
 	Stream &seekg(streampos pos);
 	Stream &seekg(streamoff off, ios_base::seekdir way);
 
 	// ostream methods
 	Stream &write(const char *s, streamsize n);
+	streampos tellp();
 	Stream &seekp(streampos pos);
 	Stream &seekp(streamoff off, ios_base::seekdir way);
 	Stream &flush();
