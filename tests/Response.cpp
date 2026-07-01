@@ -3,7 +3,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#define BUFSIZE 4096 // DO NOT DECREASE
+#ifndef BUFSIZE
+#define BUFSIZE 4096
+#endif
 
 using ::testing::Return;
 
