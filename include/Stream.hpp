@@ -26,6 +26,12 @@ public:
 	typedef std::ios_base ios_base;
 	typedef std::streambuf streambuf;
 
+	typedef enum eSeekDir {
+		BEG = ios_base::beg,
+		CUR = ios_base::cur,
+		END = ios_base::end,
+	} SeekDir;
+
 	// Stream becomes the owner of the given stream
 	void adoptStream(std::iostream *stream);
 
@@ -35,13 +41,13 @@ public:
 	Stream &read(char *s, streamsize n);
 	streampos tellg();
 	Stream &seekg(streampos pos);
-	Stream &seekg(streamoff off, ios_base::seekdir way);
+	Stream &seekg(streamoff off, SeekDir way);
 
 	// ostream methods
 	Stream &write(const char *s, streamsize n);
 	streampos tellp();
 	Stream &seekp(streampos pos);
-	Stream &seekp(streamoff off, ios_base::seekdir way);
+	Stream &seekp(streamoff off, SeekDir way);
 	Stream &flush();
 
 	// ios methods
