@@ -59,6 +59,7 @@ TEST(Session, ReadData) {
 	EXPECT_LT(size, BUFSIZ);
 	EXPECT_GT(size, 0);
 	EXPECT_EQ(size, std::string(buf).size());
+	EXPECT_EQ(session.nextAction(), Session::CLOSE);
 }
 
 TEST(Session, ReadUntilEndOfResponse) {
@@ -70,6 +71,7 @@ TEST(Session, ReadUntilEndOfResponse) {
 	EXPECT_LT(size, BUFSIZ);
 	EXPECT_GT(size, 0);
 	EXPECT_EQ(size, std::string(buf).size());
+	EXPECT_EQ(s1.nextAction(), Session::CLOSE);
 
 	Session s2;
 	writeSimpleRequest(s2);
@@ -77,4 +79,21 @@ TEST(Session, ReadUntilEndOfResponse) {
 	while (s2.nextAction() == Session::WRSOCK)
 		size2 += s2.read(buf, 5);
 	EXPECT_EQ(size, size2);
+	EXPECT_EQ(s2.nextAction(), Session::CLOSE);
+}
+
+TEST(Session, WrongCalls) {
+	Session session;
+	char buf[BUFSIZE];
+
+	EXPECT_EQ(session.nextAction(), Session::RDSOCK);
+	EXPECT_THROW(session.read(buf, BUFSIZE), std::logic_error);
+
+	writeSimpleRequest(session);
+	EXPECT_THROW(session.write("Hello world!\n", 13), std::logic_error);
+
+	session.read(buf, BUFSIZE);
+	EXPECT_EQ(session.nextAction(), Session::CLOSE);
+	EXPECT_THROW(session.write("Hello world!\n", 13), std::logic_error);
+	EXPECT_THROW(session.read(buf, BUFSIZE), std::logic_error);
 }
