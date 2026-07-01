@@ -6,18 +6,20 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/30 16:01:03 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/01 10:55:43 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "Request.hpp"
 #include "Resource.hpp"
+#include "Response.hpp"
 #include "Stream.hpp"
 
 class Session {
 public:
-	Session();
+	Session(): _next(RDSOCK), _resource(NULL) {}
 	~Session();
 
 	// Action to do from Network
@@ -28,7 +30,7 @@ public:
 		CLOSE, // Close the Connection
 	} Action;
 
-	Action nextAction() const;
+	Action nextAction() const { return _next; }
 
 	// Write data to the Session Request. Corresponds to RDSOCK Action.
 	Stream::streamsize write(const char *buf, Stream::streamsize count);
@@ -42,4 +44,17 @@ public:
 private:
 	Session(const Session &);
 	Session &operator=(const Session &);
+
+	Action _next;
+
+	Request _request;
+	Resource *_resource;
+	Response _response;
+
+	void throwIfNotAction(Action action) const;
+	void manageSession();
+	void handleRequest();
+	void handleResource();
+
+	Stream::streamsize _sent;
 };
