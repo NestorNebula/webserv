@@ -55,6 +55,7 @@ private:
 	void manageSession();
 	void handleRequest();
 	void handleResource();
+	void handleResponse();
 
 	Stream::streamsize _sent;
 };
