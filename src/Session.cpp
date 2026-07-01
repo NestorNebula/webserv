@@ -46,8 +46,9 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 	}
 
 	if (bufsize && _response.hasBody()) {
-		_sent += _response.readBody(buf, bufsize);
-		r += head.size();
+		Stream::streamsize bodyRead = _response.readBody(buf, bufsize);
+		_sent += bodyRead;
+		r += bodyRead;
 	}
 
 	if (r < bufsize)
