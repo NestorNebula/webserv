@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:11:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 19:15:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ private:
 	int			exec_cgi(void);
 	
 	int			req_cnt;
+	int			filedes; // "response"
+	
 };
 
 std::ostream& operator << (std::ostream & os, Connection & obj);

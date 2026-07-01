@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 07:47:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 19:15:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <unistd.h>
 # include <string>
+# include <vector>
 # include "WsLog.hpp"
 
 
@@ -25,6 +26,34 @@
 # ifndef EPC_OUT_SIZ
 #  define EPC_OUT_SIZ 4095
 # endif
+
+class EpollBuf
+{
+public:
+	char	*buf;
+	
+	EpollBuf(void) : buf(mem), beg(0), end(0), cnt(EPC_BUF_SIZ) {}
+	
+	char	*hed(void)
+	{
+		return (this->buf + this->beg);
+	}
+	ssize_t	rem(void)
+	{
+		return (this-> cnt - this->end);
+	}
+	ssize_t	siz(void)
+	{
+		if (this->end < this->beg)
+			return (-1);
+		return (this->end - this->beg);
+	}
+private:
+	char			mem[EPC_BUF_SIZ + 1]; // or :: FULL (for binary)
+	ssize_t			beg;
+	ssize_t			end;
+	const ssize_t	cnt;
+};
 
 typedef enum
 {
@@ -57,6 +86,9 @@ public:
 	virtual int pollout(void) = 0;
 
 	int			recv(void);
+	// std::string -- fucks with binary data
+	// std::vector<char> .. fucking ugly
+	int			send(const char *buf, size_t siz);
 	int			send(std::string & buf);
 	
 	int			get_fd(void)	const { return (this->fd); }
@@ -76,8 +108,13 @@ public:
 
 public:
     char            ibuf[EPC_BUF_SIZ + 1];
+	// size_t		isiz;
 	std::string		istr;
 	std::string		ostr;
+	// char            obuf[]
+	// size_t		osiz;
+	std::vector<char>	ivec;
+	std::vector<char>	ovec;
 };
 
 #endif

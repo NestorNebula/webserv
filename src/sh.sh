@@ -10,9 +10,9 @@
 # echo
 # exit 0
 
-# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=10 --no-parser -b
-# echo
-# exit 0
+siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=100 --no-parser -b
+echo
+exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -25,6 +25,9 @@
 
 # curl -X GET http://localhost:8080
 # echo
+# exit 0
+
+
 # curl -X POST http://localhost:8081
 # echo
 # exit 0

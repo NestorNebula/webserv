@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 07:42:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 19:09:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int	EpollClient::timeout(void)
 
 int	EpollClient::recv(void)
 {
-	int	err = 0;
+	int	err = 0; // size_t
 
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
@@ -79,6 +79,8 @@ int	EpollClient::recv(void)
 		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero");
 		return (-1);
 	}
+	// "string" ASSUMED
+	// ATTN : binary data
 	this->ibuf[err] = '\0';
 
 	WsLog::_(LVL_INFO, TGT_EPC_RECV, "ibuf");
@@ -93,16 +95,21 @@ int	EpollClient::recv(void)
 	return (err);
 }
 
-int	EpollClient::send(std::string & buf)
+
+int	EpollClient::send(const char *buf , size_t siz)
 {
-	int err;
+
+	int err; // size_t
 	
-	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", buf.size());
+	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 
 	size_t osiz = EPC_OUT_SIZ;
-	if (osiz > buf.size())
-		osiz = buf.size();
-	err = write(this->fd, buf.c_str(), osiz);
+	if (osiz > siz)
+		osiz = siz;
+
+	// while (osiz) ... 
+	// osiz -= err;
+	err = write(this->fd, buf, osiz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
 
@@ -116,6 +123,15 @@ int	EpollClient::send(std::string & buf)
 		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
 		return (-1);
 	}
+	return (err);
+}
+int	EpollClient::send(std::string & buf)
+{
+	int	err; // size_t
+
+	err = this->send(buf.c_str(), buf.size());
+	if (err <= 0)
+		return (err);
 	buf.erase(0, err);
 	return (err);
 }

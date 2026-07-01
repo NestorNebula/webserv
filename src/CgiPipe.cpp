@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 07:38:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 19:01:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,10 @@ int		CgiPipe::pollin(void)
 		return (-1);
 	}
 
+	// reading back from CGI -- 
+	// ONLY "Content-Length" bytes
+	// otherwise .. EOF
+	// (!) BINARY DATA (!)
 	this->conn.ostr += std::string(this->ibuf);
     
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "ostr");
@@ -62,6 +66,8 @@ int		CgiPipe::pollout(void)
 	
     // POLLOUT assumed .. 
     // mod : add/remove a certain flag
+
+	// check : conn->istr
 
 	this->conn.serv.ep.mod(this, 0);
     return (0);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 07:46:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 19:08:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 #include "CgiPipe.hpp"
 
 Connection::Connection (int _fd, Server &_serv) : EpollClient(EPC_CONN, _fd), serv(_serv), 
-	req_cnt(0)
+	req_cnt(0), filedes(-1)
 {
 };
 
 Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv),
-	req_cnt(0)
+	req_cnt(0), filedes(-1)
 {
 }
 
@@ -39,6 +39,8 @@ Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
 	// WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	if (filedes != -1)
+		close(filedes);
 };
 
 
@@ -71,12 +73,14 @@ int	Connection::pollin(void)
 		return (-1);
 	}
 
-	this->istr += std::string(this->ibuf);
-    
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
+
+	istr += std::string(this->ibuf);
+    ivec.insert(ivec.end(), ibuf, ibuf + err);
 	
-		
+	// WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
+	// WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
+	
+
 	std::string hed_end("\r\n\r\n");
 	
 	if (istr.find(hed_end) == std::string::npos)
@@ -84,13 +88,47 @@ int	Connection::pollin(void)
 
 	this->req_cnt++;
 
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
+	// for (size_t k=0; k < ivec.size(); k++)
+	// 	std::cerr << ivec[k];
+		
+	
 	// erase: up to \r\n\r\n
 	istr = std::string("");
 
-#if 0 // fake body
-	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 9\r\n\r\nGotcha!!\n");
+
+
+	
+#if 1 
+		// fake body
+	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 9\r\n\r\nGotcha!!\n");
+	
+	
+	// filedes = open("./2k_earth_daymap.jpg", O_RDONLY);
+	// if (filedes < 0)
+	// 	return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
+	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: 463087\r\n\r\n");
+
+
+	filedes = open("./Kanan.mp3", O_RDONLY);
+	if (filedes < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
+	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: audio/mp3\r\nContent-Length: 14975750\r\n\r\n");
+	
+	// UGLY : have not checked "write" yet 
+	// ATTN : send (buf_siz) .. ugh
+	
+	// GENERAL QUESTION : send-buf-until-flushed (?)
+	// one "send" per "epoll" (?)
+
+	this->send(ostr); // not here .. but TEST 
+
 	
 	this->serv.ep.mod(this, EPOLLOUT);
+
+
+	
 #else // EXEC_CGI
 	err = this->exec_cgi();
 	if (err < 0)
@@ -104,15 +142,7 @@ int	Connection::pollin(void)
 	this->serv.ep.mod(this, 0);
 	
 	// Resource::generate()
-		// may fail here .. bad file, directory
-		
-	// so .. maybe .. CgiPipe .. is NOT an EPOLL_CLIENT
-	// CgiInput
-		// pollin
-		// write from (istr) of (conn)
-	// CgiOutput
-		// pollout
-		// write to (ostr) of conn
+		// may fail here .. bad file, bad directory, bad pipe, not allowed
 		
 // the CONTENT_LENGTH environment variable needs to be set
 
@@ -126,24 +156,69 @@ int	Connection::pollin(void)
 //    value before processing it
 	// wow : open cgi file and write TO stdin (?)
 	
-	// cgi->ofd : should be added to (epoll) ?
+	
 	
 	// may get more body here 
 
-		// crash without this 
-		// gets .. deleted (?)
-	// or >> (DEL) .. until cgi has written stuff
+	// need to know cgi INPUT fd .. to write to it (?)
+	// OR : CGI .. "reads" from conn->istr
 #endif
 
 	return (err);
 }
 
 
+// ∗ Just remember that, for chunked requests, your server needs to un-chunk
+// them, the CGI will expect EOF as the end of the body.
+// ∗ The same applies to the output of the CGI. If no content_length is
+// returned from the CGI, EOF will mark the end of the returned data.
+// ∗ The CGI should be run in the correct directory for relative path file access.
+
 int	Connection::pollout(void)
 {
 	int	err = 0;
 
 	this->timeout();
+
+#if 1 // filedes
+
+	// and .. header (ostr) needs to be sent .. 
+	// MsgBuf .. was pretty handy
+	// output of CGI may be binary as well 
+	if (filedes > 0)
+	{
+		err = read(filedes, this->ibuf, EPC_BUF_SIZ);
+		if (err < 0)
+		{
+			close(filedes);
+			filedes = -1;
+			return WsLog::_errno(LVL_ERR, TGT_CONN, "read (file)");
+		}
+		if (err == 0)
+		{
+			close(filedes);
+			filedes = -1;
+			WsLog::_(LVL_DBG, TGT_CONN_RECV, "read: zero");
+			return (-1);
+		}
+		err = this->send(ibuf, err);
+
+		// and if NOT ALL BYTES ARE SENT (?)
+		if (err < 0)
+			return WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
+		if (err == 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: zero");
+			return (-1);
+		}
+		
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
+
+	}
+#else
+
+	// v.insert(v.end(), data2, data2 + strlen(data2));
+
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
@@ -152,6 +227,8 @@ int	Connection::pollout(void)
 	}
 
 	err = this->send(ostr);
+
+
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
 	if (err == 0)
@@ -172,15 +249,20 @@ int	Connection::pollout(void)
 	else
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
+		
 		// this->serv.ep.mod(this, 0);
+
+		// nothing if that was the header for a FILE 
+
 #if 0 // KEEP_ALIVE
 		// see more HUP => read [0] with THIS .. AND NOT siege.conf
 		this->serv.ep.mod(this, EPOLLIN); // something more here ..
 #else
 		
 #endif
-
 	}
+
+#endif
 	return (err); // (!) bytes written
 }
 
