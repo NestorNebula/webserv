@@ -88,13 +88,22 @@ void Session::manageSession() {
 
 void Session::handleRequest() {
 	// TODO
-	// Checks Request format and validity
+	// Check Request format and validity
 	// Ensure start line and headers values make sense
+	// Check route and file
+	// Check that method works for route/file
 }
 
 void Session::handleResource() {
 	// TODO
-	// Prepares the Resource for the Response
-	// Handles CGI once executed
-	// Handles Resource errors
+	// Choose type of Resource depending on route/file
+	// Store CGI once executed
+	// Handle Resource errors
+}
+
+void Session::handleResponse() {
+	// TODO
+	// Add Response details and missing fields
+	// Set Response headers
+	// Ensure that Response is valid
 }
