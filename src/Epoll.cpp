@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 22:57:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 08:00:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	evt.data.ptr = cli;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd());
 	if (this->conn.find(cli) != this->conn.end())
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
@@ -165,7 +166,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : ", strerror(errno));
+		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: add");
 		delete (cli);
 	}
 	else 
@@ -185,6 +186,8 @@ int	Epoll::mod(EpollClient *cli, int e)
 	evt.data.ptr = cli;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd());
 	if (this->conn.find(cli) == this->conn.end())
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
@@ -192,7 +195,7 @@ int	Epoll::mod(EpollClient *cli, int e)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), &evt);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod cli  : ", strerror(errno));	
+		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod");	
 	}
 	return (err);
 }
@@ -202,6 +205,7 @@ int	Epoll::del(EpollClient *cli)
 	int err;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
+	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd());
 	if (this->conn.find(cli) == this->conn.end())
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
@@ -211,7 +215,7 @@ int	Epoll::del(EpollClient *cli)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "del cli  : ", strerror(errno));
+		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: del");
 	}
 	return (err);
 }
@@ -258,7 +262,7 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\nwait\n");
+	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
 #if 1
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, 10000); // to_ms
 #else
@@ -276,13 +280,12 @@ int	Epoll::exec(void)
 	// SIGINT not "caught" .. if events are still waiting to process
 #endif
 	if (this->ecnt < 0)
-		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait: ");
+		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
 		
 	if (this->ecnt == 0) // timeout
 		return (0);
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "ecnt");
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, this->ecnt);
+	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "ecnt: ", this->ecnt);
 	
 	return (this->ecnt);
 }
@@ -315,23 +318,8 @@ int	Epoll::loop(void)
             if (evt->events & EPOLLERR)
 			{
 				this->rem(epc);
-				// epc->state = EPC_STATE_SHUTDOWN;
 				continue;
 			}
-#if 0
-			if (evt->events & EPOLLRDHUP)
-			{
-				this->rem(epc);
-				// epc->state = EPC_STATE_SHUTDOWN;
-				continue;
-			} 
-            if (evt->events & EPOLLHUP)
-			{
-				this->rem(epc);
-				// epc->state = EPC_STATE_SHUTDOWN;
-				continue;
-			}
-#endif
 			epc = this->get_epc(evt->data.ptr);
 			if (epc == NULL)
 			{
@@ -356,7 +344,6 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 				if (err < 0) // && state
 				{
 					this->rem(epc);
-					// epc->state = EPC_STATE_SHUTDOWN;
 					continue;
 				}
             }
@@ -366,47 +353,22 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 				if (err < 0) // && state ... 
 				{
 					this->rem(epc);
-					// epc->state = EPC_STATE_SHUTDOWN;
 					continue;
 				}
 			}
 #if 1
-			if (evt->events == EPOLLRDHUP)
+			if (evt->events & EPOLLRDHUP)
 			{
 				this->rem(epc);
-				// epc->state = EPC_STATE_SHUTDOWN;
 				continue;
 			} 
             if (evt->events == EPOLLHUP)
 			{
 				this->rem(epc);
-				// epc->state = EPC_STATE_SHUTDOWN;
 				continue;
 			}
 #endif
         }
-
-#if 0 // SHUTDOWN / rem()
-		for (int k=0; k < e; k++) 
-		{
-			evt = this->get_evt(k);
-			if (evt == NULL)
-			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
-				continue;
-			}
-			epc = this->get_epc(evt->data.ptr);
-			// reinterpret_cast<EpollClient*>(evt->data.ptr);
-			if (evt->data.ptr == NULL || epc == NULL)
-			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
-				continue;
-			}
-			// does not exist 
-			if (epc->state == EPC_STATE_SHUTDOWN)
-				this->rem(epc);
-		}
-#endif
     }
 	return (0);
 }

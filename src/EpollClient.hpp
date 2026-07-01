@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:16:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 07:47:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,12 @@
 # include "WsLog.hpp"
 
 
-// SMALL BUF SIZ -- will make testing very interesting
-// approximate "NEED MORE"
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ 3 // 4095
+#  define EPC_BUF_SIZ 4095
 # endif
 
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ 3 // 4095
+#  define EPC_OUT_SIZ 4095
 # endif
 
 typedef enum

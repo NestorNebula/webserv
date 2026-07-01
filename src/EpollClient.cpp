@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:12:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 07:42:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,22 +65,18 @@ int	EpollClient::recv(void)
 {
 	int	err = 0;
 
-	// char	buf
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "recv");
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, err);
+	WsLog::_(LVL_INFO, TGT_EPC_RECV, "recv: ", err);
 	
 	if (err < 0)
 	{
 		this->state = EPC_STATE_ERROR;
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: ", strerror(errno));
-		return (err);
+		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	}
 	if (err == 0)
 	{
 		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero");
-		// this->state = EPC_STATE_SHUTDOWN;
 		return (-1);
 	}
 	this->ibuf[err] = '\0';
@@ -101,27 +97,23 @@ int	EpollClient::send(std::string & buf)
 {
 	int err;
 	
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, "send");
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, buf.size());
+	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", buf.size());
 
 	size_t osiz = EPC_OUT_SIZ;
 	if (osiz > buf.size())
 		osiz = buf.size();
 	err = write(this->fd, buf.c_str(), osiz);
 
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, "sent");
-	WsLog::_(LVL_INFO, TGT_EPC_SEND, err);
+	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
 
 	if (err < 0)
 	{
 		this->state = EPC_STATE_ERROR;
-		WsLog::_(LVL_ERR, TGT_EPC_SEND, "send: ", strerror(errno));
-		return (err);
+		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
 	}
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
-		// this->state = EPC_STATE_SHUTDOWN;
 		return (-1);
 	}
 	buf.erase(0, err);

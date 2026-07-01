@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:11:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 07:38:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,17 +39,14 @@ int		CgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
-		// this->state = EPC_STATE_SHUTDOWN;
 		return (-1);
 	}
 
-	this->istr += std::string(this->ibuf);
+	this->conn.ostr += std::string(this->ibuf);
     
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
-		
-	this->conn.ostr = this->istr;
-
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "ostr");
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", this->conn.ostr);
+	
     this->conn.serv.ep.mod(&this->conn, EPOLLOUT);
 
 	return (err);
@@ -63,10 +60,9 @@ int		CgiPipe::pollout(void)
 	// input TO CGI .. from conn.istr
 	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "pollout");
 	
-	// this->conn.serv.ep.del(this);
-	// this->state = EPC_STATE_SHUTDOWN;
     // POLLOUT assumed .. 
     // mod : add/remove a certain flag
+
 	this->conn.serv.ep.mod(this, 0);
     return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 22:53:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 07:59:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,15 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
-
 int main (void)
 {
-    int     err;
-    
-    WsLog::lvl = 
-        LVL_NONE
+    WsLog::lvl = LVL_NONE
         | LVL_ERR 
         | LVL_INFO
         | LVL_DBG
         | LVL_WARN
     ;
-    WsLog::tgt = 
-        TGT_NONE
+    WsLog::tgt = TGT_NONE
         | TGT_EPOLL 
         // | TGT_EPOLL_EVT
         // | TGT_EPOLL_CTL
@@ -45,23 +40,19 @@ int main (void)
         | TGT_CGI
         | TGT_CGI_RECV
         | TGT_CGI_SEND
+
+        | TGT_SERV
+        | TGT_MAIN
     ;
     
     Epoll   ep;
-
-    Server *serv[2];
+    Server  *serv[2];
     
-    // attn : CATCH each (bind) FAIL ...
     serv[0] = new Server(ep, 8080);
     serv[1] = new Server(ep, 8081);
     
-    err = ep.loop();
+    int err = ep.loop();
 
-    // TGT_MAIN
-    std::cerr << "exit  : " << err << std::endl;
-
-    // delete (serv[0]);
-    // delete (serv[1]);
-    
+    WsLog::_(LVL_INFO, TGT_MAIN, "exit  : ", err);
     return (err);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 19:20:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/01 08:01:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,11 @@ static const char *tgt_str[] =
     "conn  : ",
     "cgi   : ",
     "serv  : ",
+    "main  : ",
     NULL
 };
+// ATTN : this is IMPORTANT
+// or shit gets fucked up
 static const char *tgt_prefix(log_tgt tgt)
 {
     if (tgt & TGT_EPOLL)
@@ -36,6 +39,8 @@ static const char *tgt_prefix(log_tgt tgt)
         return (tgt_str[3]);
     if (tgt & TGT_SERV)
         return (tgt_str[4]);
+    if (tgt & TGT_MAIN)
+        return (tgt_str[5]);
 
     return (NULL);
 }
@@ -86,8 +91,9 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
     // if (WsLog::nolog(msg_lvl, msg_tgt))
     //     return (-1);
-    msg_lvl = LVL_ERR;
+    // msg_lvl = LVL_ERR;
 
-    std::cerr << tgt_prefix(msg_tgt) << msg << strerror(errno) << std::endl;
+    std::cerr << tgt_prefix(msg_tgt) << msg << std::endl;
+    std::cerr << "error : " << strerror(errno) << std::endl;
     return (-1);
 }
