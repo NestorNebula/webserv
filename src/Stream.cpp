@@ -45,9 +45,9 @@ Stream &Stream::seekg(streampos pos) {
 	return *this;
 }
 
-Stream &Stream::seekg(streamoff off, ios_base::seekdir way) {
+Stream &Stream::seekg(streamoff off, SeekDir way) {
 	throwIfNull();
-	_stream->seekg(off, way);
+	_stream->seekg(off, static_cast<std::iostream::seekdir>(way));
 	return *this;
 }
 
@@ -68,9 +68,9 @@ Stream &Stream::seekp(streampos pos) {
 	return *this;
 }
 
-Stream &Stream::seekp(streamoff off, ios_base::seekdir way) {
+Stream &Stream::seekp(streamoff off, SeekDir way) {
 	throwIfNull();
-	_stream->seekp(off, way);
+	_stream->seekp(off, static_cast<std::iostream::seekdir>(way));
 	return *this;
 }
 
