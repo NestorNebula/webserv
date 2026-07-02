@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 11:33:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 14:55:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ int	EpollClient::send(const char *buf , size_t siz)
 		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
 		return (-1);
 	}
-	return (err);
+	return (err); // bytes written
 }
 int	EpollClient::send(std::string & buf)
 {
@@ -100,8 +100,8 @@ int	EpollClient::send(std::string & buf)
 	err = this->send(buf.c_str(), buf.size());
 	if (err <= 0)
 		return (err);
-	buf.erase(0, err);
-	return (err);
+	buf.erase(0, err); // hm : here (?) or in parent
+	return (err); // bytes written
 }
 
 

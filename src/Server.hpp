@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 11:42:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 15:06:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 # endif
 
 
+// env .. map .. or fixed "key=val"
 class Connection;
 
 class Server : public EpollClient

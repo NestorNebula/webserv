@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 11:47:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 15:31:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,8 @@ int		CgiPipe::pollin(void)
 // Q: COMMUNICATION : between cgi/conn
 	this->conn.ostr += std::string(this->ibuf);
     
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "ostr");
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", this->conn.ostr);
+	WsLog::_(LVL_INFO, TGT_CGI_RECV, "ostr");
+	WsLog::_(LVL_INFO, TGT_CGI_RECV, "\n", this->conn.ostr);
 	
     this->conn.serv.ep.mod(&this->conn, EPOLLOUT);
 
@@ -60,8 +60,33 @@ int		CgiPipe::pollin(void)
 
 int		CgiPipe::pollout(void)
 {
+	int	err;
+
 	this->timeout();
     
+	WsLog::_(LVL_INFO, TGT_CGI_SEND, "send: ", this->conn.istr.size());
+
+	// cgi : needs to have received CONTENT_LENGTH .. 
+	// so it knows something is coming 
+	if (this->conn.istr.size())
+	{
+		err = this->send(this->conn.istr); // body
+		if (err < 0)
+		{
+			WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+			return (err);
+		}
+		if (err == 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: zero");
+			return (-1);
+		}
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+		this->conn.serv.ep.mod(this, 0);
+		// close down .. 
+		return (-1);
+
+	}
 	// this (fd) .. can WRITE
 	// input TO CGI .. from conn.istr
 	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "pollout");
@@ -71,6 +96,8 @@ int		CgiPipe::pollout(void)
 
 	// check : conn->istr
 
+		// nothing more to write to cgi (?)
+		// wait for more data 
 	this->conn.serv.ep.mod(this, 0);
     return (0);
 }

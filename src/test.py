@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 # not school -- nice test for error in (cgi) script
+# Deprecated since version 3.11, removed in version 3.13.
 import cgi
 
 # export QUERY_STRING="p1=one&p2=two"

@@ -1,18 +1,24 @@
 <?php
 
     // var_dump($_ENV);
-    // echo (get_env('QUERY_STRING'));
+    var_dump($_GET);
+    var_dump($_POST);
+    var_dump($_SERVER); // ENV shows up here
 
-    // $p1 = $_GET['p1'];
-    // $p2 = $_GET['p2'];
+    print("PHP : hello, world!\n");  
 
-    // php-cgi IS DIFFERENT
-    // SERVER : needs to add headers-before ... 
-    // presumably CONTENT LENGTH
-    // after it has read everything into a buffer 
+    $g1 = $_GET['g1'];
+    $g2 = $_GET['g2'];
 
-    print("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 20\r\n\r\nPHP : hello, world!\n");  
+    print("g1 : " . $g1 . PHP_EOL);
+    print("g2 : " . $g2 . PHP_EOL);
 
-    // print($p1);
-    // print($p2);
+    $p1 = $_POST['p1'];
+    $p2 = $_POST['p2'];
+
+    print("p1 : " . $p1 . PHP_EOL);
+    print("p2 : " . $p2 . PHP_EOL);
+
+    // $f = $_POST['file']; // undefined array key name="file" filename=""
+    // print("file:\n" . $f . PHP_EOL);
 ?>
