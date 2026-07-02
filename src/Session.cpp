@@ -65,7 +65,7 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
 	switch (_next) {
 		case RDSOCK:
-			if (_request.isComplete()) {
+			if (_request.isComplete() || _request.isInvalid()) {
 				handleRequest();
 				handleResource();
 			}
