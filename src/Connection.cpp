@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 18:17:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 22:42:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,9 +132,14 @@ int	Connection::pollin(void)
 	if (crlf == std::string::npos)
 		return (err);
 
-
+// what would this look like with <iostream>
 	// rsrc.send_data();
-	// BUT : we need to pass cgi through epoll
+	// BUT : we need to pass cgi through epoll ..
+	// or : rsrc.data_src(conn::ibuf)
+		// when it can write .. that's where the data comes from
+	// rsrc.data_dst
+		// where data the source produces should end up
+		// this is what (conn) will used to write out 
 	this->req_cnt++;
 
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");

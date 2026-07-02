@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 17:39:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 22:31:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,21 @@ int	EpollClient::recv(void)
 	return (err);
 }
 
+// send(EpollBuf *)
+// Conn : sends output from resource
+	// file_read
+	// cgi_exec
+// Conn : 
+	// rsrc.write_data()
+		// file upload
+		// cgi exec
+		// may be more to write ..
+		
+	// rsrc.read_data() -- returns current EpollBuf of resources
+// What problems does <stream> solve, and at what cost?
 
-int	EpollClient::send(const char *buf , size_t siz)
+int	EpollClient::send(const char *buf, size_t siz)
 {
-
 	int err; // size_t
 	
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
@@ -78,6 +89,10 @@ int	EpollClient::send(const char *buf , size_t siz)
 
 	// while (osiz) ... 
 	// osiz -= err;
+	// NO : the promise here .. is that we only write fixed-max amount of data
+	// per (fd) per call ...
+	// seems inefficient, if only one socket is active
+	// ensures : distribution is better
 	err = write(this->fd, buf, osiz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
@@ -102,6 +117,7 @@ int	EpollClient::send(std::string & buf)
 	err = this->send(buf.c_str(), buf.size());
 	if (err <= 0)
 		return (err);
+		// UGLY
 	buf.erase(0, err); // hm : here (?) or in parent
 	return (err); // bytes written
 }

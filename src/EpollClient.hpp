@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 17:55:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 22:39:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,27 @@
 #  define EPC_OUT_SIZ 4095
 # endif
 
+// or .. EpollBufMgr
+	// EpollBuf *hed;
+	// EpollBuf *curW;
+		// Q: fill "partial" space 
+		// or always create a new one
+		// 
+	// EpollBuf *curR;
+// Conn
+	// reading a lot of file data to send to a cgi
+	// conn::can_read ... read 
+	// COULD -- not read any more until buf has been FULLY WRITTEN to cgi
+	// OR : READ_MORE .. adding on to the linked list
+	
+	// also : we'd like to re-use as much as possible
+	// if we read from the END ..
+		// cleanup all "in-between"
+	// and start writing to the (hed)
+	// if read_from is not complete ...
+		// the next write_to will have to add_on
+// FifoBuf
+	// linked list of chunks (EpollBuf)
 class EpollBuf
 {
 public:

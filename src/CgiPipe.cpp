@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 17:22:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 22:42:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,11 +48,16 @@ int		CgiPipe::pollin(void)
 	// (!) BINARY DATA (!)
 
 // Q: COMMUNICATION : between cgi/conn
+// or .. simply ensure 
+	// ibuf = conn::rsrc.data_dst
+
+
 	this->conn.ostr += std::string(this->ibuf);
     
 	WsLog::_(LVL_INFO, TGT_CGI_RECV, "ostr");
 	WsLog::_(LVL_INFO, TGT_CGI_RECV, "\n", this->conn.ostr);
 	
+	// any chance we're reading (EPOLLIN) at the same time (?)
     this->conn.serv.ep.mod(&this->conn, EPOLLOUT);
 
 	return (err);
