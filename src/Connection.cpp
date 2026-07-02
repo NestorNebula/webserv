@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 19:08:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 12:09:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,32 +24,14 @@ Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd)
 {
 }
 
-Connection & Connection::operator = (const Connection & that)
-{
-	if (this == &that)
-		return (*this);
-
-	WsLog::_(LVL_DBG, TGT_CONN, "(=) Connection");
-	// FREE DATA : this
-	// COPY DATA : this->val = that.val
-	return (*this);
-}
 
 Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
 	// WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-	if (filedes != -1)
+	if (filedes != -1) // Resource
 		close(filedes);
 };
-
-
-std::ostream& operator << (std::ostream & os, Connection & obj)
-{
-	(void)obj;
-	return (os);
-}
-
 
 // GET Requests: The encoded string is appended to the URL and passed to the CGI script via the QUERY_STRING environment variable. 
 // POST Requests: The encoded data is sent in the request body. The script must read the number of bytes specified by the CONTENT_LENGTH environment variable from standard input (stdin). 
@@ -74,6 +56,9 @@ int	Connection::pollin(void)
 	}
 
 
+// EpollBuf
+
+	// copy (?) or keep-adding (?)
 	istr += std::string(this->ibuf);
     ivec.insert(ivec.end(), ibuf, ibuf + err);
 	
@@ -99,44 +84,38 @@ int	Connection::pollin(void)
 
 
 
-	
-#if 1 
-		// fake body
-	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 9\r\n\r\nGotcha!!\n");
-	
-	
-	// filedes = open("./2k_earth_daymap.jpg", O_RDONLY);
-	// if (filedes < 0)
-	// 	return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
-	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: 463087\r\n\r\n");
+#define RESP_SIMPLE 0
+#define RESP_FILE 1
+#define RESP_CGI 2
+#define RESP 2
 
 
-	filedes = open("./Kanan.mp3", O_RDONLY);
+#if (RESP == RESP_FILE)
+	filedes = open("./2k_earth_daymap.jpg", O_RDONLY);
 	if (filedes < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
-	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: audio/mp3\r\nContent-Length: 14975750\r\n\r\n");
-	
-	// UGLY : have not checked "write" yet 
-	// ATTN : send (buf_siz) .. ugh
+	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: 463087\r\n\r\n");
+
+	// filedes = open("./Kanan.mp3", O_RDONLY);
+	// if (filedes < 0)
+	// 	return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
+	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: audio/mp3\r\nContent-Length: 14975750\r\n\r\n");
 	
 	// GENERAL QUESTION : send-buf-until-flushed (?)
 	// one "send" per "epoll" (?)
 
-	this->send(ostr); // not here .. but TEST 
-
-	
+	this->send(ostr); // UGLY : testing
 	this->serv.ep.mod(this, EPOLLOUT);
-
-
 	
-#else // EXEC_CGI
+#elif (RESP == RESP_CGI)
+
 	err = this->exec_cgi();
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
 		return (err);
 	}
-	
+
 	// ATTN : may have more to read ... 
 	// to send to cgi-stdin
 	this->serv.ep.mod(this, 0);
@@ -156,14 +135,17 @@ int	Connection::pollin(void)
 //    value before processing it
 	// wow : open cgi file and write TO stdin (?)
 	
-	
-	
+
 	// may get more body here 
 
 	// need to know cgi INPUT fd .. to write to it (?)
 	// OR : CGI .. "reads" from conn->istr
+#else //  (RESP == RESP_SIMPLE)
+// MINI_BODY
+	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 9\r\n\r\nGotcha!!\n");
+	this->send(ostr); // not here .. but TEST 
+	this->serv.ep.mod(this, EPOLLOUT);
 #endif
-
 	return (err);
 }
 
@@ -180,7 +162,7 @@ int	Connection::pollout(void)
 
 	this->timeout();
 
-#if 1 // filedes
+#if (RESP == RESP_FILE)
 
 	// and .. header (ostr) needs to be sent .. 
 	// MsgBuf .. was pretty handy
@@ -219,6 +201,8 @@ int	Connection::pollout(void)
 
 	// v.insert(v.end(), data2, data2 + strlen(data2));
 
+	// CGI && SIMPLE .. "filled" (ostr)
+	// Is this a good idea (?)
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
@@ -250,15 +234,18 @@ int	Connection::pollout(void)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
 		
+		// Q: have we sent (content-length) bytes (?)
+		// Q: chunked send .. must close 
 		// this->serv.ep.mod(this, 0);
-
 		// nothing if that was the header for a FILE 
 
 #if 0 // KEEP_ALIVE
 		// see more HUP => read [0] with THIS .. AND NOT siege.conf
 		this->serv.ep.mod(this, EPOLLIN); // something more here ..
 #else
-		
+		// TEST : content-length header .. longer than what we send
+		// curl: (18) end of response with 5 bytes missing
+		return (-1);		
 #endif
 	}
 
@@ -277,18 +264,18 @@ int	Connection::exec_cgi(void)
 	std::string	path;
 	std::string	file;
 	
-	if (this->serv.get_port() == 8080)
+	if (false) // this->serv.get_port() == 8080)
 	{
 		path = std::string("/usr/bin/python");
 		file = std::string("test.py");
 	}
 	else
 	{
-		path = std::string("/usr/bin/perl");
-		file = std::string("test.pl");
+		// path = std::string("/usr/bin/perl");
+		// file = std::string("test.pl");
 
-		// path = std::string("/usr/bin/php");
-		// file = std::string("test.php");
+		path = std::string("/usr/bin/php-cgi"); // DIFFERENT
+		file = std::string("test.php");
 	}
 
 	int		p1[2];
@@ -312,7 +299,7 @@ int	Connection::exec_cgi(void)
 	}
 	if (pid == 0)
 	{
-		// this->serv.ep.copied(); // CLOEXEC
+		// Epoll:: CLOEXEC should have closed Epoll::epfd
 
 		close(p1[1]);
 		err = dup2(p1[0], STDIN_FILENO);
@@ -367,6 +354,13 @@ int	Connection::exec_cgi(void)
 	int			cgifd;
 	EpollClient	*epc_cgi;
 
+
+	// Q: need to track (!)
+	// .. to write to (?)
+	// or .. 
+	// we just always .. read to (ibuf)
+	// then "signal" the cgi's pollout .. that it should check 
+	// for something new to read .. 
 #if 0
 	cgifd = dup(p1[1]);
 	if (cgifd < 0)

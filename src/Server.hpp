@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 19:22:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:42:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,14 @@ class Connection;
 
 class Server : public EpollClient
 {
+private:
+	Server (const Server & that);
+	Server & operator = (const Server & that)  { return (*this); }
+
 public:
 	Epoll	&ep;
 	
 	Server (Epoll & epoll, unsigned short p);
-	Server (const Server & that);
-	Server & operator = (const Server & that);
 	~Server();
 
 	int				pollin(void);
@@ -59,8 +61,6 @@ private:
 	int					init(void);
 	// std::vector<Route> route;
 };
-
-std::ostream& operator << (std::ostream & os, Server & obj);
 
 #endif
 

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+# not school -- nice test for error in (cgi) script
 import cgi
 
 # export QUERY_STRING="p1=one&p2=two"

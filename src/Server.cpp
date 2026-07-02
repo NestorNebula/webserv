@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 20:02:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:42:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,40 +16,22 @@
 
 Server::Server (Epoll & epoll, unsigned short p) : EpollClient(EPC_SERV, -1), ep(epoll), port(p)
 {
-	this->addr.sin_family = AF_INET;
-	this->addr.sin_addr.s_addr = INADDR_ANY;
-	this->addr.sin_port = htons(this->port);
+	this->addr.sin_family		= AF_INET;
+	this->addr.sin_addr.s_addr	= INADDR_ANY;
+	this->addr.sin_port			= htons(this->port);
 	if (this->init())
 		throw (std::runtime_error("Server : construct failed"));
 };
 
 Server::Server(const Server & that) : EpollClient(EPC_SERV, that.fd), ep(that.ep)
 {
-	(void) that;
-}
-
-Server & Server::operator = (const Server & that)
-{
-	if (this == &that)
-		return (*this);
-	return (*this);
+	
 }
 
 Server::~Server()
 {
 	WsLog::_(LVL_DBG, TGT_SERV, "(~) Server");
-	// strange
-	// hm
-	// this->ep.del(this); // (ep) MUST STILL EXIST
-	// if (this->fd != -1)
-	// 	close(this->fd);
 };
-
-std::ostream& operator << (std::ostream & os, Server & obj)
-{
-	(void)obj;
-	return (os);
-}
 
 int Server::init(void)
 {
@@ -107,8 +89,6 @@ int	Server::pollin(void)
 
 int	Server::pollout(void)
 {
-	int	err = 0;
-		
 		// When would we ever write to the Server's (fd)
-	return (err);
+	return (0);
 }

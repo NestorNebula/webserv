@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 19:15:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:45:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Connection : public EpollClient
 {
 private:
 	Connection (const Connection & that);
-	Connection & operator = (const Connection & that);
+	Connection & operator = (const Connection & that) { return (*this); }
 public:
 	Server		&serv;
 	
@@ -43,8 +43,6 @@ private:
 	int			filedes; // "response"
 	
 };
-
-std::ostream& operator << (std::ostream & os, Connection & obj);
 
 #endif
 

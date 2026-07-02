@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 19:01:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:47:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,15 @@
 #include "Server.hpp"
 
 
+CgiPipe::CgiPipe (int _fd, Connection & _conn) : EpollClient(EPC_CGI, _fd), conn(_conn)
+{
+}
+	
 CgiPipe::~CgiPipe()
 {
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
 }
 
-CgiPipe::CgiPipe (int _fd, Connection & _conn) : EpollClient(EPC_CGI, _fd), conn(_conn)
-{
-}
-	
 int		CgiPipe::pollin(void)
 {
 	int	err = 0;
@@ -46,6 +46,8 @@ int		CgiPipe::pollin(void)
 	// ONLY "Content-Length" bytes
 	// otherwise .. EOF
 	// (!) BINARY DATA (!)
+
+// Q: COMMUNICATION : between cgi/conn
 	this->conn.ostr += std::string(this->ibuf);
     
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "ostr");

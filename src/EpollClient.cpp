@@ -6,59 +6,27 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 19:09:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:33:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
 
-static const char *epc_str[] = 
+EpollClient::EpollClient::EpollClient(epc_typ _typ, int _fd) : 
+	typ(_typ), 
+	fd(_fd), 
+	lact(0), 
+	state(EPC_STATE_INIT), 
+	error(0)
 {
-	"serv",
-	"conn",
-	"cgi",
-	NULL
-};
 
-std::string EpollClient::typ_str(void)
-{
-	epc_typ t;
-	try
-	{
-		t = this->get_typ();
-		if (t >= EPC_MAX)
-			return (std::string(""));
-		// WsLog::_(LVL_ERR, TGT_EPC, "typ", t);
-		return (epc_str[t]);
-
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
-	return (std::string(""));
 }
 
-
-
-#define EPC_TO_SECS 5
-
-int	EpollClient::timeout(void)
+EpollClient::~EpollClient()
 {
-	int	err = 0;
-
-	time_t now = time(&now);
-	if (this->lact)
-	{
-		double secs = ((double) (now - lact));
-		if (secs > EPC_TO_SECS)
-		{
-			WsLog::_(LVL_WARN, TGT_CONN, "timed out");
-			err = 1;
-		}
-	}
-	this->lact = now;
-	return (err);
+	// WsLog::_(LVL_ERR, TGT_EPC, "(~) EpollClient");
+	if (this->fd != -1)
+		close(this->fd);
 }
 
 int	EpollClient::recv(void)
@@ -133,5 +101,55 @@ int	EpollClient::send(std::string & buf)
 	if (err <= 0)
 		return (err);
 	buf.erase(0, err);
+	return (err);
+}
+
+
+static const char *epc_str[] = 
+{
+	"serv",
+	"conn",
+	"cgi",
+	NULL
+};
+
+std::string EpollClient::typ_str(void)
+{
+	epc_typ t;
+	try
+	{
+		t = this->get_typ();
+		if (t >= EPC_MAX)
+			return (std::string(""));
+		// WsLog::_(LVL_ERR, TGT_EPC, "typ", t);
+		return (epc_str[t]);
+
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	return (std::string(""));
+}
+
+
+
+#define EPC_TO_SECS 5
+
+int	EpollClient::timeout(void)
+{
+	int	err = 0;
+
+	time_t now = time(&now);
+	if (this->lact)
+	{
+		double secs = ((double) (now - lact));
+		if (secs > EPC_TO_SECS)
+		{
+			WsLog::_(LVL_WARN, TGT_CONN, "timed out");
+			err = 1;
+		}
+	}
+	this->lact = now;
 	return (err);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 17:51:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:29:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ volatile sig_atomic_t stop = 0;
 static void sigint_handler(int signo)
 {
     (void)signo;
+	
 	WsLog::_(LVL_ERR, TGT_EPOLL, "");
 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
     stop = 1;
@@ -80,7 +81,6 @@ static std::string evt_type(struct epoll_event *evt)
 
 Epoll::Epoll (void) : epfd(-1), ecnt(0)
 {
-	// with CLOEXEC .. no need for "copied")
 	this->epfd = epoll_create1(EPOLL_CLOEXEC);
 	if (this->epfd < 0)
 		throw (std::runtime_error("Epoll : bad create"));
@@ -98,21 +98,6 @@ Epoll::Epoll (void) : epfd(-1), ecnt(0)
 #endif
 };
 
-Epoll::Epoll(const Epoll & that) : epfd(that.epfd), ecnt(0)
-{
-	*this = that;
-}
-
-Epoll & Epoll::operator = (const Epoll & that)
-{
-	if (this == &that)
-		return (*this);
-	// UGLY : KILL SOMETHING HERE (?)
-	this->epfd = that.epfd;
-	return (*this);
-}
-
-
 // If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
 Epoll::~Epoll()
 {
@@ -120,31 +105,16 @@ Epoll::~Epoll()
 
 	std::set<EpollClient*>::iterator it = this->conn.begin();
 	while (it != this->conn.end())
-	{
-		delete (*it);
-		it++;
-	}
+		delete (*it++);
 	this->conn.clear();
 	
 	if (this->epfd != -1)
-		close(this->epfd); // closes all in interest list (?)
+		close(this->epfd); // closes all fd in interest list (?)
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 	
 };
-
-void	Epoll::copied(void)
-{
-
-	if (this->epfd != -1)
-		close(this->epfd);
-	// std::set<EpollClient*>::iterator it = this->conn.begin();
-	// while (it != this->conn.end())
-	// {
-	// 	close ( (*it)->get_fd());
-	// }
-}
 
 int	Epoll::add(EpollClient *cli, int e)
 {
@@ -161,7 +131,6 @@ int	Epoll::add(EpollClient *cli, int e)
 	if (this->conn.find(cli) != this->conn.end())
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
-		// Q: mod()
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), &evt);
 	if (err < 0)
@@ -186,7 +155,6 @@ int	Epoll::mod(EpollClient *cli, int e)
 	evt.data.ptr = cli;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
-
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd());
 	if (this->conn.find(cli) == this->conn.end())
 	{
@@ -211,7 +179,6 @@ int	Epoll::del(EpollClient *cli)
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
 		return (0);
 	}
-
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
 	if (err < 0)
 	{
@@ -315,11 +282,6 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
 				continue;
 			}
-            if (evt->events & EPOLLERR)
-			{
-				this->rem(epc);
-				continue;
-			}
 			epc = this->get_epc(evt->data.ptr);
 			if (epc == NULL)
 			{
@@ -338,10 +300,15 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 
+            if (evt->events & EPOLLERR)
+			{
+				this->rem(epc);
+				continue;
+			}
             if (evt->events & EPOLLIN)
             {
 				err = epc->pollin();
-				if (err < 0) // && state
+				if (err < 0) // && state (?)
 				{
 					this->rem(epc);
 					continue;
@@ -350,13 +317,12 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
             if (evt->events & EPOLLOUT)
             {
 				err = epc->pollout();
-				if (err < 0) // && state ... 
+				if (err < 0) // && state (?)
 				{
 					this->rem(epc);
 					continue;
 				}
 			}
-#if 1
 			if (evt->events & EPOLLRDHUP)
 			{
 				this->rem(epc);
@@ -367,17 +333,9 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 				this->rem(epc);
 				continue;
 			}
-#endif
         }
     }
 	return (0);
-}
-
-
-std::ostream& operator << (std::ostream & os, Epoll & obj)
-{
-	(void)obj;
-	return (os);
 }
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:14:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:39:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,12 @@ class EpollClient;
 
 class Epoll
 {
+private:
+	Epoll (const Epoll & that) {}
+	Epoll & operator = (const Epoll & that) { return (*this); }
+
 public:
 	Epoll (void);
-	Epoll (const Epoll & that);
-	Epoll & operator = (const Epoll & that);
 	~Epoll();
 
 	int		loop(void);
@@ -44,9 +46,6 @@ public:
 	int		rem(EpollClient *cli);
 	
 	EpollClient	*get_epc(void *cli);
-	
-	void	copied(void);
-	
 private:
 	int					epfd;
 	int					ecnt;
@@ -57,8 +56,6 @@ private:
 	int					exec(void);
 	struct epoll_event	*get_evt(int idx);
 };
-
-std::ostream& operator << (std::ostream & os, Epoll & obj);
 
 #endif
 

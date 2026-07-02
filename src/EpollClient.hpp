@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 19:15:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:39:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,17 +73,12 @@ typedef enum
 
 class EpollClient
 {
+private:
+	EpollClient (const EpollClient & that) {}
+	EpollClient & operator = (const EpollClient & that) { return (*this); }
 public:
-	EpollClient(epc_typ _typ, int _fd) : typ(_typ), fd(_fd), lact(0), state(EPC_STATE_INIT), error(0) {}
-	
-	virtual ~EpollClient()
-	{
-		// WsLog::_(LVL_ERR, TGT_EPC, "(~) EpollClient");
-		if (this->fd != -1)
-			close(this->fd);
-	}
-	virtual int	pollin(void) = 0;
-	virtual int pollout(void) = 0;
+	EpollClient(epc_typ _typ, int _fd);
+	virtual ~EpollClient();
 
 	int			recv(void);
 	// std::string -- fucks with binary data
@@ -91,6 +86,9 @@ public:
 	int			send(const char *buf, size_t siz);
 	int			send(std::string & buf);
 	
+	virtual int	pollin(void) = 0;
+	virtual int pollout(void) = 0;
+
 	int			get_fd(void)	const { return (this->fd); }
 	epc_typ		get_typ(void)	const { return (this->typ); }
 	epc_state	get_state(void)	const { return (this->state); }
@@ -105,7 +103,7 @@ protected:
 public:
 	epc_state	state;
 	int			error;
-
+	
 public:
     char            ibuf[EPC_BUF_SIZ + 1];
 	// size_t		isiz;

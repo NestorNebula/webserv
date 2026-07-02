@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/01 07:57:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 11:36:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,17 +61,15 @@ private:
 public:
 	static log_lvl  lvl;
 	static log_tgt  tgt; 
-
-	static bool nolog(log_lvl msg_lvl, log_tgt msg_tgt);
 	
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
-
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, int n);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, int n);
-	// static void	_(log_lvl msg_lvl, log_tgt msg_tgt, int e, const char *str);
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
+private:
+	static bool nolog(log_lvl msg_lvl, log_tgt msg_tgt);
 };
 
 #endif
