@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 17:19:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 18:17:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,15 @@ int	Connection::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: zero");
 		return (-1);
 	}
-
+	// CONN_STATE_INIT
+	// CONN_STATE_HAND
+	// CONN_STATE_HEAD
+		// create resource 
+	// CONN_STATE_BODY
+	
+	// we may need to be passing data .. 
+		// cgi
+		// file upload
 
 // EpollBuf
 
@@ -111,7 +119,7 @@ int	Connection::pollin(void)
 // gonna be hard to test BIG (binary) files without that approach in place 
 
 	// copy (?) or keep-adding (?)
-	istr += std::string(this->ibuf);
+	istr += std::string(this->ibuf); // for (isiz)
     ivec.insert(ivec.end(), ibuf, ibuf + err);
 	
 	// WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
@@ -124,6 +132,9 @@ int	Connection::pollin(void)
 	if (crlf == std::string::npos)
 		return (err);
 
+
+	// rsrc.send_data();
+	// BUT : we need to pass cgi through epoll
 	this->req_cnt++;
 
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
@@ -139,11 +150,6 @@ int	Connection::pollin(void)
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
 	// for (size_t k=0; k < ivec.size(); k++)
 	// 	std::cerr << ivec[k];
-		
-	
-	// erase: up to \r\n\r\n
-	// send rest as POST DATA
-
 
 
 #define RESP_SIMPLE 0
@@ -151,11 +157,12 @@ int	Connection::pollin(void)
 #define RESP_CGI 2
 #define RESP 2
 
-
+	// res.init(FROM HEADER)
 #if (RESP == RESP_FILE)
 	filedes = open("./2k_earth_daymap.jpg", O_RDONLY);
 	if (filedes < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
+		
 	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: 463087\r\n\r\n");
 
 	// filedes = open("./Kanan.mp3", O_RDONLY);
@@ -167,11 +174,11 @@ int	Connection::pollin(void)
 	// one "send" per "epoll" (?)
 
 	this->send(ostr); // UGLY : testing
-	this->serv.ep.mod(this, EPOLLOUT);
+	this->serv.ep.mod(this, EPOLLOUT); // not expeting any more pollin
 	
 #elif (RESP == RESP_CGI)
 
-	err = this->exec_cgi();
+	err = this->exec_cgi(); // nb : from "HEADER"
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
@@ -182,12 +189,20 @@ int	Connection::pollin(void)
 	// send (post) to cgi (?)
 	// cgi-can-write :: flush BOYD - what is in Cgi::Conn::istr (?)
 
+	// when writing ... 
+	// if rsrc.has_head()
+	// if rsrc.has_data()
+
+	
 	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n");
 	this->send(ostr); // UGLY : testing
 	this->ostr = std::string("");
 
 	// ATTN : may have more to read ... 
 	// to send to cgi-stdin
+	
+
+		// tiny testing -- really .. need to keep reading post 
 	this->serv.ep.mod(this, 0);
 	
 	// Resource::generate()
@@ -222,6 +237,9 @@ int	Connection::pollin(void)
 }
 
 
+
+
+
 // ∗ Just remember that, for chunked requests, your server needs to un-chunk
 // them, the CGI will expect EOF as the end of the body.
 // ∗ The same applies to the output of the CGI. If no content_length is
@@ -234,6 +252,10 @@ int	Connection::pollout(void)
 
 	this->timeout();
 
+
+	// rsrc.has_data()
+		// file : reads
+		// cgi  : returns (char*) ? 
 #if (RESP == RESP_FILE)
 
 	// and .. header (ostr) needs to be sent .. 
@@ -278,6 +300,9 @@ int	Connection::pollout(void)
 
 	// CGI && SIMPLE .. "filled" (ostr)
 	// Is this a good idea (?)
+
+	// (obuf) : pointer to buffer filled by resource
+		
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
@@ -310,6 +335,9 @@ int	Connection::pollout(void)
 	else
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
+
+		// cgi .. may have more data to send ..
+		// content length (?)
 		
 		// Q: have we sent (content-length) bytes (?)
 		// Q: chunked send .. must close 
@@ -343,6 +371,7 @@ int	Connection::exec_cgi(void)
 	std::string	path;
 	std::string	file;
 	
+		// FROM_HEADER
 	if (false) // this->serv.get_port() == 8080)
 	{
 		path = std::string("/usr/bin/python");
@@ -503,6 +532,9 @@ int	Connection::exec_cgi(void)
 	close(p1[0]);
 	close(p2[1]);
 
+
+	// so .. conn->resource .. 
+	// tracks these (?)
 	int			cgifd;
 	EpollClient	*epc_cgi;
 	

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 16:44:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 17:35:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,10 @@ Epoll::~Epoll()
 {
 	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
 
-	std::set<EpollClient*>::iterator it = this->conn.begin();
-	while (it != this->conn.end())
+	std::set<EpollClient*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
 		delete (*it++);
-	this->conn.clear();
+	this->clients.clear();
 	
 	if (this->epfd != -1)
 		close(this->epfd); // closes all fd in interest list (?)
@@ -128,7 +128,7 @@ int	Epoll::add(EpollClient *cli, int e)
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd());
-	if (this->conn.find(cli) != this->conn.end())
+	if (this->has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
 	}
@@ -140,7 +140,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	}
 	else 
 	{
-		this->conn.insert(cli);
+		this->clients.insert(cli);
 	}
 	return (err);
 }
@@ -156,7 +156,7 @@ int	Epoll::mod(EpollClient *cli, int e)
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd());
-	if (this->conn.find(cli) == this->conn.end())
+	if (!this->has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
 	}
@@ -174,7 +174,7 @@ int	Epoll::del(EpollClient *cli)
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd());
-	if (this->conn.find(cli) == this->conn.end())
+	if (!has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
 		return (0);
@@ -191,12 +191,12 @@ int	Epoll::del(EpollClient *cli)
 int	Epoll::rem(EpollClient *cli)
 {
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
-	std::set<EpollClient*>::iterator it = this->conn.find(cli);
-	if (it != this->conn.end())
+	std::set<EpollClient*>::iterator it = this->clients.find(cli);
+	if (it != this->clients.end())
 	{
 		this->del(cli); // VERY IMPORTANT
 		delete (cli);
-		this->conn.erase(it);
+		this->clients.erase(it);
 	}
 	else
 	{
@@ -204,6 +204,11 @@ int	Epoll::rem(EpollClient *cli)
 	}
 
 	return (0);
+}
+
+bool Epoll::has_client(EpollClient *cli)
+{
+	return (this->clients.find(cli) != this->clients.end());
 }
 
 EpollClient	*Epoll::get_epc(void *cli)
@@ -214,7 +219,7 @@ EpollClient	*Epoll::get_epc(void *cli)
 	epc = reinterpret_cast<EpollClient*>(cli);
 	if (epc == NULL)
 		return (NULL);
-	// if (this->conn.find(epc) == this->conn.end())
+	// if (!this->has_client(epc))
 	// 	return (NULL);
 	return (epc);
 }
@@ -289,7 +294,7 @@ int	Epoll::loop(void)
 				continue;
 			}
 #if 0 // TESTING
-			if (this->conn.find(epc) == this->conn.end())
+			if (!this->has_client(epc))
 			{
 				std::cerr << "\nEXPECT SHIT\n\n";
 				continue;

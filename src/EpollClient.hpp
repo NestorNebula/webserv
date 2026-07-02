@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 11:39:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 17:55:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class EpollBuf
 public:
 	char	*buf;
 	
-	EpollBuf(void) : buf(mem), beg(0), end(0), cnt(EPC_BUF_SIZ) {}
+	EpollBuf(void) : buf(mem), nxt(NULL), beg(0), end(0), cnt(EPC_BUF_SIZ) {}
 	
 	char	*hed(void)
 	{
@@ -48,6 +48,7 @@ public:
 			return (-1);
 		return (this->end - this->beg);
 	}
+	EpollBuf	*nxt;
 private:
 	char			mem[EPC_BUF_SIZ + 1]; // or :: FULL (for binary)
 	ssize_t			beg;
@@ -108,6 +109,8 @@ public:
     char            ibuf[EPC_BUF_SIZ + 1];
 	// size_t		isiz;
 	std::string		istr;
+
+	// hm : we have to imagine this is coming from somewhere else ...
 	std::string		ostr;
 	// char            obuf[]
 	// size_t		osiz;

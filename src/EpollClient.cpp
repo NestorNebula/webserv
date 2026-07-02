@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 14:55:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 17:39:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ int	EpollClient::recv(void)
 	}
 	// "string" ASSUMED
 	// ATTN : binary data
+	// this->isiz = err;
 	this->ibuf[err] = '\0';
 
 	WsLog::_(LVL_INFO, TGT_EPC_RECV, "ibuf");
@@ -93,6 +94,7 @@ int	EpollClient::send(const char *buf , size_t siz)
 	}
 	return (err); // bytes written
 }
+
 int	EpollClient::send(std::string & buf)
 {
 	int	err; // size_t

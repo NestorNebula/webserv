@@ -44,7 +44,10 @@ curl -X POST http://localhost:8081 \
 	-F p1=post-one \
 	-F p2=post-two \
 	-F file=@2k_earth_daymap.jpg
+echo
+exit 0
 	# -F file=@Kanan.mp3
+	
 # POST / HTTP/1.1
 # Host: localhost:8081
 # User-Agent: curl/8.11.1
@@ -55,7 +58,7 @@ curl -X POST http://localhost:8081 \
 
 
 # echo
-# 	# chunked
+# 	# chunked - needs to be parsed before passing to CGI
 # curl -X POST http://localhost:8081 \
 # 	-H "Transfer-Encoding: chunked" \
 # 	-d @2k_earth_daymap.jpg

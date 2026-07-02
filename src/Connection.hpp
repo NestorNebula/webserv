@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 16:03:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/02 17:26:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,34 +80,6 @@ private:
 };
 
 class Server;
-
-
-
-
-// #include <string>
-// #include <algorithm>
-// #include <cctype>
-
-// bool caseInsensitiveCompare(char a, char b)
-// {
-//     return std::tolower(static_cast<unsigned char>(a)) ==
-//            std::tolower(static_cast<unsigned char>(b));
-// }
-
-// std::string::size_type findCaseInsensitive(const std::string& str,
-//                                            const std::string& sub)
-// {
-//     std::string::const_iterator it =
-//         std::search(str.begin(), str.end(),
-//                     sub.begin(), sub.end(),
-//                     caseInsensitiveCompare);
-
-//     if (it == str.end())
-//         return std::string::npos;
-
-//     return it - str.begin();
-// }
-
 
 class Connection : public EpollClient
 {
