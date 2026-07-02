@@ -6,12 +6,13 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 10:55:43 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/02 15:12:14 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "ConfigParser.hpp"
 #include "Request.hpp"
 #include "Resource.hpp"
 #include "Response.hpp"
@@ -19,7 +20,7 @@
 
 class Session {
 public:
-	Session(): _next(RDSOCK), _resource(NULL) {}
+	Session(ServerConfig &config): _next(RDSOCK), _config(config), _resource(NULL) {}
 	~Session();
 
 	// Action to do from Network
@@ -46,6 +47,8 @@ private:
 	Session &operator=(const Session &);
 
 	Action _next;
+
+	ServerConfig &_config;
 
 	Request _request;
 	Resource *_resource;
