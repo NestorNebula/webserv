@@ -32,9 +32,26 @@ bool isValidVersion(const std::string &version) {
 	return true;
 }
 
-RouteConfig *findBestRoute(const std::string &url, ServerConfig &config);
+RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
+	RouteConfig *bestRoute;
 
-std::string resolvePath(const std::string &url, RouteConfig &config);
+	for (std::vector<RouteConfig>::iterator it = config.routes.begin(), ite = config.routes.end(); it != ite; it++) {
+		std::string::size_type equalSize = 0;
+		while (url[equalSize] == it->path[equalSize])
+			++equalSize;
+		if ((equalSize == it->path.size() && ((url.size() == equalSize) || url[equalSize] == '/'))
+				&& (!bestRoute || equalSize > bestRoute->path.size())) {
+			bestRoute = &(*it);
+		}
+	}
+	return bestRoute;
+}
+
+std::string resolvePath(const std::string &url, RouteConfig &config) {
+	std::string path(config.root);
+	path += std::string(url, config.root.size());
+	return path;
+}
 
 bool isExistingFile(const std::string &path) {
 	return access(path.c_str(), F_OK) == 0;
