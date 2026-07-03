@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 11:11:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:27:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,10 @@ std::string Connection::header(const char *key)
 	val = head.substr(off_beg, off_end - off_beg);
 
 	// ugh : need to point to something in head .. which is valid outside this function
-	std::cerr << "header:\nheader: " << key << "=" << val << std::endl;
+	// std::cerr << "header:\nheader: " << key << "=" << val << std::endl;
+
+	std::string kv(key + std::string("=") + val);
+	WsLog::_(LVL_DBG, TGT_HEAD, kv);
 	return (val);
 }
 
@@ -160,7 +163,7 @@ int	Connection::pollin(void)
 #define RESP_SIMPLE 0
 #define RESP_FILE 1
 #define RESP_CGI 2
-#define RESP 1
+#define RESP 2
 
 	// res.init(FROM HEADER)
 #if (RESP == RESP_FILE)
@@ -368,6 +371,49 @@ int	Connection::pollout(void)
 }
 
 
+CgiEnv::CgiEnv(void) : res(NULL)
+{
+
+}
+
+CgiEnv::~CgiEnv()
+{
+	if (res)
+		delete[] res;
+}
+
+void	CgiEnv::add(const char *key, const char *val)
+{
+	// <map> first .. to override multiple (?)
+	data.push_back(std::string(key) + std::string("=") + std::string(val));
+}
+
+void	CgiEnv::add(const char *key, int n)
+{
+	data.push_back(std::string(key) + std::string("=") + num_2_str(n));
+}
+
+const char	**CgiEnv::gen(void)
+{
+	if (res)
+		delete[] res;
+	size_t	cnt	= data.size();
+
+	res = new const char*[cnt + 1];
+	const char	**ins = res;
+	
+	std::vector<std::string>::iterator it = data.begin();
+	while (it != data.end())
+	{
+		*ins++ = it->c_str();
+		it++;
+	}
+	*ins = NULL;
+	return (res);
+}
+
+
+
 
 
 // Resource .. built from Request
@@ -376,24 +422,6 @@ int	Connection::pollout(void)
 int	Connection::exec_cgi(void)
 {
 	int			err;
-
-	std::string	path;
-	std::string	file;
-	
-		// FROM_HEADER
-	if (false) // this->serv.get_port() == 8080)
-	{
-		path = std::string("/usr/bin/python");
-		file = std::string("test.py");
-	}
-	else
-	{
-		// path = std::string("/usr/bin/perl");
-		// file = std::string("test.pl");
-
-		path = std::string("/usr/bin/php-cgi"); // DIFFERENT
-		file = std::string("test.php");
-	}
 
 	int		p1[2];
 	int		p2[2];
@@ -435,6 +463,26 @@ int	Connection::exec_cgi(void)
 			return WsLog::_errno(LVL_ERR, TGT_CONN, "dup2");
 		}
 		close(p2[1]);
+
+
+		std::string	path;
+		std::string	file;
+		
+			// FROM_HEADER
+		if (true) // this->serv.get_port() == 8080)
+		{
+			path = std::string("/usr/bin/perl");
+			file = std::string("test.pl");
+		}
+		else
+		{
+			// path = std::string("/usr/bin/perl");
+			// file = std::string("test.pl");
+
+			path = std::string("/usr/bin/php-cgi"); // DIFFERENT
+			file = std::string("test.php");
+		}
+
 
 		char const *args[3];
 		args[0] = path.c_str();

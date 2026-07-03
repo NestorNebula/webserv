@@ -17,7 +17,7 @@ my $p2 = $cgi->param('p2');
 print ( $qs );
 
 
-print("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 26\r\n\r\nPerl : hello, world!\n");
+print("Perl : hello, world!\n");
 
 
 print ($p1);

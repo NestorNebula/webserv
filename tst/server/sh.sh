@@ -2,9 +2,9 @@
 
 
 
-siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=44 --concurrent=10 --no-parser -b
-echo
-exit 0
+# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=44 --concurrent=10 --no-parser -b
+# echo
+# exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -33,11 +33,11 @@ exit 0
 # 	 -d "p1=post-one&p2=post-two"
 # echo
 
-# curl -X POST http://localhost:8081 \
-# 	-H "Content-Type: application/x-www-form-urlencoded" \
-# 	-d "p1=post-one&p2=post-two"
-# echo
-# exit 0
+curl -X POST http://localhost:8081 \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 	# multipart/form-data
 # curl -X POST http://localhost:8081 \

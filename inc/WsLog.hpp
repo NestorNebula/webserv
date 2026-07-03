@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 11:13:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:24:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,10 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1L << 9)
 # define TGT_MAIN		(1L << 10)
 
+# define TGT_HEAD		(1L << 11)
 
 
-
-# define TGT_MAX		(1L << 63)
+# define TGT_MAX		(1UL << 63)
 # define TGT_ALL		(TGT_MAX - 1)
 
 

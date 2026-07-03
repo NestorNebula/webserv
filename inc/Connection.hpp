@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 09:37:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:19:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,54 +26,25 @@
 #include <sstream>
 
 template <typename T>
-std::string sstr(T value)
+std::string num_2_str(T value)
 {
     std::stringstream ss;
     ss << value;
     return ss.str();
 }
 
-
 class CgiEnv
 {
+private:
+	CgiEnv (const CgiEnv & that);
+	CgiEnv & operator = (const CgiEnv & that) { (void) that; return (*this); }
 public:
-	CgiEnv(void) : res(NULL) {}
-	~CgiEnv()
-	{
-		if (res)
-			delete[] res;
-	}
-
-	void	add(const char *key, const char *val)
-	{
-		// <map> first .. to override multiple (?)
-		data.push_back(std::string(key) + std::string("=") + std::string(val));
-	}
-	void	add(const char *key, int n)
-	{
-		data.push_back(std::string(key) + std::string("=") + sstr(n));
-	}
-	const char	**gen(void)
-	{
-		if (res)
-			delete[] res;
-		size_t	cnt	= data.size();
-
-		res = new const char*[cnt + 1];
-		const char	**ins = res;
-		
-		std::vector<std::string>::iterator it = data.begin();
-		while (it != data.end())
-		{
-			*ins++ = it->c_str();
-			it++;
-		}
-		*ins = NULL;
-		return (res);
-		// create strings key=val
-		// malloc the (char**)
-	}
-
+	CgiEnv(void);
+	~CgiEnv();
+	
+	void		add(const char *key, const char *val);
+	void		add(const char *key, int n);
+	const char	**gen(void);
 private:
 	std::vector<std::string>	data;
 	const char					**res;
