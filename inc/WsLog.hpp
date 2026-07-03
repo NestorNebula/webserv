@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WsLog.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 11:13:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 12:49:32 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,8 @@ private:
 
 public:
 	static log_lvl  lvl;
-	static log_tgt  tgt; 
-	
+	static log_tgt  tgt;
+
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, int n);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str);

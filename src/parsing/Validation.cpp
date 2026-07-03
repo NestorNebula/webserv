@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 11:56:36 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 12:54:33 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,23 @@ std::set<HttpMethod>	parseMethods(const std::string& value)
 		if (method == METHOD_UNKNOWN)
 			throw	ConfigParser::ConfigException("Invalid HTTP method: " + clean);
 		result.insert(method);
+	}
+	return (result);
+}
+
+std::vector<std::string>	splitList(const std::string& value)
+{
+	std::vector<std::string>	result;
+	std::stringstream			ss(value);
+	std::string					token;
+
+	while (std::getline(ss, token, ','))
+	{
+		size_t	start = token.find_first_not_of(" \t");
+		size_t	end = token.find_last_not_of(" \t");
+		if (start == std::string::npos)
+			continue;
+		result.push_back(token.substr(start, end - start + 1));
 	}
 	return (result);
 }

@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 12:26:29 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 12:55:55 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,5 @@ class ConfigParser {
 				virtual const char* what() const throw();
 		};
 };
-
-
 
 #endif

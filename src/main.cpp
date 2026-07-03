@@ -6,11 +6,11 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:51:20 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:18:04 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 12:56:30 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ConfigParser.hpp"
+#include "ConfigParser.hpp"
 #include <iostream>
 
 static void	printServer(const ServerConfig& server, size_t index)
