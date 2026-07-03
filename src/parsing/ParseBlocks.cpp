@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 13:06:30 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:24:37 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		route.methods = parseMethods(directives["methods"]);
 	if (directives.count("index"))
 		route.index = splitList(directives["index"]);
+	if (directives.count("upload"))
+		route.upload = (directives["upload"] == "on");
 	if (directives.count("redirect"))
 		route.redirect = directives["redirect"];
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
@@ -85,7 +87,7 @@ void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives
 	{
 		Token	vToken = consume();
 
-		if (vToken.type == TOKEN_COLON)
+		if (vToken.type == TOKEN_COMMA)
 			value += ",";
 		else
 			value += value.empty() ? vToken.value : " " + vToken.value;
