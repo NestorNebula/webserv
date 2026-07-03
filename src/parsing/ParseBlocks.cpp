@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 13:24:37 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:53:15 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,20 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		route.index = splitList(directives["index"]);
 	if (directives.count("upload"))
 		route.upload = (directives["upload"] == "on");
+	if (directives.count("upload_dir"))
+		route.upload_dir = directives["upload_dir"];
 	if (directives.count("redirect"))
 		route.redirect = directives["redirect"];
+
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
 	{
-		if (it->first.find("cgi ") == 0)
+		if (it->first.find("error_page ") == 0)
+		{
+			std::string code = it->first.substr(11);
+			route.error_pages[code] = it->second;
+		}
+		else if (it->first.find("cgi ") == 0)
 		{
 			std::string	ext = it->first.substr(4); // cgi .php -> .php
 			route.cgi[ext] = it->second;
@@ -146,7 +154,7 @@ void	ConfigParser::parseServer()
 	if (directives.count("index"))
 		server.index = splitList(directives["index"]);
 
-	// Extraction of error pagese
+	// Extraction of error pages
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
 	{
@@ -166,6 +174,12 @@ void	ConfigParser::parseServer()
 			server.routes[i].max_body_size = server.max_body_size;
 		if (server.routes[i].index.empty())
 			server.routes[i].index = server.index;
+		std::map<std::string, std::string>::iterator	ite;
+		for (ite = server.error_pages.begin(); ite != server.error_pages.end(); ++ite)
+		{
+			if (server.routes[i].error_pages.find(ite->first) == server.routes[i].error_pages.end())
+				server.routes[i].error_pages[ite->first] = ite->second;
+		}
 		validateRouteConfig(server.routes[i]);
 	}
 
