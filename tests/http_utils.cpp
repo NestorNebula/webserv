@@ -65,9 +65,9 @@ TEST(findBestRoute, InvalidRoutes) {
 	r1.path = "/route";
 	r2.path = "/route/subroute";
 	r3.path = "/another/subroute";
-	EXPECT_EQ(findBestRoute("/not-my-route", server), NULL);
-	EXPECT_EQ(findBestRoute("/rout", server), NULL);
-	EXPECT_EQ(findBestRoute("/routes", server), NULL);
+	EXPECT_EQ(findBestRoute("/not-my-route", server), (void *) NULL);
+	EXPECT_EQ(findBestRoute("/rout", server), (void *) NULL);
+	EXPECT_EQ(findBestRoute("/routes", server), (void *) NULL);
 }
 
 TEST(resolvePath, SameRoute) {
