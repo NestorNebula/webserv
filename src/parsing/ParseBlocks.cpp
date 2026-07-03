@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 12:55:35 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 13:06:30 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,19 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		route.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("methods"))
 		route.methods = parseMethods(directives["methods"]);
+	if (directives.count("index"))
+		route.index = splitList(directives["index"]);
+	if (directives.count("redirect"))
+		route.redirect = directives["redirect"];
+	for (std::map<std::string, std::string>::iterator it = directives.begin();
+		it != directives.end(); ++it)
+	{
+		if (it->first.find("cgi ") == 0)
+		{
+			std::string	ext = it->first.substr(4); // cgi .php -> .php
+			route.cgi[ext] = it->second;
+		}
+	}
 	current_server.routes.push_back(route);
 }
 
@@ -128,6 +141,8 @@ void	ConfigParser::parseServer()
 		server.upload_dir = directives["upload_dir"];
 	if (directives.count("methods"))
 		server.methods = parseMethods(directives["methods"]);
+	if (directives.count("index"))
+		server.index = splitList(directives["index"]);
 
 	// Extraction of error pagese
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
@@ -147,6 +162,8 @@ void	ConfigParser::parseServer()
 			server.routes[i].methods = server.methods;
 		if (server.routes[i].max_body_size == 0)
 			server.routes[i].max_body_size = server.max_body_size;
+		if (server.routes[i].index.empty())
+			server.routes[i].index = server.index;
 		validateRouteConfig(server.routes[i]);
 	}
 
