@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 22:42:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 11:11:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd)
 Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
-	// WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (filedes != -1) // Resource
 		close(filedes);
 };
@@ -160,11 +160,11 @@ int	Connection::pollin(void)
 #define RESP_SIMPLE 0
 #define RESP_FILE 1
 #define RESP_CGI 2
-#define RESP 2
+#define RESP 1
 
 	// res.init(FROM HEADER)
 #if (RESP == RESP_FILE)
-	filedes = open("./2k_earth_daymap.jpg", O_RDONLY);
+	filedes = open("./files/2k_earth_daymap.jpg", O_RDONLY);
 	if (filedes < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
 		
@@ -280,8 +280,12 @@ int	Connection::pollout(void)
 			close(filedes);
 			filedes = -1;
 			WsLog::_(LVL_DBG, TGT_CONN_RECV, "read: zero");
-			return (-1);
+// KEEP_ALIVE
+			this->serv.ep.mod(this, EPOLLIN);
+
+			return (0);
 		}
+		
 		err = this->send(ibuf, err);
 
 		// and if NOT ALL BYTES ARE SENT (?)

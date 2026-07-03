@@ -2,9 +2,9 @@
 
 
 
-# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=12 --no-parser -b
-# echo
-# exit 0
+siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=44 --concurrent=10 --no-parser -b
+echo
+exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -40,12 +40,12 @@
 # exit 0
 
 	# multipart/form-data
-curl -X POST http://localhost:8081 \
-	-F p1=post-one \
-	-F p2=post-two \
-	-F file=@2k_earth_daymap.jpg
-echo
-exit 0
+# curl -X POST http://localhost:8081 \
+# 	-F p1=post-one \
+# 	-F p2=post-two \
+# 	-F file=files/@2k_earth_daymap.jpg
+# echo
+# exit 0
 	# -F file=@Kanan.mp3
 	
 # POST / HTTP/1.1
