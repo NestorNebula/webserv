@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 22:39:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:37:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,8 @@ typedef enum
 class EpollClient
 {
 private:
-	EpollClient (const EpollClient & that) {}
-	EpollClient & operator = (const EpollClient & that) { return (*this); }
+	EpollClient (const EpollClient & that) { (void) that; }
+	EpollClient & operator = (const EpollClient & that) { (void) that; return (*this); }
 public:
 	EpollClient(epc_typ _typ, int _fd);
 	virtual ~EpollClient();

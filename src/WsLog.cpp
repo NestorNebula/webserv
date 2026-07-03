@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 09:31:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:36:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, int n)
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
+    (void) msg_lvl;
     std::cerr << tgt_prefix(msg_tgt) << msg << std::endl;
     std::cerr << "error : " << strerror(errno) << std::endl;
     return (-1);

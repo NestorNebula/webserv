@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 15:06:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:37:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Server : public EpollClient
 {
 private:
 	Server (const Server & that);
-	Server & operator = (const Server & that)  { return (*this); }
+	Server & operator = (const Server & that)  { (void) that; return (*this); }
 
 public:
 	Epoll	&ep;

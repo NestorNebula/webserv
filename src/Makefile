@@ -1,7 +1,8 @@
 NAME=test
 
 CC=c++
-CFLAGS=-std=c++98 -Wall -Wextra -Werror -MMD -MP -g3 -Wno-unused
+CFLAGS=-std=c++98 -Wall -Wextra -Werror -MMD -MP -g3 
+# -Wno-unused
 # -Wshadow=local
 
 SRC_DIR=.

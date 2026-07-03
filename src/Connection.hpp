@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 22:40:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:37:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ class Connection : public EpollClient
 {
 private:
 	Connection (const Connection & that);
-	Connection & operator = (const Connection & that) { return (*this); }
+	Connection & operator = (const Connection & that) { (void) that; return (*this); }
 public:
 	Server		&serv;
 	
