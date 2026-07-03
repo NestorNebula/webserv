@@ -6,51 +6,18 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:28:10 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 12:26:29 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIGPARSER_HPP
 # define CONFIGPARSER_HPP
 
-# include <string>
-# include <vector>
-# include <map>
-# include <set>
+# include "HttpMethod.hpp"
+# include "ServerConfig.hpp"
+# include "RouteConfig.hpp"
+
 # include <exception>
-
-enum	HttpMethod {
-	METHOD_GET,
-	METHOD_POST,
-	METHOD_DELETE,
-	METHOD_UNKNOWN	// for invalid or unknown method
-};
-
-struct RouteConfig {
-	std::string				path;
-	std::string				root;
-	bool					autoindex;
-	bool					upload;
-	size_t					max_body_size;
-	std::set<HttpMethod>	methods;
-
-	RouteConfig();
-};
-
-struct ServerConfig {
-	std::string				host;
-	int						port;
-	size_t					max_body_size;
-	std::string				root;
-	bool					upload;
-	std::string				upload_dir;
-	std::set<HttpMethod>	methods;
-
-	std::map<std::string, std::string>	error_pages;
-	std::vector<RouteConfig>			routes;
-
-	ServerConfig();
-};
 
 enum TokenType {
 	TOKEN_WORD,
@@ -110,9 +77,6 @@ class ConfigParser {
 		};
 };
 
-HttpMethod	stringToMethod(const std::string& string);
-std::string	methodToString(HttpMethod method);
 
-std::set<HttpMethod>	parseMethods(const std::string& value);
 
 #endif

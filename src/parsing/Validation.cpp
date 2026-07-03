@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 11:09:21 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 11:56:36 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 #define GET		"GET"
 #define POST	"POST"
 #define DELETE	"DELETE"
-
 
 HttpMethod	stringToMethod(const std::string& string)
 {
