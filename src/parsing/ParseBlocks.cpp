@@ -6,12 +6,13 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:25:24 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 11:03:48 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include <sstream>
+#include <cstdlib>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {
@@ -110,10 +111,10 @@ void	ConfigParser::parseServer()
 		if (colon_pos != std::string::npos)
 		{
 			server.host = value.substr(0, colon_pos);
-			server.port = std::atoi(value.substr(colon_pos + 1).c_str());
+			server.port = atoi(value.substr(colon_pos + 1).c_str());
 		} else {
 			server.host = "127.0.0.1";
-			server.port = std::atoi(value.c_str());
+			server.port = atoi(value.c_str());
 		}
 	}
 	if (directives.count("max_body_size"))
@@ -127,7 +128,7 @@ void	ConfigParser::parseServer()
 	if (directives.count("methods"))
 		server.methods = parseMethods(directives["methods"]);
 
-	// Extraction of error pages
+	// Extraction of error pagese
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
 	{
@@ -145,6 +146,7 @@ void	ConfigParser::parseServer()
 			server.routes[i].methods = server.methods;
 		if (server.routes[i].max_body_size == 0)
 			server.routes[i].max_body_size = server.max_body_size;
+		validateRouteConfig(server.routes[i]);
 	}
 
 	validateServerConfig(server);

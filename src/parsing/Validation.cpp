@@ -6,16 +6,18 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/06/30 11:28:27 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/03 11:09:21 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include <sstream>
+#include <cstdlib>
 
 #define GET		"GET"
 #define POST	"POST"
 #define DELETE	"DELETE"
+
 
 HttpMethod	stringToMethod(const std::string& string)
 {
@@ -84,15 +86,23 @@ size_t	ConfigParser::parseSize(const std::string& sizeStr)
 		if (!std::isdigit(numPart[i]))
 			throw	ConfigException("Invalid max_body_size value:" + sizeStr);
 	}
-	return static_cast<size_t>(std::atoi(numPart.c_str())) * multiplier;
+	return static_cast<size_t>(atoi(numPart.c_str())) * multiplier;
 }
 
 void	ConfigParser::validateServerConfig(const ServerConfig& server)
 {
-	(void) server;
+	if (server.port == 0)
+		throw	ConfigException("Server is missing required 'listen' directive.");
+	if (server.error_pages.find("default") == server.error_pages.end())
+		throw	ConfigException("Server is missing required 'error_page default' directive.");
 }
 
 void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 {
-	(void) route;
+	if (route.path.empty())
+		throw	ConfigException("Route has an empty path");
+	if (route.root.empty())
+		throw	ConfigException("Route '" + route.path + "' has no 'root' (and none to inherit).");
+	if (route.methods.empty())
+		throw	ConfigException("Route '" + route.path + "' has no 'methods' (and none to inherit).");
 }
