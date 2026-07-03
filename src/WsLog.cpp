@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 11:36:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:31:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,33 +15,33 @@
 log_lvl WsLog::lvl = LVL_NONE;
 log_tgt WsLog::tgt = TGT_NONE;
 
-static const char *tgt_str[] =
+static const std::string tgt_str[] =
 {
+    "",
     "epoll : ",
     "epc   : ",
     "conn  : ",
     "cgi   : ",
     "serv  : ",
-    "main  : ",
-    NULL
+    "main  : "
 };
 
-static const char *tgt_prefix(log_tgt tgt)
+static const std::string &tgt_prefix(log_tgt tgt)
 {
     if (tgt & TGT_EPOLL)
-        return (tgt_str[0]);
-    if (tgt & TGT_EPC)
         return (tgt_str[1]);
-    if (tgt & TGT_CONN)
+    if (tgt & TGT_EPC)
         return (tgt_str[2]);
-    if (tgt & TGT_CGI)
+    if (tgt & TGT_CONN)
         return (tgt_str[3]);
-    if (tgt & TGT_SERV)
+    if (tgt & TGT_CGI)
         return (tgt_str[4]);
-    if (tgt & TGT_MAIN)
+    if (tgt & TGT_SERV)
         return (tgt_str[5]);
+    if (tgt & TGT_MAIN)
+        return (tgt_str[6]);
 
-    return (NULL); // DANGEROUS
+    return (tgt_str[0]);
 }
 
 

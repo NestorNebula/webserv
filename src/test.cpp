@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/02 14:47:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/03 09:30:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@ int main (void)
         | LVL_WARN
     ;
     WsLog::tgt = TGT_NONE
-        // | TGT_EPOLL 
-        // | TGT_EPOLL_EVT
-        // | TGT_EPOLL_CTL
+        | TGT_EPOLL 
+        | TGT_EPOLL_EVT
+        | TGT_EPOLL_CTL
         
-        // | TGT_EPC
-        // | TGT_EPC_RECV
-        // | TGT_EPC_SEND
+        | TGT_EPC
+        | TGT_EPC_RECV
+        | TGT_EPC_SEND
         
         | TGT_CONN
         | TGT_CONN_RECV
