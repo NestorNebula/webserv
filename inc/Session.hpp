@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/02 15:12:14 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/04 15:39:26 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ public:
 		DOCGI, // Handle CGI
 		WRSOCK, // Write to Connection socket
 		CLOSE, // Close the Connection
+		KPALIVE, // Keep the Connection alive
 	} Action;
 
 	Action nextAction() const { return _next; }
