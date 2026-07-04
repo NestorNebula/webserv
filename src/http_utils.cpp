@@ -33,11 +33,11 @@ bool isValidVersion(const std::string &version) {
 }
 
 RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
-	RouteConfig *bestRoute;
+	RouteConfig *bestRoute = NULL;
 
 	for (std::vector<RouteConfig>::iterator it = config.routes.begin(), ite = config.routes.end(); it != ite; it++) {
 		std::string::size_type equalSize = 0;
-		while (url[equalSize] == it->path[equalSize])
+		while (equalSize < url.size() && equalSize < it->path.size() && url[equalSize] == it->path[equalSize])
 			++equalSize;
 		if ((equalSize == it->path.size() && ((url.size() == equalSize) || url[equalSize] == '/'))
 				&& (!bestRoute || equalSize > bestRoute->path.size())) {
@@ -49,7 +49,8 @@ RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
 
 std::string resolvePath(const std::string &url, RouteConfig &config) {
 	std::string path(config.root);
-	path += std::string(url, config.root.size());
+	if (url.size() > config.path.size())
+		path += url.substr(config.path.size());
 	return path;
 }
 
@@ -68,5 +69,5 @@ bool isDirectory(const std::string &path) {
 bool isCgi(const std::string &path, RouteConfig &config); // TODO: Check CGI config in config file
 
 bool isAccessibleFile(const std::string &path) {
-	return access(path.c_str(), R_OK);
+	return access(path.c_str(), R_OK) == 0;
 }
