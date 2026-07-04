@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 11:13:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/04 15:37:02 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,23 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1L << 9)
 # define TGT_MAIN		(1L << 10)
 
+// HTTP TGTs using 1L << 21 to 1L << 40
+# define TGT_REQ		(1L << 21)
 
+# define TGT_STAT_RES	(1L << 22)
+# define TGT_DIR_RES	(1L << 23)
+# define TGT_RES		(TGT_STAT_RES | TGT_DIR_RES)
+
+# define TGT_RESP		(1L << 24)
+
+# define TGT_TMP_STRM	(1L << 25)
+# define TGT_STRM		(TGT_TMP_STRM | (1L << 26))
+
+# define TGT_SESS_WR	(1L << 27)
+# define TGT_SESS_RD	(1L << 28)
+# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD)
+
+# define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
 
 # define TGT_MAX		(1L << 63)
