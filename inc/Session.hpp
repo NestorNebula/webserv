@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "ConfigParser.hpp"
+#include "ServerConfig.hpp" // Maxime's Header
 #include "Request.hpp"
 #include "Resource.hpp"
 #include "Response.hpp"
