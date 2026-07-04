@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "ConfigParser.hpp" // Maxime's header
+#include "ServerConfig.hpp" // Maxime's header
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config);
 
