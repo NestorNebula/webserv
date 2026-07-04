@@ -6,21 +6,17 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 11:12:28 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 12:48:39 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/04 12:52:24 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "TemporaryFileStream.hpp"
+#include <cstring>
 #include <fstream>
 #include <unistd.h>
 
 TemporaryFileStream::TemporaryFileStream() {
-	std::tmpnam(_path);
-	std::fstream *fstream = new std::fstream();
-	fstream->open(_path, std::fstream::in | std::fstream::out | std::fstream::binary);
-	if (!fstream->is_open())
-		throw std::runtime_error("failed to open temporary file");
-	_stream = fstream;
+	openTmpFile();
 }
 
 TemporaryFileStream::~TemporaryFileStream() {
@@ -33,8 +29,10 @@ void TemporaryFileStream::openTmpFile() {
 		std::string tmpFilePath = getNextFilePath();
 		std::fstream *fstream = new std::fstream();
 		fstream->open(tmpFilePath.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary | std::fstream::trunc);
-		if (fstream->is_open())
+		if (fstream->is_open()) {
+			std::strcpy(_path, tmpFilePath.c_str());
 			_stream = fstream;
+		}
 		else
 			delete fstream;
 	}
