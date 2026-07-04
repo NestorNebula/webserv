@@ -12,7 +12,7 @@ TEST(isAllowedMethod, NotAllowedMethod) {
 	RouteConfig config;
 
 	config.methods.insert(METHOD_POST);
-	EXPECT_TRUE(isAllowedMethod(METHOD_GET, config));
+	EXPECT_FALSE(isAllowedMethod(METHOD_GET, config));
 }
 
 TEST(isValidVersion, ValidVersion) {
@@ -35,9 +35,9 @@ TEST(findBestRoute, OneRoute) {
 
 	route.path = "/route";
 	server.routes.push_back(route);
-	EXPECT_EQ(findBestRoute("/route", server), &route);
-	EXPECT_EQ(findBestRoute("/route/index.html", server), &route);
-	EXPECT_EQ(findBestRoute("/route/subroute/index.html", server), &route);
+	EXPECT_EQ(findBestRoute("/route", server), &server.routes[0]);
+	EXPECT_EQ(findBestRoute("/route/index.html", server), &server.routes[0]);
+	EXPECT_EQ(findBestRoute("/route/subroute/index.html", server), &server.routes[0]);
 }
 
 TEST(findBestRoute, MultipleRoutes) {
@@ -50,12 +50,12 @@ TEST(findBestRoute, MultipleRoutes) {
 	server.routes.push_back(r1);
 	server.routes.push_back(r2);
 	server.routes.push_back(r3);
-	EXPECT_EQ(findBestRoute("/route", server), &r1);
-	EXPECT_EQ(findBestRoute("/route/subroute", server), &r2);
-	EXPECT_EQ(findBestRoute("/another/subroute", server), &r3);
-	EXPECT_EQ(findBestRoute("/route/index.html", server), &r1);
-	EXPECT_EQ(findBestRoute("/route/subroute/index.html", server), &r2);
-	EXPECT_EQ(findBestRoute("/another/subroute/index.html", server), &r3);
+	EXPECT_EQ(findBestRoute("/route", server), &server.routes[0]);
+	EXPECT_EQ(findBestRoute("/route/subroute", server), &server.routes[1]);
+	EXPECT_EQ(findBestRoute("/another/subroute", server), &server.routes[2]);
+	EXPECT_EQ(findBestRoute("/route/index.html", server), &server.routes[0]);
+	EXPECT_EQ(findBestRoute("/route/subroute/index.html", server), &server.routes[1]);
+	EXPECT_EQ(findBestRoute("/another/subroute/index.html", server), &server.routes[2]);
 }
 
 TEST(findBestRoute, InvalidRoutes) {
@@ -65,6 +65,9 @@ TEST(findBestRoute, InvalidRoutes) {
 	r1.path = "/route";
 	r2.path = "/route/subroute";
 	r3.path = "/another/subroute";
+	server.routes.push_back(r1);
+	server.routes.push_back(r2);
+	server.routes.push_back(r3);
 	EXPECT_EQ(findBestRoute("/not-my-route", server), (void *) NULL);
 	EXPECT_EQ(findBestRoute("/rout", server), (void *) NULL);
 	EXPECT_EQ(findBestRoute("/routes", server), (void *) NULL);
