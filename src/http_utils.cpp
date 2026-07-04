@@ -66,7 +66,19 @@ bool isDirectory(const std::string &path) {
 	return S_ISDIR(statbuf.st_mode);
 }
 
-bool isCgi(const std::string &path, RouteConfig &config); // TODO: Check CGI config in config file
+bool isCgi(const std::string &path, RouteConfig &config) {
+	std::string::size_type extIndex = path.find_last_of(".");
+	if (extIndex == std::string::npos || extIndex == 0
+			|| path[extIndex - 1] == '/')
+		return false;
+	std::string extension = path.substr(extIndex);
+	bool cgi = false;
+	for (std::map<std::string, std::string>::const_iterator it = config.cgi.begin(), ite = config.cgi.end(); !cgi && it != ite; it++) {
+		if (extension == it->first)
+			cgi = true;
+	}
+	return cgi;
+}
 
 bool isAccessibleFile(const std::string &path) {
 	return access(path.c_str(), R_OK) == 0;
