@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:41:07 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/04 14:32:45 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ void capitalize(std::string &s) {
   for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) {
     if (it == s.begin() || !std::isalpha(*(it - 1)))
       *it = std::toupper(static_cast<unsigned char>(*it));
+    else
+      *it = std::tolower(static_cast<unsigned char>(*it));
   }
 }
 
