@@ -116,7 +116,25 @@ TEST(isDirectory, NonDirectory) {
 	EXPECT_FALSE(isDirectory("files/empty.txt"));
 }
 
-// TODO: isCgi tests
+TEST(isCgi, CGIFiles) {
+	RouteConfig config;
+
+	config.cgi.insert(std::pair<std::string, std::string>(".php", "php-cgi"));
+	config.cgi.insert(std::pair<std::string, std::string>(".py", "python3"));
+	EXPECT_TRUE(isCgi("cgi.php", config));
+	EXPECT_TRUE(isCgi("cgi.py", config));
+}
+
+TEST(isCgi, NonCGIFiles) {
+	RouteConfig config;
+
+	config.cgi.insert(std::pair<std::string, std::string>(".php", "php-cgi"));
+	config.cgi.insert(std::pair<std::string, std::string>(".py", "python3"));
+	EXPECT_FALSE(isCgi("noncgi.cgi", config));
+	config.cgi.clear();
+	EXPECT_FALSE(isCgi("cgi.php", config));
+	EXPECT_FALSE(isCgi("cgi.py", config));
+}
 
 TEST(isAccessibleFile, AccessibleFile) {
 	EXPECT_TRUE(isAccessibleFile("files/empty.txt"));
