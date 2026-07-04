@@ -5,7 +5,7 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
 GTEST_CXXFLAGS = -std=c++98
 
-CPPFLAGS = -I../include \
+CPPFLAGS = -I../inc \
 		   -Igtest/googletest \
 		   -Igtest/googletest/include \
 		   -Igtest/googlemock \
