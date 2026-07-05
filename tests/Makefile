@@ -28,7 +28,8 @@ PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 			  $(SRC_DIR)/DirectoryResource.cpp \
 			  $(SRC_DIR)/Stream.cpp \
 			  $(SRC_DIR)/TemporaryFileStream.cpp \
-			  $(SRC_DIR)/http_utils.cpp
+			  $(SRC_DIR)/http_utils.cpp \
+			  $(SRC_DIR)/utils/WsLog.cpp
 
 TEST_SRC_DIR = .
 
