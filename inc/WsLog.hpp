@@ -69,7 +69,7 @@ typedef long unsigned int log_tgt;
 
 # define TGT_SESS_WR	(1L << 27)
 # define TGT_SESS_RD	(1L << 28)
-# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD)
+# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1L << 29))
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
