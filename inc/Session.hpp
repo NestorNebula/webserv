@@ -48,6 +48,9 @@ public:
 	// Read data from the Session Response. Corresponds to WRSOCK Action.
 	Stream::streamsize read(char *buf, Stream::streamsize bufsize);
 
+	// Reset session state and clears all its data
+	void reset();
+
 private:
 	Session(const Session &);
 	Session &operator=(const Session &);
