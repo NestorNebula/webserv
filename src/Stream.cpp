@@ -13,6 +13,7 @@
 #include <Stream.hpp>
 
 void Stream::adoptStream(std::iostream *stream) {
+	WsLog::_(LVL_DBG, TGT_STRM, "Stream adopting new stream");
 	delete _stream;
 	_stream = stream;
 }

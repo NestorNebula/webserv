@@ -13,14 +13,18 @@
 #include "TemporaryFileStream.hpp"
 #include <cstring>
 #include <fstream>
+#include <sstream>
 #include <unistd.h>
 
 TemporaryFileStream::TemporaryFileStream() {
+	WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor");
 	openTmpFile();
 }
 
 TemporaryFileStream::~TemporaryFileStream() {
+	WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream destructor");
 	static_cast<std::fstream *>(_stream)->close();
+	WsLog::_(LVL_INFO, TGT_TMP_STRM, "Removing TemporaryFileStream: ", _path);
 	std::remove(_path);
 }
 
@@ -36,6 +40,9 @@ void TemporaryFileStream::openTmpFile() {
 		else
 			delete fstream;
 	}
+	std::ostringstream oss;
+	oss << "Opened " << _path << " as TemporaryFileStream";
+	WsLog::_(LVL_INFO, TGT_TMP_STRM, oss.str());
 }
 
 std::string TemporaryFileStream::getNextFilePath() {
