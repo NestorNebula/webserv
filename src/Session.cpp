@@ -65,6 +65,18 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 	return r;
 }
 
+void Session::reset() {
+	throwIfNotAction(KPALIVE);
+
+	_sent = 0;
+
+	_request.clear();
+	_response.clear();
+	delete _resource;
+
+	_next = RDSOCK;
+}
+
 void Session::throwIfNotAction(Action action) const {
 	if (action != _next)
 		throw std::logic_error("Wrong action on Session");
