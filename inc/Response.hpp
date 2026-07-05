@@ -43,6 +43,8 @@ public:
 
   bool isReady() const;
   bool hasBody() const;
+  
+  void clear();
 
 private:
   Response(const Response &);
