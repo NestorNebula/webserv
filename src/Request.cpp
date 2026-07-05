@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 14:17:53 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:41:57 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void Request::setMethod(const std::string &method) {
 
 	int i = 0;
 	while (!methods[i].empty() && method != methods[i]) i++;
-	_method = static_cast<Request::Method>(i);
+	_method = static_cast<HttpMethod>(i);
 }
 
 void Request::handleHeaderLine(std::string headerLine, std::string::size_type eol) {

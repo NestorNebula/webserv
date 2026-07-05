@@ -6,13 +6,14 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 14:15:47 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:41:26 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Headers.hpp"
+#include "HttpMethod.hpp" // Maxime's header
 #include "Stream.hpp"
 #include "WsLog.hpp"
 
@@ -24,19 +25,12 @@ public:
 	  WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
   }
 
-  typedef enum eMethod {
-	  GET,
-	  POST,
-	  DELETE,
-	  UNKNOWN,
-  } Method;
-
   // Methods
   void append(const std::string data);
   bool isComplete() const { return _state == COMPLETE; }
   bool isInvalid() const { return _state == INVALID; }
   bool hasMethod() const { return _state > START_LINE; }
-  Method getMethod() const { return _method; }
+  HttpMethod getMethod() const { return _method; }
   bool hasURL() const { return _state > START_LINE; }
   const std::string &getURL() const { return _url; }
   bool hasQuery() const { return _state > START_LINE && !_query.empty(); }
@@ -71,7 +65,7 @@ private:
 
   std::string _raw;
   InternalState _state;
-  Method _method;
+  HttpMethod _method;
   std::string _url;
   std::string _query;
   std::string _version;
