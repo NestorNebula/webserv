@@ -79,6 +79,14 @@ bool Response::hasBody() const {
 	return _resource && _resource->done();
 }
 
+void Response::clear() {
+	_version.clear();
+	_code = 0;
+	_reason.clear();
+	_headers.clear();
+	_resource = NULL;
+}
+
 void Response::throwIfNotReady() const {
 	if (!isReady())
 		throw std::logic_error("Response not in readable state");
