@@ -21,7 +21,7 @@ public:
 		WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
 	}
 	Stream(std::iostream *stream): _stream(stream) {}
-	~Stream() { 
+	virtual ~Stream() { 
 		WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
 		delete _stream; 
 	}

@@ -13,12 +13,11 @@
 #pragma once
 
 #include "Stream.hpp"
-#include "WsLog.hpp"
 
 class TemporaryFileStream: public Stream {
 public:
 	TemporaryFileStream();
-	~TemporaryFileStream();
+	virtual ~TemporaryFileStream();
 
 private:
 	TemporaryFileStream(const TemporaryFileStream &);
