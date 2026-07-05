@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 15:39:26 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:19:24 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ private:
 	void handleRequest();
 	void handleResource();
 	void handleResponse();
+
+	void setResponseStatus(Response::StatusCode code);
 
 	Stream::streamsize _sent;
 };
