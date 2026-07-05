@@ -17,11 +17,16 @@
 #include "Resource.hpp"
 #include "Response.hpp"
 #include "Stream.hpp"
+#include "WsLog.hpp"
 
 class Session {
 public:
-	Session(ServerConfig &config): _next(RDSOCK), _config(config), _resource(NULL) {}
-	~Session();
+	Session(ServerConfig &config): _next(RDSOCK), _config(config), _resource(NULL) {
+		WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
+	}
+	~Session() {
+		WsLog::_(LVL_DBG, TGT_SESS, "Session destructor");
+	}
 
 	// Action to do from Network
 	typedef enum eAction {

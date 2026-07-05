@@ -12,13 +12,19 @@
 
 #pragma once
 
+#include "WsLog.hpp"
 #include <iostream>
 
 class Stream {
 public:
-	Stream(): _stream(NULL) {}
+	Stream(): _stream(NULL) {
+		WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
+	}
 	Stream(std::iostream *stream): _stream(stream) {}
-	~Stream() { delete _stream; }
+	~Stream() { 
+		WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
+		delete _stream; 
+	}
 
 	typedef std::streamsize streamsize;
 	typedef std::streampos streampos;
