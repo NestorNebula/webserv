@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 13:24:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/05 15:54:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define WS_LOG_HPP
 
 # include <iostream>
+# include <sstream>
 # include <string>
 # include <cstring>
 # include <cerrno>
