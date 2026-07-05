@@ -14,12 +14,15 @@
 
 #include "Headers.hpp"
 #include "Stream.hpp"
+#include "WsLog.hpp"
 
 #define MAX_BODY_SIZE (64 * 1024)
 
 class Request {
 public:
-  Request() : _state(EMPTY), _body(NULL), _bodySize(0) {}
+  Request() : _state(EMPTY), _body(NULL), _bodySize(0) {
+	  WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
+  }
 
   typedef enum eMethod {
 	  GET,

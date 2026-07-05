@@ -18,10 +18,13 @@ void DirectoryResource::generate() {
 	if (_state != DEFAULT)
 		throw std::logic_error("generate called multiple times");
 	
+	WsLog::_(LVL_INFO, TGT_DIR_RES, "Directory Listing for: ", _dirpath);
 	_stream = new Stream(new std::stringstream());
 	if (_dir)
 		buildList();
 	_state = (_dir != NULL && _stream->good()) ? DONE : FAIL;
+	if (_state != DONE)
+		WsLog::_(LVL_WARN, TGT_DIR_RES, "Directory listing error for: ", _dirpath);
 }
 
 Stream &DirectoryResource::stream() {

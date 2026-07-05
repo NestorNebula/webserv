@@ -51,6 +51,7 @@ std::string Response::getHead() const {
 	throwIfNotReady();
 	oss << _version << " " << _code << " " << _reason << "\r\n";
 	oss << _headers.str() << "\r\n";
+	WsLog::_(LVL_INFO, TGT_RESP, "Response forwarding head");
 	return oss.str();
 }
 
@@ -64,6 +65,9 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 		return -1;
 	Stream::streamsize readCount = _resource->stream().gcount();
 	buf[readCount] = '\0';
+	std::ostringstream oss;
+	oss << "Response forwarding " << readCount << " bytes of body";
+	WsLog::_(LVL_INFO, TGT_RESP, oss.str());
 	return readCount;
 }
 

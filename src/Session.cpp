@@ -12,11 +12,15 @@
 
 #include "Session.hpp"
 #include <cstring>
+#include <sstream>
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 	throwIfNotAction(RDSOCK);
 
 	_request.append(std::string(buf, count));
+	std::ostringstream oss;
+	oss << "Session received " << count << " bytes of data";
+	WsLog::_(LVL_INFO, TGT_SESS_WR, oss.str());
 	manageSession();
 	return count;
 }
@@ -25,6 +29,7 @@ void Session::setCgiResource(Resource *cgiResource) {
 	throwIfNotAction(DOCGI);
 	delete _resource;
 	_resource = cgiResource;
+	WsLog::_(LVL_INFO, TGT_SESS, "Session received CGI resource");
 	manageSession();
 }
 
@@ -53,6 +58,9 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 
 	if (r < bufsize)
 		_next = CLOSE;
+	std::ostringstream oss;
+	oss << "Session sending " << r << "bytes of data";
+	WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
 	manageSession();
 	return r;
 }

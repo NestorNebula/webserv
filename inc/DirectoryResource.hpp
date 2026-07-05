@@ -13,12 +13,16 @@
 #pragma once
 
 #include "Resource.hpp"
+#include "WsLog.hpp"
 #include <dirent.h>
 
 class DirectoryResource: public Resource {
 public:
-	DirectoryResource(const std::string &dirpath): _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())), _stream(NULL) {}
+	DirectoryResource(const std::string &dirpath): _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())), _stream(NULL) {
+		WsLog::_(LVL_DBG, TGT_DIR_RES, "DirectoryResource constructor for: ", dirpath);
+	}
 	~DirectoryResource() {
+		WsLog::_(LVL_DBG, TGT_DIR_RES, "DirectoryResource destructor for: ", _dirpath);
 		closedir(_dir);
 		delete _stream;
 	}

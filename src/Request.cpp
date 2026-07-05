@@ -17,8 +17,11 @@
 #include <sstream>
 
 void Request::append(const std::string data) {
-  if (_state == COMPLETE || _state == INVALID)
+  if (_state == COMPLETE || _state == INVALID) {
+	WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
+  }
+  WsLog::_(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));

@@ -13,6 +13,7 @@
 #pragma once
 
 #include "Stream.hpp"
+#include "WsLog.hpp"
 
 class TemporaryFileStream: public Stream {
 public:
