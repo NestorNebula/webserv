@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/03 08:01:54 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:34:56 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,4 +82,26 @@ bool isCgi(const std::string &path, RouteConfig &config) {
 
 bool isAccessibleFile(const std::string &path) {
 	return access(path.c_str(), R_OK) == 0;
+}
+
+std::string getStatusReason(Response::StatusCode code) {
+	static std::map<int, std::string> reasons;
+
+	if (reasons.empty()) {
+		reasons.insert(std::pair<int, std::string>(200, "OK"));
+		reasons.insert(std::pair<int, std::string>(201, "Created"));
+		reasons.insert(std::pair<int, std::string>(301, "Moved Permanently"));
+		reasons.insert(std::pair<int, std::string>(400, "Bad Request"));
+		reasons.insert(std::pair<int, std::string>(403, "Forbidden"));
+		reasons.insert(std::pair<int, std::string>(404, "Not Found"));
+		reasons.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
+		reasons.insert(std::pair<int, std::string>(408, "Request Timeout"));
+		reasons.insert(std::pair<int, std::string>(413, "Content Too Large"));
+		reasons.insert(std::pair<int, std::string>(500, "Internal Server Error"));
+		reasons.insert(std::pair<int, std::string>(501, "Not Implemented"));
+		reasons.insert(std::pair<int, std::string>(505, "HTTP Version Not Supported"));
+	}
+	if (reasons.find(code) != reasons.end())
+		return reasons[code];
+	return std::string();
 }
