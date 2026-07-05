@@ -6,11 +6,12 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:26:21 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:37:50 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Session.hpp"
+#include "http_utils.hpp"
 #include <cstring>
 #include <sstream>
 
@@ -126,4 +127,9 @@ void Session::handleResponse() {
 	// Add Response details and missing fields
 	// Set Response headers
 	// Ensure that Response is valid
+}
+
+void Session::setResponseStatus(Response::StatusCode code) {
+	_response.setCode(code);
+	_response.setReason(getStatusReason(code));
 }
