@@ -16,7 +16,7 @@ TEST(Request, BasicGet) {
              "Host: localhost\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ(req.getMethod(), Request::GET);
+  EXPECT_EQ(req.getMethod(), METHOD_GET);
   EXPECT_EQ(req.getURL(), "/");
   EXPECT_EQ(req.getVersion(), "HTTP/1.1");
   EXPECT_EQ((int)req.getHeaders().size(), 1);
@@ -62,7 +62,7 @@ TEST(Request, BasicPost) {
              "\r\n"
              "username=nhoussie&password=42");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ(req.getMethod(), Request::POST);
+  EXPECT_EQ(req.getMethod(), METHOD_POST);
   EXPECT_EQ((int)req.getHeaders().size(), 2);
   expectHeader(req.getHeaders(), "Host", "localhost");
   expectHeader(req.getHeaders(), "Content-Length", "29");
@@ -90,7 +90,7 @@ TEST(Request, BasicDelete) {
              "Host: localhost\r\n"
              "\r\n");
   EXPECT_TRUE(req.isComplete());
-  EXPECT_EQ(req.getMethod(), Request::DELETE);
+  EXPECT_EQ(req.getMethod(), METHOD_DELETE);
   EXPECT_EQ((int)req.getHeaders().size(), 1);
   expectHeader(req.getHeaders(), "Host", "localhost");
 }
