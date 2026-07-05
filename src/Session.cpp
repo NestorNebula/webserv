@@ -88,8 +88,8 @@ void Session::manageSession() {
 			if (_request.isComplete() || _request.isInvalid()) {
 				handleRequest();
 				handleResource();
+				if (_next != DOCGI) _next = WRSOCK;
 			}
-			if (_next != DOCGI) _next = WRSOCK;
 			break;
 		case DOCGI:
 			if (_resource != NULL) {
@@ -99,7 +99,7 @@ void Session::manageSession() {
 			break;
 		case WRSOCK:
 			break;
-		case CLOSE:
+		case CLOSE: case KPALIVE:
 			break;
 		default:
 			break;
