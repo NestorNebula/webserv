@@ -11,7 +11,7 @@ static void setConfig(ServerConfig &config) {
 	route.autoindex = true;
 	route.methods.insert(METHOD_GET);
 	route.path = "/";
-	route.index.push_back("./");
+	route.root = "./";
 	config.routes.push_back(route);
 }
 
