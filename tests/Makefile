@@ -29,7 +29,8 @@ PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 			  $(SRC_DIR)/Stream.cpp \
 			  $(SRC_DIR)/TemporaryFileStream.cpp \
 			  $(SRC_DIR)/http_utils.cpp \
-			  $(SRC_DIR)/utils/WsLog.cpp
+			  $(SRC_DIR)/utils/WsLog.cpp \
+			  $(SRC_DIR)/Session.cpp
 
 TEST_SRC_DIR = .
 
@@ -38,6 +39,7 @@ TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
 		   $(TEST_SRC_DIR)/StaticResource.cpp \
 		   $(TEST_SRC_DIR)/DirectoryResource.cpp \
 		   $(TEST_SRC_DIR)/http_utils.cpp \
+		   $(TEST_SRC_DIR)/Session.cpp \
 		   $(TEST_SRC_DIR)/main.cpp
 
 GTEST_SRC = $(GTEST_DIR)/googletest/src/gtest-all.cc
