@@ -20,7 +20,7 @@ static void writeSimpleRequest(Session &session) {
              "Host: localhost\r\n"
              "\r\n");
 
-	EXPECT_EQ(session.write(data.c_str(), data.size()), data.size());
+	EXPECT_EQ(session.write(data.c_str(), data.size()), static_cast<long>(data.size()));
 	EXPECT_EQ(session.nextAction(), Session::WRSOCK);
 }
 
@@ -43,7 +43,7 @@ TEST(Session, WriteData) {
              "Connection: close\r\n"
              "\r\n");
 
-	EXPECT_EQ(session.write(data.c_str(), data.size()), data.size());
+	EXPECT_EQ(session.write(data.c_str(), data.size()), static_cast<long>(data.size()));
 	EXPECT_EQ(session.nextAction(), Session::WRSOCK);
 }
 
@@ -61,7 +61,7 @@ TEST(Session, WriteUntilEndOfRequest) {
 
 	for (std::vector<std::string>::const_iterator it = data.begin(), ite = data.end(); it != ite; it++) {
 		EXPECT_EQ(session.nextAction(), Session::RDSOCK);
-		EXPECT_EQ(session.write(it->c_str(), it->size()), it->size());
+		EXPECT_EQ(session.write(it->c_str(), it->size()), static_cast<long>(it->size()));
 	}
 	EXPECT_EQ(session.nextAction(), Session::WRSOCK);
 }
@@ -76,7 +76,7 @@ TEST(Session, ReadData) {
 	Stream::streamsize size = session.read(buf, BUFSIZE);
 	EXPECT_LT(size, BUFSIZE);
 	EXPECT_GT(size, 0);
-	EXPECT_EQ(size, std::string(buf).size());
+	EXPECT_EQ(size, static_cast<long>(std::string(buf).size()));
 	EXPECT_EQ(session.nextAction(), Session::KPALIVE);
 }
 
@@ -90,7 +90,7 @@ TEST(Session, ReadUntilEndOfResponse) {
 	Stream::streamsize size = s1.read(buf, BUFSIZE);
 	EXPECT_LT(size, BUFSIZE);
 	EXPECT_GT(size, 0);
-	EXPECT_EQ(size, std::string(buf).size());
+	EXPECT_EQ(size, static_cast<long>(std::string(buf).size()));
 	EXPECT_EQ(s1.nextAction(), Session::KPALIVE);
 
 	Session s2(config);
