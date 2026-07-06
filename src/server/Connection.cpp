@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 13:27:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/05 16:04:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ std::string Connection::header(const char *key)
 {
 	std::string val;
 	
-	// std::cerr << "header: " << key << std::endl;
 	std::string kstr(key);
 	std::string::const_iterator it = std::search(
 		head.begin(), head.end(),
@@ -421,7 +420,7 @@ const char	**CgiEnv::gen(void)
 
 int	Connection::exec_cgi(void)
 {
-	int			err;
+	int		err;
 
 	int		p1[2];
 	int		p2[2];
@@ -442,6 +441,7 @@ int	Connection::exec_cgi(void)
 		// cleanup
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 	}
+
 	if (pid == 0)
 	{
 		// Epoll:: CLOEXEC should have closed Epoll::epfd
@@ -469,16 +469,17 @@ int	Connection::exec_cgi(void)
 		std::string	file;
 		
 			// FROM_HEADER
-		if (true) // this->serv.get_port() == 8080)
+		if (false) // this->serv.get_port() == 8080)
 		{
-			path = std::string("/usr/bin/perl");
-			file = std::string("test.pl");
+			path = std::string("/usr/bin/python");
+			file = std::string("test.py");
 		}
 		else
 		{
 			// path = std::string("/usr/bin/perl");
 			// file = std::string("test.pl");
 
+				// not at home 
 			path = std::string("/usr/bin/php-cgi"); // DIFFERENT
 			file = std::string("test.php");
 		}
@@ -526,19 +527,15 @@ int	Connection::exec_cgi(void)
 		val = this->header("Content-type");
 		if (val.size())
 			cgienv.add("CONTENT_TYPE", val.c_str());
-
 		// wait to read this much -- even if GET (?) NOPE
 		// cgienv.add("CONTENT_LENGTH", this->istr.size()); // body
 		val = this->header("Content-length");
 		if (val.size())
 			cgienv.add("CONTENT_LENGTH", val.c_str());
 
-// /home/kdonlon/Documents/Projects/webserv/git/src
-
 		cgienv.add("PATH_INFO", "path info"); // added to PHP_SELF (?)
 // PATH_TRANSLATED
 // Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
-
 		cgienv.add("SCRIPT_NAME", "test.php");
 		cgienv.add("SCRIPT_FILENAME", "test.php");
 // 		SCRIPT_NAME
@@ -546,6 +543,7 @@ int	Connection::exec_cgi(void)
 		
 		cgienv.add("QUERY_STRING", "g1=get-one&g2=get-two");
 		
+			// get this from Conn::addr
 		cgienv.add("REMOTE_ADDR", "remote addr");
 		cgienv.add("REMOTE_HOST", "remote host");
 		cgienv.add("REMOTE_USER", "remote user");
@@ -565,8 +563,6 @@ int	Connection::exec_cgi(void)
 
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
 
-
-
 	
 			// CONSTANT : from server
 		cgienv.add("SERVER_NAME", "webserv");
@@ -575,13 +571,23 @@ int	Connection::exec_cgi(void)
 		cgienv.add("SERVER_SOFTWARE", "webserv");
 
 
-		// so .. read FROM cgi .. until (ostr) is full
+		// so .. read FROM cgi .. until (ostr) is full -- UGLY
 		// then we can slap the headers on (?)
 		const char **envp = cgienv.gen();
 
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
+		
+		// cool : this (cout) gets READ by conn
+		//  but : what do we really need to monitor in this case 
+
+// WORK : on ibuf/obuf communication FIRST
 		std::cout << "\n\nwtf\n\n";
-		return (err);	
+
+		// bad executable -- how to handle this (?) actually TWICE (?)
+		exit (err);
+
+		// so .. resource_cgi -- needs to track (pid) .. 
+		// and wait on it at some point .. 
 	}		
 	
 	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
