@@ -39,7 +39,7 @@ RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
 		std::string::size_type equalSize = 0;
 		while (equalSize < url.size() && equalSize < it->path.size() && url[equalSize] == it->path[equalSize])
 			++equalSize;
-		if ((equalSize == it->path.size() && ((url.size() == equalSize) || url[equalSize] == '/'))
+		if ((equalSize == it->path.size() && ((url.size() == equalSize) || (url[equalSize] == '/') || (it->path[equalSize - 1] == '/' && url[equalSize - 1] == '/')))
 				&& (!bestRoute || equalSize > bestRoute->path.size())) {
 			bestRoute = &(*it);
 		}
