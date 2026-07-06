@@ -151,6 +151,9 @@ void Session::handleResource() {
 	else {
 	// Choose type of Resource depending on route/file
 		if (_request.getMethod() == METHOD_GET) {
+			// TODO
+			// Handle Directory resource
+			// Handle Directory index
 			_resource = new StaticResource(_resourcePath);
 		}
 		// TODO
