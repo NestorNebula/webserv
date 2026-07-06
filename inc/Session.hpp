@@ -21,7 +21,7 @@
 
 class Session {
 public:
-	Session(ServerConfig &config): _next(RDSOCK), _config(config), _resource(NULL) {
+	Session(ServerConfig &server): _next(RDSOCK), _server(server), _resource(NULL), _sent(0) {
 		WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
 	}
 	~Session() {
@@ -57,7 +57,9 @@ private:
 
 	Action _next;
 
-	ServerConfig &_config;
+	ServerConfig &_server;
+	RouteConfig *_route;
+	std::string _resourcePath;
 
 	Request _request;
 	Resource *_resource;
@@ -65,10 +67,14 @@ private:
 
 	void throwIfNotAction(Action action) const;
 	void manageSession();
-	void handleRequest();
-	void handleResource();
-	void handleResponse();
 
+	void handleRequest();
+
+	void handleResource();
+	void prepareErrorResource();
+
+	void handleResponse();
+	void setResponseHeaders();
 	void setResponseStatus(Response::StatusCode code);
 
 	Stream::streamsize _sent;
