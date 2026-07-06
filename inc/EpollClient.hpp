@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 13:27:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 16:51:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,20 +20,20 @@
 
 
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ 4095
+#  define EPC_BUF_SIZ 3 // 4095
 # endif
 
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ 4095
+#  define EPC_OUT_SIZ 3 // 4095 -- good test for cgi-out
 # endif
 
 // or .. EpollBufMgr
 	// EpollBuf *hed;
-	// EpollBuf *curW;
+	// EpollBuf *curW; // getW
 		// Q: fill "partial" space 
 		// or always create a new one
 		// 
-	// EpollBuf *curR;
+	// EpollBuf *curR; // getR : add new OR return one with avail
 // Conn
 	// reading a lot of file data to send to a cgi
 	// conn::can_read ... read 
@@ -69,7 +69,21 @@ public:
 			return (-1);
 		return (this->end - this->beg);
 	}
-	EpollBuf	*nxt;
+	// cleanup : assume (hed) static (?)
+	// EpollBuf * get_write(void)
+		// may need to allocate another
+	// Epollbuf * get_read(void)
+		// while (beg == end)
+			// (nxt)
+	// std::string str(void)
+	// build from (potentially) multiple buffers
+	// read_from_stream(cnt)
+	// mostly .. fill/send one chunk at a time 
+	// but this approach provides security
+	// when not all bytes are read/sent
+	// wrap (copy?)
+	// push (char*)
+	EpollBuf		*nxt;
 private:
 	char			mem[EPC_BUF_SIZ + 1]; // or :: FULL (for binary)
 	ssize_t			beg;
@@ -84,6 +98,7 @@ typedef enum
 	EPC_CGI,
 	EPC_MAX
 }	epc_typ;
+// ATTN : typ_str
 
 typedef enum
 {
@@ -93,13 +108,17 @@ typedef enum
 	EPC_STATE_MAX
 }	epc_state;
 
+class Epoll;
+
 class EpollClient
 {
 private:
-	EpollClient (const EpollClient & that) { (void) that; }
-	EpollClient & operator = (const EpollClient & that) { (void) that; return (*this); }
+	EpollClient & operator = (const EpollClient & ) 
+		{ return (*this); }
 public:
-	EpollClient(epc_typ _typ, int _fd);
+	EpollClient(Epoll & _ep, epc_typ _typ, int _fd);
+	EpollClient (const EpollClient & that) : 
+		ep(that.ep), typ(that.typ), fd(that.fd) {}
 	virtual ~EpollClient();
 
 	int			recv(void);
@@ -111,22 +130,27 @@ public:
 	virtual int	pollin(void) = 0;
 	virtual int pollout(void) = 0;
 
+	void		set_lact(void);
+	
 	int			get_fd(void)	const { return (this->fd); }
 	epc_typ		get_typ(void)	const { return (this->typ); }
 	epc_state	get_state(void)	const { return (this->state); }
 
     std::string typ_str(void);
-    
+	
+	int			mod_evt(int e);
 protected:
+	Epoll		&ep;
 	epc_typ		typ;
 	int			fd;
 	time_t		lact;
-	int			timeout(void);
+
 public:
 	epc_state	state;
 	int			error;
 	
 public:
+	// EpollBuf		ebuf;
     char            ibuf[EPC_BUF_SIZ + 1];
 	// size_t		isiz;
 	std::string		istr;
@@ -135,8 +159,6 @@ public:
 	std::string		ostr;
 	// char            obuf[]
 	// size_t		osiz;
-	std::vector<char>	ivec;
-	std::vector<char>	ovec;
 };
 
 #endif

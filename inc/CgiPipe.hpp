@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 09:39:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 15:20:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,12 @@ class Connection;
 class CgiPipe : public EpollClient
 {
 private:
-	CgiPipe (const CgiPipe & that) : EpollClient(EPC_CGI, that.fd), conn(that.conn) {};
-	CgiPipe & operator = (const CgiPipe & that) { (void) that; return (*this); }
+	CgiPipe (const CgiPipe & that) : 
+		EpollClient(that), conn(that.conn) {};
+	CgiPipe & operator = (const CgiPipe & ) 
+		{ return (*this); }
 public:
-	CgiPipe (int _fd, Connection & _conn);
+	CgiPipe (Epoll &_ep, int _fd, Connection & _conn);
 	~CgiPipe();
 	
 	int		pollin(void);

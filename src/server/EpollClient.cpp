@@ -6,20 +6,22 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/05 15:49:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 16:49:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
+#include "Epoll.hpp"
 
-EpollClient::EpollClient::EpollClient(epc_typ _typ, int _fd) : 
+// EP
+EpollClient::EpollClient::EpollClient(Epoll & _ep, epc_typ _typ, int _fd) : 
+	ep(_ep),
 	typ(_typ), 
 	fd(_fd), 
 	lact(0), 
 	state(EPC_STATE_INIT), 
 	error(0)
 {
-
 }
 
 EpollClient::~EpollClient()
@@ -29,10 +31,17 @@ EpollClient::~EpollClient()
 		close(this->fd);
 }
 
+int	EpollClient::mod_evt(int e)
+{
+	return (this->ep.mod(this, e));
+}
+
 int	EpollClient::recv(void)
 {
 	int	err = 0; // size_t
 
+	// EpollBuf::setup(EPC_BUF_SIZ)
+		// malloc .. to receive enough
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
 	WsLog::_(LVL_INFO, TGT_EPC_RECV, "recv: ", err);
@@ -52,51 +61,25 @@ int	EpollClient::recv(void)
 	// this->isiz = err;
 	this->ibuf[err] = '\0';
 
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "ibuf");
-	WsLog::_(LVL_INFO, TGT_EPC_RECV, "\n", this->ibuf);
-
-	if (err == EPC_BUF_SIZ)
-	{
-		// more to read
-		// epoll should let us know 
-	}
-	
 	return (err);
 }
-
-// send(EpollBuf *)
-// Conn : sends output from resource
-	// file_read
-	// cgi_exec
-// Conn : 
-	// rsrc.write_data()
-		// file upload
-		// cgi exec
-		// may be more to write ..
-		
-	// rsrc.read_data() -- returns current EpollBuf of resources
-// What problems does <stream> solve, and at what cost?
 
 int	EpollClient::send(const char *buf, size_t siz)
 {
 	int err; // size_t
 	
+	// EpollBuf::setup -- from where .. and how much .. to send
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 
 	size_t osiz = EPC_OUT_SIZ;
 	if (osiz > siz)
 		osiz = siz;
 
-	// while (osiz) ... 
-	// osiz -= err;
-	// NO : the promise here .. is that we only write fixed-max amount of data
-	// per (fd) per call ...
-	// seems inefficient, if only one socket is active
-	// ensures : distribution is better
 	err = write(this->fd, buf, osiz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
 
+// NEED : to track if all bytes not sent ... 
 	if (err < 0)
 	{
 		this->state = EPC_STATE_ERROR;
@@ -110,6 +93,7 @@ int	EpollClient::send(const char *buf, size_t siz)
 	return (err); // bytes written
 }
 
+// get rid of this
 int	EpollClient::send(std::string & buf)
 {
 	int	err; // size_t
@@ -150,24 +134,7 @@ std::string EpollClient::typ_str(void)
 	return (std::string(""));
 }
 
-
-
-#define EPC_TO_SECS 5
-
-int	EpollClient::timeout(void)
+void	EpollClient::set_lact(void)
 {
-	int	err = 0;
-
-	time_t now = time(&now);
-	if (this->lact)
-	{
-		double secs = ((double) (now - lact));
-		if (secs > EPC_TO_SECS)
-		{
-			WsLog::_(LVL_WARN, TGT_CONN, "timed out");
-			err = 1;
-		}
-	}
-	this->lact = now;
-	return (err);
+	this->lact = time(&this->lact);
 }

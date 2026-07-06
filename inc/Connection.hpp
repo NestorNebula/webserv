@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 13:19:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 16:39:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ class CgiEnv
 {
 private:
 	CgiEnv (const CgiEnv & that);
-	CgiEnv & operator = (const CgiEnv & that) { (void) that; return (*this); }
+	CgiEnv & operator = (const CgiEnv & )
+		{ return (*this); }
 public:
 	CgiEnv(void);
 	~CgiEnv();
@@ -45,35 +46,40 @@ public:
 	void		add(const char *key, const char *val);
 	void		add(const char *key, int n);
 	const char	**gen(void);
+	// from_header(<map>)
 private:
 	std::vector<std::string>	data;
 	const char					**res;
 };
+
+
 
 class Server;
 
 class Connection : public EpollClient
 {
 private:
-	Connection (const Connection & that);
-	Connection & operator = (const Connection & that) { (void) that; return (*this); }
+	Connection (const Connection & that) : 
+		EpollClient(that), 
+		serv(that.serv), req_cnt(0) {}
+	Connection & operator = (const Connection & ) 
+		{ return (*this); }
 public:
-	Server		&serv;
 	
-	Connection (int _fd, Server &_serv);
+	Connection (Epoll &_ep, int _fd, Server &_serv);
 	~Connection();
 	
 	int			pollin(void);
 	int			pollout(void);
 	
+// TESTING
 	std::string	header(const char *key);
 	std::string	head;
 private:
+	Server		&serv;
 	int			exec_cgi(void);
 	
 	int			req_cnt;
-	int			filedes; // "response"
-	
 };
 
 #endif

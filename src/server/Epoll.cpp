@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/05 15:49:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 16:19:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,14 @@ https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
 
 // When the EPOLL_CLOEXEC flag is set, any child process forked by the current process will close the epoll descriptor before it execs, so the child process won’t have access to the epoll instance anymore.
 
+// ***
 // Avoid forking, and if you must: close all epoll-registered file descriptors before calling execve. Explicitly deregister affected file descriptors from epoll set before calling dup/dup2/dup3 or close.
 
 // https://idea.popcount.org/2017-03-20-epoll-is-fundamentally-broken-22/
 
-// epoll_ctl(EPOLL_CTL_ADD) doesn't actually register a file descriptor. Instead it registers a tuple1 of a file descriptor and a pointer to underlying kernel object. Most confusingly the lifetime of an epoll subscription is not tied to the lifetime of a file descriptor. It's tied to the life of the kernel object.
+// epoll_ctl(EPOLL_CTL_ADD) doesn't actually register a file descriptor. Instead it registers a tuple of a file descriptor and a pointer to underlying kernel object. Most confusingly the lifetime of an epoll subscription is not tied to the lifetime of a file descriptor. It's tied to the life of the kernel object.
+
+// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
 
 static const char *evt_name[] =
 {
@@ -78,16 +81,10 @@ static std::string evt_type(struct epoll_event *evt)
 	return (typ);
 }
 
+/*
+	epoll_pwait()
 
-Epoll::Epoll (void) : epfd(-1), ecnt(0)
-{
-	this->epfd = epoll_create1(EPOLL_CLOEXEC);
-	if (this->epfd < 0)
-		throw (std::runtime_error("Epoll : bad create"));
-		
-	signal(SIGINT, sigint_handler);
-
-#if 0 // ILLEGAL FUNCTIONS
+setup
 		// use this with wait_mask
 		// wait_mask .. will REPLACE the current sigset
 		// for the duration of the epoll_pwait() call
@@ -95,10 +92,27 @@ Epoll::Epoll (void) : epfd(-1), ecnt(0)
     sigemptyset(&block_mask);
     sigaddset(&block_mask, SIGINT);
     sigprocmask(SIG_BLOCK, &block_mask, NULL);
-#endif
+
+execute
+
+// epoll_pwait() allows an application to safely wait until either a file descriptor becomes ready or until a signal is caught.
+
+	sigset_t wait_mask;
+    sigemptyset(&wait_mask); // mask for DURING epoll_pwait
+// pthread_sigmask(SIG_SETMASK, &sigmask, &origmask);
+// ready = epoll_wait(epfd, &events, n, timeout);
+// pthread_sigmask(SIG_SETMASK, &origmask, NULL);
+	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
+*/
+
+Epoll::Epoll (void) : epfd(-1), ecnt(0)
+{
+	this->epfd = epoll_create1(EPOLL_CLOEXEC);
+	if (this->epfd < 0)
+		throw (std::runtime_error("Epoll : bad create"));
+	signal(SIGINT, sigint_handler);
 };
 
-// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
 Epoll::~Epoll()
 {
 	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
@@ -113,7 +127,6 @@ Epoll::~Epoll()
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
-	
 };
 
 int	Epoll::add(EpollClient *cli, int e)
@@ -127,7 +140,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	evt.data.ptr = cli;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd());
+	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
@@ -155,10 +168,11 @@ int	Epoll::mod(EpollClient *cli, int e)
 	evt.data.ptr = cli;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd());
+	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
+		// return (this->add(cli, e));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), &evt);
 	if (err < 0)
@@ -173,7 +187,7 @@ int	Epoll::del(EpollClient *cli)
 	int err;
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd());
+	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
@@ -234,31 +248,14 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
-#if 1
-	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, 10000); // to_ms
-#else
-// epoll_pwait() allows an application to safely
-//        wait until either a file descriptor becomes ready or until a
-//        signal is caught.
-
-	sigset_t wait_mask;
-    sigemptyset(&wait_mask); // mask for DURING epoll_pwait
-// pthread_sigmask(SIG_SETMASK, &sigmask, &origmask);
-// ready = epoll_wait(epfd, &events, n, timeout);
-// pthread_sigmask(SIG_SETMASK, &origmask, NULL);
-	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
-
-	// SIGINT not "caught" .. if events are still waiting to process
-#endif
+	// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
+	
+	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
-		
-	if (this->ecnt == 0) // timeout
-		return (0);
-
+	if (this->ecnt == 0)
+		return (this->ecnt);
 	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "ecnt: ", this->ecnt);
-	
 	return (this->ecnt);
 }
 
@@ -276,6 +273,7 @@ int	Epoll::loop(void)
         if (e == 0)
 		{
 			// timeout
+			// this->check_timeouts()
 		}
         else if (e < 0)
 			return (1);
@@ -303,8 +301,8 @@ int	Epoll::loop(void)
 
 WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
-
+// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			
             if (evt->events & EPOLLERR)
 			{
 				this->rem(epc);
@@ -312,6 +310,7 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 			}
             if (evt->events & EPOLLIN)
             {
+				epc->set_lact();
 				err = epc->pollin();
 				if (err < 0) // && state (?)
 				{
@@ -321,6 +320,7 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
             }
             if (evt->events & EPOLLOUT)
             {
+				epc->set_lact();
 				err = epc->pollout();
 				if (err < 0) // && state (?)
 				{
@@ -339,6 +339,7 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd());
 				continue;
 			}
         }
+		// this->check_timeouts()
     }
 	return (0);
 }

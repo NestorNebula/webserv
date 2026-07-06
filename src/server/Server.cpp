@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 09:58:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 14:49:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll & epoll, unsigned short p) : EpollClient(EPC_SERV, -1), ep(epoll), port(p)
+Server::Server (Epoll & _ep, unsigned short p) : 
+	EpollClient(_ep, EPC_SERV, -1), 
+	port(p)
 {
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
@@ -22,11 +24,6 @@ Server::Server (Epoll & epoll, unsigned short p) : EpollClient(EPC_SERV, -1), ep
 	if (this->init())
 		throw (std::runtime_error("Server : construct failed"));
 };
-
-Server::Server(const Server & that) : EpollClient(EPC_SERV, that.fd), ep(that.ep)
-{
-	
-}
 
 Server::~Server()
 {
@@ -80,10 +77,9 @@ int	Server::pollin(void)
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
 	
-	Connection *c = new Connection(conn_fd, *this);
+	Connection *c = new Connection(this->ep, conn_fd, *this);
 	
-	err = this->ep.add(c, EPOLLIN);
-	
+	err = this->ep.add(c, EPOLLIN);	
 	return (err);
 }
 

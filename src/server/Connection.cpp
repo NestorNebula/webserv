@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/05 16:04:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 17:25:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,23 @@
 #include "Server.hpp"
 #include "CgiPipe.hpp"
 
-Connection::Connection (int _fd, Server &_serv) : EpollClient(EPC_CONN, _fd), serv(_serv), 
-	req_cnt(0), filedes(-1)
+Connection::Connection (Epoll & _ep, int _fd, Server &_serv) : 
+	EpollClient(_ep, EPC_CONN, _fd), 
+	serv(_serv), 
+	req_cnt(0)
 {
 };
-
-Connection::Connection(const Connection & that) : EpollClient(EPC_CONN, that.fd), serv(that.serv),
-	req_cnt(0), filedes(-1)
-{
-}
-
 
 Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-	if (filedes != -1) // Resource
-		close(filedes);
 };
 
 // GET Requests: The encoded string is appended to the URL and passed to the CGI script via the QUERY_STRING environment variable. 
+
 // POST Requests: The encoded data is sent in the request body. The script must read the number of bytes specified by the CONTENT_LENGTH environment variable from standard input (stdin). 
+
 // Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
 static bool	icmp(char a, char b)
@@ -45,7 +41,7 @@ static bool	icmp(char a, char b)
 
 std::string Connection::header(const char *key)
 {
-	std::string val;
+	std::string val("");
 	
 	std::string kstr(key);
 	std::string::const_iterator it = std::search(
@@ -85,12 +81,14 @@ std::string Connection::header(const char *key)
 	return (val);
 }
 
+
+
+
 int	Connection::pollin(void)
 {
-	int	err = 0;
+	int	err;
 
-	this->timeout();
-	
+	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
 	err = this->recv();
 	if (err < 0)
 	{
@@ -102,15 +100,6 @@ int	Connection::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: zero");
 		return (-1);
 	}
-	// CONN_STATE_INIT
-	// CONN_STATE_HAND
-	// CONN_STATE_HEAD
-		// create resource 
-	// CONN_STATE_BODY
-	
-	// we may need to be passing data .. 
-		// cgi
-		// file upload
 
 // EpollBuf
 
@@ -121,31 +110,28 @@ int	Connection::pollin(void)
 // gonna be hard to test BIG (binary) files without that approach in place 
 
 	// copy (?) or keep-adding (?)
-	istr += std::string(this->ibuf); // for (isiz)
-    ivec.insert(ivec.end(), ibuf, ibuf + err);
-	
-	// WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
-	// WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
-	
+	// add to (str) on receive .. if that's what we want 
 
+	
+	// RECV (3)
+	// body .. not fully received
+	// need to know .. we are pushing to RESOURCE 
+
+	// this->ebuf->str()
+	istr += std::string(this->ibuf); // for (isiz)
+	
+	// if (state < HAVE_HEAD)
 	std::string hed_end("\r\n\r\n");
 	
 	size_t	crlf = istr.find(hed_end);
 	if (crlf == std::string::npos)
 		return (err);
 
-// what would this look like with <iostream>
-	// rsrc.send_data();
-	// BUT : we need to pass cgi through epoll ..
-	// or : rsrc.data_src(conn::ibuf)
-		// when it can write .. that's where the data comes from
-	// rsrc.data_dst
-		// where data the source produces should end up
-		// this is what (conn) will used to write out 
+	// state = HAVE_HEAD
 	this->req_cnt++;
 
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "istr");
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "****\n", istr);
 
 	head = istr.substr(0, crlf + 4);
 	// need to save head shit .. for passing to CGI
@@ -154,36 +140,13 @@ int	Connection::pollin(void)
 	//  Reading data from STDIN is required when METHOD=POST, whereas when METHOD=GET, data are passed through the QUERY_STRING environment variable
 		
 	WsLog::_(LVL_INFO, TGT_CONN_RECV, "body");
-	WsLog::_(LVL_INFO, TGT_CONN_RECV, "\n", istr);
-	// for (size_t k=0; k < ivec.size(); k++)
-	// 	std::cerr << ivec[k];
+	WsLog::_(LVL_INFO, TGT_CONN_RECV, "****\n", istr);
 
-
-#define RESP_SIMPLE 0
-#define RESP_FILE 1
-#define RESP_CGI 2
-#define RESP 2
-
-	// res.init(FROM HEADER)
-#if (RESP == RESP_FILE)
-	filedes = open("./files/2k_earth_daymap.jpg", O_RDONLY);
-	if (filedes < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
-		
-	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: 463087\r\n\r\n");
-
-	// filedes = open("./Kanan.mp3", O_RDONLY);
-	// if (filedes < 0)
-	// 	return WsLog::_errno(LVL_ERR, TGT_CONN, "open (file)");
-	// ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: audio/mp3\r\nContent-Length: 14975750\r\n\r\n");
-	
-	// GENERAL QUESTION : send-buf-until-flushed (?)
-	// one "send" per "epoll" (?)
-
-	this->send(ostr); // UGLY : testing
-	this->serv.ep.mod(this, EPOLLOUT); // not expeting any more pollin
-	
-#elif (RESP == RESP_CGI)
+	// if (state >= HAVE_RSRC)
+		// send to resource ... 
+		// or .. let resource grab from (ibuf)
+		// return
+	// make_rsrc
 
 	err = this->exec_cgi(); // nb : from "HEADER"
 	if (err < 0)
@@ -201,7 +164,11 @@ int	Connection::pollin(void)
 	// if rsrc.has_data()
 
 	
-	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n");
+		// maybe fucking not 
+		// rsrc.write_header .. 
+			// may be FAIL
+	ostr = std::string("HTTP/1.1 200 OK\r\n");
+	// conn.send() SUCKS 
 	this->send(ostr); // UGLY : testing
 	this->ostr = std::string("");
 
@@ -210,7 +177,7 @@ int	Connection::pollin(void)
 	
 
 		// tiny testing -- really .. need to keep reading post 
-	this->serv.ep.mod(this, 0);
+	this->mod_evt(0);
 	
 	// Resource::generate()
 		// may fail here .. bad file, bad directory, bad pipe, not allowed
@@ -232,13 +199,6 @@ int	Connection::pollin(void)
 
 	// need to know cgi INPUT fd .. to write to it (?)
 	// OR : CGI .. "reads" from conn->istr
-#else //  (RESP == RESP_SIMPLE)
-// MINI_BODY
-	ostr = std::string("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: Keep-Alive\r\nContent-Length: 9\r\n\r\nGotcha!!\n");
-	this->send(ostr); // not here .. but TEST 
-	istr = std::string("");
-	this->serv.ep.mod(this, EPOLLOUT);
-#endif
 
 	return (err);
 }
@@ -247,64 +207,44 @@ int	Connection::pollin(void)
 
 
 
-// ∗ Just remember that, for chunked requests, your server needs to un-chunk
-// them, the CGI will expect EOF as the end of the body.
-// ∗ The same applies to the output of the CGI. If no content_length is
-// returned from the CGI, EOF will mark the end of the returned data.
+// ∗ Just remember that, for chunked requests, your server needs to un-chunk them, the CGI will expect EOF as the end of the body.
+// ∗ The same applies to the output of the CGI. If no content_length is returned from the CGI, EOF will mark the end of the returned data.
 // ∗ The CGI should be run in the correct directory for relative path file access.
 
 int	Connection::pollout(void)
 {
 	int	err = 0;
 
-	this->timeout();
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
+	// EpollBuf * rsrc.get_data()
+	
+	// buf .. has state .. set by provider
 
+	
+	// if (!rsrc.send_head())
+		
+	// done 
+	// if (this->obuf.has-data-to-send)
+		// sent it
+	// OR : always try to fill 
+	
 	// rsrc.has_data()
 		// file : reads
 		// cgi  : returns (char*) ? 
-#if (RESP == RESP_FILE)
 
-	// and .. header (ostr) needs to be sent .. 
-	// MsgBuf .. was pretty handy
-	// output of CGI may be binary as well 
-	if (filedes > 0)
-	{
-		err = read(filedes, this->ibuf, EPC_BUF_SIZ);
-		if (err < 0)
-		{
-			close(filedes);
-			filedes = -1;
-			return WsLog::_errno(LVL_ERR, TGT_CONN, "read (file)");
-		}
-		if (err == 0)
-		{
-			close(filedes);
-			filedes = -1;
-			WsLog::_(LVL_DBG, TGT_CONN_RECV, "read: zero");
-// KEEP_ALIVE
-			this->serv.ep.mod(this, EPOLLIN);
+	// EpollBuf : obuf ..
+	// filled by ..
+	// may need to FLUSH before getting more data
 
-			return (0);
-		}
-		
-		err = this->send(ibuf, err);
+	// cgi / conn : ORDER (!)
+	// conn : nothing to send
+	// cgi  : fills
+		// "alert" conn .. HOW .. 
 
-		// and if NOT ALL BYTES ARE SENT (?)
-		if (err < 0)
-			return WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
-		if (err == 0)
-		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: zero");
-			return (-1);
-		}
-		
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
-
-	}
-#else
-
-	// CGI : so .. we need to .. READY EVERYTHING FIRST ...
+	// CGI : so .. we need to .. READ EVERYTHING FIRST (?)
+		// no .. not if huge file .. 
+	// What headers are the server expected to add ... 
 	
 	// so that we can set the content-length header accordingly (?)
 	// v.insert(v.end(), data2, data2 + strlen(data2));
@@ -314,13 +254,26 @@ int	Connection::pollout(void)
 
 	// (obuf) : pointer to buffer filled by resource
 		
+	// CgiPipe::status (?)
+	// cgi_out::ibuf (?)
+	
+	// cgi_out::state (read_data)
+
+	// FROM : a single EpollBuf ..
+	// which might get filled by ... 
+	// file_read
+	// dir_list
+	
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
-		this->serv.ep.mod(this, 0);
+		this->mod_evt(0); // so .. 
 		return (0);
 	}
 
+	// send as much as we can .. 
+	// letting EpollBuf manage the internals
+	// so CgiPipe knows where to write next time around
 	err = this->send(ostr);
 
 
@@ -338,6 +291,12 @@ int	Connection::pollout(void)
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, ostr);
 
 	
+	// CgiPipe::status DONE (?) how do we know (?) when its (fd) is closed (?)
+	
+	// this is not where we know anything ...
+	// Q: how do we know we are done (?)
+	// when .. cgi .. closes its stdout (?)
+	// where does fail/wait come into play
 	if (ostr.size())
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", ostr.size());
@@ -352,12 +311,12 @@ int	Connection::pollout(void)
 		
 		// Q: have we sent (content-length) bytes (?)
 		// Q: chunked send .. must close 
-		// this->serv.ep.mod(this, 0);
+		// this->mod_evt(0);
 		// nothing if that was the header for a FILE 
 
 #if 0 // KEEP_ALIVE
 		// see more HUP => read [0] with THIS .. AND NOT siege.conf
-		this->serv.ep.mod(this, EPOLLIN); // something more here ..
+		this->mod_evt(EPOLLIN); // something more here ..
 #else
 		// TEST : content-length header .. longer than what we send
 		// curl: (18) end of response with 5 bytes missing
@@ -365,10 +324,8 @@ int	Connection::pollout(void)
 #endif
 	}
 
-#endif
 	return (err); // (!) bytes written
 }
-
 
 CgiEnv::CgiEnv(void) : res(NULL)
 {
@@ -381,6 +338,7 @@ CgiEnv::~CgiEnv()
 		delete[] res;
 }
 
+// from_headers
 void	CgiEnv::add(const char *key, const char *val)
 {
 	// <map> first .. to override multiple (?)
@@ -445,7 +403,6 @@ int	Connection::exec_cgi(void)
 	if (pid == 0)
 	{
 		// Epoll:: CLOEXEC should have closed Epoll::epfd
-
 		close(p1[1]);
 		err = dup2(p1[0], STDIN_FILENO);
 		if (err < 0)
@@ -465,25 +422,23 @@ int	Connection::exec_cgi(void)
 		close(p2[1]);
 
 
+			// FROM HEADER / cgi_env
 		std::string	path;
 		std::string	file;
 		
-			// FROM_HEADER
+		// TEST CGI at server startup
 		if (false) // this->serv.get_port() == 8080)
 		{
-			path = std::string("/usr/bin/python");
-			file = std::string("test.py");
+			// path = std::string("/usr/bin/python");
+			// file = std::string("test.py");
+			path = std::string("/usr/bin/perl");
+			file = std::string("test.pl");
 		}
 		else
 		{
-			// path = std::string("/usr/bin/perl");
-			// file = std::string("test.pl");
-
-				// not at home 
-			path = std::string("/usr/bin/php-cgi"); // DIFFERENT
+			path = std::string("/usr/bin/php-cgi");
 			file = std::string("test.php");
 		}
-
 
 		char const *args[3];
 		args[0] = path.c_str();
@@ -522,25 +477,28 @@ int	Connection::exec_cgi(void)
 		std::string val;
 
 		// cgienv.add("CONTENT_TYPE", "application/x-www-form-urlencoded"); // IMPORTANT
-		// cgienv.add("CONTENT_TYPE", "multipart/form-data"); // NEEDS BOUNDARY
+		// cgienv.add("CONTENT_TYPE", "multipart/form-data"); // ATTN : does (cgi) parse boundary (?)
 
 		val = this->header("Content-type");
 		if (val.size())
 			cgienv.add("CONTENT_TYPE", val.c_str());
-		// wait to read this much -- even if GET (?) NOPE
-		// cgienv.add("CONTENT_LENGTH", this->istr.size()); // body
 		val = this->header("Content-length");
 		if (val.size())
 			cgienv.add("CONTENT_LENGTH", val.c_str());
+// should (conn) know about INCOMING contenth-length ... 
+// if we do not have content-length .. need to CLOSE the socket
+// after all data has been written
 
 		cgienv.add("PATH_INFO", "path info"); // added to PHP_SELF (?)
 // PATH_TRANSLATED
 // Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
+		// SCRIPT_NAME
+		// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
 		cgienv.add("SCRIPT_NAME", "test.php");
 		cgienv.add("SCRIPT_FILENAME", "test.php");
-// 		SCRIPT_NAME
-// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
+// 		
 		
+		// need to EXTRACT from URL
 		cgienv.add("QUERY_STRING", "g1=get-one&g2=get-two");
 		
 			// get this from Conn::addr
@@ -565,14 +523,14 @@ int	Connection::exec_cgi(void)
 
 	
 			// CONSTANT : from server
-		cgienv.add("SERVER_NAME", "webserv");
-		cgienv.add("SERVER_PORT", "8080");
+		cgienv.add("SERVER_NAME", "webserv"); // virtual
+		cgienv.add("SERVER_PORT", this->serv.get_port());
 		cgienv.add("SERVER_PROTOCOL", "HTTP/1.1");
 		cgienv.add("SERVER_SOFTWARE", "webserv");
 
 
-		// so .. read FROM cgi .. until (ostr) is full -- UGLY
-		// then we can slap the headers on (?)
+		// need to ADD TO .. current (envp) ? 
+		// cwd() !!!
 		const char **envp = cgienv.gen();
 
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
@@ -583,11 +541,10 @@ int	Connection::exec_cgi(void)
 // WORK : on ibuf/obuf communication FIRST
 		std::cout << "\n\nwtf\n\n";
 
+
+// cgi HUP .. on python exception
 		// bad executable -- how to handle this (?) actually TWICE (?)
 		exit (err);
-
-		// so .. resource_cgi -- needs to track (pid) .. 
-		// and wait on it at some point .. 
 	}		
 	
 	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
@@ -609,15 +566,14 @@ int	Connection::exec_cgi(void)
 	}
 	close (p1[1]);
 
-	epc_cgi = new CgiPipe(cgifd, *this);
-	err = this->serv.ep.add(epc_cgi, EPOLLOUT);
+	epc_cgi = new CgiPipe(this->ep, cgifd, *this);
+	err = this->ep.add(epc_cgi, EPOLLOUT);
 	if (err < 0)
 	{
 		// cleanup (?)
 		// delete (epc_cgi);
 		return (err);
 	}
-
 
 	cgifd = dup(p2[0]);
 	if (cgifd < 0)
@@ -627,8 +583,8 @@ int	Connection::exec_cgi(void)
 	}
 	close (p2[0]);
 	
-	epc_cgi = new CgiPipe(cgifd, *this);
-	err = this->serv.ep.add(epc_cgi, EPOLLIN);
+	epc_cgi = new CgiPipe(this->ep, cgifd, *this);
+	err = this->ep.add(epc_cgi, EPOLLIN);
 	if (err < 0)
 	{
 		// cleanup (?)
