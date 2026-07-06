@@ -172,6 +172,8 @@ void Session::prepareErrorResource() {
 	std::ostringstream oss;
 	oss << _response.getCode();
 	std::string errPage = errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"];
+	if (!isAccessibleFile(errPage))
+		errPage = errPages["default"];
 	delete _resource;
 	_resource = new StaticResource(errPage);
 }
