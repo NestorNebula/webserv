@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "Session.hpp"
+#include "StaticResource.hpp"
+#include "HttpMethod.hpp"
 #include "http_utils.hpp"
 #include <cstring>
 #include <sstream>
@@ -89,18 +91,25 @@ void Session::manageSession() {
 			if (_request.isComplete() || _request.isInvalid()) {
 				handleRequest();
 				handleResource();
-				if (_next != DOCGI) _next = WRSOCK;
+				if (_next != DOCGI) {
+					handleResponse();
+					_next = WRSOCK;
+				}
 			}
 			break;
 		case DOCGI:
 			if (_resource != NULL) {
-				handleResource();
+				handleResponse();
 				_next = WRSOCK;
 			}
 			break;
 		case WRSOCK:
 			break;
 		case CLOSE: case KPALIVE:
+			if (_response.getVersion() == "HTTP/1.1")
+				_next = KPALIVE;
+			else
+				_next = CLOSE;
 			break;
 		default:
 			break;
@@ -111,22 +120,94 @@ void Session::handleRequest() {
 	// TODO
 	// Check Request format and validity
 	// Ensure start line and headers values make sense
+	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
+		return setResponseStatus(400);
+	if (_request.getMethod() == METHOD_UNKNOWN)
+		return setResponseStatus(501);
 	// Check route and file
+	_route = findBestRoute(_request.getURL(), _server);
+	if (!_route)
+		return setResponseStatus(404);
+	_resourcePath = resolvePath(_request.getURL(), *_route);
 	// Check that method works for route/file
+	if (!isAllowedMethod(_request.getMethod(), *_route))
+		return setResponseStatus(405);
+	if (!isExistingFile(_resourcePath)) {
+		if (_request.getMethod() == METHOD_POST && _route->upload)
+			return;
+		return setResponseStatus(404);
+	}
+	if (!isAccessibleFile(_resourcePath))
+		return setResponseStatus(403);
+	if (isCgi(_resourcePath, *_route))
+		_next = DOCGI;
 }
 
 void Session::handleResource() {
-	// TODO
+	if (_next == DOCGI)
+		return;
+	if (_response.getCode() >= 400)
+		prepareErrorResource();
+	else {
 	// Choose type of Resource depending on route/file
-	// Store CGI once executed
+		if (_request.getMethod() == METHOD_GET) {
+			_resource = new StaticResource(_resourcePath);
+		}
+		// TODO
+		// Handle upload Resource
+	}
 	// Handle Resource errors
+	if (_resource) {
+		_resource->generate();
+		if (_resource->failed()) {
+			setResponseStatus(500);
+			delete _resource;
+			_resource = NULL;
+		}
+	}
+}
+
+void Session::prepareErrorResource() {
+	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
+	std::ostringstream oss;
+	oss << _response.getCode();
+	std::string errPage = errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"];
+	delete _resource;
+	_resource = new StaticResource(errPage);
 }
 
 void Session::handleResponse() {
 	// TODO
 	// Add Response details and missing fields
-	// Set Response headers
+	if (!isValidVersion(_request.getVersion()))
+		_response.setVersion("HTTP/1.1");
+	else
+		_response.setVersion(_request.getVersion());
+	if (!_response.getCode()) {
+		if (_request.getMethod() != METHOD_POST || !_route->upload)
+			setResponseStatus(200);
+		else
+			setResponseStatus(201);
+	}
+	setResponseHeaders();
+	_response.setResource(_resource);
 	// Ensure that Response is valid
+	if (!_response.isReady())
+		throw std::logic_error("Incomplete response generated");
+}
+
+void Session::setResponseHeaders() {
+	// TODO
+	// Add missing headers
+	Headers headers;
+
+	headers.insert("Server", "Webserv");
+	// Date header
+	// Content-Length header
+	// Content-Type header
+	// ...
+	
+	_response.addHeaders(headers.begin(), headers.end());
 }
 
 void Session::setResponseStatus(Response::StatusCode code) {
