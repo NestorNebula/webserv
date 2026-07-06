@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 16:39:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:11:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,14 @@ private:
 };
 
 
-
 class Server;
+
+
+#define CONN_HAS_HEAD 1 
+#define CONN_HAS_RSRC 2
+#define CONN_SENT_RESP 3
+#define RSRC_SENT_BODY 4
+#define CONN_SENT_LENGTH 5
 
 class Connection : public EpollClient
 {
@@ -69,9 +75,11 @@ public:
 	Connection (Epoll &_ep, int _fd, Server &_serv);
 	~Connection();
 	
-	int			pollin(void);
-	int			pollout(void);
+	ssize_t		pollin(void);
+	ssize_t		pollout(void);
+	int			hup(void) { return (0); }
 	
+private:
 // TESTING
 	std::string	header(const char *key);
 	std::string	head;
@@ -80,6 +88,10 @@ private:
 	int			exec_cgi(void);
 	
 	int			req_cnt;
+// TESTING
+	std::string	resp;
+public:
+	int			state;
 };
 
 #endif

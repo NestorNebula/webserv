@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 15:20:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:04:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@ public:
 	CgiPipe (Epoll &_ep, int _fd, Connection & _conn);
 	~CgiPipe();
 	
-	int		pollin(void);
-	int		pollout(void);
+	ssize_t	pollin(void);
+	ssize_t	pollout(void);
+	int		hup(void);
 
 private:
 	Connection	&conn;

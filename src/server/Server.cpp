@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 14:49:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:07:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,9 @@ int Server::init(void)
 	return (err);
 }
 
-int	Server::pollin(void)
+ssize_t	Server::pollin(void)
 {
-	int	err;
+	ssize_t	err;
 
 	int conn_fd = accept(this->fd, NULL, NULL); // peer_addr 
 	if (conn_fd < 0)
@@ -83,7 +83,7 @@ int	Server::pollin(void)
 	return (err);
 }
 
-int	Server::pollout(void)
+ssize_t	Server::pollout(void)
 {
 		// When would we ever write to the Server's (fd)
 	return (0);

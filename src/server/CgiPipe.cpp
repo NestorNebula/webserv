@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 17:25:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:14:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ CgiPipe::~CgiPipe()
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
 }
 
-int		CgiPipe::pollin(void)
+ssize_t	CgiPipe::pollin(void)
 {
-	int	err = 0;
+	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
 	err = this->recv();
@@ -40,50 +40,31 @@ int		CgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
-		return (-1);
+		return (0);
 	}
 
-	WsLog::_(LVL_INFO, TGT_CGI_RECV, "ibuf");
-	WsLog::_(LVL_INFO, TGT_CGI_RECV, "****\n", this->ibuf);
-
-	// reading back from CGI -- 
-	// ONLY "Content-Length" bytes
-	// otherwise .. EOF
-	// (!) BINARY DATA (!)
-
-// Q: COMMUNICATION : between cgi/conn
-// or .. simply ensure 
-	// ibuf = conn::rsrc.data_dst
-
-	// UGLY
-// or : conn checks ... cgi_out::state (read_data)
-
-// EPC_OUT_SIZ
-
-// read .. INTO .. conn::obuf (?)
-	this->conn.ostr += std::string(this->ibuf);
+	this->conn.ostr.append(this->ibuf, err);
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn.ostr.size());
     
-	WsLog::_(LVL_INFO, TGT_CGI_RECV, "ostr");
-	WsLog::_(LVL_INFO, TGT_CGI_RECV, "****\n", this->conn.ostr);
+	WsLog::_(LVL_INFO, TGT_CGI_DATA, "ostr");
+	WsLog::_(LVL_INFO, TGT_CGI_DATA, "****\n", this->conn.ostr);
 	
 	// any chance we're reading (EPOLLIN) at the same time (?)
 
-// this is the conn/cgi COMMUNICATION
-// what is the best way to do this (?)
-// OR : conn .. just checks if data in cgi::ibuf ... 
-// rsrc
-    this->conn.mod_evt(EPOLLOUT);
+		// partial
+    // this->conn.mod_evt(EPOLLOUT);
 
 	return (err);
 }
 
+// cgi::hup .. set conn state DONE 
 // epoll::state (read_data)
 	// has read data from its (fd) 
 	// that is avaiable for processing (in its ibuf)
 	 
-int		CgiPipe::pollout(void)
+ssize_t	CgiPipe::pollout(void)
 {
-	int	err;
+	ssize_t	err;
     
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send");
 
@@ -103,39 +84,21 @@ int		CgiPipe::pollout(void)
 		if (err == 0)
 		{
 			WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: zero");
-			return (-1);
+			return (0);
 		}
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
-		
-		this->conn.mod_evt(0); // probably a bad idea
-		// just "turn off" here .. 
-		// or .. continue 
-		// close down .. 
-		return (-1);
+		return (0); // keep going
 	}
-	this->mod_evt(0);
-	return (0);
-	
-// epoll : evt typ  : out 
-// epoll : evt tgt  : cgi
-// epoll : evt fd   : [7]
-// cgi   : send: [0]
-// epoll : mod cli  : serv // !!!!!
+	// ASSUMES : conn::input : is faster than our output 
+	this->conn.mod_evt(EPOLLOUT);
+	return (-1); // EOF : close input to cgi
+}
 
-	// this (fd) .. can WRITE
-	// input TO CGI .. from conn.istr
-	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "pollout");
-	
-    // POLLOUT assumed .. 
-    // mod : add/remove a certain flag
-
-	// NOT NECESSSARILY 
-	// conn .. make be continuing to receive input .. to be passed to cgi
+int		CgiPipe::hup(void)
+{
+	// if POLLIN
+		// set_state() could better protect/compare 
+	this->conn.state = RSRC_SENT_BODY;
+	this->conn.mod_evt(EPOLLOUT); // make sure it gets detected
 	return (-1);
-
-		// nothing more to write to cgi (?)
-		// wait for more data 
-	// RIGHT -- conn may no longer exist 
-	// this->conn.mod_evt(0); // may want to preserve its POLLIN (!)
-    return (0);
 }

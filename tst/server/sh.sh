@@ -1,8 +1,6 @@
 #!/bin/bash
 
-
-
-# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=44 --concurrent=10 --no-parser -b
+# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
 # echo
 # exit 0
 
@@ -11,9 +9,9 @@
 # echo
 # exit 0
 
-# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=4 --concurrent=2 --no-parser 
+# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=2 --concurrent=2 --no-parser 
 # echo
-# # exit 0
+# exit 0
 
 # curl -X GET http://localhost:8080
 # echo
@@ -29,23 +27,25 @@
 # echo
 
 
-# curl -X POST http://localhost:8080 \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-
-curl -X POST http://localhost:8081 \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "p1=post-one&p2=post-two"
+curl -X POST http://localhost:8080 \
+	 -d "p1=post-one&p2=post-two"
 echo
 exit 0
+
+# curl -X POST http://localhost:8081 \
+# 	-H "Content-Type: application/x-www-form-urlencoded" \
+# 	-d "p1=post-one&p2=post-two"
+# echo
+# exit 0
 
 	# multipart/form-data
 # curl -X POST http://localhost:8081 \
 # 	-F p1=post-one \
 # 	-F p2=post-two \
-# 	-F file=files/@2k_earth_daymap.jpg
+# 	-F file=@files/2k_earth_daymap.jpg
 # echo
 # exit 0
+
 	# -F file=@Kanan.mp3
 	
 # POST / HTTP/1.1
@@ -61,5 +61,5 @@ exit 0
 # 	# chunked - needs to be parsed before passing to CGI
 # curl -X POST http://localhost:8081 \
 # 	-H "Transfer-Encoding: chunked" \
-# 	-d @2k_earth_daymap.jpg
+# 	-d @files/2k_earth_daymap.jpg
 

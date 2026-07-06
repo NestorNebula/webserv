@@ -6,13 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/05 15:54:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:06:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WS_LOG_HPP
 # define WS_LOG_HPP
 
+# include <unistd.h>
 # include <iostream>
 # include <sstream>
 # include <string>
@@ -41,16 +42,18 @@ typedef long unsigned int log_tgt;
 
 # define TGT_CONN_RECV	(1L << 5)
 # define TGT_CONN_SEND	(1L << 6)
-# define TGT_CONN		(TGT_CONN_RECV | TGT_CONN_SEND)
+# define TGT_CONN_DATA	(1L << 7)
+# define TGT_CONN		(TGT_CONN_RECV | TGT_CONN_SEND | TGT_CONN_DATA)
 
-# define TGT_CGI_RECV	(1L << 7)
-# define TGT_CGI_SEND	(1L << 8)
-# define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND)
+# define TGT_CGI_RECV	(1L << 8)
+# define TGT_CGI_SEND	(1L << 9)
+# define TGT_CGI_DATA	(1L << 10)
+# define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND | TGT_CGI_DATA)
 
-# define TGT_SERV		(1L << 9)
-# define TGT_MAIN		(1L << 10)
+# define TGT_SERV		(1L << 11)
+# define TGT_MAIN		(1L << 12)
 
-# define TGT_HEAD		(1L << 11)
+# define TGT_HEAD		(1L << 13)
 
 
 # define TGT_MAX		(1UL << 63)
@@ -67,9 +70,9 @@ public:
 	static log_tgt  tgt; 
 	
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
-	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, int n);
+	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str);
-	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, int n);
+	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n);
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 private:

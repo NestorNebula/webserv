@@ -1,10 +1,10 @@
 <?php
 
-
     // var_dump($_GET);
     // var_dump($_POST);
     // var_dump($_SERVER); // ENV shows up here
 
+    
     print("PHP : hello, world!\n");  
 
     $g1 = $_GET['g1'];
@@ -18,6 +18,17 @@
 
     print("p1 : " . $p1 . PHP_EOL);
     print("p2 : " . $p2 . PHP_EOL);
+
+
+
+    // $data = file_get_contents('files/Kanan.mp3');
+        // fucks with keep-alive size .. 
+    // header('Content-Type: audio/mp3');
+    // echo $data;
+
+    // $data = file_get_contents('files/2k_earth_daymap.jpg');
+    // header('Content-Type: image/jpg');
+    // echo $data;
 
     // $f = $_POST['file']; // undefined array key name="file" filename=""
     // print("file:\n" . $f . PHP_EOL);

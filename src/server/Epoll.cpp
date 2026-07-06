@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 16:19:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:00:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ Epoll::~Epoll()
 int	Epoll::add(EpollClient *cli, int e)
 {
 	int					err;
-	struct epoll_event	evt;
+	struct epoll_event	evt; // with (cli) .. mod should be able to turn off per-bit
 
 	evt.events = e;
 	evt.events |= EPOLLRDHUP;
@@ -161,7 +161,7 @@ int	Epoll::add(EpollClient *cli, int e)
 int	Epoll::mod(EpollClient *cli, int e)
 {
 	int					err;
-	struct epoll_event	evt;
+	struct epoll_event	evt; // with (cli) .. mod should be able to turn off per-bit
 
 	evt.events = e; 
 	evt.events |= EPOLLRDHUP;
@@ -255,7 +255,7 @@ int	Epoll::exec(void)
 		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
 	if (this->ecnt == 0)
 		return (this->ecnt);
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "ecnt: ", this->ecnt);
+	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\necnt  : ", this->ecnt);
 	return (this->ecnt);
 }
 
@@ -299,11 +299,12 @@ int	Epoll::loop(void)
 			}
 #endif
 
-WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
+WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 // WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-			
-            if (evt->events & EPOLLERR)
+		
+			// epc->events(evt)
+            if (evt->events & EPOLLERR) // with (out) .. shit .. things to write (?)
 			{
 				this->rem(epc);
 				continue;
@@ -327,14 +328,24 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 					this->rem(epc);
 					continue;
 				}
-			}
+			}	
+			// down here : connection reset by peer
+            // if (evt->events & EPOLLERR)
+			// {
+			// 	this->rem(epc);
+			// 	continue;
+			// }
+				// nothing more to read .. BUT may still need to write (cgi) output 
 			if (evt->events & EPOLLRDHUP)
 			{
 				this->rem(epc);
+				// epc->mod_evt(EPOLLOUT);
 				continue;
 			} 
+			// cgi : may close with (hup)
             if (evt->events == EPOLLHUP)
 			{
+				epc->hup();
 				this->rem(epc);
 				continue;
 			}

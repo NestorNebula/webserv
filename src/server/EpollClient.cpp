@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 16:49:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:02:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ EpollClient::EpollClient::EpollClient(Epoll & _ep, epc_typ _typ, int _fd) :
 	typ(_typ), 
 	fd(_fd), 
 	lact(0), 
-	state(EPC_STATE_INIT), 
 	error(0)
 {
 }
@@ -36,74 +35,55 @@ int	EpollClient::mod_evt(int e)
 	return (this->ep.mod(this, e));
 }
 
-int	EpollClient::recv(void)
+ssize_t	EpollClient::recv(void)
 {
-	int	err = 0; // size_t
+	ssize_t	err = 0;
 
-	// EpollBuf::setup(EPC_BUF_SIZ)
-		// malloc .. to receive enough
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
 	WsLog::_(LVL_INFO, TGT_EPC_RECV, "recv: ", err);
 	
 	if (err < 0)
-	{
-		this->state = EPC_STATE_ERROR;
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
-	}
 	if (err == 0)
 	{
 		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero");
-		return (-1);
+		return (0);
 	}
-	// "string" ASSUMED
-	// ATTN : binary data
-	// this->isiz = err;
-	this->ibuf[err] = '\0';
-
 	return (err);
 }
 
-int	EpollClient::send(const char *buf, size_t siz)
+ssize_t	EpollClient::send(const char *buf, size_t siz)
 {
-	int err; // size_t
+	ssize_t err;
 	
-	// EpollBuf::setup -- from where .. and how much .. to send
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 
-	size_t osiz = EPC_OUT_SIZ;
-	if (osiz > siz)
-		osiz = siz;
+	if (siz > EPC_OUT_SIZ)
+		siz = EPC_OUT_SIZ;
 
-	err = write(this->fd, buf, osiz);
+	err = write(this->fd, buf, siz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
-
-// NEED : to track if all bytes not sent ... 
 	if (err < 0)
-	{
-		this->state = EPC_STATE_ERROR;
 		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
-	}
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
-		return (-1);
+		return (0);
 	}
-	return (err); // bytes written
+	return (err); // bytes
 }
 
-// get rid of this
-int	EpollClient::send(std::string & buf)
+ssize_t	EpollClient::send(std::string & buf)
 {
-	int	err; // size_t
+	ssize_t	err;
 
 	err = this->send(buf.c_str(), buf.size());
 	if (err <= 0)
 		return (err);
-		// UGLY
-	buf.erase(0, err); // hm : here (?) or in parent
-	return (err); // bytes written
+	buf.erase(0, err);
+	return (err); // bytes
 }
 
 

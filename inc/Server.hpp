@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 15:13:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:05:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,9 @@ public:
 	Server (Epoll & _ep, unsigned short p);
 	~Server();
 
-	int				pollin(void);
-	int				pollout(void);
+	ssize_t			pollin(void);
+	ssize_t			pollout(void);
+	int				hup(void) { return (0); }
 	
 	unsigned short	get_port(void) const { return (this->port); }
 private:
