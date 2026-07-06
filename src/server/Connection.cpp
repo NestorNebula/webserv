@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:20:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/06 21:25:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,9 @@ ssize_t	Connection::pollout(void)
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
+		// rsrc.inProgress() .. wait for it
+		// rsrc.failure() .. send error
+		// rsrc.done()
 		if (this->state == RSRC_SENT_BODY) // complete
 		{
 #if 0 // KEEP_ALIVE -- would REQUIRE CONTENT-LENGTH from (cgi)
@@ -195,6 +198,7 @@ ssize_t	Connection::pollout(void)
 	// if (this->state < CONN_SENT_LENGTH)
 	// {
 			// wrong : if php sent headers .. ugh
+			// may work
 	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "clen: ", ostr.size());
 	// 	std::string len("Content-Length: " + num_2_str(ostr.size()) + "\r\n");
 	// 	err = this->send(len);
