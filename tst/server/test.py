@@ -1,10 +1,13 @@
 #!/usr/bin/python
+import sys
 import os
-# not school -- nice test for error in (cgi) script
+
+# what is CWD .. when scripts are called (!)
+# ENV : dir ... from which we launched webserv 
+sys.path.append("/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
 # Deprecated since version 3.11, removed in version 3.13.
 import cgi
-
-# export QUERY_STRING="p1=one&p2=two"
+import cgitb
 
 form = cgi.FieldStorage()
 p1 = form.getvalue("p1", "p1-default")
@@ -15,7 +18,9 @@ body = "Python : hello, world!\n"
 
 siz = len(p1) + len(p2) + len(body) + len(env)
 
-print("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str(siz + 4) + "\r\n\r\n");
+# print("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+
+# what about the query string (?)
 
 print(p1)
 print(p2)

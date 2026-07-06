@@ -14,14 +14,16 @@ my $cgi = CGI->new;
 my $p1 = $cgi->param('p1');
 my $p2 = $cgi->param('p2');
 
-print ( $qs );
-
+print ($qs);
+print ("\n");
 
 print("Perl : hello, world!\n");
 
 
 print ($p1);
+print ("\n");
 print ($p2);
+print ("\n");
 
 
 
