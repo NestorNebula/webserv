@@ -93,6 +93,20 @@ TEST(resolvePath, DifferentRoute) {
 	EXPECT_EQ(resolvePath("/route/index.html", route), "/another/index.html");
 }
 
+TEST(joinPaths, BasicPaths) {
+	EXPECT_EQ(joinPaths("prefix/", "suffix"), "prefix/suffix");
+	EXPECT_EQ(joinPaths("prefix", "/suffix"), "prefix/suffix");
+	EXPECT_EQ(joinPaths("/", "suffix"), "/suffix");
+	EXPECT_EQ(joinPaths("prefix", "/"), "prefix/");
+}
+
+TEST(joinPaths, SpecialPaths) {
+	EXPECT_EQ(joinPaths("/", "/"), "/");
+	EXPECT_EQ(joinPaths("prefix", ""), "prefix");
+	EXPECT_EQ(joinPaths("", "suffix"), "suffix");
+	EXPECT_EQ(joinPaths("", ""), "");
+}
+
 TEST(isExistingFile, ExistingFile) {
 	EXPECT_TRUE(isExistingFile("files/empty.txt"));
 	EXPECT_TRUE(isExistingFile("files/small.txt"));
