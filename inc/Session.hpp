@@ -72,6 +72,7 @@ private:
 
 	void handleResource();
 	void prepareErrorResource();
+	void prepareDirectoryResource();
 
 	void handleResponse();
 	void setResponseHeaders();

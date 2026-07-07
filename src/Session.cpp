@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Session.hpp"
+#include "DirectoryResource.hpp"
 #include "StaticResource.hpp"
 #include "HttpMethod.hpp"
 #include "http_utils.hpp"
@@ -151,10 +152,10 @@ void Session::handleResource() {
 	else {
 	// Choose type of Resource depending on route/file
 		if (_request.getMethod() == METHOD_GET) {
-			// TODO
-			// Handle Directory resource
-			// Handle Directory index
-			_resource = new StaticResource(_resourcePath);
+			if (isDirectory(_resourcePath))
+				prepareDirectoryResource();
+			else
+				_resource = new StaticResource(_resourcePath);
 		}
 		// TODO
 		// Handle upload Resource
@@ -179,6 +180,25 @@ void Session::prepareErrorResource() {
 		errPage = errPages["default"];
 	delete _resource;
 	_resource = new StaticResource(errPage);
+}
+
+void Session::prepareDirectoryResource() {
+	bool indexFound = false;
+	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
+		std::string indexPath = joinPaths(_route->root, *it);
+		if (isAccessibleFile(indexPath)) {
+			_resourcePath = indexPath;
+			indexFound = true;
+		}
+	}
+	if (indexFound)
+		_resource = new StaticResource(_resourcePath);
+	else if (_route->autoindex)
+		_resource = new DirectoryResource(_resourcePath);
+	else {
+		setResponseStatus(403);
+		prepareErrorResource();
+	}
 }
 
 void Session::handleResponse() {
