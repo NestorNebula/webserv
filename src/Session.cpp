@@ -150,7 +150,7 @@ void Session::handleResource() {
 	if (_response.getCode() >= 400)
 		prepareErrorResource();
 	else {
-	// Choose type of Resource depending on route/file
+		// Choose type of Resource depending on route/file
 		if (_request.getMethod() == METHOD_GET) {
 			if (isDirectory(_resourcePath))
 				prepareDirectoryResource();
@@ -175,9 +175,9 @@ void Session::prepareErrorResource() {
 	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
 	std::ostringstream oss;
 	oss << _response.getCode();
-	std::string errPage = errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"];
+	std::string errPage = joinPaths(!_route ? "" : _route->root, errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"]);
 	if (!isAccessibleFile(errPage))
-		errPage = errPages["default"];
+		errPage = joinPaths(!_route ? "" : _route->root, errPages["default"]);
 	delete _resource;
 	_resource = new StaticResource(errPage);
 }
