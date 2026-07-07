@@ -60,11 +60,10 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 	if (!hasBody())
 		throw std::logic_error("Response does not have body");
 
-	_resource->stream().read(buf, bufsize - 1);
+	_resource->stream().read(buf, bufsize);
 	if (!_resource->stream() && !_resource->stream().eof())
 		return -1;
 	Stream::streamsize readCount = _resource->stream().gcount();
-	buf[readCount] = '\0';
 	std::ostringstream oss;
 	oss << "Response forwarding " << readCount << " bytes of body";
 	WsLog::_(LVL_INFO, TGT_RESP, oss.str());
