@@ -23,6 +23,8 @@ RouteConfig *findBestRoute(const std::string &url, ServerConfig &config);
 
 std::string resolvePath(const std::string &url, RouteConfig &config);
 
+std::string joinPaths(const std::string &prefix, const std::string &suffix);
+
 bool isExistingFile(const std::string &path);
 
 bool isDirectory(const std::string &path);
