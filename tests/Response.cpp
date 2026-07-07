@@ -78,8 +78,9 @@ TEST(Response, Basic200WithBody) {
 	EXPECT_EQ(response.getHead(), "HTTP/1.1 200 OK\r\n"
 			"\r\n");
 	EXPECT_TRUE(response.hasBody());
-	EXPECT_EQ(response.readBody(buf, BUFSIZE), static_cast<long>(std::string("Content").size()));
-	EXPECT_STREQ(buf, "Content");
+	Stream::streamsize read = response.readBody(buf, BUFSIZE);
+	EXPECT_EQ(read, static_cast<long>(std::string("Content").size()));
+	EXPECT_EQ(std::string(buf, read), "Content");
 }
 
 TEST(Response, Basic404WithBody) {
@@ -95,8 +96,9 @@ TEST(Response, Basic404WithBody) {
 	EXPECT_EQ(response.getHead(), "HTTP/1.1 404 Not Found\r\n"
 			"\r\n");
 	EXPECT_TRUE(response.hasBody());
-	EXPECT_EQ(response.readBody(buf, BUFSIZE), static_cast<long>(std::string("Content").size()));
-	EXPECT_STREQ(buf, "Content");
+	Stream::streamsize read = response.readBody(buf, BUFSIZE);
+	EXPECT_EQ(read, static_cast<long>(std::string("Content").size()));
+	EXPECT_EQ(std::string(buf, read), "Content");
 }
 
 TEST(Response, OneHeaderWithBody) {
@@ -155,9 +157,10 @@ TEST(Response, MultilineBody) {
 	EXPECT_TRUE(response.isReady());
 	EXPECT_EQ(response.getHead(), "HTTP/1.1 200 OK\r\n"
 			"\r\n");
-	EXPECT_EQ(response.readBody(buf, BUFSIZE), static_cast<long>(std::string("Hello\nThere!\n").size()));
-	EXPECT_STREQ(buf, "Hello\nThere!\n");
 	EXPECT_TRUE(response.hasBody());
+	Stream::streamsize read = response.readBody(buf, BUFSIZE);
+	EXPECT_EQ(read, static_cast<long>(std::string("Hello\nThere!\n").size()));
+	EXPECT_EQ(std::string(buf, read), "Hello\nThere!\n");
 }
 
 TEST(Response, AccessNonReadyResponse) {
