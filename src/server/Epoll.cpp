@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 18:53:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:27:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ static void sigint_handler(int signo)
 	
 	WsLog::_(LVL_ERR, TGT_EPOLL, "");
 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
+
+	// *** CGI CLEANUP ***
     stop = 1;
 }
 
@@ -116,10 +118,10 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 Epoll::~Epoll()
 {
 	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
-	this->cleanup();
+	this->cleanup(1);
 };
 
-void	Epoll::cleanup(void)
+void	Epoll::cleanup(int std_err)
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
@@ -130,18 +132,15 @@ void	Epoll::cleanup(void)
 		close(this->epfd);
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
-	// close(STDERR_FILENO);
+	if (std_err)
+		close(STDERR_FILENO);
 }
 
-int	Epoll::add(EpollClient *cli, int e)
-{
-	int					err;
-	struct epoll_event	evt; // with (cli) .. mod should be able to turn off per-bit
 
-	evt.events = e;
-	evt.events |= EPOLLRDHUP;
-	// evt.events |= EPOLLET; // edge-triggered .. ONCE PER EVENT
-	evt.data.ptr = cli;
+int	Epoll::add(EpollClient *cli)
+{
+	int	err;
+	// check : cli->get_evt().data.ptr
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
 	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
@@ -149,7 +148,7 @@ int	Epoll::add(EpollClient *cli, int e)
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
 	}
-	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), &evt);
+	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: add");
@@ -162,23 +161,19 @@ int	Epoll::add(EpollClient *cli, int e)
 	return (err);
 }
 
-int	Epoll::mod(EpollClient *cli, int e)
+int	Epoll::mod(EpollClient *cli)
 {
-	int					err;
-	struct epoll_event	evt; // with (cli) .. mod should be able to turn off per-bit
-
-	evt.events = e; 
-	evt.events |= EPOLLRDHUP;
-	evt.data.ptr = cli;
+	int	err;
+	// check : cli->get_evt().data.ptr
 
 	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
 	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
 		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
-		// return (this->add(cli, e));
+		// return (this->add(cli));
 	}
-	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), &evt);
+	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod");	

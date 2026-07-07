@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 18:53:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:25:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,21 +34,21 @@ int main (int, char **, char **envp)
         // | TGT_EPC_RECV
         // | TGT_EPC_SEND
         
-        | TGT_CONN
+        // | TGT_CONN
         // | TGT_CONN_RECV
         // | TGT_CONN_SEND
-        | TGT_CONN_DATA
+        // | TGT_CONN_DATA
 
         // | TGT_CGI
         | TGT_CGI_RECV
         | TGT_CGI_SEND
-        | TGT_CGI_DATA
+        // | TGT_CGI_DATA
 
         // | TGT_SERV
         // | TGT_MAIN
     ;
     
-    // WsLog::tgt = TGT_NONE;
+    WsLog::tgt = TGT_NONE;
     
     Epoll   ep(envp);
     

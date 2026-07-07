@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:02:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:13:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,40 @@ EpollClient::EpollClient::EpollClient(Epoll & _ep, epc_typ _typ, int _fd) :
 	lact(0), 
 	error(0)
 {
+	evt.events = 0;
+	evt.data.ptr = NULL;
 }
 
 EpollClient::~EpollClient()
 {
-	// WsLog::_(LVL_ERR, TGT_EPC, "(~) EpollClient");
+	WsLog::_(LVL_DBG, TGT_EPC, "(~) EpollClient");
 	if (this->fd != -1)
 		close(this->fd);
 }
 
+int	EpollClient::ini_evt(int e)
+{
+	if (evt.data.ptr != NULL)
+	{
+		WsLog::_(LVL_WARN, TGT_EPC, "ini_evt: already initialized");
+		return (this->mod_evt(e));
+	}
+	evt.data.ptr = this;
+	evt.events = e;
+	evt.events |= EPOLLRDHUP;
+	return (this->ep.add(this));
+}
+
 int	EpollClient::mod_evt(int e)
 {
-	return (this->ep.mod(this, e));
+	if (evt.data.ptr == NULL)
+	{
+		WsLog::_(LVL_WARN, TGT_EPC, "mod_evt: not yet initialized");
+		return (this->ini_evt(e));
+	}
+	evt.events = e;
+	evt.events |= EPOLLRDHUP;
+	return (this->ep.mod(this));
 }
 
 ssize_t	EpollClient::recv(void)
@@ -46,10 +68,7 @@ ssize_t	EpollClient::recv(void)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-	{
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero");
-		return (0);
-	}
+		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero"); // WARN
 	return (err);
 }
 
@@ -68,22 +87,19 @@ ssize_t	EpollClient::send(const char *buf, size_t siz)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
 	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
-		return (0);
-	}
-	return (err); // bytes
+		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero"); // WARN
+	return (err);
 }
 
-ssize_t	EpollClient::send(std::string & buf)
+ssize_t	EpollClient::send(std::string & str)
 {
 	ssize_t	err;
 
-	err = this->send(buf.c_str(), buf.size());
+	err = this->send(str.c_str(), str.size());
 	if (err <= 0)
 		return (err);
-	buf.erase(0, err);
-	return (err); // bytes
+	str.erase(0, err);
+	return (err);
 }
 
 

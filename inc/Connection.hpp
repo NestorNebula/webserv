@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:08:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:17:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,16 +55,18 @@ public:
 	
 	void		set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
+// TESTING
 	std::string	header(const char *key);
 	
 private:
 // TESTING
 	std::string	head;
-public:
+public: // CgiEnv
 	Server		&serv;
 private:
 	int			exec_cgi(void);
-public:
+	
+public: // CgiEnv (?) // get_addr .. get_addr_str
 	struct sockaddr_in	addr;
 private:
 	int			req_cnt;

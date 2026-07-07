@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:00:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 20:18:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@ private:
 	CgiEnv & operator = (const CgiEnv & )
 		{ return (*this); }
 public:
-	CgiEnv(void);
+	CgiEnv (void);
 	~CgiEnv();
 	
-    int         from_conn(Connection & conn);
-	void		add(const char *key, const char *val);
-	void		add(const char *key, int n);
-	const char	**gen(void);
+    int             from_conn(Connection & conn);
+	void		    add(const char *key, const char *val);
+	void		    add(const char *key, int n);
+	const char	    **gen(void);
 	// from_header(<map>)
 private:
 	std::vector<std::string>	data;

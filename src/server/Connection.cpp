@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:14:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:31:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,12 +186,12 @@ ssize_t	Connection::pollout(void)
 			return (-1);		
 #endif			
 		}
-		this->mod_evt(0); // otherwise, we get stuck here 
+		this->mod_evt(0);  // -EPOLLOUT // otherwise, we get stuck here 
 		return (0);
 	}
 	if (this->state < RSRC_SENT_BODY)
 	{
-		this->mod_evt(0);
+		this->mod_evt(0); // -EPOLLOUT
 		return (0);
 	}
 	
@@ -271,8 +271,7 @@ int	Connection::exec_cgi(void)
 		if (err < 0)
 		{
 			pipes.shutdown(0);
-			this->ep.cleanup();		
-				// file descriptor (2) was closed already
+			this->ep.cleanup(0);		
 			exit(WsLog::_errno(LVL_ERR, TGT_CONN, "dup2"));
 		}
 
@@ -309,6 +308,9 @@ int	Connection::exec_cgi(void)
 		// cwd (?)
 		const char **envp = cgienv.gen();
 
+
+// signal handler (!)
+	signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
 		
 		// cool : this (cout) gets READ by conn
@@ -340,14 +342,14 @@ int	Connection::exec_cgi(void)
 	EpollClient	*epc_cgi_op;
 
 	epc_cgi_ip = new CgiPipe(this->ep, cgifd_ip, *this);
-	err = this->ep.add(epc_cgi_ip, EPOLLOUT);
+	err = epc_cgi_ip->ini_evt(EPOLLOUT);
 	if (err < 0)
 	{
 		return (err);
 	}
 
 	epc_cgi_op = new CgiPipe(this->ep, cgifd_op, *this);
-	err = this->ep.add(epc_cgi_op, EPOLLIN);
+	err = epc_cgi_op->ini_evt(EPOLLIN);
 	if (err < 0)
 	{
 		return (err);

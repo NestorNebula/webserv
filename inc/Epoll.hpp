@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 18:54:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:13:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,27 +41,27 @@ public:
 
 	int		loop(void);
 	
-	int		add(EpollClient *cli, int e);
-	int		mod(EpollClient *cli, int e);
+	int		add(EpollClient *cli);
+	int		mod(EpollClient *cli);
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
 	
-	void	cleanup(void);
+	void	cleanup(int std_err);
 	
 private:
-	int					epfd;
-	int					ecnt;
-	struct epoll_event	evts[EPOLL_MAX_EVT];
-	static const int	toms = 10000;
+	int						epfd;
+	int						ecnt;
+	struct epoll_event		evts[EPOLL_MAX_EVT];
+	static const int		toms = 10000;
 	
 	std::set<EpollClient*>	clients;
 
-	char **&envp;
+	char 					**&envp;
 	
-	int					exec(void);
-	struct epoll_event	*get_evt(int idx);
-	EpollClient			*get_epc(void *cli);
-	bool				has_client(EpollClient *ecp);
+	int						exec(void);
+	struct epoll_event		*get_evt(int idx);
+	EpollClient				*get_epc(void *cli);
+	bool					has_client(EpollClient *ecp);
 };
 
 #endif

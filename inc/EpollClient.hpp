@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 16:31:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 21:15:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define EPOLL_CLIENT_HPP
 
 # include <unistd.h>
+# include <sys/epoll.h>
 # include <string>
 # include <vector>
 # include "WsLog.hpp"
@@ -44,40 +45,46 @@ private:
 	EpollClient & operator = (const EpollClient & ) 
 		{ return (*this); }
 public:
-	EpollClient(Epoll & _ep, epc_typ _typ, int _fd);
+	EpollClient (Epoll & _ep, epc_typ _typ, int _fd);
 	EpollClient (const EpollClient & that) : 
 		ep(that.ep), typ(that.typ), fd(that.fd) {}
 	virtual ~EpollClient();
 
 	ssize_t			recv(void);
 	ssize_t			send(const char *buf, size_t siz);
-	ssize_t			send(std::string & buf);
+	ssize_t			send(std::string & str);
 	
 	virtual ssize_t	pollin(void) = 0;
 	virtual ssize_t pollout(void) = 0;
 	virtual int		hup(void) = 0;
 
+	int				ini_evt(int e);
+	int				mod_evt(int e);
+
 	void			set_lact(void);
 	
-	int				get_fd(void)	const { return (this->fd); }
-	epc_typ			get_typ(void)	const { return (this->typ); }
-
-    std::string 	typ_str(void);
-	
-	int				mod_evt(int e);
+	int					get_fd(void) const
+		{ return (this->fd); }
+	epc_typ				get_typ(void) const
+		{ return (this->typ); }
+	struct epoll_event	*get_evt(void)
+		{ return (&this->evt); }
+		
+    std::string 		typ_str(void);
 protected:
-	Epoll		&ep;
-	epc_typ		typ;
-	int			fd;
-	time_t		lact;
+	Epoll				&ep;
+	epc_typ				typ;
+	int					fd;
+	struct epoll_event	evt;
+	time_t				lact;
 
 public:
-	int			error;
+	int					error;
 	
 public:
-    char            ibuf[EPC_BUF_SIZ];
-	std::string		istr;
-	std::string		ostr;
+    char            	ibuf[EPC_BUF_SIZ];
+	std::string			istr;
+	std::string			ostr;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:14:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 20:20:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,15 @@ void	CgiEnv::add(const char *key, int n)
 
 int     CgiEnv::from_conn(Connection & conn)
 {
+    // conn.ep.envp
+    
+
+// ALLOWED : chdir()
+
 // ATTN : needs to be RELATIVE ... to executable 
 		this->add("PYTHONPATH", 
 			"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
-		this->add("REDIRECT_STATUS", "1"); // [404] NOT FOUND .. hm .. no input file 
+		this->add("REDIRECT_STATUS", "1");
 		
 
 	//  PHP CGI depends on non-standard SCRIPT_FILENAME
@@ -63,9 +68,6 @@ int     CgiEnv::from_conn(Connection & conn)
 // This PHP CGI binary was compiled with force-cgi-redirect enabled.  This
 // means that a page will only be served up if the REDIRECT_STATUS CGI variable is
 // set
-		// seems like CGI NEEDS THIS -- to know to wait for BODY
-
-		// header :: starts with
 		
 		// this->add("REQUEST_METHOD", "POST"); 
 		this->add("REQUEST_METHOD", "GET"); 
@@ -88,11 +90,15 @@ int     CgiEnv::from_conn(Connection & conn)
 // if we do not have content-length .. need to CLOSE the socket
 // after all data has been written
 
+
+// WORK TO BE DONE HERE 
+
 		this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
 // PATH_TRANSLATED
 // Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
 		// SCRIPT_NAME
 		// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
+
 		this->add("SCRIPT_NAME", "test.php");
 		this->add("SCRIPT_FILENAME", "test.php");
 // 		
