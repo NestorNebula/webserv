@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:13:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/08 00:24:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,15 @@ int	cgi_pipes::dup_io(void)
 	err = dup2(p2[1], STDOUT_FILENO);
 	if (err < 0)
 		return (this->shutdown(err));
-		
+	
+	// To use devNull as STDOUT_FILENO, it must be opened for writing:
+
+	int dnfd = open("/dev/null", O_WRONLY);
+	err = dup2(dnfd, STDERR_FILENO);
+	if (err < 0)
+		return (this->shutdown(err));
+	close(dnfd);
+
 	return (err);		
 }
 
@@ -172,6 +180,7 @@ int		CgiPipe::hup(void)
 {
 	// if POLLIN
 		// set_state() could better protect/compare 
+	// check (pid) here (?)
 	this->conn.state = RSRC_SENT_BODY;
 	this->conn.mod_evt(EPOLLOUT); // make sure it gets detected
 	return (-1);

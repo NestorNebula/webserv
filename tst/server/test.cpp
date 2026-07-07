@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:25:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/08 00:24:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,17 +20,17 @@ int main (int, char **, char **envp)
 {
     WsLog::lvl = LVL_NONE
         | LVL_ERR 
+        | LVL_WARN
         | LVL_INFO
         | LVL_DBG
-        | LVL_WARN
     ;
     WsLog::tgt = TGT_NONE
         // | TGT_ALL
         // | TGT_EPOLL 
-        // | TGT_EPOLL_EVT
-        // | TGT_EPOLL_CTL
+        | TGT_EPOLL_EVT
+        | TGT_EPOLL_CTL
         
-        | TGT_EPC
+        // | TGT_EPC
         // | TGT_EPC_RECV
         // | TGT_EPC_SEND
         
@@ -40,15 +40,15 @@ int main (int, char **, char **envp)
         // | TGT_CONN_DATA
 
         // | TGT_CGI
-        | TGT_CGI_RECV
-        | TGT_CGI_SEND
+        // | TGT_CGI_RECV
+        // | TGT_CGI_SEND
         // | TGT_CGI_DATA
 
         // | TGT_SERV
         // | TGT_MAIN
     ;
     
-    WsLog::tgt = TGT_NONE;
+    // WsLog::tgt = TGT_NONE;
     
     Epoll   ep(envp);
     

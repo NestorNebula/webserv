@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:31:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/08 00:22:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,6 +316,7 @@ int	Connection::exec_cgi(void)
 		// cool : this (cout) gets READ by conn
 		//  but : what do we really need to monitor in this case 
 
+// home : bad (php-cgi)
 // WORK : on ibuf/obuf communication FIRST
 		std::cout << "\n\nwtf\n\n";
 
