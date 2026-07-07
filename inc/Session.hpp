@@ -69,6 +69,7 @@ private:
 	void manageSession();
 
 	void handleRequest();
+	void handleUpload();
 
 	void handleResource();
 	void prepareErrorResource();
