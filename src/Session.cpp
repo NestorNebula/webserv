@@ -46,7 +46,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 		head.erase(0, _sent);
 		if (head.size() > static_cast<unsigned long>(bufsize))
 			head.erase(bufsize);
-		std::strcpy(buf, head.c_str());
+		std::strncpy(buf, head.c_str(), head.size());
 		buf += head.size();
 		bufsize -= head.size();
 		_sent += head.size();
