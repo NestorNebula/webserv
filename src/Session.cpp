@@ -129,6 +129,8 @@ void Session::handleRequest() {
 	_route = findBestRoute(_request.getURL(), _server);
 	if (!_route)
 		return setResponseStatus(404);
+	if (!_route->redirect.empty())
+		return setResponseStatus(301);
 	_resourcePath = resolvePath(_request.getURL(), *_route);
 	// Check that method works for route/file
 	if (!isAllowedMethod(_request.getMethod(), *_route))
@@ -149,7 +151,7 @@ void Session::handleResource() {
 		return;
 	if (_response.getCode() >= 400)
 		prepareErrorResource();
-	else {
+	else if (!_response.getCode()) {
 		// Choose type of Resource depending on route/file
 		if (_request.getMethod() == METHOD_GET) {
 			if (isDirectory(_resourcePath))
