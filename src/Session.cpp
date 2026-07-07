@@ -139,9 +139,9 @@ void Session::handleRequest() {
 	// Check that method works for route/file
 	if (!isAllowedMethod(_request.getMethod(), *_route))
 		return setResponseStatus(405);
+	if (_request.getMethod() == METHOD_POST && _route->upload)
+		return handleUpload();
 	if (!isExistingFile(_resourcePath)) {
-		if (_request.getMethod() == METHOD_POST && _route->upload)
-			return handleUpload();
 		return setResponseStatus(404);
 	}
 	if (!isAccessibleFile(_resourcePath))
@@ -167,13 +167,12 @@ void Session::handleUpload() {
 			ofs.write(buf, bodyStream->gcount());
 		if (bodyStream->eof() && bodyStream->gcount())
 			ofs.write(buf, bodyStream->gcount());
-		if (!bodyStream->eof() || !ofs) {
-			ofs.close();
-			std::remove(uploadFile.c_str());
-			return setResponseStatus(500);
-		}
 	}
 	ofs.close();
+	if ((bodyStream && !bodyStream->eof()) || !ofs) {
+			std::remove(uploadFile.c_str());
+			return setResponseStatus(500);
+	}
 	setResponseStatus(201);
 }
 
@@ -235,7 +234,6 @@ void Session::prepareDirectoryResource() {
 }
 
 void Session::handleResponse() {
-	// TODO
 	// Add Response details and missing fields
 	if (!isValidVersion(_request.getVersion()))
 		_response.setVersion("HTTP/1.1");
