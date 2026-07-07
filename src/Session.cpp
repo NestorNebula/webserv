@@ -16,7 +16,12 @@
 #include "HttpMethod.hpp"
 #include "http_utils.hpp"
 #include <cstring>
+#include <fstream>
 #include <sstream>
+
+#ifndef BUFSIZE
+#define BUFSIZE 4096
+#endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 	throwIfNotAction(RDSOCK);
@@ -118,7 +123,6 @@ void Session::manageSession() {
 }
 
 void Session::handleRequest() {
-	// TODO
 	// Check Request format and validity
 	// Ensure start line and headers values make sense
 	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
@@ -137,13 +141,40 @@ void Session::handleRequest() {
 		return setResponseStatus(405);
 	if (!isExistingFile(_resourcePath)) {
 		if (_request.getMethod() == METHOD_POST && _route->upload)
-			return;
+			return handleUpload();
 		return setResponseStatus(404);
 	}
 	if (!isAccessibleFile(_resourcePath))
 		return setResponseStatus(403);
 	if (isCgi(_resourcePath, *_route))
 		_next = DOCGI;
+}
+
+void Session::handleUpload() {
+	std::string uploadDir = joinPaths(_route->root, _route->upload_dir);
+	if (!isDirectory(uploadDir))
+		return setResponseStatus(400);
+	std::string uploadFile = joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
+	if (isExistingFile(uploadFile))
+		return setResponseStatus(403);
+	std::ofstream ofs(uploadFile.c_str());
+	if (!ofs.is_open())
+		return setResponseStatus(500);
+	Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
+	if (bodyStream && *bodyStream) {
+		char buf[BUFSIZE];
+		while (bodyStream->read(buf, BUFSIZE))
+			ofs.write(buf, bodyStream->gcount());
+		if (bodyStream->eof() && bodyStream->gcount())
+			ofs.write(buf, bodyStream->gcount());
+		if (!bodyStream->eof() || !ofs) {
+			ofs.close();
+			std::remove(uploadFile.c_str());
+			return setResponseStatus(500);
+		}
+	}
+	ofs.close();
+	setResponseStatus(201);
 }
 
 void Session::handleResource() {
@@ -159,12 +190,11 @@ void Session::handleResource() {
 			else
 				_resource = new StaticResource(_resourcePath);
 		}
-		// TODO
-		// Handle upload Resource
 	}
-	// Handle Resource errors
+	// Generate Resource
 	if (_resource) {
 		_resource->generate();
+		// Handle Resource errors
 		if (_resource->failed()) {
 			setResponseStatus(500);
 			delete _resource;
