@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "helpers.hpp"
 #include "http_utils.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
@@ -52,6 +53,12 @@ std::string resolvePath(const std::string &url, RouteConfig &config) {
 	if (url.size() > config.path.size())
 		path += url.substr(config.path.size());
 	return path;
+}
+
+std::string joinPaths(const std::string &prefix, const std::string &suffix) {
+	if (prefix.empty() || suffix.empty())
+		return prefix + suffix;
+	return  trim(prefix, "/") + "/" + trim(suffix, "/");
 }
 
 bool isExistingFile(const std::string &path) {
