@@ -6,13 +6,86 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:14:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 20:08:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiPipe.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
+
+
+
+cgi_pipes::cgi_pipes (void)
+{
+	p1[0] = -1;
+	p1[1] = -1;
+	p2[0] = -1;
+	p2[1] = -1;
+}
+
+cgi_pipes::~cgi_pipes()
+{
+	this->shutdown(0);
+}
+
+int	cgi_pipes::init(void)
+{
+	int	err;
+	
+	err = pipe(p1);
+	if (err < 0)
+		return (this->shutdown(err));
+	err = pipe(p2);
+	if (err < 0)
+		return (this->shutdown(err));
+	return (0);
+}
+int	cgi_pipes::dup_io(void)
+{
+	int	err;
+
+	if (p1[0] == -1)
+		return (this->shutdown(-1));
+	err = dup2(p1[0], STDIN_FILENO);
+	if (err < 0)
+		return (this->shutdown(err));
+
+	if (p2[1] == -1)
+		return (this->shutdown(-1));
+	err = dup2(p2[1], STDOUT_FILENO);
+	if (err < 0)
+		return (this->shutdown(err));
+		
+	return (err);		
+}
+
+int	cgi_pipes::shutdown(int err)
+{
+	if (p1[0] != -1)
+	{
+		close(p1[0]);
+		p1[0] = -1;
+	}
+	if (p1[1] != -1)
+	{
+		close(p1[1]);
+		p1[1] = -1;
+	}
+	if (p2[0] != -1)
+	{
+		close(p2[0]);
+		p2[0] = -1;
+	}
+	if (p2[1] != -1)
+	{
+		close(p2[1]);
+		p2[1] = -1;
+	}
+	return (err);
+}
+
+
 
 
 CgiPipe::CgiPipe (Epoll &_ep, int _fd, Connection & _conn) : 
@@ -75,6 +148,7 @@ ssize_t	CgiPipe::pollout(void)
 	
 	if (this->conn.istr.size())
 	{
+		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn.istr);
 		err = this->send(this->conn.istr); // body
 		if (err < 0)
 		{

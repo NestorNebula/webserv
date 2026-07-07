@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:23 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/06/30 23:11:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 16:55:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 # define SOCKET_HPP
 
 # include "fcntl.h"
+# include <arpa/inet.h>
+# include <string>
+# include <sstream>
 
 inline int sock_non_block(int fd)
 {
@@ -23,4 +26,5 @@ inline int sock_non_block(int fd)
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+std::string addr_2_str(struct sockaddr_in * addr);
 #endif

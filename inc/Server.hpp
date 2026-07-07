@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:05:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 16:55:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,6 @@
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
 
-# ifndef DBG_SERV
-#  define DBG_SERV 0
-# endif
-
 	// The backlog argument defines the maximum length to which the queue
 	// of pending connections for sockfd may grow.  If a connection
 	// request arrives when the queue is full, the client may receive an
@@ -36,7 +32,6 @@
 # endif
 
 
-// env .. map .. or fixed "key=val"
 class Connection;
 
 class Server : public EpollClient

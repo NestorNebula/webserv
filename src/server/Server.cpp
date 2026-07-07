@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:07:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 17:14:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,18 +69,24 @@ ssize_t	Server::pollin(void)
 {
 	ssize_t	err;
 
-	int conn_fd = accept(this->fd, NULL, NULL); // peer_addr 
+	struct sockaddr_in	conn_addr;
+	socklen_t			conn_asiz = sizeof(conn_addr);
+	
+	int conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "accept"));
-	
+		
 	err = sock_non_block(conn_fd);
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
 	
 	Connection *c = new Connection(this->ep, conn_fd, *this);
 	
-	err = this->ep.add(c, EPOLLIN);	
-	return (err);
+	err = this->ep.add(c, EPOLLIN);
+	if (err < 0)
+		return (err);
+	c->set_addr(&conn_addr);
+	return (0);
 }
 
 ssize_t	Server::pollout(void)

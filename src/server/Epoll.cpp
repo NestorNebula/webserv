@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:00:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 18:53:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ execute
 	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
 */
 
-Epoll::Epoll (void) : epfd(-1), ecnt(0)
+Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 {
 	this->epfd = epoll_create1(EPOLL_CLOEXEC);
 	if (this->epfd < 0)
@@ -116,18 +116,22 @@ Epoll::Epoll (void) : epfd(-1), ecnt(0)
 Epoll::~Epoll()
 {
 	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
+	this->cleanup();
+};
 
+void	Epoll::cleanup(void)
+{
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
 		delete (*it++);
 	this->clients.clear();
 	
 	if (this->epfd != -1)
-		close(this->epfd); // closes all fd in interest list (?)
+		close(this->epfd);
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-};
+	// close(STDERR_FILENO);
+}
 
 int	Epoll::add(EpollClient *cli, int e)
 {

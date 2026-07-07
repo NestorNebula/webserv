@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 20:58:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 18:53:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
-int main (void)
+int main (int, char **, char **envp)
 {
     WsLog::lvl = LVL_NONE
         | LVL_ERR 
@@ -26,7 +26,7 @@ int main (void)
     ;
     WsLog::tgt = TGT_NONE
         // | TGT_ALL
-        | TGT_EPOLL 
+        // | TGT_EPOLL 
         // | TGT_EPOLL_EVT
         // | TGT_EPOLL_CTL
         
@@ -42,7 +42,7 @@ int main (void)
         // | TGT_CGI
         | TGT_CGI_RECV
         | TGT_CGI_SEND
-        // | TGT_CGI_DATA
+        | TGT_CGI_DATA
 
         // | TGT_SERV
         // | TGT_MAIN
@@ -50,10 +50,11 @@ int main (void)
     
     // WsLog::tgt = TGT_NONE;
     
-    Epoll   ep;
+    Epoll   ep(envp);
     
     new Server(ep, 8080);
     new Server(ep, 8081);
+    new Server(ep, 8082);
     
     int err = ep.loop();
 

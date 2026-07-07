@@ -28,7 +28,9 @@ FILES = \
 	server/EpollClient.cpp \
 	server/Epoll.cpp \
 	server/Server.cpp \
+	server/Socket.cpp \
 	server/Connection.cpp \
+	server/CgiEnv.cpp \
 	server/CgiPipe.cpp
 
 TPP = 

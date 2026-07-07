@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:25:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 20:14:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ static bool	icmp(char a, char b)
 		std::tolower(static_cast<unsigned char>(b));		
 }
 
+// more generic .. Request;
 std::string Connection::header(const char *key)
 {
 	std::string val("");
@@ -125,7 +126,7 @@ ssize_t	Connection::pollin(void)
 	
 	if (this->state < CONN_HAS_RSRC)
 	{
-		this->resp = std::string("HTTP/1.1 200 OK\r\n");
+		this->resp = std::string("HTTP/1.1 200 OK\r\n\r\n");
 // KEEP_ALIVE
 		// this->resp = std::string("HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n");
 		err = this->exec_cgi(); // (this->head)
@@ -238,50 +239,6 @@ ssize_t	Connection::pollout(void)
 
 
 
-CgiEnv::CgiEnv(void) : res(NULL)
-{
-
-}
-
-CgiEnv::~CgiEnv()
-{
-	if (res)
-		delete[] res;
-}
-
-// from_headers
-void	CgiEnv::add(const char *key, const char *val)
-{
-	// <map> first .. to override multiple (?)
-	data.push_back(std::string(key) + std::string("=") + std::string(val));
-}
-
-void	CgiEnv::add(const char *key, int n)
-{
-	data.push_back(std::string(key) + std::string("=") + num_2_str(n));
-}
-
-const char	**CgiEnv::gen(void)
-{
-	if (res)
-		delete[] res;
-	size_t	cnt	= data.size();
-
-	res = new const char*[cnt + 1];
-	const char	**ins = res;
-	
-	std::vector<std::string>::iterator it = data.begin();
-	while (it != data.end())
-	{
-		*ins++ = it->c_str();
-		it++;
-	}
-	*ins = NULL;
-	return (res);
-}
-
-
-
 
 // multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
 	// write rest of BODY to cgi->ifd;
@@ -298,163 +255,58 @@ const char	**CgiEnv::gen(void)
 
 int	Connection::exec_cgi(void)
 {
-	int		err;
+	int			err;
+	cgi_pipes	pipes;
 
-	int		p1[2];
-	int		p2[2];
-
-	err = pipe(p1);
-	if (err < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipe");
-	err = pipe(p2);
-	if (err < 0)
-	{
-		// cleanup
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipe");
-	}
+	if (pipes.init() < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes");
 
 	pid_t pid = fork();
 	if (pid < 0)
-	{
-		// cleanup (!)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
-	}
 
 	if (pid == 0)
 	{
-		// Epoll:: CLOEXEC should have closed Epoll::epfd
-		close(p1[1]);
-		err = dup2(p1[0], STDIN_FILENO);
+		err = pipes.dup_io();
 		if (err < 0)
 		{
-			// cleanup (!)
-			return WsLog::_errno(LVL_ERR, TGT_CONN, "dup2");
+			pipes.shutdown(0);
+			this->ep.cleanup();		
+				// file descriptor (2) was closed already
+			exit(WsLog::_errno(LVL_ERR, TGT_CONN, "dup2"));
 		}
-		close(p1[0]);
-		
-		close(p2[0]);
-		err = dup2(p2[1], STDOUT_FILENO);
-		if (err < 0)
-		{
-			// cleanup (!)
-			return WsLog::_errno(LVL_ERR, TGT_CONN, "dup2");
-		}
-		close(p2[1]);
 
-
-			// FROM HEADER / cgi_env
+// FROM REQUEST
 		std::string	path;
 		std::string	file;
 		
-		// https://httpd.apache.org/docs/trunk/howto/cgi.html
-//     For current Python versions, use the urllib.parse module to parse query strings and form data. For more complex applications, consider a lightweight WSGI framework, though that moves beyond the scope of traditional CGI.
-
-		// #!/usr/bin/env python3
-		// TEST CGI at server startup
-		if (false) // this->serv.get_port() == 8080)
+		switch(this->serv.get_port())
 		{
-			// path = std::string("/usr/bin/python");
-			// file = std::string("test.py");
+		case 8081:
+			path = std::string("/usr/bin/python");
+			file = std::string("test.py");
+			break;
+		case 8082:
 			path = std::string("/usr/bin/perl");
 			file = std::string("test.pl");
-		}
-		else
-		{
+			break;
+		default:
 			path = std::string("/usr/bin/php-cgi");
 			file = std::string("test.php");
+			break;
 		}
-
+		
 		char const *args[3];
 		args[0] = path.c_str();
 		args[1] = file.c_str();
 		args[2] = NULL;
 
-		// From the meta-variables thus generated, a URI, the 'Script-URI', can
-//    be constructed.  This MUST have the property that if the client had
-//    accessed this URI instead, then the script would have been executed
-//    with the same values for the SCRIPT_NAME, PATH_INFO and QUERY_STRING
-//    meta-variables.
-
-// script-URI = <scheme> "://" <server-name> ":" <server-port>
-//                    <script-path> <extra-path> "?" <query-string>
-
+// CHALLENGE
 // terminate long-running script if client closes connection
-
 		CgiEnv cgienv;
+		cgienv.from_conn(*this);
 
-		cgienv.add("REDIRECT_STATUS", "1"); // [404] NOT FOUND .. hm .. no input file 
-		
-
-	//  PHP CGI depends on non-standard SCRIPT_FILENAME
-
-// This PHP CGI binary was compiled with force-cgi-redirect enabled.  This
-// means that a page will only be served up if the REDIRECT_STATUS CGI variable is
-// set
-		// seems like CGI NEEDS THIS -- to know to wait for BODY
-		cgienv.add("REQUEST_METHOD", "POST"); 
-// If the output of a form is being processed, check that CONTENT_TYPE
-//    is "application/x-www-form-urlencoded" [18] or "multipart/form-data"
-//    [16].  If CONTENT_TYPE is blank, the script can reject the request
-//    with a 415 'Unsupported Media Type' error, where supported by the
-//    protocol.
-
-		std::string val;
-
-		// cgienv.add("CONTENT_TYPE", "application/x-www-form-urlencoded"); // IMPORTANT
-		// cgienv.add("CONTENT_TYPE", "multipart/form-data"); // ATTN : does (cgi) parse boundary (?)
-
-		val = this->header("Content-type");
-		if (val.size())
-			cgienv.add("CONTENT_TYPE", val.c_str());
-		val = this->header("Content-length");
-		if (val.size())
-			cgienv.add("CONTENT_LENGTH", val.c_str());
-// should (conn) know about INCOMING contenth-length ... 
-// if we do not have content-length .. need to CLOSE the socket
-// after all data has been written
-
-		cgienv.add("PATH_INFO", "path info"); // added to PHP_SELF (?)
-// PATH_TRANSLATED
-// Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
-		// SCRIPT_NAME
-		// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
-		cgienv.add("SCRIPT_NAME", "test.php");
-		cgienv.add("SCRIPT_FILENAME", "test.php");
-// 		
-		
-		// need to EXTRACT from URL
-		cgienv.add("QUERY_STRING", "g1=get-one&g2=get-two");
-		
-			// get this from Conn::addr
-		cgienv.add("REMOTE_ADDR", "remote addr");
-		cgienv.add("REMOTE_HOST", "remote host");
-		cgienv.add("REMOTE_USER", "remote user");
-		
-		val = this->header("Host");
-		if (val.size())
-			cgienv.add("HTTP_HOST", val.c_str());
-		val = this->header("User-Agent");
-		if (val.size())
-			cgienv.add("HTTP_USER_AGENT", val.c_str());
-		
-		val = this->header("Accept");
-		if (val.size())
-			cgienv.add("HTTP_ACCEPT", val.c_str());
-		cgienv.add("HTTP_COOKIE", "cookies");
-		
-
-// In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
-
-	
-			// CONSTANT : from server
-		cgienv.add("SERVER_NAME", "webserv"); // virtual
-		cgienv.add("SERVER_PORT", this->serv.get_port());
-		cgienv.add("SERVER_PROTOCOL", "HTTP/1.1");
-		cgienv.add("SERVER_SOFTWARE", "webserv");
-
-
-		// need to ADD TO .. current (envp) ? 
-		// cwd() !!!
+		// cwd (?)
 		const char **envp = cgienv.gen();
 
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
@@ -465,7 +317,6 @@ int	Connection::exec_cgi(void)
 // WORK : on ibuf/obuf communication FIRST
 		std::cout << "\n\nwtf\n\n";
 
-
 // cgi HUP .. on python exception
 		// bad executable -- how to handle this (?) actually TWICE (?)
 		exit (err);
@@ -473,44 +324,32 @@ int	Connection::exec_cgi(void)
 	
 	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
 
-	close(p1[0]);
-	close(p2[1]);
-
-
 	// so .. conn->resource .. 
 	// tracks these (?)
-	int			cgifd;
-	EpollClient	*epc_cgi;
+	int			cgifd_ip;
+	int			cgifd_op;
 	
-	cgifd = dup(p1[1]);
-	if (cgifd < 0)
-	{
-		// cleanup (!)
+	cgifd_ip = dup(pipes.p1[1]);
+	if (cgifd_ip < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
-	}
-	close (p1[1]);
+	cgifd_op = dup(pipes.p2[0]);
+	if (cgifd_op < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
+		
+	EpollClient	*epc_cgi_ip;
+	EpollClient	*epc_cgi_op;
 
-	epc_cgi = new CgiPipe(this->ep, cgifd, *this);
-	err = this->ep.add(epc_cgi, EPOLLOUT);
+	epc_cgi_ip = new CgiPipe(this->ep, cgifd_ip, *this);
+	err = this->ep.add(epc_cgi_ip, EPOLLOUT);
 	if (err < 0)
 	{
-		// cleanup (!)
 		return (err);
 	}
 
-	cgifd = dup(p2[0]);
-	if (cgifd < 0)
-	{
-		// cleanup (!)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
-	}
-	close (p2[0]);
-	
-	epc_cgi = new CgiPipe(this->ep, cgifd, *this);
-	err = this->ep.add(epc_cgi, EPOLLIN);
+	epc_cgi_op = new CgiPipe(this->ep, cgifd_op, *this);
+	err = this->ep.add(epc_cgi_op, EPOLLIN);
 	if (err < 0)
 	{
-		// cleanup (!)
 		return (err);
 	}
 	return (err);

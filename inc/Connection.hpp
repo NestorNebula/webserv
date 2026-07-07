@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:11:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 20:08:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,46 +14,18 @@
 # define CONNECTION_HPP
 
 # include <unistd.h>
-# include "Epoll.hpp"
-# include "EpollClient.hpp"
+# include "Socket.hpp"
 # include <iostream>
 # include <sys/wait.h>
 # include <cstring>
 # include <algorithm>
 
+# include "Epoll.hpp"
+# include "EpollClient.hpp"
+# include "CgiEnv.hpp"
+
 // # include <map>
 
-#include <sstream>
-
-template <typename T>
-std::string num_2_str(T value)
-{
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
-
-class CgiEnv
-{
-private:
-	CgiEnv (const CgiEnv & that);
-	CgiEnv & operator = (const CgiEnv & )
-		{ return (*this); }
-public:
-	CgiEnv(void);
-	~CgiEnv();
-	
-	void		add(const char *key, const char *val);
-	void		add(const char *key, int n);
-	const char	**gen(void);
-	// from_header(<map>)
-private:
-	std::vector<std::string>	data;
-	const char					**res;
-};
-
-
-class Server;
 
 
 #define CONN_HAS_HEAD 1 
@@ -61,6 +33,8 @@ class Server;
 #define CONN_SENT_RESP 3
 #define RSRC_SENT_BODY 4
 #define CONN_SENT_LENGTH 5
+
+class Server;
 
 class Connection : public EpollClient
 {
@@ -79,14 +53,20 @@ public:
 	ssize_t		pollout(void);
 	int			hup(void) { return (0); }
 	
+	void		set_addr(struct sockaddr_in *a) { this->addr = *a; }
+
+	std::string	header(const char *key);
+	
 private:
 // TESTING
-	std::string	header(const char *key);
 	std::string	head;
-private:
+public:
 	Server		&serv;
+private:
 	int			exec_cgi(void);
-	
+public:
+	struct sockaddr_in	addr;
+private:
 	int			req_cnt;
 // TESTING
 	std::string	resp;

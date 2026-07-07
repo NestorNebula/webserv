@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/06 21:03:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/07 16:31:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,6 @@ public:
 	virtual ~EpollClient();
 
 	ssize_t			recv(void);
-	// std::string -- fucks with binary data
-	// std::vector<char> .. fucking ugly
 	ssize_t			send(const char *buf, size_t siz);
 	ssize_t			send(std::string & buf);
 	
@@ -59,14 +57,14 @@ public:
 	virtual ssize_t pollout(void) = 0;
 	virtual int		hup(void) = 0;
 
-	void		set_lact(void);
+	void			set_lact(void);
 	
-	int			get_fd(void)	const { return (this->fd); }
-	epc_typ		get_typ(void)	const { return (this->typ); }
+	int				get_fd(void)	const { return (this->fd); }
+	epc_typ			get_typ(void)	const { return (this->typ); }
 
-    std::string typ_str(void);
+    std::string 	typ_str(void);
 	
-	int			mod_evt(int e);
+	int				mod_evt(int e);
 protected:
 	Epoll		&ep;
 	epc_typ		typ;

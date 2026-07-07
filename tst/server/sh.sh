@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
-# echo
-# exit 0
+siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
+echo
+exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -26,11 +26,22 @@
 # curl -X GET 'http://localhost:8080/?p1=one&p2=two'
 # echo
 
-
-curl -X POST http://localhost:8080 \
+# (firefox !)
+curl -X POST http://localhost:8081 \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0
+
+# curl -X POST http://localhost:8080 \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# curl -X POST http://localhost:8081 \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# curl -X POST http://localhost:8082 \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# exit 0
 
 # curl -X POST http://localhost:8081 \
 # 	-H "Content-Type: application/x-www-form-urlencoded" \
