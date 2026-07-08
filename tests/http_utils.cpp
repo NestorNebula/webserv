@@ -160,6 +160,32 @@ TEST(isAccessibleFile, NonAccessibleFile) {
 	EXPECT_FALSE(isAccessibleFile("non-existing"));
 }
 
+TEST(decodeURI, BasicURIs) {
+	std::vector<std::string> uris;
+	uris.push_back("/");
+	uris.push_back("/files");
+	uris.push_back("/files/empty.txt");
+	for (std::vector<std::string>::const_iterator it = uris.begin(), ite = uris.end(); it != ite; it++)
+		EXPECT_EQ(decodeURI(*it), *it);
+}
+
+TEST(decodeURI, EncodedURIs) {
+	EXPECT_EQ(decodeURI("/%66%69%6c%65%73"), "/files");
+	EXPECT_EQ(decodeURI("/%66%69%6c%65%73/%65%6d%70%74%79%2e%74%78%74"), "/files/empty.txt");
+}
+
+TEST(decodeURI, ReservedCharacters) {
+	EXPECT_EQ(decodeURI("%2F%66%69%6c%65%73%2F%65%6d%70%74%79%2e%74%78%74"), "%2Ffiles%2Fempty.txt");
+	EXPECT_EQ(decodeURI("%3a%2f%3f%23%5b%5d%2f%40%21%24%26%27%28%29%2a%2b%2c%3b%3d"), "%3a%2f%3f%23%5b%5d%2f%40%21%24%26%27%28%29%2a%2b%2c%3b%3d");
+}
+
+TEST(decodeURI, InvalidURI) {
+	EXPECT_EQ(decodeURI("/files/empty.%txt"), "");
+	EXPECT_EQ(decodeURI("/files/empty.txt%"), "");
+	EXPECT_EQ(decodeURI("/files/empty.txt%2"), "");
+	EXPECT_EQ(decodeURI("/files/empty.txt%%"), "");
+}
+
 TEST(normalizeURI, BasicURIs) {
 	std::vector<std::string> uris;
 	uris.push_back("/");
