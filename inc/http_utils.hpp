@@ -34,3 +34,5 @@ bool isCgi(const std::string &path, RouteConfig &config);
 bool isAccessibleFile(const std::string &path);
 
 std::string getStatusReason(Response::StatusCode code);
+
+std::string normalizeURI(const std::string &uri);
