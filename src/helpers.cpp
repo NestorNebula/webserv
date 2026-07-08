@@ -54,3 +54,20 @@ long getLong(const std::string &s, bool *err, long min, long max, int base,
     *err = false;
   return n;
 }
+
+std::vector<std::string> split(const std::string &s, const std::string set) {
+	std::vector<std::string> splitStr;
+	std::string tmp;
+
+	for (std::string::const_iterator it = s.begin(), ite = s.end(); it != ite; it++) {
+		if (set.find(*it) == std::string::npos)
+			tmp.push_back(*it);
+		else if (!tmp.empty()) {
+			splitStr.push_back(tmp);
+			tmp.clear();
+		}
+	}
+	if (!tmp.empty())
+		splitStr.push_back(tmp);
+	return splitStr;
+}
