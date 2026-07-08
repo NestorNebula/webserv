@@ -159,3 +159,21 @@ TEST(isAccessibleFile, AccessibleFile) {
 TEST(isAccessibleFile, NonAccessibleFile) {
 	EXPECT_FALSE(isAccessibleFile("non-existing"));
 }
+
+TEST(normalizeURI, BasicURIs) {
+	std::vector<std::string> uris;
+	uris.push_back("/");
+	uris.push_back("/files");
+	uris.push_back("/files/empty.txt");
+	for (std::vector<std::string>::const_iterator it = uris.begin(), ite = uris.end(); it != ite; it++)
+		EXPECT_EQ(normalizeURI(*it), *it);
+}
+
+TEST(normalizeURI, RelativeURIs) {
+	EXPECT_EQ(normalizeURI("/a/./b/c"), "/a/b/c");
+	EXPECT_EQ(normalizeURI("/a/../b/c"), "/b/c");
+	EXPECT_EQ(normalizeURI("/a/../b/../c"), "/c");
+	EXPECT_EQ(normalizeURI("/a/../../b/c"), "/b/c");
+	EXPECT_EQ(normalizeURI("/a/b/c/../../.."), "/");
+	EXPECT_EQ(normalizeURI("/a/b/.."), "/a/");
+}
