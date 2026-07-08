@@ -35,4 +35,6 @@ bool isAccessibleFile(const std::string &path);
 
 std::string getStatusReason(Response::StatusCode code);
 
+std::string decodeURI(const std::string &uri);
+
 std::string normalizeURI(const std::string &uri);
