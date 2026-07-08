@@ -113,3 +113,28 @@ std::string getStatusReason(Response::StatusCode code) {
 		return reasons[code];
 	return std::string();
 }
+
+std::string normalizeURI(const std::string &uri) {
+	std::vector<std::string> splitUri(split(uri, "/"));
+	std::vector<std::string> v;
+	bool endSlash = false;
+
+	for (std::vector<std::string>::const_iterator it = splitUri.begin(), ite = splitUri.end(); it != ite; it++) {
+		if (*it == ".." && !v.empty())
+			v.pop_back();
+		else if (*it != ".." && *it != ".") {
+			v.push_back(*it);
+			endSlash = it + 1 != ite || uri[uri.size() - 1] == '/';
+		}
+	}
+
+	if (v.empty())
+		return "/";
+	std::string normalized("/");
+	for (std::vector<std::string>::const_iterator it = v.begin(), ite = v.end(); it != ite; it++) {
+		(normalized += *it) += "/";
+	}
+	if (!endSlash)
+		normalized.erase(normalized.size() - 1);
+	return normalized;
+}
