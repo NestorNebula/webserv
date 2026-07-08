@@ -139,15 +139,19 @@ void Session::handleRequest() {
 	// Check that method works for route/file
 	if (!isAllowedMethod(_request.getMethod(), *_route))
 		return setResponseStatus(405);
-	if (_request.getMethod() == METHOD_POST && _route->upload)
-		return handleUpload();
+	if (isCgi(_resourcePath, *_route) && isAccessibleFile(_resourcePath)) {
+		_next = DOCGI;
+		return;
+	}
+	if (_request.getMethod() == METHOD_POST)
+		return _route->upload ? handleUpload() : setResponseStatus(403);
 	if (!isExistingFile(_resourcePath)) {
 		return setResponseStatus(404);
 	}
 	if (!isAccessibleFile(_resourcePath))
 		return setResponseStatus(403);
-	if (isCgi(_resourcePath, *_route))
-		_next = DOCGI;
+	if (_request.getMethod() == METHOD_DELETE)
+		return handleDelete();
 }
 
 void Session::handleUpload() {
@@ -174,6 +178,15 @@ void Session::handleUpload() {
 			return setResponseStatus(500);
 	}
 	setResponseStatus(201);
+}
+
+void Session::handleDelete() {
+	if (isDirectory(_resourcePath))
+		return setResponseStatus(403);
+	errno = 0;
+	if (std::remove(_resourcePath.c_str()) && errno == EACCES)
+		return setResponseStatus(403);
+	setResponseStatus(204);
 }
 
 void Session::handleResource() {

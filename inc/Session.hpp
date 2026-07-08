@@ -70,6 +70,7 @@ private:
 
 	void handleRequest();
 	void handleUpload();
+	void handleDelete();
 
 	void handleResource();
 	void prepareErrorResource();
