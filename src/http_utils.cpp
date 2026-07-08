@@ -97,6 +97,7 @@ std::string getStatusReason(Response::StatusCode code) {
 	if (reasons.empty()) {
 		reasons.insert(std::pair<int, std::string>(200, "OK"));
 		reasons.insert(std::pair<int, std::string>(201, "Created"));
+		reasons.insert(std::pair<int, std::string>(204, "No Content"));
 		reasons.insert(std::pair<int, std::string>(301, "Moved Permanently"));
 		reasons.insert(std::pair<int, std::string>(400, "Bad Request"));
 		reasons.insert(std::pair<int, std::string>(403, "Forbidden"));
