@@ -123,35 +123,120 @@ void Session::manageSession() {
 }
 
 void Session::handleRequest() {
-	// Check Request format and validity
-	// Ensure start line and headers values make sense
+	validateRequest();
+	resolveResource();
+	validateOperation();
+}
+
+void Session::validateRequest() {
+	// TODO Headers too large
+	// TODO Body too large
+	// TODO Manage pre- end of request tests
 	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
 		return setResponseStatus(400);
-	if (_request.getMethod() == METHOD_UNKNOWN)
+	if (_request.getMethod() == METHOD_UNKNOWN) // TODO move check up
 		return setResponseStatus(501);
-	// Check route and file
+	// TODO HTTP version Not Supported / 505
+}
+
+void Session::resolveResource() {
+	if (_response.getCode()) return;
 	_route = findBestRoute(_request.getURL(), _server);
 	if (!_route)
 		return setResponseStatus(404);
 	if (!_route->redirect.empty())
 		return setResponseStatus(301);
-	_resourcePath = resolvePath(_request.getURL(), *_route);
-	// Check that method works for route/file
 	if (!isAllowedMethod(_request.getMethod(), *_route))
 		return setResponseStatus(405);
-	if (isCgi(_resourcePath, *_route) && isAccessibleFile(_resourcePath)) {
+	
+	_resourcePath = resolvePath(_request.getURL(), *_route);
+	if (isCgi(_resourcePath, *_route)) {
 		_next = DOCGI;
 		return;
 	}
-	if (_request.getMethod() == METHOD_POST)
-		return _route->upload ? handleUpload() : setResponseStatus(403);
-	if (!isExistingFile(_resourcePath)) {
-		return setResponseStatus(404);
+}
+
+void Session::validateOperation() {
+	if (_response.getCode()) return;
+	if (_next == DOCGI) {
+		if (!isAccessibleFile(_resourcePath))
+			return setResponseStatus(403);
+		return;
 	}
+	if (_request.getMethod() == METHOD_POST && _route->upload) {
+		if (isExistingFile(_resourcePath))
+			return setResponseStatus(403);
+		return;
+	}
+	if (!isExistingFile(_resourcePath))
+		return setResponseStatus(404);
 	if (!isAccessibleFile(_resourcePath))
 		return setResponseStatus(403);
-	if (_request.getMethod() == METHOD_DELETE)
-		return handleDelete();
+}
+
+void Session::handleResource() {
+	if (_next == DOCGI)
+		return;
+	if (_response.getCode() >= 400)
+		prepareErrorResource();
+	else if (!_response.getCode()) {
+		switch (_request.getMethod()) {
+			case METHOD_GET:
+				if (isDirectory(_resourcePath))
+					prepareDirectoryResource();
+				else
+					_resource = new StaticResource(_resourcePath);
+				break;
+			case METHOD_POST:
+				handleUpload();
+				break;
+			case METHOD_DELETE:
+				handleDelete();
+				break;
+			default:
+				break;
+		}
+	}
+	// Generate Resource
+	if (_resource) {
+		_resource->generate();
+		// Handle Resource errors
+		if (_resource->failed()) {
+			setResponseStatus(500);
+			delete _resource;
+			_resource = NULL;
+		}
+	}
+}
+
+void Session::prepareErrorResource() {
+	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
+	std::ostringstream oss;
+	oss << _response.getCode();
+	std::string errPage = joinPaths(!_route ? _server.root : _route->root, errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"]);
+	if (!isAccessibleFile(errPage))
+		errPage = joinPaths(!_route ? "" : _route->root, errPages["default"]);
+	delete _resource;
+	_resource = new StaticResource(errPage);
+}
+
+void Session::prepareDirectoryResource() {
+	bool indexFound = false;
+	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
+		std::string indexPath = joinPaths(_route->root, *it);
+		if (isAccessibleFile(indexPath)) {
+			_resourcePath = indexPath;
+			indexFound = true;
+		}
+	}
+	if (indexFound)
+		_resource = new StaticResource(_resourcePath);
+	else if (_route->autoindex)
+		_resource = new DirectoryResource(_resourcePath);
+	else {
+		setResponseStatus(403);
+		prepareErrorResource();
+	}
 }
 
 void Session::handleUpload() {
@@ -187,63 +272,6 @@ void Session::handleDelete() {
 	if (std::remove(_resourcePath.c_str()) && errno == EACCES)
 		return setResponseStatus(403);
 	setResponseStatus(204);
-}
-
-void Session::handleResource() {
-	if (_next == DOCGI)
-		return;
-	if (_response.getCode() >= 400)
-		prepareErrorResource();
-	else if (!_response.getCode()) {
-		// Choose type of Resource depending on route/file
-		if (_request.getMethod() == METHOD_GET) {
-			if (isDirectory(_resourcePath))
-				prepareDirectoryResource();
-			else
-				_resource = new StaticResource(_resourcePath);
-		}
-	}
-	// Generate Resource
-	if (_resource) {
-		_resource->generate();
-		// Handle Resource errors
-		if (_resource->failed()) {
-			setResponseStatus(500);
-			delete _resource;
-			_resource = NULL;
-		}
-	}
-}
-
-void Session::prepareErrorResource() {
-	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
-	std::ostringstream oss;
-	oss << _response.getCode();
-	std::string errPage = joinPaths(!_route ? _server.root : _route->root, errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"]);
-	std::cout << errPage << "\n";
-	if (!isAccessibleFile(errPage))
-		errPage = joinPaths(!_route ? "" : _route->root, errPages["default"]);
-	delete _resource;
-	_resource = new StaticResource(errPage);
-}
-
-void Session::prepareDirectoryResource() {
-	bool indexFound = false;
-	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
-		std::string indexPath = joinPaths(_route->root, *it);
-		if (isAccessibleFile(indexPath)) {
-			_resourcePath = indexPath;
-			indexFound = true;
-		}
-	}
-	if (indexFound)
-		_resource = new StaticResource(_resourcePath);
-	else if (_route->autoindex)
-		_resource = new DirectoryResource(_resourcePath);
-	else {
-		setResponseStatus(403);
-		prepareErrorResource();
-	}
 }
 
 void Session::handleResponse() {

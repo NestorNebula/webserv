@@ -69,12 +69,16 @@ private:
 	void manageSession();
 
 	void handleRequest();
-	void handleUpload();
-	void handleDelete();
+	void validateRequest();
+	void resolveResource();
+	void validateOperation();
 
 	void handleResource();
 	void prepareErrorResource();
 	void prepareDirectoryResource();
+
+	void handleUpload();
+	void handleDelete();
 
 	void handleResponse();
 	void setResponseHeaders();
