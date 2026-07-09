@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
+# siege -f staging-urls.txt --internet --verbose --reps=1 --concurrent=8 --no-parser -b
 # echo
 # exit 0
 
@@ -13,7 +13,7 @@
 # echo
 # exit 0
 
-# curl -X GET http://localhost:8080
+# curl -X GET http://localhost:8hp080
 # echo
 # curl -X GET http://localhost:8081
 # echo
@@ -31,8 +31,7 @@
 # echo
 
 # (firefox !)
-curl -X POST http://localhost:8080 \
-	 -d "p1=post-one&p2=post-two"
+curl -X GET http://localhost:8080 --output tmp.mp3
 echo
 exit 0
 

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use CGI;
 
-print("Perl : hello, world!\n");
 
 my $cgi = CGI->new;
 
@@ -15,6 +14,7 @@ my $p1 = $cgi->param('p1');
 my $p2 = $cgi->param('p2');
 
 
+print("Perl : hello, world!\n");
 print("\nGET VARS\n");
 print ($g1);
 print ("\n");
