@@ -114,6 +114,32 @@ std::string getStatusReason(Response::StatusCode code) {
 	return std::string();
 }
 
+std::string decodeURI(const std::string &uri) {
+	static const std::string unreserved("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~");
+	static const std::string hexa("0123456789ABCDEF");
+	std::string decoded;
+
+	for (std::string::const_iterator it = uri.begin(), ite = uri.end(); it != ite; it++) {
+		if (*it != '%') {
+			decoded.push_back(*it);
+			continue;
+		}
+		if (ite - it <= 2)
+			return std::string();
+		std::string::size_type h1 = hexa.find(std::toupper(static_cast<unsigned char>(*(it + 1)))), h2 = hexa.find(std::toupper(static_cast<unsigned char>(*(it + 2))));
+		if (h1 == std::string::npos || h2 == std::string::npos)
+			return std::string();
+		unsigned char value = h1 * hexa.size() + h2;
+		if (unreserved.find(std::toupper(value)) == std::string::npos)
+			decoded.push_back(*it);
+		else {
+			decoded.push_back(value);
+			it += 2;
+		}
+	}
+	return decoded;
+}
+
 std::string normalizeURI(const std::string &uri) {
 	std::vector<std::string> splitUri(split(uri, "/"));
 	std::vector<std::string> v;
