@@ -51,7 +51,7 @@ RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
 std::string resolvePath(const std::string &url, RouteConfig &config) {
 	std::string path(config.root);
 	if (url.size() > config.path.size())
-		path += url.substr(config.path.size());
+		path = joinPaths(path, url.substr(config.path.size()));
 	return path;
 }
 
