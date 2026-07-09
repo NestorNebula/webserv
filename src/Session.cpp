@@ -134,6 +134,7 @@ void Session::validateRequest() {
 	// TODO Manage pre- end of request tests
 	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
 		return setResponseStatus(400);
+	// TODO Enforce HOST Header for HTTP/1.1
 	if (_request.getMethod() == METHOD_UNKNOWN) // TODO move check up
 		return setResponseStatus(501);
 	// TODO HTTP version Not Supported / 505
@@ -210,6 +211,7 @@ void Session::handleResource() {
 }
 
 void Session::prepareErrorResource() {
+	// TODO Handle errors relative to root
 	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
 	std::ostringstream oss;
 	oss << _response.getCode();
