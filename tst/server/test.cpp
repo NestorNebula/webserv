@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/09 21:44:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:48:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,9 @@ int main (int, char **, char **envp)
     {
         ep = new Epoll(envp);
         
-        new Server(*ep, 8080);
-        new Server(*ep, 8081);
-        new Server(*ep, 8082);
+        new Server(ep, 8080);
+        new Server(ep, 8081);
+        new Server(ep, 8082);
         
         err = ep->loop();
         WsLog::_(LVL_INFO, TGT_MAIN, "exit  : ", err);
