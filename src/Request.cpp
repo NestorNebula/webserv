@@ -13,6 +13,7 @@
 #include "Request.hpp"
 #include "TemporaryFileStream.hpp"
 #include "helpers.hpp"
+#include "http_utils.hpp"
 #include <climits>
 #include <sstream>
 
@@ -74,6 +75,17 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
     _query = _url.substr(qIndex + 1);
     _url.erase(qIndex);
   }
+  std::string decoded = decodeURI(_url);
+  if (decoded.empty()) {
+	  _state = INVALID;
+	  return;
+  }
+  std::string normalized = normalizeURI(decoded);
+  if (normalized.empty()) {
+	  _state = INVALID;
+	  return;
+  }
+  _url = normalized;
   _state = HEADERS;
   _raw.erase(0, eol + 2);
 }
