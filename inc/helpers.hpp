@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-std::string trim(std::string s, std::string set);
+std::string trim(std::string s, std::string set, bool beg = true, bool end = true);
 
 void capitalize(std::string &s);
 std::string capitalize(const std::string &s);

@@ -15,13 +15,15 @@
 #include <cerrno>
 #include <cstdlib>
 
-std::string trim(std::string s, std::string set) {
-  std::string::size_type start, end;
-  start = s.find_first_not_of(set);
-  end = s.find_last_not_of(set);
-  if (start == std::string::npos || end == std::string::npos)
+std::string trim(std::string s, std::string set, bool beg, bool end) {
+  if (s.empty())
+	  return s;
+  std::string::size_type startIndex, endIndex;
+  startIndex = beg ? s.find_first_not_of(set) : 0;
+  endIndex = end ? s.find_last_not_of(set) : s.size() - 1;
+  if (startIndex == std::string::npos || endIndex == std::string::npos)
     return std::string();
-  return std::string(s, start, end - start + 1);
+  return std::string(s, startIndex, endIndex - startIndex + 1);
 }
 
 void capitalize(std::string &s) {
