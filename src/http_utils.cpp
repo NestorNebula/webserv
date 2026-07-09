@@ -58,7 +58,7 @@ std::string resolvePath(const std::string &url, RouteConfig &config) {
 std::string joinPaths(const std::string &prefix, const std::string &suffix) {
 	if (prefix.empty() || suffix.empty())
 		return prefix + suffix;
-	return  trim(prefix, "/") + "/" + trim(suffix, "/");
+	return  trim(prefix, "/", false) + "/" + trim(suffix, "/", true, false);
 }
 
 bool isExistingFile(const std::string &path) {
