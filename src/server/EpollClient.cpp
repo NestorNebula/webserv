@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:13:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/09 08:54:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,14 @@ int	EpollClient::mod_evt(int e)
 		WsLog::_(LVL_WARN, TGT_EPC, "mod_evt: not yet initialized");
 		return (this->ini_evt(e));
 	}
-	evt.events = e;
+	if (e < 0)
+	{
+		evt.events &= ~(-e);
+	}
+	else
+	{
+		evt.events |= e;
+	}
 	evt.events |= EPOLLRDHUP;
 	return (this->ep.mod(this));
 }

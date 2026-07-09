@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/08 00:14:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/09 08:46:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -337,6 +337,7 @@ WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 				// nothing more to read .. BUT may still need to write (cgi) output 
 			if (evt->events & EPOLLRDHUP)
 			{
+				// can we trust this (?)
 				this->rem(epc);
 				// epc->mod_evt(EPOLLOUT);
 				continue;

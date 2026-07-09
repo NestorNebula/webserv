@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/08 00:24:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/09 09:04:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,39 +121,34 @@ ssize_t	CgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
-		return (0);
+		return (-1); // (?)
 	}
 
+	// UGLY : IPC "communication"
 	this->conn.ostr.append(this->ibuf, err);
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn.ostr.size());
     
 	WsLog::_(LVL_INFO, TGT_CGI_DATA, "ostr");
 	WsLog::_(LVL_INFO, TGT_CGI_DATA, "****\n", this->conn.ostr);
 	
-	// any chance we're reading (EPOLLIN) at the same time (?)
-
-		// partial
-    // this->conn.mod_evt(EPOLLOUT);
-
 	return (err);
 }
 
-// cgi::hup .. set conn state DONE 
-// epoll::state (read_data)
-	// has read data from its (fd) 
-	// that is avaiable for processing (in its ibuf)
-	 
 ssize_t	CgiPipe::pollout(void)
 {
 	ssize_t	err;
     
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send");
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", this->conn.istr.size());
 
 	// cgi : needs to have received CONTENT_LENGTH .. 
 	// so it knows something is coming 
 	// otherwise we need to CLOSE its INPUT
 	// conn::state (read_data) 
 	
+	// not sure this is the best IPC communication approach
+	// what if (cgi) .. flushes (istr/body)
+	// before conn receives more ...
+	// Content-Length (?)
 	if (this->conn.istr.size())
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn.istr);
@@ -176,6 +171,11 @@ ssize_t	CgiPipe::pollout(void)
 	return (-1); // EOF : close input to cgi
 }
 
+
+// cgi::hup .. set conn state DONE 
+// epoll::state (read_data)
+	// has read data from its (fd) 
+	// that is avaiable for processing (in its ibuf)
 int		CgiPipe::hup(void)
 {
 	// if POLLIN

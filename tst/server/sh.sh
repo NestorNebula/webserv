@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=6 --concurrent=255 --no-parser -b
+# siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=100 --no-parser -b
 # echo
 # exit 0
 

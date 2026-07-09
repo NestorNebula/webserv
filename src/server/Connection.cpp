@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/08 00:22:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/09 09:04:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,8 @@ ssize_t	Connection::pollin(void)
 		return (0);
 	}
 
-	istr.append(this->ibuf, err); // std::string::append includes any (null)
+		// std::string::append includes any (null)
+	istr.append(this->ibuf, err); 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
 	
 	if (this->state < CONN_HAS_HEAD)
@@ -152,7 +153,7 @@ ssize_t	Connection::pollout(void)
 
 	if (this->state < CONN_HAS_RSRC)
 	{
-		return (0);
+		return (0); // (-1)
 	}
 	if (this->state < CONN_SENT_RESP)
 	{
@@ -182,16 +183,15 @@ ssize_t	Connection::pollout(void)
 			return (0);
 #else
 			// TEST : content-length header .. longer than what we send
-			// curl: (18) end of response with 5 bytes missing
 			return (-1);		
 #endif			
 		}
-		this->mod_evt(0);  // -EPOLLOUT // otherwise, we get stuck here 
+		this->mod_evt(-EPOLLOUT); //  // otherwise, we get stuck here 
 		return (0);
 	}
 	if (this->state < RSRC_SENT_BODY)
 	{
-		this->mod_evt(0); // -EPOLLOUT
+		this->mod_evt(-EPOLLOUT);
 		return (0);
 	}
 	
@@ -264,7 +264,6 @@ int	Connection::exec_cgi(void)
 	pid_t pid = fork();
 	if (pid < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
-
 	if (pid == 0)
 	{
 		err = pipes.dup_io();
@@ -324,6 +323,8 @@ int	Connection::exec_cgi(void)
 		// bad executable -- how to handle this (?) actually TWICE (?)
 		exit (err);
 	}		
+	
+
 	
 	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
 
