@@ -76,7 +76,7 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
     _url.erase(qIndex);
   }
   std::string decoded = decodeURI(_url);
-  if (decoded.empty()) {
+  if (decoded.empty() || decoded[0] != '/') {
 	  _state = INVALID;
 	  return;
   }
