@@ -30,15 +30,6 @@
     $chk_hed = 'REMOTE_ADDR';
     print("\n$chk_hed : " . $_SERVER[$chk_hed] . PHP_EOL);
 
-    // $data = file_get_contents('files/Kanan.mp3');
-        // fucks with keep-alive size .. 
-    // header('Content-Type: audio/mp3');
-    // echo $data;
-
-    // $data = file_get_contents('files/2k_earth_daymap.jpg');
-    // header('Content-Type: image/jpg');
-    // echo $data;
-
     // $f = $_POST['file']; // undefined array key name="file" filename=""
     // print("file:\n" . $f . PHP_EOL);
 ?>

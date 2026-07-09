@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=100 --no-parser -b
+# siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
 # echo
 # exit 0
 
@@ -14,6 +14,10 @@
 # exit 0
 
 # curl -X GET http://localhost:8080
+# echo
+# curl -X GET http://localhost:8081
+# echo
+# curl -X GET http://localhost:8082
 # echo
 # exit 0
 

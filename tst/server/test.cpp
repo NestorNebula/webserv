@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/09 09:01:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/09 14:26:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ int main (int, char **, char **envp)
     ;
     WsLog::tgt = TGT_NONE
         // | TGT_ALL
-        | TGT_EPOLL 
-        // | TGT_EPOLL_EVT
+        // | TGT_EPOLL 
+        | TGT_EPOLL_EVT
         // | TGT_EPOLL_CTL
         
         // | TGT_EPC
@@ -37,7 +37,7 @@ int main (int, char **, char **envp)
         // | TGT_CONN
         | TGT_CONN_RECV
         | TGT_CONN_SEND
-        // | TGT_CONN_DATA
+        | TGT_CONN_DATA
 
         // | TGT_CGI
         | TGT_CGI_RECV
@@ -49,15 +49,25 @@ int main (int, char **, char **envp)
     ;
     
     // WsLog::tgt = TGT_NONE;
-    
-    Epoll   ep(envp);
-    
-    new Server(ep, 8080);
-    new Server(ep, 8081);
-    new Server(ep, 8082);
-    
-    int err = ep.loop();
 
-    WsLog::_(LVL_INFO, TGT_MAIN, "exit  : ", err);
+    
+    int err = 0;
+    Epoll *ep = NULL;
+    try
+    {
+        ep = new Epoll(envp);
+        
+        new Server(*ep, 8080);
+        new Server(*ep, 8081);
+        new Server(*ep, 8082);
+        
+        err = ep->loop();
+        WsLog::_(LVL_INFO, TGT_MAIN, "exit  : ", err);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    delete (ep);
     return (err);
 }
