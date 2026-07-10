@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:57:26 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:41:22 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ class ConfigParser {
 		void	validateServerConfig(const ServerConfig& server);
 		void	validateRouteConfig(const RouteConfig& route);
 		void	validateCGIExecutables(const RouteConfig& route);
+		void	validateDirExists(const std::string& path, const std::string& context);
+		void	validateFileExists(const std::string& path, const std::string& context);
 
 	public:
 		ConfigParser();

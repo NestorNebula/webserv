@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:59:56 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:40:58 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #define GET		"GET"
 #define POST	"POST"
@@ -147,6 +148,15 @@ void	ConfigParser::validateServerConfig(const ServerConfig& server)
 		throw	ConfigException("Server is missing required 'error_page default' directive.");
 	if (server.upload && server.upload_dir.empty())
 		throw	ConfigException("Server has upload enabled but no 'upload_dir'.");
+
+	if (!server.root.empty())
+		validateDirExists(server.root, "server root");
+	if (server.upload && !server.upload_dir.empty())
+		validateDirExists(server.upload_dir, "server upload_dir");
+
+	std::map<std::string, std::string>::const_iterator	it;
+	for (it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
+		validateFileExists(it->second, "server error_page " + it->first);
 }
 
 void	ConfigParser::validateRouteConfig(const RouteConfig& route)
@@ -159,6 +169,14 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		throw	ConfigException("Route '" + route.path + "' has no 'methods' (and none to inherit).");
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
+
+	validateDirExists(route.root, "route '" + route.path + "' root");
+	if (route.upload && !route.upload_dir.empty())
+		validateDirExists(route.upload_dir, "route '" + route.path + "' upload_dir");
+
+	std::map<std::string, std::string>::const_iterator	it;
+	for (it = route.error_pages.begin(); it != route.error_pages.end(); ++it)
+		validateFileExists(it->second, "route '" + route.path + "' error_page " + it->first);
 }
 
 void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
@@ -170,4 +188,20 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");
 	}
+}
+
+void	ConfigParser::validateDirExists(const std::string& path, const std::string& context)
+{
+	struct stat	info;
+
+	if (stat(path.c_str(), &info) != 0)
+		throw	ConfigException(context + ": directory does not exist: " + path);
+	if (!S_ISDIR(info.st_mode))
+		throw	ConfigException(context + ": path is not a directory: " + path);
+}
+
+void	ConfigParser::validateFileExists(const std::string& path, const std::string& context)
+{
+	if (access(path.c_str(), R_OK) != 0)
+		throw	ConfigException(context + ": file does not exist or is not readable: " + path);
 }
