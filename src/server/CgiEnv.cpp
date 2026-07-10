@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:40:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 18:42:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,18 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 {
 	std::string val;
 	
-	this->add("REQUEST_METHOD", "GET");  // conn->method
+	val = conn.header("METH");
+	if (val.size())
+		this->add("REQUEST_METHOD", val.c_str());
+	else
+		this->add("REQUEST_METHOD", "GET");
+
+
+	val = conn.header("PATH");
+	if (val.size())
+		this->add("_PATH", val.c_str());
+
+		// extract query string
 	this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
 // (cwd) !!!

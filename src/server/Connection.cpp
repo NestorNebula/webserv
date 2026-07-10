@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 13:22:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 20:31:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
+	cgi_ip(NULL),
+	cgi_op(NULL),
 	serv(_serv), 
 	req_cnt(0),
 	state(0)
@@ -26,6 +28,13 @@ Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+
+	// if either open .. 
+	// should we try to KILL it (?)
+	if (this->cgi_ip)
+		this->cgi_ip->conn = NULL;
+	if (this->cgi_op)
+		this->cgi_op->conn = NULL;
 };
 
 // GET Requests: The encoded string is appended to the URL and passed to the CGI script via the QUERY_STRING environment variable. 
@@ -46,6 +55,24 @@ std::string Connection::header(const char *key)
 	std::string val("");
 	
 	std::string kstr(key);
+
+	if (kstr == std::string("METH"))
+	{
+		std::string			meth;
+		std::stringstream	line(head);
+		line >> meth;
+		WsLog::_(LVL_DBG, TGT_HEAD, "meth: ", meth);
+		return (meth);
+	}
+	if (kstr == std::string("PATH"))
+	{
+		std::string			meth;
+		std::string			path;
+		std::stringstream	line(head);
+		line >> meth >> path;
+		WsLog::_(LVL_DBG, TGT_HEAD, "path: ", path);
+		return (path);
+	}
 	std::string::const_iterator it = std::search(
 		head.begin(), head.end(),
 		kstr.begin(), kstr.end(),
@@ -83,14 +110,15 @@ std::string Connection::header(const char *key)
 	return (val);
 }
 
+
+
 #define CONN_TIMEO 5
 
+// CgiPipe as well .. or .. just .. NOT SERVER
 bool	Connection::timeo(time_t now)
 {
-	// per-type
-	// for ALL
-	// if (this->to_val == 0)
-		// return (false)
+	if (this->lact == 0)
+		return (false);
 	if (now < this->lact)
 		return (false);
 	if ((this->lact + CONN_TIMEO) < now)
@@ -116,7 +144,8 @@ ssize_t	Connection::pollin(void)
 		return (0);
 	}
 
-	istr.append(this->ibuf, err); 
+	istr.append(this->ibuf, err);
+	
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
 	
 	if (this->state < CONN_HAS_HEAD)
@@ -129,9 +158,12 @@ ssize_t	Connection::pollin(void)
 		
 		head = istr.substr(0, crlf + 4);
 		istr.erase(0, crlf + 4);
+		// parse chunked
 		
 		WsLog::_(LVL_DBG, TGT_HEAD, "head");
 		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", head);
+		WsLog::_(LVL_DBG, TGT_HEAD, "rest");
+		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", istr);
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 	}
@@ -147,8 +179,6 @@ ssize_t	Connection::pollin(void)
 			this->resp = std::string("HTTP/1.1 200 OK\r\n\r\n");
 			break;
 		}
-// KEEP_ALIVE
-		// this->resp = std::string("HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n");
 		err = this->exec_cgi(); // (this->head)
 		if (err < 0)
 		{
@@ -171,14 +201,24 @@ ssize_t	Connection::pollout(void)
 
 	if (this->state < CONN_HAS_RSRC)
 	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no rsrc");
+		return (0); // (-1)
+	}
+	// if (this->cgi_op == NULL)
+		// ERROR
+	// rsrc->state
+	if (this->state < RSRC_HAS_RESP)
+	{
+		// get this more than I like ... 
+		//back to mod_evt(-)
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no resp");
+		this->mod_evt(-EPOLLOUT); // why not (?)
+		// should work with (-EPOLLOUT) .. right (?)
+		// BUT : we want (0) to mean (0) ... 
 		return (0); // (-1)
 	}
 
-	// ATTN : should not send RESP .. 
-	// until we confirm that CGI is sending us data ... 
-	// it may have FAILED
-	// test : (err) in cgi_exec
-	if (this->state < CONN_SENT_RESP)
+	if (this->state < CONN_SENT_RESP || this->state == RSRC_BODY_DONE)
 	{
 		err = this->send(this->resp); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
@@ -196,43 +236,26 @@ ssize_t	Connection::pollout(void)
 		// rsrc.inProgress() .. wait for it
 		// rsrc.failure() .. send error
 		// rsrc.done()
-		if (this->state == RSRC_SENT_BODY) // complete
+		// not always getting this 
+		if (this->state == RSRC_BODY_DONE || this->cgi_op == NULL) // complete
 		{
 #if 0 // KEEP_ALIVE -- would REQUIRE CONTENT-LENGTH from (cgi)
 			// see more HUP => read [0] with THIS .. AND NOT siege.conf
 			this->istr.clear();
 			this->state = 0;
-			this->mod_evt(EPOLLIN); // something more here ..
+			// turn OFF first
+			this->mod_evt(EPOLLIN);
 			return (0);
 #else
 			// TEST : content-length header .. longer than what we send
 			return (-1);		
 #endif			
 		}
-		this->mod_evt(0); //  // otherwise, we get stuck here 
+		// lucky .. send has probably already happened 
+		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
 		return (0);
 	}
-	// UGLY -- when does this get set (?)
-	// if (this->state < RSRC_SENT_BODY)
-	// {
-	// 	this->mod_evt(0);
-	// 	return (0);
-	// }
 	
-// KEEP_ALIVE
-	// if (this->state < CONN_SENT_LENGTH)
-	// {
-			// wrong : if php sent headers .. ugh
-			// may work
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "clen: ", ostr.size());
-	// 	std::string len("Content-Length: " + num_2_str(ostr.size()) + "\r\n");
-	// 	err = this->send(len);
-	// 	this->state = CONN_SENT_LENGTH;
-	// 	return (0);
-	// }
-	// // we sent LENGTH
-	// wait until cgi says done .. 
-
 	err = this->send(ostr);
 	if (err < 0)
 	{
@@ -277,6 +300,14 @@ ssize_t	Connection::pollout(void)
 // Resource .. built from Request
 // CgiEnv   .. built from Request .. add to current ENV (?)
 
+void	Connection::rem_cgi(CgiPipe *epc)
+{
+	// Q: error message (?)
+	if (epc == this->cgi_ip) // expect this to close before (op)
+		this->cgi_ip = NULL;
+	else if (epc == this->cgi_op)
+		this->cgi_op = NULL;
+}
 int	Connection::exec_cgi(void)
 {
 	int			err;
@@ -288,6 +319,7 @@ int	Connection::exec_cgi(void)
 	pid_t pid = fork();
 	if (pid < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		
 	if (pid == 0)
 	{
 		err = pipes.dup_io();
@@ -314,7 +346,7 @@ int	Connection::exec_cgi(void)
 			break;
 		default:
 			path = std::string("/usr/bin/php-cgi");
-			file = std::string("bigfile.php");
+			file = std::string("test.php");
 			break;
 		}
 		
@@ -338,11 +370,9 @@ int	Connection::exec_cgi(void)
 // when client (conn) quits
 // NEED THAT LINK between (conn) and (cgi)
 
-		close(this->ep->epfd);
-
-
 // since it's still running .. that copy of server (port) is STILL OPEN 
-		signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
+		// signal(SIGINT, SIG_IGN); // (?)
+		signal(SIGINT, SIG_DFL);
 		// dangerous : should monitor their cleanup ..
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
 		
@@ -359,8 +389,6 @@ int	Connection::exec_cgi(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 
-	// so .. conn->resource .. 
-	// tracks these (?)
 	int			cgifd_ip;
 	int			cgifd_op;
 	
@@ -369,22 +397,26 @@ int	Connection::exec_cgi(void)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
 	cgifd_op = dup(pipes.p2[0]);
 	if (cgifd_op < 0)
+	{
+		close(cgifd_ip);
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
-		
-	EpollClient	*epc_cgi_ip;
-	EpollClient	*epc_cgi_op;
+	}	
 
-	epc_cgi_ip = new CgiPipe(this->ep, cgifd_ip, *this);
-	err = epc_cgi_ip->ini_evt(EPOLLOUT);
+	this->cgi_ip = new CgiPipe(this->ep, cgifd_ip, this);
+	err = this->cgi_ip->ini_evt(EPOLLOUT);
 	if (err < 0)
 	{
+		close(cgifd_ip);
+		close(cgifd_op);
 		return (err);
 	}
 
-	epc_cgi_op = new CgiPipe(this->ep, cgifd_op, *this);
-	err = epc_cgi_op->ini_evt(EPOLLIN);
+	this->cgi_op = new CgiPipe(this->ep, cgifd_op, this);
+	err = this->cgi_op->ini_evt(EPOLLIN);
 	if (err < 0)
 	{
+		close(cgifd_ip);
+		close(cgifd_op);
 		return (err);
 	}
 	return (err);

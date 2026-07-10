@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 13:18:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 20:31:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ int	cgi_pipes::dup_io(void)
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
 	}
 	
+#if 0
 	int dnfd = open("/dev/null", O_WRONLY);
 	err = dup2(dnfd, STDERR_FILENO);
 	if (err < 0)
@@ -84,7 +85,7 @@ int	cgi_pipes::dup_io(void)
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
 	}
 	close(dnfd);
-
+#endif
 	return (err);		
 }
 
@@ -115,7 +116,7 @@ void	cgi_pipes::shutdown(void)
 
 
 
-CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection & _conn) : 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn) : 
 	EpollClient(_ep, EPC_CGI, _fd), 
 	conn(_conn)
 {
@@ -124,10 +125,15 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection & _conn) :
 CgiPipe::~CgiPipe()
 {
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
+	if (this->conn)
+		this->conn->rem_cgi(this);
 }
 
 ssize_t	CgiPipe::pollin(void)
 {
+	if (this->conn == NULL)
+		return (-1);
+		
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
@@ -143,22 +149,40 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1); // (?)
 	}
 
-	// UGLY : IPC "communication"
-	this->conn.ostr.append(this->ibuf, err);
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn.ostr.size());
-    
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn.ostr);
+	if (this->conn->state < RSRC_HAS_RESP)
+		this->conn->state = RSRC_HAS_RESP;
+		
+	this->conn->ostr.append(this->ibuf, err);
+	this->conn->mod_evt(EPOLLOUT);
 	
-	this->conn.mod_evt(EPOLLOUT); // seems important -- where had it gone (?)
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn->ostr.size());
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn->ostr);
+	
 	return (err);
+}
+
+unsigned int	unchunk(std::string & str)
+{
+	unsigned int x;   
+	std::stringstream ss(str);
+	ss >> std::hex >> x;
+	size_t pos = ss.tellg();
+	str.erase(0, pos + 2); // CRLF
+	if (x == 0)
+		str.erase(0, pos + 4); // CRLF CRLF
+
+	return (x);
 }
 
 ssize_t	CgiPipe::pollout(void)
 {
+	if (this->conn == NULL)
+		return (-1);
+		
 	ssize_t	err;
     
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", this->conn.istr.size());
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", this->conn->istr.size());
 
 	// cgi : needs to have received CONTENT_LENGTH .. 
 	// so it knows something is coming 
@@ -169,10 +193,34 @@ ssize_t	CgiPipe::pollout(void)
 	// what if (cgi) .. flushes (istr/body)
 	// before conn receives more ...
 	// Content-Length (?)
-	if (this->conn.istr.size())
+
+// conn  : exec cgi
+// conn  : recv
+// conn  : istr: [16228]
+// cgi   : send: [16228]
+// head  : meth: POST
+// cgi   : send: [65368] ff58 -- which we do not HAVE yet 
+// cgi   : sent: [8192] // so .. gotta HOLD that value .. until all sent to CGI
+// gotta keep track of when to re-parse
+// conn  : recv
+// conn  : istr: [16220]
+// cgi   : send: [16220]
+// cgi   : send: [0]
+// cgi   : send: zero
+
+	if (this->conn->istr.size())
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn.istr);
-		err = this->send(this->conn.istr); // body
+		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
+#if 1 
+		err = this->send(this->conn->istr);
+#else // parse-chunked
+		unsigned int cnt = unchunk(this->conn->istr);
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", cnt);
+		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
+		err = this->send(this->conn->istr, cnt); // body
+		this->conn->istr.erase(0, 2); // CRLF
+#endif		
+
 		if (err < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
@@ -187,7 +235,7 @@ ssize_t	CgiPipe::pollout(void)
 		return (0); // keep going
 	}
 	// ASSUMES : conn::input : is faster than our output 
-	this->conn.mod_evt(EPOLLOUT);
+	this->conn->mod_evt(EPOLLOUT);
 	return (-1); // EOF : close input to cgi
 }
 
@@ -198,10 +246,17 @@ ssize_t	CgiPipe::pollout(void)
 	// that is avaiable for processing (in its ibuf)
 int		CgiPipe::hup(void)
 {
+	if (this->conn == NULL)
+		return (-1);
 	// if POLLIN
 		// set_state() could better protect/compare 
 	// check (pid) here (?)
-	this->conn.state = RSRC_SENT_BODY;
-	this->conn.mod_evt(EPOLLOUT); // make sure it gets detected
+	// might be (ip) .. which hangs up (when stdin is closed)
+	
+	// YEAH -- conn->cgi_hup() : TEST 
+	// NOT NECESSARILY
+	// CONN_SENT_RESP may not yet have been triggered
+	this->conn->state = RSRC_BODY_DONE;
+	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }

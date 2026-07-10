@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:57:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 20:01:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@
 
 
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ 4096
+#  define EPC_BUF_SIZ 8192
 # endif
 
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ 4096 // (3) -- good test for cgi-out
+#  define EPC_OUT_SIZ 8192 // (3) -- good test for cgi-out
 # endif
 
 typedef enum
@@ -51,13 +51,14 @@ public:
 	virtual ~EpollClient();
 
 	ssize_t			recv(void);
-	ssize_t			send(const char *buf, size_t siz);
+	ssize_t			send(const char *buf, ssize_t siz);
 	ssize_t			send(std::string & str);
+	ssize_t			send(std::string & str, ssize_t cnt);
 	
 	virtual ssize_t	pollin(void) = 0;
 	virtual ssize_t pollout(void) = 0;
 	virtual int		hup(void) = 0;
-	virtual bool	timeo(time_t now) = 0;
+	virtual bool	timeo(time_t ) { return (false); }
 
 	int				ini_evt(int e);
 	int				mod_evt(int e);

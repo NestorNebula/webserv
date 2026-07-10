@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:58:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 20:02:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,12 @@ int	EpollClient::mod_evt(int e)
 		WsLog::_(LVL_WARN, TGT_EPC, "mod_evt: not yet initialized");
 		return (this->ini_evt(e));
 	}
-	evt.events = e;
+	if (e == 0)
+		evt.events = e;
+	else if (e < 0)
+		evt.events &= ~(-e);
+	else
+		evt.events |= e;
 	evt.events |= EPOLLRDHUP;
 	return (this->ep->mod(this));
 }
@@ -108,7 +113,7 @@ ssize_t	EpollClient::recv(void)
 	return (err);
 }
 
-ssize_t	EpollClient::send(const char *buf, size_t siz)
+ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 {
 	ssize_t err;
 	
@@ -132,6 +137,16 @@ ssize_t	EpollClient::send(std::string & str)
 	ssize_t	err;
 
 	err = this->send(str.c_str(), str.size());
+	if (err <= 0)
+		return (err);
+	str.erase(0, err); // here (?) or caller (?)
+	return (err);
+}
+ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
+{
+	ssize_t	err;
+
+	err = this->send(str.c_str(), cnt);
 	if (err <= 0)
 		return (err);
 	str.erase(0, err); // here (?) or caller (?)

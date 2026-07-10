@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:57:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 18:19:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,7 +247,7 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
+	// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...");
 	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
@@ -269,7 +269,7 @@ void	Epoll::check_timeo(void)
 	{
 		if ((*it)->timeo(n))
 		{
-			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT");
+			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT: ", (*it)->typ_str());
 		}
 		it++;
 	}

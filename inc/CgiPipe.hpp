@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:59:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 17:01:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ private:
 	CgiPipe & operator = (const CgiPipe & ) 
 		{ return (*this); }
 public:
-	CgiPipe (Epoll *_ep, int _fd, Connection & _conn);
+	CgiPipe (Epoll *_ep, int _fd, Connection * _conn);
 	~CgiPipe();
 	
 	ssize_t		pollin(void);
@@ -52,8 +52,8 @@ public:
 	int			hup(void);
 	bool		timeo(time_t ) { return (false); }
 
-private:
-	Connection	&conn;
+// private:
+	Connection	*conn;
 };
 
 
