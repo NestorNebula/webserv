@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=1 --concurrent=8 --no-parser -b
-# echo
-# exit 0
+siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
+echo
+exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -31,9 +31,9 @@
 # echo
 
 # (firefox !)
-curl -X GET http://localhost:8080 --output tmp.bin
-echo
-exit 0
+# curl -X GET http://localhost:8080 --output tmp.bin
+# echo
+# exit 0
 
 # curl -X POST http://localhost:8080 \
 # 	 -d "p1=post-one&p2=post-two"
