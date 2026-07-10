@@ -95,9 +95,8 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
 	switch (_next) {
 		case RDSOCK:
-			// TODO Remove check for preValidateRequest to be useful, but without breaking everything
+			handleRequest();
 			if (_request.isComplete() || _request.isInvalid()) {
-				handleRequest();
 				handleResource();
 				if (_next != DOCGI) {
 					handleResponse();
@@ -130,24 +129,26 @@ void Session::handleRequest() {
 	validateOperation();
 }
 
-void preValidateRequest() {
-	// TODO Move possible checks from validateRequest
+void Session::preValidateRequest() {
+	if (_request.hasVersion() && !isValidVersion(_request.getVersion()))
+		return setResponseStatus(400);
+	if (_request.hasVersion() && _request.getVersion() != "HTTP/1.0" && _request.getVersion() != "HTTP/1.1")
+		return setResponseStatus(505);
+	if (_request.hasMethod() && _request.getMethod() == METHOD_UNKNOWN)
+		return setResponseStatus(501);
+	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
+		return setResponseStatus(413);
 }
 
 void Session::validateRequest() {
-	// TODO Integrate preValidateRequest
+	preValidateRequest();
+	if (!_request.isComplete() && !_request.isInvalid())
+		return;
 	if (_request.hasHeaders() && _request.getHeaders().str().size() > MAX_HEADERS_SIZE)
 		return setResponseStatus(431);
-	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
-		return setResponseStatus(413);
-	// TODO Manage pre- end of request tests
-	if (_request.isInvalid() || !isValidVersion(_request.getVersion())
+	if (_request.isInvalid()
 			|| (_request.getVersion() == "HTTP/1.1" && !_request.getHeaders().has("Host")))
 		return setResponseStatus(400);
-	if (_request.getVersion() != "HTTP/1.0" && _request.getVersion() != "HTTP/1.1")
-		return setResponseStatus(505);
-	if (_request.getMethod() == METHOD_UNKNOWN) // TODO move check up
-		return setResponseStatus(501);
 }
 
 void Session::resolveResource() {
