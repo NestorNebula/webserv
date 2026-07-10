@@ -18,13 +18,22 @@ p2 = form.getvalue("p2", "p2-default")
 print("Python : hello, world!")
 
 print ("\nGET VARS")
-print("g1 : ", g1)
-print("g2 : ", g2)
+print("g1 :", g1)
+print("g2 :", g2)
 
 print ("\nPOST VARS")
-print("p1 : ", p1)
-print("p2 : ", p2)
+print("p1 :", p1)
+print("p2 :", p2)
 
-print ("\nENV")
+print ("\nENV\n")
 for key, val in os.environ.items():
     print(key, "=", val)
+
+if "file" in form:
+    file_item = form["file"]
+    if file_item.filename:
+        print("file name", file_item.filename)
+        file_name = file_item.filename
+        file_path = './' + file_name
+        with open(file_path, 'wb') as file:
+            file.write(file_item.file.read())

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 13:19:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 19:13:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ int main (int, char **, char **envp)
     WsLog::tgt = TGT_NONE
         // | TGT_ALL
         // | TGT_EPOLL 
-        | TGT_EPOLL_EVT
-        | TGT_EPOLL_CTL
+        // | TGT_EPOLL_EVT
+        // | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV

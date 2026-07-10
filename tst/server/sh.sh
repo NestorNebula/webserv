@@ -1,8 +1,8 @@
 #!/bin/bash
 
-siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
-echo
-exit 0
+# siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=10 --no-parser -b
+# echo
+# exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -13,25 +13,11 @@ exit 0
 # echo
 # exit 0
 
-# curl -X GET http://localhost:8hp080
+# curl -X GET http://localhost:8080?p1=one -i
 # echo
-# curl -X GET http://localhost:8081
+# curl -X GET http://localhost:8081?a1=one -i
 # echo
-# curl -X GET http://localhost:8082
-# echo
-# exit 0
-
-
-# curl -X POST http://localhost:8081
-# echo
-# exit 0
-
-
-# curl -X GET 'http://localhost:8080/?p1=one&p2=two'
-# echo
-
-# (firefox !)
-# curl -X GET http://localhost:8080 --output tmp.bin
+# curl -X POST http://localhost:8082?b2=two -i
 # echo
 # exit 0
 
@@ -46,6 +32,8 @@ exit 0
 # echo
 # exit 0
 
+
+
 # curl -X POST http://localhost:8081 \
 # 	-H "Content-Type: application/x-www-form-urlencoded" \
 # 	-d "p1=post-one&p2=post-two"
@@ -53,27 +41,36 @@ exit 0
 # exit 0
 
 	# multipart/form-data
+
+# Q: add "chunked" to this POST form (?)
 # curl -X POST http://localhost:8081 \
 # 	-F p1=post-one \
 # 	-F p2=post-two \
-# 	-F file=@files/2k_earth_daymap.jpg
+# 	-F file=@files/Kanan.mp3
+# 	# -F file=@files/2k_earth_daymap.jpg
 # echo
 # exit 0
 
-	# -F file=@Kanan.mp3
 	
 # POST / HTTP/1.1
 # Host: localhost:8081
 # User-Agent: curl/8.11.1
 # Accept: */*
-# Content-Length: 14976173
+# Content-Length: 14976173 -- or .. we need to track this .. and (close) input to cgi when done 
 # Content-Type: multipart/form-data; boundary=------------------------pmbnJBZpu2KOjNtCuj9mAu
 # Expect: 100-continue ***
+	# do NOT send Content-Length to (cgi)
 
 
-# echo
-# 	# chunked - needs to be parsed before passing to CGI
-# curl -X POST http://localhost:8081 \
-# 	-H "Transfer-Encoding: chunked" \
-# 	-d @files/2k_earth_daymap.jpg
+
+
+	# chunked - needs to be parsed before passing to CGI
+	# not the same as form (?)
+	# "pure" upload .. "PUT"
+	# we do not respond to this properly 
+	# not actually a (cgi) thing (?)
+
+curl -X POST http://localhost:8080 \
+	-H "Transfer-Encoding: chunked" \
+	-d @files/2k_earth_daymap.jpg
 
