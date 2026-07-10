@@ -121,6 +121,16 @@ Stream::streambuf *Stream::rdbuf(streambuf *sb) {
 	return _stream->rdbuf(sb);
 }
 
+Stream::streamsize Stream::size() {
+	streampos curr = tellg();
+	streampos streamSize;
+
+	seekg(0, END);
+	streamSize = tellg();
+	seekg(curr);
+	return streamSize;
+}
+
 void Stream::throwIfNull() const {
 	if (!_stream)
 		throw std::logic_error("calling method on null Stream pointer");
