@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 13:53:15 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:08:52 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	}
 	expect(TOKEN_RBRACE);
 
+	if (directives.count("listen"))
+		throw	ConfigException("'listen' directive is not allowed in a route block.");
 	if (directives.count("root"))
     	route.root = directives["root"];
 	if (directives.count("autoindex"))
@@ -127,6 +129,8 @@ void	ConfigParser::parseServer()
 	}
 	expect(TOKEN_RBRACE);
 
+	if (directives.count("redirect"))
+		throw	ConfigException("'redirect' directive is not allowed in a server block.");
 	if (directives.count("listen"))
 	{
 		std::string	value = directives["listen"];
