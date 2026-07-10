@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 11:08:52 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:28:52 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,15 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	if (directives.count("root"))
     	route.root = directives["root"];
 	if (directives.count("autoindex"))
-		route.autoindex = (directives["autoindex"] == "on");
+		route.autoindex = parseOnOff(directives["autoindex"]);
+	if (directives.count("upload"))
+		route.upload = parseOnOff(directives["upload"]);
 	if (directives.count("max_body_size"))
 		route.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("methods"))
 		route.methods = parseMethods(directives["methods"]);
 	if (directives.count("index"))
 		route.index = splitList(directives["index"]);
-	if (directives.count("upload"))
-		route.upload = (directives["upload"] == "on");
 	if (directives.count("upload_dir"))
 		route.upload_dir = directives["upload_dir"];
 	if (directives.count("redirect"))
@@ -149,8 +149,8 @@ void	ConfigParser::parseServer()
 		server.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("root"))
 		server.root = directives["root"];
-	if (directives.count("upload") && directives["upload"] == "on")
-		server.upload = true;
+	if (directives.count("upload"))
+		server.upload = parseOnOff(directives["upload"]);
 	if (directives.count("upload_dir"))
 		server.upload_dir = directives["upload_dir"];
 	if (directives.count("methods"))

@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 11:08:46 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:26:51 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,5 +57,14 @@ void	ConfigParser::parseFile(const std::string& filename)
 		}
 		skipNewlines();
 	}
+}
+
+bool	parseOnOff(const std::string& value)
+{
+	if (value == "on")
+		return (true);
+	else if (value == "off")
+		return (false);
+	throw	ConfigParser::ConfigException("Value must be 'on' or 'off', got: " + value);
 }
 
