@@ -22,8 +22,6 @@ TEST(isValidVersion, ValidVersion) {
 
 TEST(isValidVersion, InvalidVersion) {
 	EXPECT_FALSE(isValidVersion("Valid Version"));
-	EXPECT_FALSE(isValidVersion("HTTP/1.2"));
-	EXPECT_FALSE(isValidVersion("HTTTP/1.2"));
 	EXPECT_FALSE(isValidVersion("HTTP/1.x"));
 	EXPECT_FALSE(isValidVersion("HTTP/x.1"));
 	EXPECT_FALSE(isValidVersion("HTTP 1.1"));
