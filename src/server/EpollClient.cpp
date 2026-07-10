@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/09 08:54:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:44:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "Epoll.hpp"
 
 // EP
-EpollClient::EpollClient::EpollClient(Epoll & _ep, epc_typ _typ, int _fd) : 
+EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
 	ep(_ep),
 	typ(_typ), 
 	fd(_fd), 
@@ -42,7 +42,7 @@ int	EpollClient::ini_evt(int e)
 	evt.data.ptr = this;
 	evt.events = e;
 	evt.events |= EPOLLRDHUP;
-	return (this->ep.add(this));
+	return (this->ep->add(this));
 }
 
 int	EpollClient::mod_evt(int e)
@@ -61,7 +61,7 @@ int	EpollClient::mod_evt(int e)
 		evt.events |= e;
 	}
 	evt.events |= EPOLLRDHUP;
-	return (this->ep.mod(this));
+	return (this->ep->mod(this));
 }
 
 ssize_t	EpollClient::recv(void)

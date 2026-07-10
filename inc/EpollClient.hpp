@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/08 00:11:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:45:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ private:
 	EpollClient & operator = (const EpollClient & ) 
 		{ return (*this); }
 public:
-	EpollClient (Epoll & _ep, epc_typ _typ, int _fd);
+	EpollClient (Epoll *_ep, epc_typ _typ, int _fd);
 	EpollClient (const EpollClient & that) : 
 		ep(that.ep), typ(that.typ), fd(that.fd) {}
 	virtual ~EpollClient();
@@ -72,7 +72,7 @@ public:
 		
     std::string 		typ_str(void);
 protected:
-	Epoll				&ep;
+	Epoll				*ep;
 	epc_typ				typ;
 	int					fd;
 	struct epoll_event	evt;

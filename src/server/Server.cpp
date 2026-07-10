@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:20:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:46:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll & _ep, unsigned short p) : 
+Server::Server (Epoll *_ep, unsigned short p) : 
 	EpollClient(_ep, EPC_SERV, -1), 
 	port(p)
 {

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 21:17:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:47:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ private:
 		{ return (*this); }
 public:
 	
-	Connection (Epoll &_ep, int _fd, Server &_serv);
+	Connection (Epoll *_ep, int _fd, Server &_serv);
 	~Connection();
 	
 	ssize_t		pollin(void);
