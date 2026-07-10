@@ -65,7 +65,10 @@ public:
 	operator void*() const;
 	streambuf *rdbuf() const;
 	streambuf *rdbuf(streambuf *sb);
-
+	
+	// Custom methods
+	streamsize size();
+	
 	template <typename T>
 	Stream &operator>>(T &t) {
 		throwIfNull();
