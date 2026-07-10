@@ -105,6 +105,7 @@ std::string getStatusReason(Response::StatusCode code) {
 		reasons.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
 		reasons.insert(std::pair<int, std::string>(408, "Request Timeout"));
 		reasons.insert(std::pair<int, std::string>(413, "Content Too Large"));
+		reasons.insert(std::pair<int, std::string>(431, "Request Header Fields Too Large"));
 		reasons.insert(std::pair<int, std::string>(500, "Internal Server Error"));
 		reasons.insert(std::pair<int, std::string>(501, "Not Implemented"));
 		reasons.insert(std::pair<int, std::string>(505, "HTTP Version Not Supported"));

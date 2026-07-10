@@ -12,6 +12,7 @@
 
 #include "Session.hpp"
 #include "DirectoryResource.hpp"
+#include "Request.hpp"
 #include "StaticResource.hpp"
 #include "HttpMethod.hpp"
 #include "http_utils.hpp"
@@ -129,7 +130,8 @@ void Session::handleRequest() {
 }
 
 void Session::validateRequest() {
-	// TODO Headers too large
+	if (_request.hasHeaders() && _request.getHeaders().str().size() > MAX_HEADERS_SIZE)
+		return setResponseStatus(431);
 	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
 		return setResponseStatus(413);
 	// TODO Manage pre- end of request tests
