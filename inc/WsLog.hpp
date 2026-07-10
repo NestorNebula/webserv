@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/03 12:49:32 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 10:33:02 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,12 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1L << 9)
 # define TGT_MAIN		(1L << 10)
 
+# define TGT_CONFIG		(1L << 11)
+# define TGT_LEXER		(1L << 12)
+# define TGT_PARSER		(1L << 13)
+# define TGT_VALIDATE	(1L << 14)
 
-
+# define TGT_PARSING	(TGT_CONFIG | TGT_LEXER | TGT_PARSER | TGT_VALIDATE)
 
 # define TGT_MAX		(1L << 63)
 # define TGT_ALL		(TGT_MAX - 1)
