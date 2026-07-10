@@ -133,12 +133,12 @@ void Session::validateRequest() {
 	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
 		return setResponseStatus(413);
 	// TODO Manage pre- end of request tests
-	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
+	if (_request.isInvalid() || !isValidVersion(_request.getVersion())
+			|| (_request.getVersion() == "HTTP/1.1" && !_request.getHeaders().has("Host")))
 		return setResponseStatus(400);
-	// TODO Enforce HOST Header for HTTP/1.1
+	// TODO HTTP version Not Supported / 505
 	if (_request.getMethod() == METHOD_UNKNOWN) // TODO move check up
 		return setResponseStatus(501);
-	// TODO HTTP version Not Supported / 505
 }
 
 void Session::resolveResource() {
