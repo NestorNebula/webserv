@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=10 --no-parser -b
-# echo
-# exit 0
+siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=255 --no-parser -b
+echo
+exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -42,16 +42,14 @@
 
 	# multipart/form-data
 
-# Q: add "chunked" to this POST form (?)
-# curl -X POST http://localhost:8081 \
-# 	-F p1=post-one \
-# 	-F p2=post-two \
-# 	-F file=@files/Kanan.mp3
-# 	# -F file=@files/2k_earth_daymap.jpg
-# echo
-# exit 0
+curl -X POST http://localhost:8081 \
+	-F p1=post-one \
+	-F p2=post-two \
+	-F file=@files/2k_earth_daymap.jpg
+	# -F file=@files/Kanan.mp3
+echo
+exit 0
 
-	
 # POST / HTTP/1.1
 # Host: localhost:8081
 # User-Agent: curl/8.11.1
@@ -69,8 +67,10 @@
 	# "pure" upload .. "PUT"
 	# we do not respond to this properly 
 	# not actually a (cgi) thing (?)
+	# NB : not a FORM
+	# Content-Type: application/x-www-form-urlencoded
 
-curl -X POST http://localhost:8080 \
-	-H "Transfer-Encoding: chunked" \
-	-d @files/2k_earth_daymap.jpg
+# curl -X POST http://localhost:8080 \
+# 	-H "Transfer-Encoding: chunked" \
+# 	-d @files/2k_earth_daymap.jpg
 

@@ -1,9 +1,8 @@
 <?php
 
-    print_r($_GET);
-    print_r($_POST);
-    print_r($_SERVER); // ENV shows up here
-    // exit (0);
+    // print_r($_GET);
+    // print_r($_POST);
+    // print_r($_SERVER); // ENV shows up here
 
     header('Content-type: text/plain');
     
