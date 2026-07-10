@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 11:28:52 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:52:40 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,10 +139,10 @@ void	ConfigParser::parseServer()
 		if (colon_pos != std::string::npos)
 		{
 			server.host = value.substr(0, colon_pos);
-			server.port = atoi(value.substr(colon_pos + 1).c_str());
+			server.port = parsePort(value.substr(colon_pos + 1));
 		} else {
 			server.host = "127.0.0.1";
-			server.port = atoi(value.c_str());
+			server.port = parsePort(value);
 		}
 	}
 	if (directives.count("max_body_size"))

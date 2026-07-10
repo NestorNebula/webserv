@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 13:38:07 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:51:07 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,23 @@ size_t	ConfigParser::parseSize(const std::string& sizeStr)
 	}
 	return static_cast<size_t>(atoi(numPart.c_str())) * multiplier;
 }
+
+int	ConfigParser::parsePort(const std::string& portStr)
+{
+	if (portStr.empty())
+		throw	ConfigException("Empty port value.");
+	if (portStr.length() > 5)
+		throw	ConfigException("Port value out of range: " + portStr);
+	for (size_t i = 0; i < portStr.length(); ++i)
+	{
+		if (!std::isdigit(portStr[i]))
+			throw	ConfigException("Invalid port value: " + portStr);
+	}
+	int port = atoi(portStr.c_str());
+	if (port < 1 || port > 65535)
+		throw	ConfigException("Port out of range (1 - 65535): " + portStr);
+	return (port);
+ }
 
 void	ConfigParser::validateServerConfig(const ServerConfig& server)
 {
