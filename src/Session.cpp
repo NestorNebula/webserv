@@ -130,7 +130,8 @@ void Session::handleRequest() {
 
 void Session::validateRequest() {
 	// TODO Headers too large
-	// TODO Body too large
+	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
+		return setResponseStatus(413);
 	// TODO Manage pre- end of request tests
 	if (_request.isInvalid() || !isValidVersion(_request.getVersion()))
 		return setResponseStatus(400);
