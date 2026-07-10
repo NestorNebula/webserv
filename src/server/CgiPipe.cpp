@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/09 09:04:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 00:52:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ int	cgi_pipes::shutdown(int err)
 
 
 
-CgiPipe::CgiPipe (Epoll &_ep, int _fd, Connection & _conn) : 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection & _conn) : 
 	EpollClient(_ep, EPC_CGI, _fd), 
 	conn(_conn)
 {

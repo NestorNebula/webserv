@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 09:43:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 09:47:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "Server.hpp"
 #include "CgiPipe.hpp"
 
-Connection::Connection (Epoll & _ep, int _fd, Server &_serv) : 
+Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
 	serv(_serv), 
 	req_cnt(0),
@@ -270,7 +270,7 @@ int	Connection::exec_cgi(void)
 		if (err < 0)
 		{
 			pipes.shutdown(0);
-			this->ep.cleanup(0);		
+			this->ep->cleanup(0);		
 			exit(WsLog::_errno(LVL_ERR, TGT_CONN, "dup2"));
 		}
 
@@ -289,7 +289,7 @@ int	Connection::exec_cgi(void)
 			file = std::string("test.pl");
 			break;
 		default:
-			path = std::string("/usr/bin/php-cgi");
+			path = std::string("/usr/bin/php");
 			file = std::string("test.php");
 			break;
 		}
@@ -301,15 +301,16 @@ int	Connection::exec_cgi(void)
 
 // CHALLENGE
 // terminate long-running script if client closes connection
-		CgiEnv cgienv;
-		cgienv.from_conn(*this);
+		CgiEnv *cgienv = new CgiEnv;
+		cgienv->from_conn(*this);
 
 		// cwd (?)
-		const char **envp = cgienv.gen();
+		const char **envp = cgienv->gen();
 
 
 // signal handler (!)
 	signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
+		// dangerous : should monitor their cleanup ..
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
 		
 		// cool : this (cout) gets READ by conn
@@ -317,8 +318,14 @@ int	Connection::exec_cgi(void)
 
 // home : bad (php-cgi)
 // WORK : on ibuf/obuf communication FIRST
-		std::cout << "\n\nwtf\n\n";
+		// std::cout << "\n\nwtf\n\n";
 
+			pipes.shutdown(0);
+			// delete [] envp;
+			delete (cgienv);
+			// this->ep->cleanup(1);
+			delete (this->ep); 
+			
 // cgi HUP .. on python exception
 		// bad executable -- how to handle this (?) actually TWICE (?)
 		exit (err);
