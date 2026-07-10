@@ -69,6 +69,7 @@ private:
 	void manageSession();
 
 	void handleRequest();
+	void preValidateRequest();
 	void validateRequest();
 	void resolveResource();
 	void validateOperation();
