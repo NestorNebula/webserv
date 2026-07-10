@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 00:47:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:01:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ public:
 	ssize_t		pollin(void);
 	ssize_t		pollout(void);
 	int			hup(void) { return (0); }
+	bool		timeo(time_t now);
 	
 	void		set_addr(struct sockaddr_in *a) { this->addr = *a; }
 

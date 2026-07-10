@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 00:47:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:59:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ public:
 	cgi_pipes (void);
 	~cgi_pipes();
 	
-	int	init(void);
-	int	dup_io(void);
-	int	shutdown(int err);
+	int		init(void);
+	int		dup_io(void);
+	void	shutdown(void);
 };
 
 class Connection;
@@ -50,6 +50,7 @@ public:
 	ssize_t		pollin(void);
 	ssize_t		pollout(void);
 	int			hup(void);
+	bool		timeo(time_t ) { return (false); }
 
 private:
 	Connection	&conn;

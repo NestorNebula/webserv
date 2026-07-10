@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 10:10:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:39:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
 	void		    add(const char *key, const char *val);
 	void		    add(const char *key, int n);
 	const char	    **gen(void);
-	// from_header(<map>)
+	
 private:
 	std::vector<std::string>	data;
 	const char					**res;

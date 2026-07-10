@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 11:11:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:22:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,20 @@ std::string Connection::header(const char *key)
 	return (val);
 }
 
+#define CONN_TIMEO 5
 
+bool	Connection::timeo(time_t now)
+{
+	// per-type
+	// for ALL
+	// if (this->to_val == 0)
+		// return (false)
+	if (now < this->lact)
+		return (false);
+	if ((this->lact + CONN_TIMEO) < now)
+		return (true);
+	return (false);
+}
 
 
 ssize_t	Connection::pollin(void)
@@ -117,8 +130,8 @@ ssize_t	Connection::pollin(void)
 		head = istr.substr(0, crlf + 4);
 		istr.erase(0, crlf + 4);
 		
-		WsLog::_(LVL_INFO, TGT_HEAD, "head");
-		WsLog::_(LVL_INFO, TGT_HEAD, "****\n", head);
+		WsLog::_(LVL_DBG, TGT_HEAD, "head");
+		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", head);
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 	}
@@ -144,7 +157,6 @@ ssize_t	Connection::pollin(void)
 		}
 		this->state = CONN_HAS_RSRC;
 	}
-	// rsrc.push(ibuf, err)
 	return (err);
 }
 
@@ -161,6 +173,11 @@ ssize_t	Connection::pollout(void)
 	{
 		return (0); // (-1)
 	}
+
+	// ATTN : should not send RESP .. 
+	// until we confirm that CGI is sending us data ... 
+	// it may have FAILED
+	// test : (err) in cgi_exec
 	if (this->state < CONN_SENT_RESP)
 	{
 		err = this->send(this->resp); 
@@ -195,11 +212,12 @@ ssize_t	Connection::pollout(void)
 		this->mod_evt(0); //  // otherwise, we get stuck here 
 		return (0);
 	}
-	if (this->state < RSRC_SENT_BODY)
-	{
-		this->mod_evt(0);
-		return (0);
-	}
+	// UGLY -- when does this get set (?)
+	// if (this->state < RSRC_SENT_BODY)
+	// {
+	// 	this->mod_evt(0);
+	// 	return (0);
+	// }
 	
 // KEEP_ALIVE
 	// if (this->state < CONN_SENT_LENGTH)
@@ -275,9 +293,9 @@ int	Connection::exec_cgi(void)
 		err = pipes.dup_io();
 		if (err < 0)
 		{
-			pipes.shutdown(0);
-			this->ep->cleanup(0);		
-			exit(WsLog::_errno(LVL_ERR, TGT_CONN, "dup2"));
+			pipes.shutdown();
+			delete (this->ep);
+			exit(1);
 		}
 
 // FROM REQUEST
@@ -296,7 +314,7 @@ int	Connection::exec_cgi(void)
 			break;
 		default:
 			path = std::string("/usr/bin/php-cgi");
-			file = std::string("test.php");
+			file = std::string("bigfile.php");
 			break;
 		}
 		
@@ -310,30 +328,28 @@ int	Connection::exec_cgi(void)
 		CgiEnv *cgienv = new CgiEnv;
 		cgienv->from_conn(*this, file);
 
-		// cwd (?)
 		const char **envp = cgienv->gen();
 
+		// signal handler (!)
+		// shit : ctrl-c .. leaves (php) RUNNING IN BACKGROUND 
+		// and does not appear to cleanup connection to client 
 
-// signal handler (!)
-// shit : ctrl-c .. leaves (php) RUNNING IN BACKGROUND 
-// and does not appear to cleanup connection to client 
-	signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
+// maybe, maybe not
+// when client (conn) quits
+// NEED THAT LINK between (conn) and (cgi)
+
+		close(this->ep->epfd);
+
+
+// since it's still running .. that copy of server (port) is STILL OPEN 
+		signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
 		// dangerous : should monitor their cleanup ..
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
 		
-		// cool : this (cout) gets READ by conn
-		//  but : what do we really need to monitor in this case 
-
-// home : bad (php-cgi)
-// WORK : on ibuf/obuf communication FIRST
-		// std::cout << "\n\nwtf\n\n";
-
-			pipes.shutdown(0);
-			// delete [] envp;
-			delete (cgienv);
-			// this->ep->cleanup(1);
-			delete (this->ep); 
-			
+		pipes.shutdown();
+		delete (cgienv);
+		delete (this->ep); 
+		
 // cgi HUP .. on python exception
 		// bad executable -- how to handle this (?) actually TWICE (?)
 		exit (err);
@@ -341,7 +357,7 @@ int	Connection::exec_cgi(void)
 	
 
 	
-	WsLog::_(LVL_INFO, TGT_CONN, "exec cgi");
+	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 
 	// so .. conn->resource .. 
 	// tracks these (?)
@@ -350,10 +366,10 @@ int	Connection::exec_cgi(void)
 	
 	cgifd_ip = dup(pipes.p1[1]);
 	if (cgifd_ip < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
 	cgifd_op = dup(pipes.p2[0]);
 	if (cgifd_op < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup");
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
 		
 	EpollClient	*epc_cgi_ip;
 	EpollClient	*epc_cgi_op;

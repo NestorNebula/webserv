@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 11:12:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:57:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,10 +118,10 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 Epoll::~Epoll()
 {
 	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
-	this->cleanup(1);
+	this->cleanup();
 };
 
-void	Epoll::cleanup(int std_err)
+void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
@@ -132,21 +132,21 @@ void	Epoll::cleanup(int std_err)
 		close(this->epfd);
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
-	if (std_err)
-		close(STDERR_FILENO);
+	close(STDERR_FILENO);
 }
 
 
 int	Epoll::add(EpollClient *cli)
 {
-	int	err;
 	// check : cli->get_evt().data.ptr
+	int	err;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
-	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "add cli  : already exists");
+		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : already exists");
+		// return (this->mod(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
@@ -163,14 +163,14 @@ int	Epoll::add(EpollClient *cli)
 
 int	Epoll::mod(EpollClient *cli)
 {
-	int	err;
 	// check : cli->get_evt().data.ptr
+	int	err;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
-	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "mod cli  : does not exist");
+		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : does not exist");
 		// return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
@@ -185,11 +185,11 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
-	// WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "del cli  : does not exist");
+		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -203,7 +203,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->clients.find(cli);
 	if (it != this->clients.end())
 	{
@@ -213,7 +213,7 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_INFO, TGT_EPOLL_CTL, "rem cli  : does not exist");
+		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : does not exist");
 	}
 
 	return (0);
@@ -247,7 +247,7 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
+	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...\n");
 	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
@@ -259,9 +259,24 @@ int	Epoll::exec(void)
 }
 
 
+void	Epoll::check_timeo(void)
+{
+	time_t	n;
+	n = time(&n);
+	
+	std::set<EpollClient*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		if ((*it)->timeo(n))
+		{
+			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT");
+		}
+		it++;
+	}
+}
+
 int	Epoll::loop(void)
 {
-	int					err;
 	int					e;
 	struct epoll_event	*evt;
 	EpollClient 		*epc;
@@ -269,12 +284,7 @@ int	Epoll::loop(void)
     while (!stop)
     {
         e = this->exec();
-        if (e == 0)
-		{
-			// timeout
-			// this->check_timeouts()
-		}
-        else if (e < 0)
+        if (e < 0)
 			return (1);
 		for (int k=0; k < e; k++) 
         {
@@ -298,59 +308,17 @@ int	Epoll::loop(void)
 			}
 #endif
 
-WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
-// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-		
-			// epc->events(evt)
-            if (evt->events & EPOLLERR) // with (out) .. shit .. things to write (?)
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
+			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+					
+			if (epc->event(evt) < 0)
 			{
+				// set DONE ...
 				this->rem(epc);
-				continue;
-			}
-            if (evt->events & EPOLLIN)
-            {
-				epc->set_lact();
-				err = epc->pollin();
-				if (err < 0) // && state (?)
-				{
-					this->rem(epc);
-					continue;
-				}
-            }
-            if (evt->events & EPOLLOUT)
-            {
-				epc->set_lact();
-				err = epc->pollout();
-				if (err < 0) // && state (?)
-				{
-					this->rem(epc);
-					continue;
-				}
-			}	
-			// down here : connection reset by peer
-            // if (evt->events & EPOLLERR)
-			// {
-			// 	this->rem(epc);
-			// 	continue;
-			// }
-				// nothing more to read .. BUT may still need to write (cgi) output 
-			if (evt->events & EPOLLRDHUP)
-			{
-				// can we trust this (?)
-				this->rem(epc);
-				// epc->mod_evt(EPOLLOUT);
-				continue;
-			} 
-			// cgi : may close with (hup)
-            if (evt->events == EPOLLHUP)
-			{
-				epc->hup();
-				this->rem(epc);
-				continue;
 			}
         }
-		// this->check_timeouts()
+		this->check_timeo();
     }
 	return (0);
 }

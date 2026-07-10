@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 11:12:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:18:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ cgi_pipes::cgi_pipes (void)
 
 cgi_pipes::~cgi_pipes()
 {
-	this->shutdown(0);
+	this->shutdown();
 }
 
 int	cgi_pipes::init(void)
@@ -35,40 +35,60 @@ int	cgi_pipes::init(void)
 	
 	err = pipe(p1);
 	if (err < 0)
-		return (this->shutdown(err));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
+	}
 	err = pipe(p2);
 	if (err < 0)
-		return (this->shutdown(err));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
+	}
 	return (0);
 }
+
 int	cgi_pipes::dup_io(void)
 {
 	int	err;
 
 	if (p1[0] == -1)
-		return (this->shutdown(-1));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+	}
 	err = dup2(p1[0], STDIN_FILENO);
 	if (err < 0)
-		return (this->shutdown(err));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+	}
 
 	if (p2[1] == -1)
-		return (this->shutdown(-1));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+	}
 	err = dup2(p2[1], STDOUT_FILENO);
 	if (err < 0)
-		return (this->shutdown(err));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+	}
 	
-	// To use devNull as STDOUT_FILENO, it must be opened for writing:
-
 	int dnfd = open("/dev/null", O_WRONLY);
 	err = dup2(dnfd, STDERR_FILENO);
 	if (err < 0)
-		return (this->shutdown(err));
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+	}
 	close(dnfd);
 
 	return (err);		
 }
 
-int	cgi_pipes::shutdown(int err)
+void	cgi_pipes::shutdown(void)
 {
 	if (p1[0] != -1)
 	{
@@ -90,7 +110,6 @@ int	cgi_pipes::shutdown(int err)
 		close(p2[1]);
 		p2[1] = -1;
 	}
-	return (err);
 }
 
 
@@ -128,9 +147,10 @@ ssize_t	CgiPipe::pollin(void)
 	this->conn.ostr.append(this->ibuf, err);
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn.ostr.size());
     
-	WsLog::_(LVL_INFO, TGT_CGI_DATA, "ostr");
-	WsLog::_(LVL_INFO, TGT_CGI_DATA, "****\n", this->conn.ostr);
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn.ostr);
 	
+	this->conn.mod_evt(EPOLLOUT); // seems important -- where had it gone (?)
 	return (err);
 }
 

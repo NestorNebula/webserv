@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 09:40:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:57:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,16 +57,14 @@ public:
 	virtual ssize_t	pollin(void) = 0;
 	virtual ssize_t pollout(void) = 0;
 	virtual int		hup(void) = 0;
+	virtual bool	timeo(time_t now) = 0;
 
 	int				ini_evt(int e);
 	int				mod_evt(int e);
+	int				event(struct epoll_event *e);
 
-	void			set_lact(void);
-	
 	int					get_fd(void) const
 		{ return (this->fd); }
-	epc_typ				get_typ(void) const
-		{ return (this->typ); }
 	struct epoll_event	*get_evt(void)
 		{ return (&this->evt); }
 		

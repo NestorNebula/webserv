@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/09 08:38:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:22:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,11 @@ public:
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
 	
-	void	cleanup(int std_err);
+	void	cleanup(void);
 	
-private:
 	int						epfd;
+private:
+	// int						epfd;
 	int						ecnt;
 	struct epoll_event		evts[EPOLL_MAX_EVT];
 	static const int		toms = 10000;
@@ -62,6 +63,8 @@ private:
 	struct epoll_event		*get_evt(int idx);
 	EpollClient				*get_epc(void *cli);
 	bool					has_client(EpollClient *ecp);
+
+	void					check_timeo(void);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 11:06:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:40:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ void	CgiEnv::add(const char *key, int n)
 	data.push_back(std::string(key) + std::string("=") + num_2_str(n));
 }
 
-
-
 // From the meta-variables thus generated, a URI, the 'Script-URI', can
 //    be constructed.  This MUST have the property that if the client had
 //    accessed this URI instead, then the script would have been executed
@@ -49,7 +47,8 @@ void	CgiEnv::add(const char *key, int n)
 // script-URI = <scheme> "://" <server-name> ":" <server-port>
 //                    <script-path> <extra-path> "?" <query-string>
 		// PATH_TRANSLATED
-	// Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
+	// Maps the script's virtual path to the physical path used to call the script. 
+	// This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
 	// SCRIPT_NAME
 	// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
 
@@ -58,9 +57,9 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 	std::string val;
 	
 	this->add("REQUEST_METHOD", "GET");  // conn->method
-	// this->add("REQUEST_METHOD", "POST"); 
 	this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
+// (cwd) !!!
 	this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
 	this->add("SCRIPT_NAME", file.c_str());
 		// PHP CGI depends on non-standard SCRIPT_FILENAME
@@ -82,6 +81,11 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 	val = conn.header("Accept");
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());
+		// Accept-Language
+		// Accept-Encoding
+		// Connection
+		// Upgrade-Insecure-Requesets
+		// Sec-Fetch
 	this->add("HTTP_COOKIE", "chocolate chip");
 	
 // If the output of a form is being processed, check that CONTENT_TYPE
@@ -90,6 +94,7 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 // If CONTENT_TYPE is blank, the script can reject the request
 // with a 415 'Unsupported Media Type' error, where supported by the
 // protocol.
+
 	val = conn.header("Content-type");
 	if (val.size())
 		this->add("CONTENT_TYPE", val.c_str());

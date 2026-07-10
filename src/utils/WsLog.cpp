@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:20:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:42:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ static const std::string &tgt_prefix(log_tgt tgt)
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
     if ((msg_lvl & WsLog::lvl) == LVL_ERR)
+        return (false);
+    if ((msg_lvl & WsLog::lvl) == LVL_INFO)
         return (false);
     if ((msg_lvl & WsLog::lvl) && (msg_tgt & WsLog::tgt))
         return (false);
