@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 11:51:07 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:03:55 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,11 +96,14 @@ size_t	ConfigParser::parseSize(const std::string& sizeStr)
 		multiplier = 1024;
 		numPart = sizeStr.substr(0, sizeStr.length() - 1);
 	}
-
+	if (numPart.empty())
+		throw	ConfigException("Invalid max_body_size value: " + sizeStr);
+	if (numPart.length() > 10)
+		throw	ConfigException("max_body_size value too large: " + sizeStr);
 	for (size_t i = 0; i < numPart.length(); ++i)
 	{
 		if (!std::isdigit(numPart[i]))
-			throw	ConfigException("Invalid max_body_size value:" + sizeStr);
+			throw	ConfigException("Invalid max_body_size value: " + sizeStr);
 	}
 	return static_cast<size_t>(atoi(numPart.c_str())) * multiplier;
 }
