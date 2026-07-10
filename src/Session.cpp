@@ -138,7 +138,8 @@ void Session::validateRequest() {
 	if (_request.isInvalid() || !isValidVersion(_request.getVersion())
 			|| (_request.getVersion() == "HTTP/1.1" && !_request.getHeaders().has("Host")))
 		return setResponseStatus(400);
-	// TODO HTTP version Not Supported / 505
+	if (_request.getVersion() != "HTTP/1.0" && _request.getVersion() != "HTTP/1.1")
+		return setResponseStatus(505);
 	if (_request.getMethod() == METHOD_UNKNOWN) // TODO move check up
 		return setResponseStatus(501);
 }
