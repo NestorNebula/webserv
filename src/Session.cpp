@@ -212,13 +212,12 @@ void Session::handleResource() {
 }
 
 void Session::prepareErrorResource() {
-	// TODO Handle errors relative to root
 	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
 	std::ostringstream oss;
 	oss << _response.getCode();
-	std::string errPage = joinPaths(!_route ? _server.root : _route->root, errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"]);
+	std::string errPage = joinPaths(_server.root, errPages.find(oss.str()) != errPages.end() ? errPages[oss.str()] : errPages["default"]);
 	if (!isAccessibleFile(errPage))
-		errPage = joinPaths(!_route ? "" : _route->root, errPages["default"]);
+		errPage = joinPaths(_server.root, errPages["default"]);
 	delete _resource;
 	_resource = new StaticResource(errPage);
 }
