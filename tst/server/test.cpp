@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 10:57:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:47:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,9 @@ int main (int, char **, char **envp)
     // WsLog::tgt = TGT_NONE;
 
     
-    int err = 0;
-    Epoll *ep = NULL;
+    int     err = 0;
+    Epoll   *ep = NULL;
+    
     try
     {
         ep = new Epoll(envp);
@@ -64,7 +65,7 @@ int main (int, char **, char **envp)
         new Server(ep, 8082);
         
         err = ep->loop();
-        WsLog::_(LVL_INFO, TGT_MAIN, "exit  : ", err);
+        WsLog::_(LVL_INFO, TGT_MAIN, "exit: ", err);
     }
     catch(const std::exception& e)
     {
