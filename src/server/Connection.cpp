@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 09:47:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:11:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,11 +100,9 @@ ssize_t	Connection::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: zero");
-		// maybe not (-1) : just turn off pollin
 		return (0);
 	}
 
-		// std::string::append includes any (null)
 	istr.append(this->ibuf, err); 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
 	
@@ -119,15 +117,23 @@ ssize_t	Connection::pollin(void)
 		head = istr.substr(0, crlf + 4);
 		istr.erase(0, crlf + 4);
 		
-		WsLog::_(LVL_INFO, TGT_CONN_DATA, "head");
-		WsLog::_(LVL_INFO, TGT_CONN_DATA, "****\n", head);
+		WsLog::_(LVL_INFO, TGT_HEAD, "head");
+		WsLog::_(LVL_INFO, TGT_HEAD, "****\n", head);
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 	}
 	
 	if (this->state < CONN_HAS_RSRC)
 	{
-		this->resp = std::string("HTTP/1.1 200 OK\r\n\r\n");
+		switch(this->serv.get_port())
+		{
+		case 8080: // (php)
+			this->resp = std::string("HTTP/1.1 200 OK\r\n");
+			break;
+		default:
+			this->resp = std::string("HTTP/1.1 200 OK\r\n\r\n");
+			break;
+		}
 // KEEP_ALIVE
 		// this->resp = std::string("HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n");
 		err = this->exec_cgi(); // (this->head)
@@ -186,12 +192,12 @@ ssize_t	Connection::pollout(void)
 			return (-1);		
 #endif			
 		}
-		this->mod_evt(-EPOLLOUT); //  // otherwise, we get stuck here 
+		this->mod_evt(0); //  // otherwise, we get stuck here 
 		return (0);
 	}
 	if (this->state < RSRC_SENT_BODY)
 	{
-		this->mod_evt(-EPOLLOUT);
+		this->mod_evt(0);
 		return (0);
 	}
 	
@@ -289,7 +295,7 @@ int	Connection::exec_cgi(void)
 			file = std::string("test.pl");
 			break;
 		default:
-			path = std::string("/usr/bin/php");
+			path = std::string("/usr/bin/php-cgi");
 			file = std::string("test.php");
 			break;
 		}
@@ -302,13 +308,15 @@ int	Connection::exec_cgi(void)
 // CHALLENGE
 // terminate long-running script if client closes connection
 		CgiEnv *cgienv = new CgiEnv;
-		cgienv->from_conn(*this);
+		cgienv->from_conn(*this, file);
 
 		// cwd (?)
 		const char **envp = cgienv->gen();
 
 
 // signal handler (!)
+// shit : ctrl-c .. leaves (php) RUNNING IN BACKGROUND 
+// and does not appear to cleanup connection to client 
 	signal(SIGINT, SIG_IGN); // okay .. let them finish ... 
 		// dangerous : should monitor their cleanup ..
 		err = execve(args[0], (char* const*) args, (char* const*) envp);

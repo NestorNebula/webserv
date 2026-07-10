@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/07 20:20:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/10 11:06:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,89 +48,65 @@ void	CgiEnv::add(const char *key, int n)
 
 // script-URI = <scheme> "://" <server-name> ":" <server-port>
 //                    <script-path> <extra-path> "?" <query-string>
+		// PATH_TRANSLATED
+	// Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
+	// SCRIPT_NAME
+	// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
 
-
-int     CgiEnv::from_conn(Connection & conn)
+int     CgiEnv::from_conn(Connection & conn, std::string & file)
 {
-    // conn.ep.envp
-    
+	std::string val;
+	
+	this->add("REQUEST_METHOD", "GET");  // conn->method
+	// this->add("REQUEST_METHOD", "POST"); 
+	this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
-// ALLOWED : chdir()
+	this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
+	this->add("SCRIPT_NAME", file.c_str());
+		// PHP CGI depends on non-standard SCRIPT_FILENAME
+	this->add("SCRIPT_FILENAME", file.c_str()); // (php)
+	
+// php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.  This
+// means that a page will only be served up if the REDIRECT_STATUS CGI variable is set
+	this->add("REDIRECT_STATUS", "1");
+// Python: legacy-cgi
+	this->add("PYTHONPATH", 
+		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
 
-// ATTN : needs to be RELATIVE ... to executable 
-		this->add("PYTHONPATH", 
-			"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
-		this->add("REDIRECT_STATUS", "1");
-		
-
-	//  PHP CGI depends on non-standard SCRIPT_FILENAME
-
-// This PHP CGI binary was compiled with force-cgi-redirect enabled.  This
-// means that a page will only be served up if the REDIRECT_STATUS CGI variable is
-// set
-		
-		// this->add("REQUEST_METHOD", "POST"); 
-		this->add("REQUEST_METHOD", "GET"); 
-		
+	val = conn.header("Host");
+	if (val.size())
+		this->add("HTTP_HOST", val.c_str());
+	val = conn.header("User-Agent");
+	if (val.size())
+		this->add("HTTP_USER_AGENT", val.c_str());
+	val = conn.header("Accept");
+	if (val.size())
+		this->add("HTTP_ACCEPT", val.c_str());
+	this->add("HTTP_COOKIE", "chocolate chip");
+	
 // If the output of a form is being processed, check that CONTENT_TYPE
-//    is "application/x-www-form-urlencoded" [18] or "multipart/form-data"
-//    [16].  If CONTENT_TYPE is blank, the script can reject the request
-//    with a 415 'Unsupported Media Type' error, where supported by the
-//    protocol.
-
-		std::string val;
-
-		val = conn.header("Content-type");
-		if (val.size())
-			this->add("CONTENT_TYPE", val.c_str());
-		val = conn.header("Content-length");
-		if (val.size())
-			this->add("CONTENT_LENGTH", val.c_str());
-// should (conn) know about INCOMING contenth-length ... 
-// if we do not have content-length .. need to CLOSE the socket
-// after all data has been written
-
-
-// WORK TO BE DONE HERE 
-
-		this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
-// PATH_TRANSLATED
-// Maps the script's virtual path to the physical path used to call the script. This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
-		// SCRIPT_NAME
-		// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
-
-		this->add("SCRIPT_NAME", "test.php");
-		this->add("SCRIPT_FILENAME", "test.php");
-// 		
-		
-		// need to EXTRACT from URL
-		this->add("QUERY_STRING", "g1=get-one&g2=get-two");
-		
-		this->add("REMOTE_ADDR", addr_2_str(&conn.addr).c_str());
-		// this->add("REMOTE_HOST", "remote host");
-		// this->add("REMOTE_USER", "remote user");
-		
-		val = conn.header("Host");
-		if (val.size())
-			this->add("HTTP_HOST", val.c_str());
-		val = conn.header("User-Agent");
-		if (val.size())
-			this->add("HTTP_USER_AGENT", val.c_str());
-		
-		val = conn.header("Accept");
-		if (val.size())
-			this->add("HTTP_ACCEPT", val.c_str());
-		this->add("HTTP_COOKIE", "cookies");
-		
+// is "application/x-www-form-urlencoded"
+// or "multipart/form-data".
+// If CONTENT_TYPE is blank, the script can reject the request
+// with a 415 'Unsupported Media Type' error, where supported by the
+// protocol.
+	val = conn.header("Content-type");
+	if (val.size())
+		this->add("CONTENT_TYPE", val.c_str());
+	val = conn.header("Content-length");
+	if (val.size())
+		this->add("CONTENT_LENGTH", val.c_str());
+	
+	this->add("REMOTE_ADDR", addr_2_str(&conn.addr).c_str());
+	// this->add("REMOTE_HOST", "remote host");
+	// this->add("REMOTE_USER", "remote user");
+	
+	this->add("SERVER_NAME", "webserv"); // virtual
+	this->add("SERVER_PORT", conn.serv.get_port());
+	this->add("SERVER_PROTOCOL", "HTTP/1.1");
+	this->add("SERVER_SOFTWARE", "webserv");
 
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
-
-	
-			// CONSTANT : from server
-		this->add("SERVER_NAME", "webserv"); // virtual
-		this->add("SERVER_PORT", conn.serv.get_port());
-		this->add("SERVER_PROTOCOL", "HTTP/1.1");
-		this->add("SERVER_SOFTWARE", "webserv");
 
     return (0);
 }

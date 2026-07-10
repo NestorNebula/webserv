@@ -15,7 +15,7 @@ g2 = form.getvalue("g2", "g2-default")
 p1 = form.getvalue("p1", "p1-default")
 p2 = form.getvalue("p2", "p2-default")
 
-print("Python : hello, world!\n")
+print("Python : hello, world!")
 
 print ("\nGET VARS")
 print("g1 : ", g1)

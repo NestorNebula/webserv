@@ -4,6 +4,8 @@
     // print_r($_POST);
     // print_r($_SERVER); // ENV shows up here
     // exit (0);
+
+    header('Content-type: text/plain');
     
     print("PHP : hello, world!\n");  
 
