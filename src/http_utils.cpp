@@ -26,9 +26,10 @@ bool isValidVersion(const std::string &version) {
 	std::string::size_type majorIndex = expectedSize - 3;
 	if (majorIndex == std::string::npos)
 		return false;
-	if (version[majorIndex] != '1'
+	unsigned char ma = version[majorIndex], mi = version[majorIndex + 2];
+	if ((ma < '0' || ma > '9')
 			|| version[majorIndex + 1] != '.'
-			|| (version[majorIndex + 2] <'0' || version[majorIndex + 2] > '1'))
+			|| (mi < '0' || mi > '9'))
 		return false;
 	return true;
 }
