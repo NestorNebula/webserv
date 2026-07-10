@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:10:38 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:32:21 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,16 @@ std::vector<std::string>	splitList(const std::string& value)
 		result.push_back(token.substr(start, end - start + 1));
 	}
 	return (result);
+}
+
+std::string	trim(const std::string& str)
+{
+	size_t	start = str.find_first_not_of(" \t");
+	size_t	end = str.find_last_not_of(" \t");
+
+	if (start == std::string::npos)
+		return ("");
+	return (str.substr(start, end - start + 1));
 }
 
 size_t	ConfigParser::parseSize(const std::string& sizeStr)
