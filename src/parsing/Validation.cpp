@@ -6,13 +6,14 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:32:21 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:59:56 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include <sstream>
 #include <cstdlib>
+#include <unistd.h>
 
 #define GET		"GET"
 #define POST	"POST"
@@ -158,4 +159,15 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		throw	ConfigException("Route '" + route.path + "' has no 'methods' (and none to inherit).");
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
+}
+
+void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
+{
+	std::map<std::string, std::string>::const_iterator	it;
+	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
+	{
+		if (access(it->second.c_str(), X_OK) != 0)
+			throw	ConfigException("CGI executable not found or not executable: "
+				+ it->second + " (for extension " + it->first + ")");
+	}
 }

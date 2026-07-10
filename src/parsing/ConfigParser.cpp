@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:40:00 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 12:56:41 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ void	ConfigParser::parseFile(const std::string& filename)
 	if (_servers.empty())
 		throw	ConfigException("No server block found in configuration.");
 }
+
+
 
 bool	parseOnOff(const std::string& value)
 {

@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 12:34:43 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/10 13:00:23 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,7 @@ void	ConfigParser::parseServer()
 				server.routes[i].error_pages[ite->first] = ite->second;
 		}
 		validateRouteConfig(server.routes[i]);
+		validateCGIExecutables(server.routes[i]);
 	}
 
 	validateServerConfig(server);
