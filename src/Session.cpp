@@ -95,6 +95,7 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
 	switch (_next) {
 		case RDSOCK:
+			// TODO Remove check for preValidateRequest to be useful, but without breaking everything
 			if (_request.isComplete() || _request.isInvalid()) {
 				handleRequest();
 				handleResource();
@@ -129,7 +130,12 @@ void Session::handleRequest() {
 	validateOperation();
 }
 
+void preValidateRequest() {
+	// TODO Move possible checks from validateRequest
+}
+
 void Session::validateRequest() {
+	// TODO Integrate preValidateRequest
 	if (_request.hasHeaders() && _request.getHeaders().str().size() > MAX_HEADERS_SIZE)
 		return setResponseStatus(431);
 	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
