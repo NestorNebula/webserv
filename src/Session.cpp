@@ -230,6 +230,7 @@ void Session::prepareErrorResource() {
 		errPage = joinPaths(_server.root, errPages["default"]);
 	delete _resource;
 	_resource = new StaticResource(errPage);
+	_resourcePath = errPage;
 }
 
 void Session::prepareDirectoryResource() {
@@ -298,8 +299,8 @@ void Session::handleResponse() {
 		else
 			setResponseStatus(201);
 	}
-	setResponseHeaders();
 	_response.setResource(_resource);
+	setResponseHeaders();
 	// Ensure that Response is valid
 	if (!_response.isReady())
 		throw std::logic_error("Incomplete response generated");
@@ -314,6 +315,8 @@ void Session::setResponseHeaders() {
 	// Date header
 	// Content-Length header
 	// Content-Type header
+	if (_response.hasBody())
+		headers.insert("Content-Type", getMimeType(_resourcePath));
 	// ...
 	
 	_response.addHeaders(headers.begin(), headers.end());
