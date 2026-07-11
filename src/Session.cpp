@@ -16,6 +16,7 @@
 #include "StaticResource.hpp"
 #include "HttpMethod.hpp"
 #include "http_utils.hpp"
+#include "helpers.hpp"
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -313,10 +314,10 @@ void Session::setResponseHeaders() {
 
 	headers.insert("Server", "Webserv");
 	// Date header
-	// Content-Length header
-	// Content-Type header
-	if (_response.hasBody())
+	if (_response.hasBody()) {
 		headers.insert("Content-Type", getMimeType(_resourcePath));
+		headers.insert("Content-Length", toString(_resource->stream().size()));
+	}
 	// ...
 	
 	_response.addHeaders(headers.begin(), headers.end());
