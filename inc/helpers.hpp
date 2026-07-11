@@ -13,6 +13,7 @@
 #pragma once
 
 #include <climits>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -25,3 +26,10 @@ long getLong(const std::string &s, bool *err, long min = LONG_MIN,
              long max = LONG_MAX, int base = 10, char endc = '\0');
 
 std::vector<std::string> split(const std::string &s, const std::string set);
+
+template <typename T>
+std::string toString(T t) {
+	std::ostringstream oss;
+	oss << t;
+	return oss.str();
+}
