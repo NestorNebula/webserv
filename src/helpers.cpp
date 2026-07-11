@@ -14,6 +14,7 @@
 #include <cctype>
 #include <cerrno>
 #include <cstdlib>
+#include <ctime>
 
 std::string trim(std::string s, std::string set, bool beg, bool end) {
   if (s.empty())
@@ -72,4 +73,14 @@ std::vector<std::string> split(const std::string &s, const std::string set) {
 	if (!tmp.empty())
 		splitStr.push_back(tmp);
 	return splitStr;
+}
+
+std::string getDate() {
+	std::time_t time = std::time(NULL);
+	std::tm *tm = std::gmtime(&time);
+	if (tm == NULL)
+		return std::string();
+	char buf[30];
+	std::strftime(buf, 30, "%a, %d %b %Y %H:%M:%S GMT", tm);
+	return std::string(buf);
 }
