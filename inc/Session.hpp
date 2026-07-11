@@ -21,7 +21,7 @@
 
 class Session {
 public:
-	Session(ServerConfig &server): _next(RDSOCK), _server(server), _route(NULL), _redirectRoute(NULL), _resource(NULL), _sent(0) {
+	Session(ServerConfig &server): _next(RDSOCK), _server(server), _route(NULL), _redirectRoute(NULL), _resource(NULL), _keepalive(false), _sent(0) {
 		WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
 	}
 	~Session() {
@@ -65,6 +65,8 @@ private:
 	Request _request;
 	Resource *_resource;
 	Response _response;
+
+	bool _keepalive;
 
 	void throwIfNotAction(Action action) const;
 	void manageSession();
