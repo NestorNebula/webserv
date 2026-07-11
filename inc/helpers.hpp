@@ -13,6 +13,7 @@
 #pragma once
 
 #include <climits>
+#include <ctime>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -35,3 +36,5 @@ std::string toString(T t) {
 }
 
 std::string getDate();
+std::string getDate(std::time_t time);
+std::string getDate(std::tm *tm);

@@ -77,7 +77,16 @@ std::vector<std::string> split(const std::string &s, const std::string set) {
 
 std::string getDate() {
 	std::time_t time = std::time(NULL);
+	return (getDate(time));
+}
+
+std::string getDate(std::time_t time) {
 	std::tm *tm = std::gmtime(&time);
+	if (tm == NULL)
+		return std::string();
+	return getDate(tm);
+}
+std::string getDate(std::tm *tm) {
 	if (tm == NULL)
 		return std::string();
 	char buf[30];
