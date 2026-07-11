@@ -1,8 +1,8 @@
 #!/bin/bash
 
-siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=255 --no-parser -b
-echo
-exit 0
+# siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=255 --no-parser -b
+# echo
+# exit 0
 
 # KEEP_ALIVE
 # siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
@@ -42,13 +42,13 @@ exit 0
 
 	# multipart/form-data
 
-curl -X POST http://localhost:8081 \
-	-F p1=post-one \
-	-F p2=post-two \
-	-F file=@files/2k_earth_daymap.jpg
-	# -F file=@files/Kanan.mp3
-echo
-exit 0
+# curl -X POST http://localhost:8082 \
+# 	-F p1=post-one \
+# 	-F p2=post-two \
+# 	-F file=@files/2k_earth_daymap.jpg
+# 	# -F file=@files/Kanan.mp3
+# echo
+# exit 0
 
 # POST / HTTP/1.1
 # Host: localhost:8081
@@ -59,7 +59,8 @@ exit 0
 # Expect: 100-continue ***
 	# do NOT send Content-Length to (cgi)
 
-
+    # Chunked transfer encoding allows a server to maintain an HTTP persistent connection for dynamically generated content. In this case, the HTTP Content-Length header cannot be used to delimit the content and the next HTTP request/response, as the content size is not yet known. Chunked encoding has the benefit that it is not necessary to generate the full content before writing the header, as it allows streaming of content as chunks and explicitly signaling the end of the content, making the connection available for the next HTTP request/response.
+    # Chunked encoding allows the sender to send additional header fields after the message body. This is important in cases where values of a field cannot be known until the content has been produced, such as when the content of the message must be digitally signed. Without chunked encoding, the sender would have to buffer the content until it was complete in order to calculate a field value and send it before the content.
 
 
 	# chunked - needs to be parsed before passing to CGI
@@ -73,4 +74,21 @@ exit 0
 # curl -X POST http://localhost:8080 \
 # 	-H "Transfer-Encoding: chunked" \
 # 	-d @files/2k_earth_daymap.jpg
+# echo
+# exit 0
+
+
+# Transfer-Encoding: chunked
+# Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
+# Expect: 100-continue
+
+curl -X POST http://localhost:8082 \
+	-H "Transfer-Encoding: chunked" \
+	-F p1=post-one \
+	-F p2=post-two \
+	-F file=@files/Kanan.mp3
+
+	# -F file=@files/2k_earth_daymap.jpg
+echo
+exit 0
 

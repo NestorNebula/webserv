@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 20:31:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/11 10:08:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,11 +162,25 @@ ssize_t	Connection::pollin(void)
 		
 		WsLog::_(LVL_DBG, TGT_HEAD, "head");
 		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", head);
-		WsLog::_(LVL_DBG, TGT_HEAD, "rest");
-		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", istr);
+		// NULL HERE : sucks
+		// WsLog::_(LVL_DBG, TGT_HEAD, "rest");
+		// WsLog::_(LVL_DBG, TGT_HEAD, "****\n", istr);
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 	}
+#if 1 // test chunked -- do we get another header (?)
+
+		std::string hed_end("\r\n\r\n");
+		
+		size_t	crlf = istr.find(hed_end);
+		if (crlf != std::string::npos)
+		{
+			std::string new_hed = istr.substr(0, crlf + 4);
+
+			WsLog::_(LVL_DBG, TGT_HEAD, "new_hed");
+			// WsLog::_(LVL_DBG, TGT_HEAD, "*******\n", new_hed);
+		}
+#endif
 	
 	if (this->state < CONN_HAS_RSRC)
 	{
@@ -186,7 +200,15 @@ ssize_t	Connection::pollin(void)
 			return (err);
 		}
 		this->state = CONN_HAS_RSRC;
+// conn  : exec cgi
+// cgi   : send: [0]
+// cgi   : (~) Cgi
+
 	}
+	// "tell" cgi_ip we have data
+	if (this->cgi_ip)
+		this->cgi_ip->mod_evt(EPOLLOUT);
+
 	return (err);
 }
 
@@ -345,7 +367,7 @@ int	Connection::exec_cgi(void)
 			file = std::string("test.pl");
 			break;
 		default:
-			path = std::string("/usr/bin/php-cgi");
+			path = std::string("/usr/bin/php"); // HOME : fail better
 			file = std::string("test.php");
 			break;
 		}

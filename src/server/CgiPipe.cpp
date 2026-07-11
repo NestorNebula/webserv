@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 20:31:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/11 10:08:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,7 @@ ssize_t	CgiPipe::pollin(void)
 	return (err);
 }
 
+// do in Connection, not here 
 unsigned int	unchunk(std::string & str)
 {
 	unsigned int x;   
@@ -213,7 +214,7 @@ ssize_t	CgiPipe::pollout(void)
 		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
 #if 1 
 		err = this->send(this->conn->istr);
-#else // parse-chunked
+#else // parse-chunked -- in Connection
 		unsigned int cnt = unchunk(this->conn->istr);
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", cnt);
 		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
@@ -234,6 +235,11 @@ ssize_t	CgiPipe::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 		return (0); // keep going
 	}
+	// hm : Conn should decide when it is done writing
+	// BUT : this may close on cgi fail (?)
+	this->mod_evt(0);
+	return (0);
+	
 	// ASSUMES : conn::input : is faster than our output 
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1); // EOF : close input to cgi
