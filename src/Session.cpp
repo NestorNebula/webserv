@@ -124,6 +124,9 @@ void Session::manageSession() {
 }
 
 void Session::handleRequest() {
+	preValidateRequest();
+	if (!_request.isComplete() && !_request.isInvalid())
+		return;
 	validateRequest();
 	resolveResource();
 	validateOperation();
@@ -141,9 +144,6 @@ void Session::preValidateRequest() {
 }
 
 void Session::validateRequest() {
-	preValidateRequest();
-	if (!_request.isComplete() && !_request.isInvalid())
-		return;
 	if (_request.hasHeaders() && _request.getHeaders().str().size() > MAX_HEADERS_SIZE)
 		return setResponseStatus(431);
 	if (_request.isInvalid()
