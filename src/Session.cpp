@@ -349,6 +349,14 @@ void Session::setResponseHeaders() {
 				headers.insert("Last-Modified", lmDate);
 		}
 	}
+
+	// Location
+	if (_response.getCode() == 301 && _redirectRoute) {
+		std::string location(_redirectRoute->path);
+		if (_request.getURL().size() > _route->path.size())
+			location = joinPaths(location, _request.getURL().substr(_route->path.size()));
+		headers.insert("Location", location);
+	}
 	// ...
 	
 	_response.addHeaders(headers.begin(), headers.end());
