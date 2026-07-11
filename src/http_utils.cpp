@@ -116,6 +116,61 @@ std::string getStatusReason(Response::StatusCode code) {
 	return std::string();
 }
 
+std::string getMimeType(const std::string &path) {
+	static std::map<std::string, std::string> types;
+	std::string::size_type extIndex = path.find_last_of('.');
+	std::string ext = (extIndex != std::string::npos && extIndex != 0 && extIndex != path.size() - 1)
+		? path.substr(extIndex + 1)
+		: "";
+	for (std::string::iterator it = ext.begin(), ite = ext.end(); it != ite; it++)
+		*it = std::tolower(static_cast<unsigned char>(*it));
+
+	if (types.empty()) {
+		// Application
+		types["js"] = "application/javascript";
+		types["json"] = "application/json";
+		types["pdf"] = "application/pdf";
+		types["zip"] = "application/zip";
+		types["gz"] = "application/gzip";
+		types["xml"] = "application/xml";
+
+		// Audio
+		types["mp3"] = "audio/mpeg";
+		types["wav"] = "audio/wav";
+		types["ogg"] = "audio/ogg";
+
+		// Font
+		types["woff"] = "font/woff";
+		types["woff2"] = "font/woff2";
+		types["ttf"] = "font/ttf";
+		types["otf"] = "font/otf";
+
+		// Images
+		types["png"] = "image/png";
+		types["jpg"] = "image/jpeg";
+		types["jpeg"] = "image/jpeg";
+		types["gif"] = "image/gif";
+		types["svg"] = "image/svg+xml";
+		types["ico"] = "image/x-icon";
+		types["webp"] = "image/webp";
+
+		// Text
+		types["html"] = "text/html";
+		types["htm"] = "text/html";
+		types["css"] = "text/css";
+		types["txt"] = "text/plain";
+	
+		// Video
+		types["mp4"] = "video/mp4";
+		types["webm"] = "video/webm";
+	}
+
+	std::map<std::string, std::string>::const_iterator type = types.find(ext);
+	if (type != types.end())
+		return type->second;
+	return "application/octet-stream";
+}
+
 std::string decodeURI(const std::string &uri) {
 	static const std::string unreserved("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~");
 	static const std::string hexa("0123456789ABCDEF");
