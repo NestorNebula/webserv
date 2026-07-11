@@ -21,7 +21,7 @@
 
 class Session {
 public:
-	Session(ServerConfig &server): _next(RDSOCK), _server(server), _route(NULL), _redirectRoute(NULL), _resource(NULL), _keepalive(false), _sent(0) {
+	Session(ServerConfig &server): _next(RDSOCK), _server(server), _route(NULL), _resource(NULL), _keepalive(false), _sent(0) {
 		WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
 	}
 	~Session() {
@@ -59,7 +59,6 @@ private:
 
 	ServerConfig &_server;
 	RouteConfig *_route;
-	RouteConfig *_redirectRoute;
 	std::string _resourcePath;
 
 	Request _request;
