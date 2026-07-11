@@ -158,13 +158,8 @@ void Session::resolveResource() {
 	_route = findBestRoute(_request.getURL(), _server);
 	if (!_route)
 		return setResponseStatus(404);
-	if (!_route->redirect.empty()) {
-		for (std::vector<RouteConfig>::iterator it = _server.routes.begin(), ite = _server.routes.end(); _redirectRoute == NULL && it != ite; it++) {
-			if (it->path == _route->redirect)
-				_redirectRoute = &(*it);
-		}
-		return setResponseStatus(!_redirectRoute ? 500 : 301);
-	}
+	if (!_route->redirect.empty())
+		return setResponseStatus(301);
 	if (!isAllowedMethod(_request.getMethod(), *_route))
 		return setResponseStatus(405);
 	
@@ -351,8 +346,8 @@ void Session::setResponseHeaders() {
 	}
 
 	// Location
-	if (_response.getCode() == 301 && _redirectRoute) {
-		std::string location(_redirectRoute->path);
+	if (_response.getCode() == 301) {
+		std::string location(_route->redirect);
 		if (_request.getURL().size() > _route->path.size())
 			location = joinPaths(location, _request.getURL().substr(_route->path.size()));
 		headers.insert("Location", location);
