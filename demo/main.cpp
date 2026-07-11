@@ -1,6 +1,7 @@
 #include "Session.hpp"
 #include <fstream>
 #include <iostream>
+#include "unistd.h"
 
 #ifndef BUFSIZE
 #define BUFSIZE 4096
@@ -12,6 +13,8 @@
 #define BLUE "\x1b[34m"
 
 ServerConfig config;
+
+static bool setWorkingDirectory(const std::string &path);
 
 static void setupConfig();
 
@@ -25,6 +28,10 @@ int main (int argc, char *argv[]) {
 		return 0;
 	}
 
+	if (!setWorkingDirectory("./config.conf")) { // Replace with config path in real main
+		std::cerr << "couldn't setup working directory.\n";
+		return 0;
+	}
 	setupConfig();
 
 	for (int i = 1; i < argc; i++) {
@@ -33,6 +40,14 @@ int main (int argc, char *argv[]) {
 			std::cout << "\n";
 	}
 	return 0;
+}
+
+static bool setWorkingDirectory(const std::string &path) {
+	std::string::size_type lastSlash = path.find_last_of('/');
+	if (lastSlash == std::string::npos)
+		return true;
+	std::string directory = path.substr(0, lastSlash);
+	return chdir(directory.c_str()) == 0;
 }
 
 static void setupConfig() {
