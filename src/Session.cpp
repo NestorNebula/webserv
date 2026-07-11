@@ -312,7 +312,9 @@ void Session::setResponseHeaders() {
 	Headers headers;
 
 	headers.insert("Server", "Webserv");
-	// Date header
+	std::string date = getDate();
+	if (!date.empty())
+		headers.insert("Date", getDate());
 	if (_response.hasBody()) {
 		headers.insert("Content-Type", getMimeType(_resourcePath));
 		headers.insert("Content-Length", toString(_resource->stream().size()));
