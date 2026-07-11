@@ -17,6 +17,7 @@
 #include "HttpMethod.hpp"
 #include "http_utils.hpp"
 #include "helpers.hpp"
+#include <sys/stat.h>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -313,18 +314,36 @@ void Session::setResponseHeaders() {
 	// Add missing headers
 	Headers headers;
 
+	// Server
 	headers.insert("Server", "webserv");
+
+	// Date
 	std::string date = getDate();
 	if (!date.empty())
 		headers.insert("Date", getDate());
+	
+	// Content-Type / Content-Length
 	if (_response.hasBody()) {
 		headers.insert("Content-Type", getMimeType(_resourcePath));
 		headers.insert("Content-Length", toString(_resource->stream().size()));
 	}
+	
+	// Connection
 	if (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 && (!_request.hasHeader("Connection") || _request.getHeaders().find("Connection")->second == "keep-alive"))
 		headers.insert("Connection", "keep-alive");
 	else
 		headers.insert("Connection", "close");
+
+	// Last-Modified
+	if (_response.getCode() == 200 && _next != DOCGI) {
+		struct stat statbuf;
+
+		if (stat(_resourcePath.c_str(), &statbuf) == 0) {
+			std::string lmDate = getDate(statbuf.st_mtim.tv_sec);
+			if (!lmDate.empty())
+				headers.insert("Last-Modified", lmDate);
+		}
+	}
 	// ...
 	
 	_response.addHeaders(headers.begin(), headers.end());
