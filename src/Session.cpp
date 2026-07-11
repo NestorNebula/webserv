@@ -96,7 +96,7 @@ void Session::manageSession() {
 	switch (_next) {
 		case RDSOCK:
 			handleRequest();
-			if (_request.isComplete() || _request.isInvalid()) {
+			if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
 				handleResource();
 				if (_next != DOCGI) {
 					handleResponse();
@@ -288,7 +288,7 @@ void Session::handleDelete() {
 
 void Session::handleResponse() {
 	// Add Response details and missing fields
-	if (!isValidVersion(_request.getVersion()))
+	if (!_request.hasVersion() || !isValidVersion(_request.getVersion()))
 		_response.setVersion("HTTP/1.1");
 	else
 		_response.setVersion(_request.getVersion());
