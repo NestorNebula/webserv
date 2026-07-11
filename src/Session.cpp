@@ -313,7 +313,7 @@ void Session::setResponseHeaders() {
 	// Add missing headers
 	Headers headers;
 
-	headers.insert("Server", "Webserv");
+	headers.insert("Server", "webserv");
 	std::string date = getDate();
 	if (!date.empty())
 		headers.insert("Date", getDate());
