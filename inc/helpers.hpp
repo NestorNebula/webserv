@@ -28,6 +28,18 @@ long getLong(const std::string &s, bool *err, long min = LONG_MIN,
 
 std::vector<std::string> split(const std::string &s, const std::string set);
 
+template <typename Container>
+std::string join(Container container, const std::string &sep = ", ") {
+	std::string joined;
+
+	for (typename Container::const_iterator it = container.begin(), ite = container.end(); it != ite; it++) {
+		joined += *it;
+		if (it + 1 != ite)
+			joined += sep;
+	}
+	return joined;
+}
+
 template <typename T>
 std::string toString(T t) {
 	std::ostringstream oss;
