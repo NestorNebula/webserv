@@ -95,7 +95,6 @@ void Session::throwIfNotAction(Action action) const {
 }
 
 void Session::manageSession() {
-	Headers headers;
 	switch (_next) {
 		case RDSOCK:
 			handleRequest();
@@ -116,8 +115,7 @@ void Session::manageSession() {
 		case WRSOCK:
 			break;
 		case CLOSE: case KPALIVE:
-			headers = _response.getHeaders();
-			if (headers.has("Connection") && headers.find("Connection")->second == "keep-alive")
+			if (_keepalive)
 				_next = KPALIVE;
 			else
 				_next = CLOSE;
@@ -308,6 +306,8 @@ void Session::handleResponse() {
 			setResponseStatus(201);
 	}
 	_response.setResource(_resource);
+	_keepalive = (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400
+			&& (!_request.hasHeader("Connection") || _request.getHeaders().find("Connection")->second == "keep-alive"));
 	setResponseHeaders();
 	// Ensure that Response is valid
 	if (!_response.isReady())
@@ -334,7 +334,7 @@ void Session::setResponseHeaders() {
 	}
 	
 	// Connection
-	if (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 && (!_request.hasHeader("Connection") || _request.getHeaders().find("Connection")->second == "keep-alive"))
+	if (_keepalive)
 		headers.insert("Connection", "keep-alive");
 	else
 		headers.insert("Connection", "close");
