@@ -325,7 +325,7 @@ void Session::setResponseHeaders() {
 	// Date
 	std::string date = getDate();
 	if (!date.empty())
-		headers.insert("Date", getDate());
+		headers.insert("Date", date);
 	
 	// Content-Type / Content-Length
 	if (_response.hasBody()) {
