@@ -33,3 +33,5 @@ std::string toString(T t) {
 	oss << t;
 	return oss.str();
 }
+
+std::string getDate();
