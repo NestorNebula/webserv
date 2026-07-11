@@ -94,6 +94,7 @@ void Session::throwIfNotAction(Action action) const {
 }
 
 void Session::manageSession() {
+	Headers headers;
 	switch (_next) {
 		case RDSOCK:
 			handleRequest();
@@ -114,7 +115,8 @@ void Session::manageSession() {
 		case WRSOCK:
 			break;
 		case CLOSE: case KPALIVE:
-			if (_response.getVersion() == "HTTP/1.1")
+			headers = _response.getHeaders();
+			if (headers.has("Connection") && headers.find("Connection")->second == "keep-alive")
 				_next = KPALIVE;
 			else
 				_next = CLOSE;
@@ -319,6 +321,10 @@ void Session::setResponseHeaders() {
 		headers.insert("Content-Type", getMimeType(_resourcePath));
 		headers.insert("Content-Length", toString(_resource->stream().size()));
 	}
+	if (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 && (!_request.hasHeader("Connection") || _request.getHeaders().find("Connection")->second == "keep-alive"))
+		headers.insert("Connection", "keep-alive");
+	else
+		headers.insert("Connection", "close");
 	// ...
 	
 	_response.addHeaders(headers.begin(), headers.end());
