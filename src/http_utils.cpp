@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/05 14:34:56 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 11:54:20 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,24 @@ std::string decodeURI(const std::string &uri) {
 		}
 	}
 	return decoded;
+}
+
+std::string encodeURI(const std::string &uri) {
+	static const std::string unreserved("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~");
+	static const std::string hexa("0123456789ABCDEF");
+	std::string encoded;
+
+	for (std::string::const_iterator it = uri.begin(), ite = uri.end(); it != ite; it++) {
+		unsigned char c = *it;
+		if (unreserved.find(std::toupper(c)) != std::string::npos || *it == '/')
+			encoded.push_back(c);
+		else {
+			encoded.push_back('%');
+			encoded.push_back(hexa[c / hexa.size()]);
+			encoded.push_back(hexa[c % hexa.size()]);
+		}
+	}
+	return encoded;
 }
 
 std::string normalizeURI(const std::string &uri) {
