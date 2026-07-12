@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 21:59:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 22:28:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,8 +148,12 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	}
 		
+		// not really .. but gets flow going
+	if (this->conn->state < RSRC_HAS_RESP)
+		this->conn->state = RSRC_HAS_RESP;
+
 	this->conn->ostr.append(this->ibuf, err);
-	this->conn->mod_evt(EPOLLOUT);
+	this->conn->mod_evt(EPOLLOUT); // should not be changing (conn)
 	// this mod pollin -- but !!! that is a SEPARATE CgiPipe
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn->ostr.size());
@@ -192,6 +196,9 @@ ssize_t	CgiPipe::pollout(void)
 		// BUT : we want to kick in TOGGLE SOONER
 		// BUT : we won't have the error
 		// until we've started to receive
+		// php not generating yet -- 
+		// or .. conn is not FLUSHING
+		// until it knows it can create a header 
 		if (this->conn->state < RSRC_HAS_RESP)
 			this->conn->state = RSRC_HAS_RESP;
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);

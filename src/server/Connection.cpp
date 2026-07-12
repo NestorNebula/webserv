@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 22:01:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 22:28:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ static bool	icmp(char a, char b)
 		std::tolower(static_cast<unsigned char>(b));		
 }
 
-// more generic .. Request;
+
 std::string Connection::header(const char *key)
 {
 	std::string	kstr(key);
@@ -217,6 +217,9 @@ ssize_t	Connection::pollin(void)
 		// Q: Expect:100-continue
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
+
+		// GET : assume nothing more coming
+		// this->mod_evt(-EPOLLIN);
 	}
 #if 0 // test chunked -- do we get another header (?)
 
@@ -274,6 +277,7 @@ ssize_t	Connection::pollin(void)
 		this->state = CONN_HAS_RSRC;
 	}
 	
+	
 #if 0 // chunked
 // right for first .. wrong place to look
 // as (cgi) flushes (istr)
@@ -284,6 +288,7 @@ WsLog::_(LVL_DBG, TGT_CGI_SEND, "chunk: ", cnt);
 // err = this->send(this->istr, cnt); // body
 // this->istr.erase(0, 2); // CRLF
 #endif
+
 
 	// chunked : needs to know when we have reached the end
 	// so we can shutdown (cgi_ip)
@@ -326,9 +331,9 @@ ssize_t	Connection::pollout(void)
 		int stat = 0;
 		err = waitpid(cgi_pid, &stat, 0);
 		if (WIFEXITED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "exit: ", WEXITSTATUS(stat));
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "EXIT: ", WEXITSTATUS(stat));
 		if (WIFSIGNALED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "SIG : ", WTERMSIG(stat));
 		if (!WIFEXITED(stat) || WEXITSTATUS(stat))
 		{
 			this->state = RSRC_ERROR;
@@ -337,7 +342,6 @@ ssize_t	Connection::pollout(void)
 		}
 	}
 	
-	// no .. 
 	if (this->state < RSRC_HAS_RESP)
 	{
 		// get this more than I like ... 
