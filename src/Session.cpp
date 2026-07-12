@@ -6,11 +6,12 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/05 14:37:50 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 09:51:24 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Session.hpp"
+#include "BuiltinResource.hpp"
 #include "DirectoryResource.hpp"
 #include "Request.hpp"
 #include "StaticResource.hpp"
@@ -211,6 +212,8 @@ void Session::handleResource() {
 				break;
 		}
 	}
+	if (!_resource && _response.getCode() != 204)
+		_resource = new BuiltinResource(_response.getCode());
 	// Generate Resource
 	if (_resource) {
 		_resource->generate();
@@ -324,7 +327,10 @@ void Session::setResponseHeaders() {
 	
 	// Content-Type / Content-Length
 	if (_response.hasBody()) {
-		headers.insert("Content-Type", getMimeType(_resourcePath));
+		if (dynamic_cast<BuiltinResource *>(_resource))
+			headers.insert("Content-Type", getMimeType("builtin.html"));
+		else
+		 headers.insert("Content-Type", getMimeType(_resourcePath));
 		headers.insert("Content-Length", toString(_resource->stream().size()));
 	}
 	
