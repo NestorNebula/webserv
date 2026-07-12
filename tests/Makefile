@@ -26,6 +26,7 @@ PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
 			  $(SRC_DIR)/Response.cpp \
 			  $(SRC_DIR)/StaticResource.cpp \
 			  $(SRC_DIR)/DirectoryResource.cpp \
+			  $(SRC_DIR)/BuiltinResource.cpp \
 			  $(SRC_DIR)/Stream.cpp \
 			  $(SRC_DIR)/TemporaryFileStream.cpp \
 			  $(SRC_DIR)/http_utils.cpp \
@@ -38,6 +39,7 @@ TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
 		   $(TEST_SRC_DIR)/Response.cpp \
 		   $(TEST_SRC_DIR)/StaticResource.cpp \
 		   $(TEST_SRC_DIR)/DirectoryResource.cpp \
+		   $(TEST_SRC_DIR)/BuiltinResource.cpp \
 		   $(TEST_SRC_DIR)/http_utils.cpp \
 		   $(TEST_SRC_DIR)/Session.cpp \
 		   $(TEST_SRC_DIR)/main.cpp
