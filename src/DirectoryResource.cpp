@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/29 14:27:41 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 10:07:44 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void DirectoryResource::buildList() {
 		"<html lang=\"en\">\n"
 		"<head>\n"
 		"<meta charset=\"utf-8\">\n"
+		"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n"
 		"<title>Directory listing for " << _dirpath << "</title>\n"
 		"</head>\n"
 		"<body>\n"
