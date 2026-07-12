@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 10:21:48 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 10:47:52 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,8 +197,12 @@ void Session::handleResource() {
 	else if (!_response.getCode()) {
 		switch (_request.getMethod()) {
 			case METHOD_GET:
-				if (isDirectory(_resourcePath))
+				if (isDirectory(_resourcePath)) {
+					if (_request.getURL().find_last_of('/') == _request.getURL().size() - 1)
 					prepareDirectoryResource();
+					else
+						setResponseStatus(301);
+				}
 				else
 					_resource = new StaticResource(_resourcePath);
 				break;
@@ -354,8 +358,12 @@ void Session::setResponseHeaders() {
 	// Location
 	if (_response.getCode() == 301) {
 		std::string location(_route->redirect);
-		if (_request.getURL().size() > _route->path.size())
-			location = joinPaths(location, _request.getURL().substr(_route->path.size()));
+		if (!_route->redirect.empty()) {
+			location = _route->redirect;
+			if (_request.getURL().size() > _route->path.size())
+				location = joinPaths(location, _request.getURL().substr(_route->path.size()));
+		} else
+			location = _request.getURL() + '/';
 		headers.insert("Location", location);
 	}
 
