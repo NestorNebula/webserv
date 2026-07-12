@@ -120,6 +120,8 @@ static void routeFromServer(RouteConfig &route) {
 	route.methods = config.methods;
 	route.index = config.index;
 	route.error_pages = config.error_pages;
+
+	route.autoindex = false;
 }
 
 static void demoRequest(char *requestFile) {
