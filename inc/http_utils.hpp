@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/05 14:21:56 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 11:26:48 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,5 +38,7 @@ std::string getStatusReason(Response::StatusCode code);
 std::string getMimeType(const std::string &path);
 
 std::string decodeURI(const std::string &uri);
+
+std::string encodeURI(const std::string &uri);
 
 std::string normalizeURI(const std::string &uri);
