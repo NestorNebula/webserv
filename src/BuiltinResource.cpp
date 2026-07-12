@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/12 09:10:36 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 10:12:53 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 15:00:41 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,13 @@ void BuiltinResource::generate() {
 
   if (_state != DEFAULT)
     throw std::logic_error("generate called multiple times");
+  WsLog::_(LVL_INFO, TGT_BUI_RES, "Generating BuiltinResource for code ", _code);
   _stream = new Stream(new std::stringstream());
   buildHTMLFromCode();
   if (_state == DEFAULT)
     _state = _stream->good() ? DONE : FAIL;
+  if (_state != DONE)
+	  WsLog::_(LVL_WARN, TGT_BUI_RES, "BuiltinResource error for code ", _code);
 }
 
 Stream &BuiltinResource::stream() {
@@ -47,6 +50,7 @@ void BuiltinResource::buildHTMLFromCode() {
     _code = 418;
     reason = "I'm a teapot";
 	_state = FAIL;
+	WsLog::_(LVL_ERR, TGT_BUI_RES, "BuiltinResource called with wrong code, teapot found");
     break;
   }
   div << "</div>\n";
