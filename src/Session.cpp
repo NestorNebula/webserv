@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 10:47:52 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 14:49:22 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,6 +364,9 @@ void Session::setResponseHeaders() {
 				location = joinPaths(location, _request.getURL().substr(_route->path.size()));
 		} else
 			location = _request.getURL() + '/';
+		location = encodeURI(location);
+		if (_request.hasQuery())
+			location = location + '?' + _request.getQuery();
 		headers.insert("Location", location);
 	}
 
