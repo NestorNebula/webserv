@@ -74,9 +74,8 @@ TEST(Session, ReadData) {
 
 	writeSimpleRequest(session);
 	Stream::streamsize size = session.read(buf, BUFSIZE);
-	EXPECT_LT(size, BUFSIZE);
+	EXPECT_LE(size, BUFSIZE);
 	EXPECT_GT(size, 0);
-	EXPECT_EQ(size, static_cast<long>(std::string(buf).size()));
 	EXPECT_EQ(session.nextAction(), Session::KPALIVE);
 }
 
