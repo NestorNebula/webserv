@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 14:49:22 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 15:24:58 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ void Session::handleRequest() {
 }
 
 void Session::preValidateRequest() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Pre-validating Session Request");
 	if (_request.hasVersion() && !isValidVersion(_request.getVersion()))
 		return setResponseStatus(400);
 	if (_request.hasVersion() && _request.getVersion() != "HTTP/1.0" && _request.getVersion() != "HTTP/1.1")
@@ -144,27 +145,33 @@ void Session::preValidateRequest() {
 		return setResponseStatus(501);
 	if (_request.hasBody() && static_cast<unsigned int>(_request.getBody()->size()) > _server.max_body_size)
 		return setResponseStatus(413);
+	WsLog::_(LVL_INFO, TGT_SESS, "Session Request pre-validation successful");
 }
 
 void Session::validateRequest() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Validating Session Request");
 	if (_request.hasHeaders() && _request.getHeaders().str().size() > MAX_HEADERS_SIZE)
 		return setResponseStatus(431);
 	if (_request.isInvalid()
 			|| (_request.getVersion() == "HTTP/1.1" && !_request.getHeaders().has("Host")))
 		return setResponseStatus(400);
+	WsLog::_(LVL_INFO, TGT_SESS, "Session Request validation successful");
 }
 
 void Session::resolveResource() {
 	if (_response.getCode()) return;
+	WsLog::_(LVL_INFO, TGT_SESS, "Resolving Request Resource");
 	_route = findBestRoute(_request.getURL(), _server);
 	if (!_route)
 		return setResponseStatus(404);
+	WsLog::_(LVL_INFO, TGT_SESS, "Request route found: ", _route->path);
 	if (!_route->redirect.empty())
 		return setResponseStatus(301);
 	if (!isAllowedMethod(_request.getMethod(), *_route))
 		return setResponseStatus(405);
 	
 	_resourcePath = resolvePath(_request.getURL(), *_route);
+	WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
 	if (isCgi(_resourcePath, *_route)) {
 		_next = DOCGI;
 		return;
@@ -178,6 +185,7 @@ void Session::validateOperation() {
 			return setResponseStatus(403);
 		return;
 	}
+	WsLog::_(LVL_INFO, TGT_SESS, "Checking operation is possible on Session Resource");
 	if (_request.getMethod() == METHOD_POST && _route->upload) {
 		if (isExistingFile(_resourcePath))
 			return setResponseStatus(403);
@@ -187,11 +195,13 @@ void Session::validateOperation() {
 		return setResponseStatus(404);
 	if (!isAccessibleFile(_resourcePath))
 		return setResponseStatus(403);
+	WsLog::_(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
 }
 
 void Session::handleResource() {
 	if (_next == DOCGI)
 		return;
+	WsLog::_(LVL_INFO, TGT_SESS, "Preparing Session Resource generation");
 	if (_response.getCode() >= 400)
 		prepareErrorResource();
 	else if (!_response.getCode()) {
@@ -220,13 +230,16 @@ void Session::handleResource() {
 		_resource = new BuiltinResource(_response.getCode());
 	// Generate Resource
 	if (_resource) {
+		WsLog::_(LVL_INFO, TGT_SESS, "Generating Session Resource");
 		_resource->generate();
 		// Handle Resource errors
 		if (_resource->failed()) {
 			setResponseStatus(500);
 			delete _resource;
 			_resource = NULL;
-		}
+			WsLog::_(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
+		} else
+			WsLog::_(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
 	}
 }
 
@@ -237,11 +250,13 @@ void Session::prepareErrorResource() {
 	if (!isAccessibleFile(errPage))
 		errPage = joinPaths(_server.root, errPages["default"]);
 	delete _resource;
+	WsLog::_(LVL_INFO, TGT_SESS, "Generating Error page Resource using ", errPage);
 	_resource = new StaticResource(errPage);
 	_resourcePath = errPage;
 }
 
 void Session::prepareDirectoryResource() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Processing requested Directory: ", _resourcePath);
 	bool indexFound = false;
 	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
 		std::string indexPath = joinPaths(_route->root, *it);
@@ -250,10 +265,14 @@ void Session::prepareDirectoryResource() {
 			indexFound = true;
 		}
 	}
-	if (indexFound)
+	if (indexFound) {
+		WsLog::_(LVL_INFO, TGT_SESS, "Preparing StaticResource with Directory index: ", _resourcePath);
 		_resource = new StaticResource(_resourcePath);
-	else if (_route->autoindex)
+	}
+	else if (_route->autoindex) {
+		WsLog::_(LVL_INFO, TGT_SESS, "Preparing DirectoryResource");
 		_resource = new DirectoryResource(_resourcePath);
+	}
 	else {
 		setResponseStatus(403);
 		prepareErrorResource();
@@ -261,6 +280,7 @@ void Session::prepareDirectoryResource() {
 }
 
 void Session::handleUpload() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Processing upload Request");
 	std::string uploadDir = joinPaths(_route->root, _route->upload_dir);
 	if (!isDirectory(uploadDir))
 		return setResponseStatus(400);
@@ -271,6 +291,7 @@ void Session::handleUpload() {
 	if (!ofs.is_open())
 		return setResponseStatus(500);
 	Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
+	WsLog::_(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
 	if (bodyStream && *bodyStream) {
 		char buf[BUFSIZE];
 		while (bodyStream->read(buf, BUFSIZE))
@@ -280,22 +301,27 @@ void Session::handleUpload() {
 	}
 	ofs.close();
 	if ((bodyStream && !bodyStream->eof()) || !ofs) {
+			WsLog::_(LVL_ERR, TGT_SESS, "Error during file upload, aborting");
 			std::remove(uploadFile.c_str());
 			return setResponseStatus(500);
 	}
+	WsLog::_(LVL_INFO, TGT_SESS, "File uploaded successfully");
 	setResponseStatus(201);
 }
 
 void Session::handleDelete() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Processing DELETE Request for: ", _resourcePath);
 	if (isDirectory(_resourcePath))
 		return setResponseStatus(403);
 	errno = 0;
 	if (std::remove(_resourcePath.c_str()) && errno == EACCES)
 		return setResponseStatus(403);
+	WsLog::_(LVL_INFO, TGT_SESS, "File deleted successfully");
 	setResponseStatus(204);
 }
 
 void Session::handleResponse() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Preparing Session Response");
 	// Add Response details and missing fields
 	if (!_request.hasVersion() || !isValidVersion(_request.getVersion()))
 		_response.setVersion("HTTP/1.1");
@@ -317,6 +343,7 @@ void Session::handleResponse() {
 }
 
 void Session::setResponseHeaders() {
+	WsLog::_(LVL_INFO, TGT_SESS, "Setting Response headers");
 	// TODO
 	// Add missing headers
 	Headers headers;
