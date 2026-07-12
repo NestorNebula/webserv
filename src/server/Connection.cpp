@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/11 10:08:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 14:24:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,19 @@ bool	Connection::timeo(time_t now)
 }
 
 
+unsigned int	chunk_size(std::string & str)
+{
+	unsigned int x;   
+	std::stringstream ss(str);
+	ss >> std::hex >> x;
+	size_t pos = ss.tellg();
+	str.erase(0, pos + 2); // CRLF
+	if (x == 0)
+		str.erase(0, pos + 4); // CRLF CRLF
+
+	return (x);
+}
+
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -144,6 +157,7 @@ ssize_t	Connection::pollin(void)
 		return (0);
 	}
 
+	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 	istr.append(this->ibuf, err);
 	
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
@@ -165,10 +179,14 @@ ssize_t	Connection::pollin(void)
 		// NULL HERE : sucks
 		// WsLog::_(LVL_DBG, TGT_HEAD, "rest");
 		// WsLog::_(LVL_DBG, TGT_HEAD, "****\n", istr);
+
+		// if chunked,
+		// check first line of body to get chunk_size
+		// Q: Expect:100-continue
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 	}
-#if 1 // test chunked -- do we get another header (?)
+#if 0 // test chunked -- do we get another header (?)
 
 		std::string hed_end("\r\n\r\n");
 		
@@ -181,7 +199,13 @@ ssize_t	Connection::pollin(void)
 			// WsLog::_(LVL_DBG, TGT_HEAD, "*******\n", new_hed);
 		}
 #endif
+	// chunked : track ... total received (?)
+	// even : against content-length
+
+	// std::string cont = std::string("HTTP/1.1 100 Continue\r\n\r\n");
+	// this->send(cont);	// ugly : have not checked (pollout)
 	
+
 	if (this->state < CONN_HAS_RSRC)
 	{
 		switch(this->serv.get_port())
@@ -205,10 +229,35 @@ ssize_t	Connection::pollin(void)
 // cgi   : (~) Cgi
 
 	}
+	// IF CHUNKED
+	// track chunk_size
+	//
+	
+// right for first .. wrong place to look
+// as (cgi) flushes (istr)
+unsigned int cnt = chunk_size(this->istr);
+// WsLog::_(LVL_DBG, TGT_CGI_SEND, "data\n", this->istr.substr(0, 255));
+WsLog::_(LVL_DBG, TGT_CGI_SEND, "chunk: ", cnt);
+// WsLog::_(LVL_DBG, TGT_CGI_SEND, "data\n", this->istr.substr(0, 255));
+// err = this->send(this->istr, cnt); // body
+// this->istr.erase(0, 2); // CRLF
+
+
+	// chunked : needs to know when we have reached the end
+	// so we can shutdown (cgi_ip)
 	// "tell" cgi_ip we have data
 	if (this->cgi_ip)
+	{
+		if (err < EPC_BUF_SIZ)
+		{
+			// tell (cgi_ip) ?
+			// close (rd) on this socket (?)
+		}
+		// state : conn_have_body
+		// check post-epoll state -- set in (cur_evt)
+		// and .. semd immediately (?)
 		this->cgi_ip->mod_evt(EPOLLOUT);
-
+	}
 	return (err);
 }
 

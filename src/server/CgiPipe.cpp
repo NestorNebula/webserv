@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/11 10:08:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 14:17:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,9 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
 		return (-1); // (?)
 	}
-
+	// even if RECV ZERO (?)
+	// error (?)
+	// state (?)
 	if (this->conn->state < RSRC_HAS_RESP)
 		this->conn->state = RSRC_HAS_RESP;
 		
@@ -160,20 +162,6 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn->ostr);
 	
 	return (err);
-}
-
-// do in Connection, not here 
-unsigned int	unchunk(std::string & str)
-{
-	unsigned int x;   
-	std::stringstream ss(str);
-	ss >> std::hex >> x;
-	size_t pos = ss.tellg();
-	str.erase(0, pos + 2); // CRLF
-	if (x == 0)
-		str.erase(0, pos + 4); // CRLF CRLF
-
-	return (x);
 }
 
 ssize_t	CgiPipe::pollout(void)
@@ -212,15 +200,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->conn->istr.size())
 	{
 		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
-#if 1 
 		err = this->send(this->conn->istr);
-#else // parse-chunked -- in Connection
-		unsigned int cnt = unchunk(this->conn->istr);
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", cnt);
-		WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
-		err = this->send(this->conn->istr, cnt); // body
-		this->conn->istr.erase(0, 2); // CRLF
-#endif		
 
 		if (err < 0)
 		{
@@ -238,6 +218,7 @@ ssize_t	CgiPipe::pollout(void)
 	// hm : Conn should decide when it is done writing
 	// BUT : this may close on cgi fail (?)
 	this->mod_evt(0);
+	this->conn->mod_evt(EPOLLOUT);
 	return (0);
 	
 	// ASSUMES : conn::input : is faster than our output 

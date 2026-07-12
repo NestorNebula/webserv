@@ -82,6 +82,10 @@
 # Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
 # Expect: 100-continue
 
+# without (chunked)
+# content-length tells cgi when it has enough
+	# -H "Transfer-Encoding: chunked" \
+
 curl -X POST http://localhost:8082 \
 	-H "Transfer-Encoding: chunked" \
 	-F p1=post-one \
