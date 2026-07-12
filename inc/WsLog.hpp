@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/04 15:37:02 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 14:56:07 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,16 +60,17 @@ typedef long unsigned int log_tgt;
 
 # define TGT_STAT_RES	(1L << 22)
 # define TGT_DIR_RES	(1L << 23)
-# define TGT_RES		(TGT_STAT_RES | TGT_DIR_RES)
+# define TGT_BUI_RES	(1L << 24)
+# define TGT_RES		(TGT_STAT_RES | TGT_DIR_RES | TGT_BUI_RES)
 
-# define TGT_RESP		(1L << 24)
+# define TGT_RESP		(1L << 25)
 
-# define TGT_TMP_STRM	(1L << 25)
-# define TGT_STRM		(TGT_TMP_STRM | (1L << 26))
+# define TGT_TMP_STRM	(1L << 26)
+# define TGT_STRM		(TGT_TMP_STRM | (1L << 27))
 
-# define TGT_SESS_WR	(1L << 27)
-# define TGT_SESS_RD	(1L << 28)
-# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1L << 29))
+# define TGT_SESS_WR	(1L << 28)
+# define TGT_SESS_RD	(1L << 29)
+# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1L << 30))
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
