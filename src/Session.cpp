@@ -6,7 +6,7 @@
 /*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 09:51:24 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/07/12 10:21:48 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -327,8 +327,8 @@ void Session::setResponseHeaders() {
 	
 	// Content-Type / Content-Length
 	if (_response.hasBody()) {
-		if (dynamic_cast<BuiltinResource *>(_resource))
-			headers.insert("Content-Type", getMimeType("builtin.html"));
+		if (!dynamic_cast<StaticResource *>(_resource))
+			headers.insert("Content-Type", getMimeType("resource.html"));
 		else
 		 headers.insert("Content-Type", getMimeType(_resourcePath));
 		headers.insert("Content-Length", toString(_resource->stream().size()));
