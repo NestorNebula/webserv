@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 18:19:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 21:58:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,6 +262,7 @@ int	Epoll::exec(void)
 void	Epoll::check_timeo(void)
 {
 	time_t	n;
+	
 	n = time(&n);
 	
 	std::set<EpollClient*>::iterator it = this->clients.begin();
@@ -269,7 +270,10 @@ void	Epoll::check_timeo(void)
 	{
 		if ((*it)->timeo(n))
 		{
-			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT: ", (*it)->typ_str());
+			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			// cgi  timeout (?)
+			// conn timeout 
+			// 408 Request Timeout 
 		}
 		it++;
 	}
@@ -300,21 +304,14 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
-#if 0 // TESTING
-			if (!this->has_client(epc))
-			{
-				std::cerr << "\nEXPECT SHIT\n\n";
-				continue;
-			}
-#endif
-
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-					
 			if (epc->event(evt) < 0)
 			{
-				// set DONE ...
+				// set DONE .. do not remove right away
+				// in case conn <=> cgi are pointing to each other
+				// -- which might have been a bad idea
 				this->rem(epc);
 			}
         }
@@ -357,5 +354,4 @@ int	Epoll::loop(void)
 // EPOLLONESHOT	:
 // EPOLLWAKEUP	:
 // EXPOLLECLUSIVE
-
 

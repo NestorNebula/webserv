@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 12:39:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 19:56:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,5 @@ private:
 	std::vector<std::string>	data;
 	const char					**res;
 };
-
-
 
 #endif

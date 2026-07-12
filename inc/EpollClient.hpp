@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 20:01:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 21:22:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,21 +55,22 @@ public:
 	ssize_t			send(std::string & str);
 	ssize_t			send(std::string & str, ssize_t cnt);
 	
-	virtual ssize_t	pollin(void) = 0;
+	virtual ssize_t	pollin (void) = 0;
 	virtual ssize_t pollout(void) = 0;
-	virtual int		hup(void) = 0;
-	virtual bool	timeo(time_t ) { return (false); }
+	virtual int		hup    (void) = 0;
+	virtual bool	timeo  (time_t) { return (false); }
 
 	int				ini_evt(int e);
 	int				mod_evt(int e);
 	int				event(struct epoll_event *e);
 
-	int					get_fd(void) const
+	int					get_fd  (void) const
 		{ return (this->fd); }
 	struct epoll_event	*get_evt(void)
 		{ return (&this->evt); }
 		
     std::string 		typ_str(void);
+	
 protected:
 	Epoll				*ep;
 	epc_typ				typ;
@@ -82,8 +83,6 @@ public:
 	
 public:
     char            	ibuf[EPC_BUF_SIZ];
-	std::string			istr;
-	std::string			ostr;
 };
 
 #endif

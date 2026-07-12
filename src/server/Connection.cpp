@@ -6,11 +6,9 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 14:24:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 22:01:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-//kd
 
 #include "Connection.hpp"
 #include "Server.hpp"
@@ -18,6 +16,7 @@
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
+	cgi_pid(0),
 	cgi_ip(NULL),
 	cgi_op(NULL),
 	serv(_serv), 
@@ -31,12 +30,30 @@ Connection::~Connection()
 	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 
-	// if either open .. 
-	// should we try to KILL it (?)
+	if (this->cgi_ip || this->cgi_op)
+	{
+		kill(cgi_pid, SIGKILL);
+		int stat = 0;
+		// int err = 
+		waitpid(cgi_pid, &stat, 0);
+		if (WIFEXITED(stat))
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "exit: ", WEXITSTATUS(stat));
+		if (WIFSIGNALED(stat))
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
+	}
+	
 	if (this->cgi_ip)
+	{
 		this->cgi_ip->conn = NULL;
+		this->cgi_ip->mod_evt(EPOLLIN);
+	}
 	if (this->cgi_op)
+	{
 		this->cgi_op->conn = NULL;
+		this->cgi_op->mod_evt(EPOLLOUT);
+	}
+	// check cgi_pid (?) kill (?)
+
 };
 
 // GET Requests: The encoded string is appended to the URL and passed to the CGI script via the QUERY_STRING environment variable. 
@@ -54,10 +71,9 @@ static bool	icmp(char a, char b)
 // more generic .. Request;
 std::string Connection::header(const char *key)
 {
-	std::string val("");
+	std::string	kstr(key);
+	std::string	val("");
 	
-	std::string kstr(key);
-
 	if (kstr == std::string("METH"))
 	{
 		std::string			meth;
@@ -75,6 +91,19 @@ std::string Connection::header(const char *key)
 		WsLog::_(LVL_DBG, TGT_HEAD, "path: ", path);
 		return (path);
 	}
+	if (kstr == std::string("QUERY"))
+	{
+		std::string			meth;
+		std::string			path;
+		std::stringstream	line(head);
+		line >> meth >> path;
+		size_t	qbeg = path.find('?');
+		if (qbeg == std::string::npos)
+			return (val);
+		WsLog::_(LVL_DBG, TGT_HEAD, "getv: ", path.substr(qbeg + 1));
+		return (path.substr(qbeg + 1));
+	}
+	
 	std::string::const_iterator it = std::search(
 		head.begin(), head.end(),
 		kstr.begin(), kstr.end(),
@@ -104,9 +133,6 @@ std::string Connection::header(const char *key)
 
 	val = head.substr(off_beg, off_end - off_beg);
 
-	// ugh : need to point to something in head .. which is valid outside this function
-	// std::cerr << "header:\nheader: " << key << "=" << val << std::endl;
-
 	std::string kv(key + std::string("=") + val);
 	WsLog::_(LVL_DBG, TGT_HEAD, kv);
 	return (val);
@@ -116,7 +142,7 @@ std::string Connection::header(const char *key)
 
 #define CONN_TIMEO 5
 
-// CgiPipe as well .. or .. just .. NOT SERVER
+
 bool	Connection::timeo(time_t now)
 {
 	if (this->lact == 0)
@@ -160,6 +186,10 @@ ssize_t	Connection::pollin(void)
 	}
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
+
+	// sess.push_data()
+
+	// rsrc.data_ip()
 	istr.append(this->ibuf, err);
 	
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
@@ -207,34 +237,44 @@ ssize_t	Connection::pollin(void)
 	// std::string cont = std::string("HTTP/1.1 100 Continue\r\n\r\n");
 	// this->send(cont);	// ugly : have not checked (pollout)
 	
+#define KEEP_ALIVE 0
+
+// Warning: Connection-specific header fields such as Connection and Keep-Alive are prohibited in HTTP/2 and HTTP/3. Chrome and Firefox ignore them in HTTP/2 responses, but Safari conforms to the HTTP/2 specification requirements and does not load any response that contains them.
 
 	if (this->state < CONN_HAS_RSRC)
 	{
+		this->resp = std::string("HTTP/1.1 200 OK\r\n");
 		switch(this->serv.get_port())
 		{
 		case 8080: // (php)
+#if KEEP_ALIVE
+			// ugh : ostr include php headers ... 
+			this->resp += std::string("Content-Length: 734\r\n");
+			this->resp += std::string("Connection: Keep-Alive\r\n");
+#else
 			this->resp = std::string("HTTP/1.1 200 OK\r\n");
+#endif			
 			break;
 		default:
-			this->resp = std::string("HTTP/1.1 200 OK\r\n\r\n");
+#if KEEP_ALIVE
+			// this->resp += std::string("Content-Length: 594\r\n"); // one-shot
+			this->resp += std::string("Content-Length: 698\r\n"); // concurrent
+			this->resp += std::string("Connection: Keep-Alive\r\n");
+#endif			
+			this->resp += std::string("\r\n");
 			break;
 		}
 		err = this->exec_cgi(); // (this->head)
 		if (err < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
+			// different RESP here 
 			return (err);
 		}
 		this->state = CONN_HAS_RSRC;
-// conn  : exec cgi
-// cgi   : send: [0]
-// cgi   : (~) Cgi
-
 	}
-	// IF CHUNKED
-	// track chunk_size
-	//
 	
+#if 0 // chunked
 // right for first .. wrong place to look
 // as (cgi) flushes (istr)
 unsigned int cnt = chunk_size(this->istr);
@@ -243,18 +283,18 @@ WsLog::_(LVL_DBG, TGT_CGI_SEND, "chunk: ", cnt);
 // WsLog::_(LVL_DBG, TGT_CGI_SEND, "data\n", this->istr.substr(0, 255));
 // err = this->send(this->istr, cnt); // body
 // this->istr.erase(0, 2); // CRLF
-
+#endif
 
 	// chunked : needs to know when we have reached the end
 	// so we can shutdown (cgi_ip)
 	// "tell" cgi_ip we have data
 	if (this->cgi_ip)
 	{
-		if (err < EPC_BUF_SIZ)
-		{
+		// if (err < EPC_BUF_SIZ) // all data received (?)
+		// {
 			// tell (cgi_ip) ?
 			// close (rd) on this socket (?)
-		}
+		// }
 		// state : conn_have_body
 		// check post-epoll state -- set in (cur_evt)
 		// and .. semd immediately (?)
@@ -264,8 +304,10 @@ WsLog::_(LVL_DBG, TGT_CGI_SEND, "chunk: ", cnt);
 }
 
 
-// ∗ Just remember that, for chunked requests, your server needs to un-chunk them, the CGI will expect EOF as the end of the body.
-// ∗ The same applies to the output of the CGI. If no content_length is returned from the CGI, EOF will mark the end of the returned data.
+// ∗ Just remember that, for chunked requests, your server needs to un-chunk them, 
+// the CGI will expect EOF as the end of the body.
+// ∗ The same applies to the output of the CGI. 
+// If no content_length is returned from the CGI, EOF will mark the end of the returned data.
 // ∗ The CGI should be run in the correct directory for relative path file access.
 
 ssize_t	Connection::pollout(void)
@@ -277,9 +319,25 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no rsrc");
 		return (0); // (-1)
 	}
-	// if (this->cgi_op == NULL)
-		// ERROR
-	// rsrc->state
+
+	if (this->state == RSRC_BODY_DONE) //  || this->cgi_op == NULL) // complete
+	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: cgi DONE");
+		int stat = 0;
+		err = waitpid(cgi_pid, &stat, 0);
+		if (WIFEXITED(stat))
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "exit: ", WEXITSTATUS(stat));
+		if (WIFSIGNALED(stat))
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
+		if (!WIFEXITED(stat) || WEXITSTATUS(stat))
+		{
+			this->state = RSRC_ERROR;
+			// something to send 
+			this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\n");
+		}
+	}
+	
+	// no .. 
 	if (this->state < RSRC_HAS_RESP)
 	{
 		// get this more than I like ... 
@@ -291,8 +349,12 @@ ssize_t	Connection::pollout(void)
 		return (0); // (-1)
 	}
 
+	// don't send resp .. until we have some body
+	// cgi may have FAILED
+	
 	if (this->state < CONN_SENT_RESP || this->state == RSRC_BODY_DONE)
 	{
+		// BODY_DONE : could be .. complete with error 
 		err = this->send(this->resp); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
 		if (this->resp.size())
@@ -303,20 +365,35 @@ ssize_t	Connection::pollout(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
-	if (ostr.size() == 0)
+	if (ostr.size() == 0) // rsrc/state seems like a better check
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
+
 		// rsrc.inProgress() .. wait for it
 		// rsrc.failure() .. send error
 		// rsrc.done()
-		// not always getting this 
+		// not always getting RSRC_BODY_DONE 
+		// should even check .. before SENDING (ostr)
 		if (this->state == RSRC_BODY_DONE || this->cgi_op == NULL) // complete
 		{
-#if 0 // KEEP_ALIVE -- would REQUIRE CONTENT-LENGTH from (cgi)
+			// int stat = 0;
+			// err = waitpid(cgi_pid, &stat, 0);
+			// if (WIFEXITED(stat))
+			// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "exit: ", WEXITSTATUS(stat));
+			// if (WIFSIGNALED(stat))
+			// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
+
+// Keepalive with chunked transfer encoding
+
+// Keepalive makes it difficult for the client to determine where one response ends and the next response begins, particularly during pipelined HTTP operation.[11] This is a serious problem when Content-Length cannot be used due to streaming.[12] To solve this problem, HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
+#if KEEP_ALIVE // -- would REQUIRE CONTENT-LENGTH from (cgi)
+
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
+			// hm : did this only work when we sent back Content-Length
 			// see more HUP => read [0] with THIS .. AND NOT siege.conf
 			this->istr.clear();
 			this->state = 0;
-			// turn OFF first
+			this->mod_evt(-EPOLLOUT); // no rsrc
 			this->mod_evt(EPOLLIN);
 			return (0);
 #else
@@ -329,6 +406,7 @@ ssize_t	Connection::pollout(void)
 		return (0);
 	}
 	
+	// rsrc.data_op
 	err = this->send(ostr);
 	if (err < 0)
 	{
@@ -343,13 +421,9 @@ ssize_t	Connection::pollout(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
 	if (ostr.size())
-	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", ostr.size());
-	}
 	else
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all"); // may have more to fill 
-	}
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
 
 	return (err); // (!) bytes written
 }
@@ -380,7 +454,10 @@ void	Connection::rem_cgi(CgiPipe *epc)
 		this->cgi_ip = NULL;
 	else if (epc == this->cgi_op)
 		this->cgi_op = NULL;
+	// both deleted .. check (exit) status (?)
 }
+
+// new rsrc (cgi)
 int	Connection::exec_cgi(void)
 {
 	int			err;
@@ -389,11 +466,11 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes");
 
-	pid_t pid = fork();
-	if (pid < 0)
+	this->cgi_pid = fork();
+	if (cgi_pid < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 		
-	if (pid == 0)
+	if (cgi_pid == 0)
 	{
 		err = pipes.dup_io();
 		if (err < 0)
@@ -418,8 +495,8 @@ int	Connection::exec_cgi(void)
 			file = std::string("test.pl");
 			break;
 		default:
-			path = std::string("/usr/bin/php"); // HOME : fail better
-			file = std::string("test.php");
+			path = std::string("/usr/bin/php-cgi"); // HOME : fail better
+			file = std::string("bigfile.php");
 			break;
 		}
 		

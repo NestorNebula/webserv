@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 18:42:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 19:57:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,10 @@ CgiEnv::~CgiEnv()
 		delete[] res;
 }
 
-// from_headers
-// plus (webserv)
+// like this .. we store the backing data for envp
 void	CgiEnv::add(const char *key, const char *val)
 {
-	// <map> first .. to override multiple (?)
+	// <map> first [keky]
 	data.push_back(std::string(key) + std::string("=") + std::string(val));
 }
 
@@ -61,14 +60,14 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 		this->add("REQUEST_METHOD", val.c_str());
 	else
 		this->add("REQUEST_METHOD", "GET");
-
-
 	val = conn.header("PATH");
 	if (val.size())
 		this->add("_PATH", val.c_str());
-
-		// extract query string
-	this->add("QUERY_STRING", "g1=get-one&g2=get-two");
+	val = conn.header("QUERY");
+	if (val.size())
+		this->add("QUERY_STRING", val.c_str());
+	else
+		this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
 // (cwd) !!!
 	this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
@@ -76,29 +75,14 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 		// PHP CGI depends on non-standard SCRIPT_FILENAME
 	this->add("SCRIPT_FILENAME", file.c_str()); // (php)
 	
-// php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.  This
-// means that a page will only be served up if the REDIRECT_STATUS CGI variable is set
+// php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
+// This means that a page will only be served up 
+// if the REDIRECT_STATUS CGI variable is set
 	this->add("REDIRECT_STATUS", "1");
-// Python: legacy-cgi
 	this->add("PYTHONPATH", 
 		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
 
-	val = conn.header("Host");
-	if (val.size())
-		this->add("HTTP_HOST", val.c_str());
-	val = conn.header("User-Agent");
-	if (val.size())
-		this->add("HTTP_USER_AGENT", val.c_str());
-	val = conn.header("Accept");
-	if (val.size())
-		this->add("HTTP_ACCEPT", val.c_str());
-		// Accept-Language
-		// Accept-Encoding
-		// Connection
-		// Upgrade-Insecure-Requesets
-		// Sec-Fetch
-	this->add("HTTP_COOKIE", "chocolate chip");
-	
+
 // If the output of a form is being processed, check that CONTENT_TYPE
 // is "application/x-www-form-urlencoded"
 // or "multipart/form-data".
@@ -112,6 +96,29 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 	val = conn.header("Content-length");
 	if (val.size())
 		this->add("CONTENT_LENGTH", val.c_str());
+		
+// In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
+	val = conn.header("Host");
+	if (val.size())
+		this->add("HTTP_HOST", val.c_str());
+	val = conn.header("User-Agent");
+	if (val.size())
+		this->add("HTTP_USER_AGENT", val.c_str());
+	val = conn.header("Accept");
+	if (val.size())
+		this->add("HTTP_ACCEPT", val.c_str());
+	val = conn.header("Accept-Language");
+	if (val.size())
+		this->add("HTTP_ACCEPT_LANGUAGE", val.c_str());
+	val = conn.header("Accept-Encoding");
+	if (val.size())
+		this->add("HTTP_ACCEPT_ENCODING", val.c_str());
+	val = conn.header("Connection");
+	if (val.size())
+		this->add("HTTP_CONNECTION", val.c_str());
+		// Upgrade-Insecure-Requesets
+		// Sec-Fetch
+	this->add("HTTP_COOKIE", "chocolate chip");
 	
 	this->add("REMOTE_ADDR", addr_2_str(&conn.addr).c_str());
 	// this->add("REMOTE_HOST", "remote host");
@@ -121,8 +128,6 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 	this->add("SERVER_PORT", conn.serv.get_port());
 	this->add("SERVER_PROTOCOL", "HTTP/1.1");
 	this->add("SERVER_SOFTWARE", "webserv");
-
-// In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
 
     return (0);
 }

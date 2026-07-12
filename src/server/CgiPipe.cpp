@@ -6,15 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 14:17:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 21:59:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiPipe.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
-
-
 
 cgi_pipes::cgi_pipes (void)
 {
@@ -138,24 +136,21 @@ ssize_t	CgiPipe::pollin(void)
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
 	err = this->recv();
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv");
+		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
-		return (-1); // (?)
+		return (-1);
 	}
-	// even if RECV ZERO (?)
-	// error (?)
-	// state (?)
-	if (this->conn->state < RSRC_HAS_RESP)
-		this->conn->state = RSRC_HAS_RESP;
 		
 	this->conn->ostr.append(this->ibuf, err);
 	this->conn->mod_evt(EPOLLOUT);
+	// this mod pollin -- but !!! that is a SEPARATE CgiPipe
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn->ostr.size());
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
@@ -177,31 +172,12 @@ ssize_t	CgiPipe::pollout(void)
 	// so it knows something is coming 
 	// otherwise we need to CLOSE its INPUT
 	// conn::state (read_data) 
-	
-	// not sure this is the best IPC communication approach
-	// what if (cgi) .. flushes (istr/body)
-	// before conn receives more ...
-	// Content-Length (?)
 
-// conn  : exec cgi
-// conn  : recv
-// conn  : istr: [16228]
-// cgi   : send: [16228]
-// head  : meth: POST
-// cgi   : send: [65368] ff58 -- which we do not HAVE yet 
-// cgi   : sent: [8192] // so .. gotta HOLD that value .. until all sent to CGI
-// gotta keep track of when to re-parse
-// conn  : recv
-// conn  : istr: [16220]
-// cgi   : send: [16220]
-// cgi   : send: [0]
-// cgi   : send: zero
-
+	// rsrc.data_ip
 	if (this->conn->istr.size())
 	{
 		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
 		err = this->send(this->conn->istr);
-
 		if (err < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
@@ -212,6 +188,12 @@ ssize_t	CgiPipe::pollout(void)
 			WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: zero");
 			return (0);
 		}
+		// in principle
+		// BUT : we want to kick in TOGGLE SOONER
+		// BUT : we won't have the error
+		// until we've started to receive
+		if (this->conn->state < RSRC_HAS_RESP)
+			this->conn->state = RSRC_HAS_RESP;
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 		return (0); // keep going
 	}
@@ -220,10 +202,7 @@ ssize_t	CgiPipe::pollout(void)
 	this->mod_evt(0);
 	this->conn->mod_evt(EPOLLOUT);
 	return (0);
-	
-	// ASSUMES : conn::input : is faster than our output 
-	this->conn->mod_evt(EPOLLOUT);
-	return (-1); // EOF : close input to cgi
+
 }
 
 
@@ -243,6 +222,9 @@ int		CgiPipe::hup(void)
 	// YEAH -- conn->cgi_hup() : TEST 
 	// NOT NECESSARILY
 	// CONN_SENT_RESP may not yet have been triggered
+	// on delete .. 
+	// RSRC_COMPLETE -- may have error
+	// check (pid) here (?)
 	this->conn->state = RSRC_BODY_DONE;
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
