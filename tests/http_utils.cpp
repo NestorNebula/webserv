@@ -184,6 +184,24 @@ TEST(decodeURI, InvalidURI) {
 	EXPECT_EQ(decodeURI("/files/empty.txt%%"), "");
 }
 
+TEST(encoreURI, basicURIs) {
+	std::vector<std::string> uris;
+	uris.push_back("/");
+	uris.push_back("/files");
+	uris.push_back("/files/empty.txt");
+	for (std::vector<std::string>::const_iterator it = uris.begin(), ite = uris.end(); it != ite; it++)
+		EXPECT_EQ(encodeURI(*it), *it);
+}
+
+TEST(encodeURI, URIsToEncode) {
+	EXPECT_EQ(encodeURI("/old directory/"), "/old%20directory/");
+	EXPECT_EQ(encodeURI("/C++"), "/C%2B%2B");
+	EXPECT_EQ(encodeURI("/100%"), "/100%25");
+	EXPECT_EQ(encodeURI("/foo#bar"), "/foo%23bar");
+	EXPECT_EQ(encodeURI("/foo?bar"), "/foo%3Fbar");
+	EXPECT_EQ(encodeURI("/foo&bar"), "/foo%26bar");
+}
+
 TEST(normalizeURI, BasicURIs) {
 	std::vector<std::string> uris;
 	uris.push_back("/");
