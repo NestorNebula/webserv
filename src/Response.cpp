@@ -14,7 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 
-void Response::setVersion(std::string version) {
+void Response::setVersion(const std::string &version) {
 	_version = version;
 }
 
@@ -22,11 +22,11 @@ void Response::setCode(StatusCode code) {
 	_code = code;
 }
 
-void Response::setReason(std::string reason) {
+void Response::setReason(const std::string &reason) {
 	_reason = reason;
 }
 
-void Response::addHeader(Header header) {
+void Response::addHeader(const Header &header) {
 	_headers.insert(header);
 }
 
