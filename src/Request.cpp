@@ -128,6 +128,10 @@ void Request::setupBody() {
 		return;
 	}
 	_state = BODY;
+	if (hasHeader("Content-Length") && hasHeader("Transfer-Encoding")) {
+		_state = INVALID;
+		return;
+	}
     if (hasHeader("Content-Length")) {
       bool err;
       _remainingBody = getLong(_headers.find("Content-Length")->second.c_str(),
@@ -136,7 +140,7 @@ void Request::setupBody() {
         _state = INVALID;
 		return;
 	  }
-    } else if (_headers.has("Transfer-Encoding")) {
+    } else if (hasHeader("Transfer-Encoding")) {
 	  if (_headers.find("Transfer-Encoding")->second != "chunked") {
 		  _state = INVALID;
 		  return;
