@@ -86,6 +86,7 @@ void Session::reset() {
 	_request.clear();
 	_response.clear();
 	delete _resource;
+	_resource = NULL;
 
 	_next = RDSOCK;
 }
