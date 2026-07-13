@@ -25,6 +25,7 @@ public:
 		WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
 	}
 	~Session() {
+		delete _resource;
 		WsLog::_(LVL_DBG, TGT_SESS, "Session destructor");
 	}
 
