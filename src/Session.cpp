@@ -259,7 +259,7 @@ void Session::prepareDirectoryResource() {
 	WsLog::_(LVL_INFO, TGT_SESS, "Processing requested Directory: ", _resourcePath);
 	bool indexFound = false;
 	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
-		std::string indexPath = joinPaths(_route->root, *it);
+		std::string indexPath = joinPaths(_resourcePath, *it);
 		if (isAccessibleFile(indexPath)) {
 			_resourcePath = indexPath;
 			indexFound = true;
