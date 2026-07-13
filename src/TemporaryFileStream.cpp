@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "TemporaryFileStream.hpp"
+#include "http_utils.hpp"
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -23,7 +24,8 @@ TemporaryFileStream::TemporaryFileStream() {
 
 TemporaryFileStream::~TemporaryFileStream() {
 	WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream destructor");
-	static_cast<std::fstream *>(_stream)->close();
+	if (_stream)
+		static_cast<std::fstream *>(_stream)->close();
 	WsLog::_(LVL_INFO, TGT_TMP_STRM, "Removing TemporaryFileStream: ", _path);
 	std::remove(_path);
 }
@@ -31,14 +33,18 @@ TemporaryFileStream::~TemporaryFileStream() {
 void TemporaryFileStream::openTmpFile() {
 	while (_stream == NULL) {
 		std::string tmpFilePath = getNextFilePath();
+		if (isExistingFile(tmpFilePath))
+			continue;
 		std::fstream *fstream = new std::fstream();
 		fstream->open(tmpFilePath.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary | std::fstream::trunc);
 		if (fstream->is_open()) {
 			std::strcpy(_path, tmpFilePath.c_str());
 			_stream = fstream;
 		}
-		else
+		else {
 			delete fstream;
+			throw std::runtime_error("Impossible to open temporary file stram");
+		}
 	}
 	std::ostringstream oss;
 	oss << "Opened " << _path << " as TemporaryFileStream";
