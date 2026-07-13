@@ -128,7 +128,7 @@ void Request::setupBody() {
 		return;
 	}
 	_state = BODY;
-    if (_state == BODY && hasHeader("Content-Length")) {
+    if (hasHeader("Content-Length")) {
       bool err;
       _remainingBody = getLong(_headers.find("Content-Length")->second.c_str(),
                                &err, 0, INT_MAX);
@@ -136,8 +136,13 @@ void Request::setupBody() {
         _state = INVALID;
 		return;
 	  }
-    } else
+    } else if (_headers.has("Transfer-Encoding")) {
+	  if (_headers.find("Transfer-Encoding")->second != "chunked") {
+		  _state = INVALID;
+		  return;
+	  }
 		_remainingBody = std::string::npos;
+	}
 	_body = new Stream(new std::stringstream);
 	_hasLargeBody = false;
 	_bodySize = 0;
