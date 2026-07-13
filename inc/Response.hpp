@@ -25,13 +25,13 @@ public:
   }
 
   const std::string &getVersion() const { return _version; }
-  void setVersion(std::string version);
+  void setVersion(const std::string &version);
   StatusCode getCode() const { return _code; }
   void setCode(StatusCode code);
   const std::string &getReason() const { return _reason; }
-  void setReason(std::string reason);
+  void setReason(const std::string &reason);
   const Headers &getHeaders() const { return _headers; }
-  void addHeader(Header header);
+  void addHeader(const Header &header);
   void addHeaders(Headers::const_iterator begin, Headers::const_iterator end);
   const Resource &getResource() const;
   void setResource(Resource *resource);
