@@ -23,7 +23,8 @@ public:
 	}
 	~DirectoryResource() {
 		WsLog::_(LVL_DBG, TGT_DIR_RES, "DirectoryResource destructor for: ", _dirpath);
-		closedir(_dir);
+		if (_dir)
+			closedir(_dir);
 		delete _stream;
 	}
 
