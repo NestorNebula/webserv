@@ -56,6 +56,8 @@ void Request::clear() {
   delete _body;
   _body = NULL;
   _state = EMPTY;
+  _bodySize = 0;
+  _hasLargeBody = false;
 }
 
 void Request::handleStartLine(std::string startLine, std::string::size_type eol) {
