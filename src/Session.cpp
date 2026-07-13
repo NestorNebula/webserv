@@ -315,8 +315,12 @@ void Session::handleDelete() {
 	if (isDirectory(_resourcePath))
 		return setResponseStatus(403);
 	errno = 0;
-	if (std::remove(_resourcePath.c_str()) != 0 && errno == EACCES)
-		return setResponseStatus(403);
+	if (std::remove(_resourcePath.c_str()) != 0) {
+		if (errno == EACCES)
+			return setResponseStatus(403);
+		else
+			return setResponseStatus(500);
+	}
 	WsLog::_(LVL_INFO, TGT_SESS, "File deleted successfully");
 	setResponseStatus(204);
 }
