@@ -17,7 +17,7 @@
 #include <climits>
 #include <sstream>
 
-void Request::append(const std::string data) {
+void Request::append(const std::string &data) {
   if (_state == COMPLETE || _state == INVALID) {
 	WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
