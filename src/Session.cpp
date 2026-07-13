@@ -38,6 +38,11 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 	return count;
 }
 
+const Request &Session::getRequest() const {
+	throwIfNotAction(DOCGI);
+	return _request;
+}
+
 void Session::setCgiResource(Resource *cgiResource) {
 	throwIfNotAction(DOCGI);
 	delete _resource;
