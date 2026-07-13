@@ -31,7 +31,7 @@ public:
   }
 
   // Methods
-  void append(const std::string data);
+  void append(const std::string &data);
   bool isComplete() const { return _state == COMPLETE; }
   bool isInvalid() const { return _state == INVALID; }
   bool hasMethod() const { return _state > START_LINE; }
