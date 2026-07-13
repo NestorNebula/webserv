@@ -122,10 +122,12 @@ TEST(Session, WrongCalls) {
 	EXPECT_EQ(session.nextAction(), Session::RDSOCK);
 	EXPECT_THROW(session.read(buf, BUFSIZE), std::logic_error);
 	EXPECT_THROW(session.reset(), std::logic_error);
+	EXPECT_THROW(session.getRequest(), std::logic_error);
 
 	writeSimpleRequest(session);
 	EXPECT_THROW(session.write("Hello world!\n", 13), std::logic_error);
 	EXPECT_THROW(session.reset(), std::logic_error);
+	EXPECT_THROW(session.getRequest(), std::logic_error);
 
 	session.read(buf, BUFSIZE);
 	EXPECT_EQ(session.nextAction(), Session::KPALIVE);
@@ -133,4 +135,5 @@ TEST(Session, WrongCalls) {
 	EXPECT_THROW(session.read(buf, BUFSIZE), std::logic_error);
 	session.reset();
 	EXPECT_THROW(session.reset(), std::logic_error);
+	EXPECT_THROW(session.getRequest(), std::logic_error);
 }
