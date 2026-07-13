@@ -21,8 +21,10 @@ bool isAllowedMethod(HttpMethod method, RouteConfig &config) {
 
 bool isValidVersion(const std::string &version) {
 	std::string::size_type expectedSize = std::string("HTTP/x.x").size();
-	if (version.size() != expectedSize || version.find("HTTP/") == std::string::npos)
+	if ((version.size() != expectedSize && version.size() != expectedSize - 2) || version.find("HTTP/") != 0)
 		return false;
+	if (version.size() == expectedSize - 2)
+		return version[version.size() - 1] >= '0' && version[version.size() - 1] <= '9';
 	std::string::size_type majorIndex = expectedSize - 3;
 	if (majorIndex == std::string::npos)
 		return false;
