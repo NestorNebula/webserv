@@ -349,8 +349,6 @@ void Session::handleResponse() {
 
 void Session::setResponseHeaders() {
 	WsLog::_(LVL_INFO, TGT_SESS, "Setting Response headers");
-	// TODO
-	// Add missing headers
 	Headers headers;
 
 	// Server
