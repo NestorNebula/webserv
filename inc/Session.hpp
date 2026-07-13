@@ -43,6 +43,8 @@ public:
 	// Write data to the Session Request. Corresponds to RDSOCK Action.
 	Stream::streamsize write(const char *buf, Stream::streamsize count);
 
+	const Request &getRequest() const;
+
 	// Give access to the data of an executed CGI script. Corresponds to DOCGI Action.
 	void setCgiResource(Resource *cgiResource);
 
