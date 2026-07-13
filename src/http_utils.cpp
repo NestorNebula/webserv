@@ -96,23 +96,24 @@ std::string getStatusReason(Response::StatusCode code) {
 	static std::map<int, std::string> reasons;
 
 	if (reasons.empty()) {
-		reasons.insert(std::pair<int, std::string>(200, "OK"));
-		reasons.insert(std::pair<int, std::string>(201, "Created"));
-		reasons.insert(std::pair<int, std::string>(204, "No Content"));
-		reasons.insert(std::pair<int, std::string>(301, "Moved Permanently"));
-		reasons.insert(std::pair<int, std::string>(400, "Bad Request"));
-		reasons.insert(std::pair<int, std::string>(403, "Forbidden"));
-		reasons.insert(std::pair<int, std::string>(404, "Not Found"));
-		reasons.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
-		reasons.insert(std::pair<int, std::string>(408, "Request Timeout"));
-		reasons.insert(std::pair<int, std::string>(413, "Content Too Large"));
-		reasons.insert(std::pair<int, std::string>(431, "Request Header Fields Too Large"));
-		reasons.insert(std::pair<int, std::string>(500, "Internal Server Error"));
-		reasons.insert(std::pair<int, std::string>(501, "Not Implemented"));
-		reasons.insert(std::pair<int, std::string>(505, "HTTP Version Not Supported"));
+		reasons[200] = "OK";
+		reasons[201] = "Created";
+		reasons[204] = "No Content";
+		reasons[301] = "Moved Permanently";
+		reasons[400] = "Bad Request";
+		reasons[403] = "Forbidden";
+		reasons[404] = "Not Found";
+		reasons[405] = "Method Not Allowed";
+		reasons[408] = "Request Timeout";
+		reasons[413] = "Content Too Large";
+		reasons[431] = "Request Header Fields Too Large";
+		reasons[500] = "Internal Server Error";
+		reasons[501] = "Not Implemented";
+		reasons[505] = "HTTP Version Not Supported";
 	}
-	if (reasons.find(code) != reasons.end())
-		return reasons[code];
+	std::map<int, std::string>::const_iterator reason = reasons.find(code);
+	if (reason != reasons.end())
+		return reason->second;
 	return std::string();
 }
 
