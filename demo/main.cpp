@@ -97,6 +97,7 @@ static void setupConfig() {
 	route.methods.clear();
 	route.methods.insert(METHOD_GET);
 	route.methods.insert(METHOD_POST);
+	route.methods.insert(METHOD_DELETE);
 	route.max_body_size = 100 * 1024 * 1024;
 	route.upload = true;
 	route.upload_dir = ".";
