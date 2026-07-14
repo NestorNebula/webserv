@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 22:27:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 14:23:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,15 +88,10 @@ int	EpollClient::event(struct epoll_event *e)
 		if (err < 0) // && state (?)
 			return (err);
 	}	
-		// nothing more to read ...
-		// ... may still need to write (cgi) output (?)
 	if (e->events & EPOLLRDHUP)
 	{
-		// this->hup();
-		// epc->mod_evt(EPOLLOUT);
-		return (-1);
-	} 
-		// cgi : may close with (hup)
+
+	}
 	if (e->events == EPOLLHUP)
 	{
 		this->hup();

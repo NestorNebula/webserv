@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/13 13:54:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 14:35:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,28 +87,20 @@ int	cgi_pipes::dup_io(void)
 	return (err);		
 }
 
+static	void fd_close(int *fd)
+{
+	if (*fd == -1)
+		return;
+	close(*fd);
+	*fd = -1;
+}
+
 void	cgi_pipes::shutdown(void)
 {
-	if (p1[0] != -1)
-	{
-		close(p1[0]);
-		p1[0] = -1;
-	}
-	if (p1[1] != -1)
-	{
-		close(p1[1]);
-		p1[1] = -1;
-	}
-	if (p2[0] != -1)
-	{
-		close(p2[0]);
-		p2[0] = -1;
-	}
-	if (p2[1] != -1)
-	{
-		close(p2[1]);
-		p2[1] = -1;
-	}
+	fd_close(p1);
+	fd_close(p1 + 1);
+	fd_close(p2);
+	fd_close(p2 + 1);
 }
 
 
@@ -148,6 +140,8 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	}
 		
+	// change state of RESOURCE -- to which this belongs
+	
 		// not really .. but gets flow going
 	if (this->conn->state < RSRC_HAS_RESP)
 		this->conn->state = RSRC_HAS_RESP;
@@ -177,6 +171,9 @@ ssize_t	CgiPipe::pollout(void)
 	// otherwise we need to CLOSE its INPUT
 	// conn::state (read_data) 
 
+	// perhaps .. epoll_event data ptr is RESOURCE .. 
+	// or .. just conn .
+	// no longer a distinct client.
 	// rsrc.data_ip
 	if (this->conn->istr.size())
 	{

@@ -13,9 +13,9 @@
 # echo
 # exit 0
 
-# curl -X GET http://127.0.0.1:8080/index.html
-# echo
-# exit 0
+curl -X GET http://127.0.0.1:8080/index.html
+echo
+exit 0
 # curl -X GET http://localhost:8081?a1=one -i
 # echo
 # curl -X POST http://localhost:8082?b2=two -i
@@ -77,10 +77,11 @@
 # NB: (-d) not part of a FORM .. 
 # which is what my test.* files are expecting
 # just .. data (?)
-curl -X POST http://localhost:8081 \
-	-d @files/2k_earth_daymap.jpg
-echo
-exit 0
+# "file upload"
+# curl -X POST http://localhost:8081 \
+# 	-d @files/2k_earth_daymap.jpg
+# echo
+# exit 0
 
 
 # Transfer-Encoding: chunked
