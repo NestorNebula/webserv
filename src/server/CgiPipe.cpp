@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 14:35:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 16:32:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,7 @@ int	cgi_pipes::dup_io(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
 	}
-	
-#if 0
+#if 1 // CGI_STD_ERROR
 	int dnfd = open("/dev/null", O_WRONLY);
 	err = dup2(dnfd, STDERR_FILENO);
 	if (err < 0)
@@ -142,15 +141,18 @@ ssize_t	CgiPipe::pollin(void)
 		
 	// change state of RESOURCE -- to which this belongs
 	
+	// this->state = HAS_DATA
+	// if .. cgi .. is generating data .. 
 		// not really .. but gets flow going
 	if (this->conn->state < RSRC_HAS_RESP)
 		this->conn->state = RSRC_HAS_RESP;
 
+	// rsrc_push_data() .. 
 	this->conn->ostr.append(this->ibuf, err);
 	this->conn->mod_evt(EPOLLOUT); // should not be changing (conn)
 	// this mod pollin -- but !!! that is a SEPARATE CgiPipe
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", conn->ostr.size());
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", this->conn->ostr.size());
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn->ostr);
 	
@@ -164,6 +166,12 @@ ssize_t	CgiPipe::pollout(void)
 		
 	ssize_t	err;
     
+	// conn->sess->req->body
+	// conn->body (1) 
+	// conn->body_part
+	// conn->body_len  (CONTENT_LENGTH, CHUNKED)
+	// conn->body_done
+
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", this->conn->istr.size());
 
 	// cgi : needs to have received CONTENT_LENGTH .. 
@@ -175,7 +183,8 @@ ssize_t	CgiPipe::pollout(void)
 	// or .. just conn .
 	// no longer a distinct client.
 	// rsrc.data_ip
-	if (this->conn->istr.size())
+	// if conn->state = HAS_DATA
+	if (this->conn->istr.size()) // state -- BODY
 	{
 		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
 		err = this->send(this->conn->istr);
@@ -201,8 +210,7 @@ ssize_t	CgiPipe::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 		return (0); // keep going
 	}
-	// hm : Conn should decide when it is done writing
-	// BUT : this may close on cgi fail (?)
+	
 	this->mod_evt(0);
 	this->conn->mod_evt(EPOLLOUT);
 	return (0);

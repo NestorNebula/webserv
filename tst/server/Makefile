@@ -11,7 +11,7 @@ INC_DIR=$(GIT_DIR)/inc
 OBJ_DIR=.obj
 LIB_DIR=.
 
-CFLAGS+=-I $(INC_DIR) 
+CFLAGS+=-I . -I $(INC_DIR) 
 LFLAGS=
 LIBS =
 
@@ -24,6 +24,7 @@ DEFS += -DTEST="$(TEST)"
 endif
 
 FILES = \
+	bridge.cpp \
 	utils/WsLog.cpp \
 	server/EpollClient.cpp \
 	server/Epoll.cpp \

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 14:36:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 16:38:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,22 +35,23 @@ Connection::~Connection()
 	{
 		kill(cgi_pid, SIGKILL);
 		int stat = 0;
-		// int err = 
-		waitpid(cgi_pid, &stat, 0);
+		int err = waitpid(cgi_pid, &stat, 0);
+		if (err < 0)
+			WsLog::_errno(LVL_ERR, TGT_CONN, "waitpid");
 		if (WIFEXITED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "exit: ", WEXITSTATUS(stat));
+			WsLog::_(LVL_DBG, TGT_CONN, "exit: ", WEXITSTATUS(stat));
 		if (WIFSIGNALED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
+			WsLog::_(LVL_DBG, TGT_CONN, "sig : ", WTERMSIG(stat));
 	}
 	
 	if (this->cgi_ip)
 	{
-		this->cgi_ip->conn = NULL;
+		this->cgi_ip->conn_closed();
 		this->cgi_ip->mod_evt(EPOLLIN);
 	}
 	if (this->cgi_op)
 	{
-		this->cgi_op->conn = NULL;
+		this->cgi_op->conn_closed();
 		this->cgi_op->mod_evt(EPOLLOUT);
 	}
 };
@@ -153,20 +154,6 @@ bool	Connection::timeo(time_t now)
 	return (false);
 }
 
-
-unsigned int	chunk_size(std::string & str)
-{
-	unsigned int x;   
-	std::stringstream ss(str);
-	ss >> std::hex >> x;
-	size_t pos = ss.tellg();
-	str.erase(0, pos + 2); // CRLF
-	if (x == 0)
-		str.erase(0, pos + 4); // CRLF CRLF
-
-	return (x);
-}
-
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -186,10 +173,10 @@ ssize_t	Connection::pollin(void)
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-	// sess.push_data()
-
-	// rsrc.data_ip()
-	istr.append(this->ibuf, err);
+	
+	sess.push_data(this->ibuf, err);
+	
+	// istr.append(this->ibuf, err);
 	
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "istr: ", istr.size());
 	
@@ -204,7 +191,6 @@ ssize_t	Connection::pollin(void)
 		
 		head = istr.substr(0, crlf + 4);
 		istr.erase(0, crlf + 4);
-		// parse chunked
 		
 		WsLog::_(LVL_DBG, TGT_HEAD, "head");
 		WsLog::_(LVL_DBG, TGT_HEAD, "****\n", head);
@@ -212,30 +198,12 @@ ssize_t	Connection::pollin(void)
 		// WsLog::_(LVL_DBG, TGT_HEAD, "rest");
 		// WsLog::_(LVL_DBG, TGT_HEAD, "****\n", istr);
 
-		// if chunked,
-		// check first line of body to get chunk_size
-		// Q: Expect:100-continue
 		this->state = CONN_HAS_HEAD;
 		this->req_cnt++;
 
 		// GET : assume nothing more coming
 		// this->mod_evt(-EPOLLIN);
 	}
-#if 0 // test chunked -- do we get another header (?)
-
-		std::string hed_end("\r\n\r\n");
-		
-		size_t	crlf = istr.find(hed_end);
-		if (crlf != std::string::npos)
-		{
-			std::string new_hed = istr.substr(0, crlf + 4);
-
-			WsLog::_(LVL_DBG, TGT_HEAD, "new_hed");
-			// WsLog::_(LVL_DBG, TGT_HEAD, "*******\n", new_hed);
-		}
-#endif
-	// chunked : track ... total received (?)
-	// even : against content-length
 
 	// std::string cont = std::string("HTTP/1.1 100 Continue\r\n\r\n");
 	// this->send(cont);	// ugly : have not checked (pollout)
@@ -246,7 +214,7 @@ ssize_t	Connection::pollin(void)
 
 	if (this->state < CONN_HAS_RSRC)
 	{
-		this->resp = std::string("HTTP/1.1 200 OK\r\n");
+		this->resp = std::string("HTTP/1.1 200 OK\r\n"); // UGLY
 		switch(this->serv.get_port())
 		{
 		case 8080: // (php)
@@ -266,7 +234,7 @@ ssize_t	Connection::pollin(void)
 			this->resp += std::string("\r\n");
 			break;
 		}
-		err = this->exec_cgi(); // (this->head)
+		err = this->exec_cgi(); // (this->head) (sess)
 		if (err < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
@@ -275,23 +243,7 @@ ssize_t	Connection::pollin(void)
 		}
 		this->state = CONN_HAS_RSRC;
 	}
-	
-	
-#if 0 // chunked
-// right for first .. wrong place to look
-// as (cgi) flushes (istr)
-unsigned int cnt = chunk_size(this->istr);
-// WsLog::_(LVL_DBG, TGT_CGI_SEND, "data\n", this->istr.substr(0, 255));
-WsLog::_(LVL_DBG, TGT_CGI_SEND, "chunk: ", cnt);
-// WsLog::_(LVL_DBG, TGT_CGI_SEND, "data\n", this->istr.substr(0, 255));
-// err = this->send(this->istr, cnt); // body
-// this->istr.erase(0, 2); // CRLF
-#endif
-
-
-	// chunked : needs to know when we have reached the end
-	// so we can shutdown (cgi_ip)
-	// "tell" cgi_ip we have data
+	// sess.got data -- more body
 	if (this->cgi_ip)
 	{
 		// if (err < EPC_BUF_SIZ) // all data received (?)
@@ -333,6 +285,7 @@ ssize_t	Connection::pollout(void)
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "EXIT: ", WEXITSTATUS(stat));
 		if (WIFSIGNALED(stat))
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "SIG : ", WTERMSIG(stat));
+		// what .. we were sending .. but then there was an error (?)
 		if (!WIFEXITED(stat) || WEXITSTATUS(stat))
 		{
 			this->state = RSRC_ERROR;
@@ -370,6 +323,10 @@ ssize_t	Connection::pollout(void)
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
 	// rsrc.data
+	
+	// FUCK : cgi may have hung up and deleted itself
+
+	// AND : cgi .. has been sending data (?)
 	if (ostr.size() == 0) // rsrc/state seems like a better check
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
@@ -388,7 +345,7 @@ ssize_t	Connection::pollout(void)
 			// if (WIFSIGNALED(stat))
 			// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sig : ", WTERMSIG(stat));
 
-// Keepalive with chunked transfer encoding
+// Keepalive : with chunked transfer encoding
 
 // Keepalive makes it difficult for the client to determine where one response ends and the next response begins, particularly during pipelined HTTP operation.[11] This is a serious problem when Content-Length cannot be used due to streaming.[12] To solve this problem, HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
 #if KEEP_ALIVE // -- would REQUIRE CONTENT-LENGTH from (cgi)
@@ -493,7 +450,7 @@ int	Connection::exec_cgi(void)
 		switch(this->serv.get_port())
 		{
 		case 8081:
-			path = std::string("/usr/bin/python");
+			path = std::string("/usr/bin/python"); // exec
 			file = std::string("test.py");
 			break;
 		case 8082:
@@ -502,7 +459,7 @@ int	Connection::exec_cgi(void)
 			break;
 		default:
 			path = std::string("/usr/bin/php-cgi"); // HOME : fail better
-			file = std::string("bigfile.php");
+			file = std::string("test.php");
 			break;
 		}
 		
@@ -514,30 +471,18 @@ int	Connection::exec_cgi(void)
 // CHALLENGE
 // terminate long-running script if client closes connection
 		CgiEnv *cgienv = new CgiEnv;
+		// from_req : exec
 		cgienv->from_conn(*this, file);
 
 		const char **envp = cgienv->gen();
 
-		// signal handler (!)
-		// shit : ctrl-c .. leaves (php) RUNNING IN BACKGROUND 
-		// and does not appear to cleanup connection to client 
-
-// maybe, maybe not
-// when client (conn) quits
-// NEED THAT LINK between (conn) and (cgi)
-
-// since it's still running .. that copy of server (port) is STILL OPEN 
-		// signal(SIGINT, SIG_IGN); // (?)
 		signal(SIGINT, SIG_DFL);
-		// dangerous : should monitor their cleanup ..
 		err = execve(args[0], (char* const*) args, (char* const*) envp);
 		
 		pipes.shutdown();
 		delete (cgienv);
 		delete (this->ep); 
-		
-// cgi HUP .. on python exception
-		// bad executable -- how to handle this (?) actually TWICE (?)
+	
 		exit (err);
 	}		
 	
@@ -545,6 +490,8 @@ int	Connection::exec_cgi(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 
+	// cgi resource : needs conn .. 
+	// unless it just uses its "parent" resource 
 	int			cgifd_ip;
 	int			cgifd_op;
 	

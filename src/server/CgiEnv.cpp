@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 14:12:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 15:54:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 	this->add("SCRIPT_NAME", file.c_str());
 		// PHP CGI depends on non-standard SCRIPT_FILENAME
 	this->add("SCRIPT_FILENAME", file.c_str()); // (php)
+
+	
 	
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 

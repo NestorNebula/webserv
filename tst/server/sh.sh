@@ -13,18 +13,19 @@
 # echo
 # exit 0
 
-curl -X GET http://127.0.0.1:8080/index.html
-echo
-exit 0
+# curl -X GET http://127.0.0.1:8080/index.html
+# echo
+# exit 0
 # curl -X GET http://localhost:8081?a1=one -i
 # echo
 # curl -X POST http://localhost:8082?b2=two -i
 # echo
 # exit 0
 
-# curl -X POST 'http://localhost:8080?g1=sig_one&g2=sig_two' \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
+curl -X GET 'http://localhost:8080?g1=sig_one&g2=sig_two' \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
 # curl -X POST http://localhost:8081 \
 # 	 -d "p1=post-one&p2=post-two"
 # echo
@@ -77,7 +78,9 @@ exit 0
 # NB: (-d) not part of a FORM .. 
 # which is what my test.* files are expecting
 # just .. data (?)
+
 # "file upload"
+
 # curl -X POST http://localhost:8081 \
 # 	-d @files/2k_earth_daymap.jpg
 # echo

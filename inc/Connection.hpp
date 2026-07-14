@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 14:22:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 16:28:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include "EpollClient.hpp"
 # include "CgiEnv.hpp"
 
+# include "bridge.hpp"
 // # include <map>
 
 
@@ -65,18 +66,23 @@ public:
 
 // Session
 	void			rem_cgi(CgiPipe *epc);
+
+	Session			sess;
+	
 	std::string		head;
 	std::string		resp;
 	std::string		header(const char *key);
 	
+// Resource
 	pid_t			cgi_pid;
 	CgiPipe			*cgi_ip;
 	CgiPipe			*cgi_op;
 	
-public: // CgiEnv
+public:
 	Server			&serv;
 	std::string		istr;
 	std::string		ostr;
+
 private:
 	int				exec_cgi(void);
 	

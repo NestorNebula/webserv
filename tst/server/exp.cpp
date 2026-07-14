@@ -6,10 +6,10 @@
 
 int main (void)
 {
-	std::string istr("ff58\nThe quick, brown fox jumped over the lazy dogs.\nAnd then decided to eat them.\n0");
+	std::string tstr("ff58\nThe quick, brown fox jumped over the lazy dogs.\nAnd then decided to eat them.\n0");
 
 	unsigned int x;   
-	std::stringstream ss(istr);
+	std::stringstream ss(tstr);
 	ss >> std::hex >> x;
 	
 	size_t pos = ss.tellg();
@@ -27,8 +27,8 @@ int main (void)
 	ss.read(&ext[0], x);
 	std::cerr << "ext " << ext << std::endl;
 
-	istr.erase(0, pos);
-	std::cerr << "str " << istr << std::endl;
+	tstr.erase(0, pos);
+	std::cerr << "str " << tstr << std::endl;
 
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 19:56:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 16:24:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <string>
 # include <vector>
 # include <sstream>
+
+# include "bridge.hpp"
 
 // Utils.hpp
 template <typename T>
@@ -31,9 +33,8 @@ class Connection;
 class CgiEnv
 {
 private:
-	CgiEnv (const CgiEnv & that);
-	CgiEnv & operator = (const CgiEnv & )
-		{ return (*this); }
+	CgiEnv				(const CgiEnv & that);
+	CgiEnv & operator = (const CgiEnv & ) { return (*this); }
 public:
 	CgiEnv (void);
 	~CgiEnv();
