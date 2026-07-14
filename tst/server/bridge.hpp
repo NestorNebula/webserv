@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 16:38:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 19:50:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 # define BRIDGE_HPP
 
 # include <string>
+# include <sstream>
 # include <CgiPipe.hpp>
+# include <WsLog.hpp>
 
 # define REQ_INIT 0
 # define REQ_READ_HEAD 1
@@ -26,39 +28,27 @@
 class Request
 {
 public:
-    Request(void) : state(REQ_INIT) {}
-    
-    std::string head;
-    std::string body;
-    std::string exec;
-    
-    int push_data(const char *buf, size_t siz)
-    {
-        if (this->state < REQ_HAVE_HEAD)
-        {
-            this->head.append(buf, siz);
+	Request(void) : state(REQ_INIT) {}
 
-            std::string hed_end("\r\n\r\n");
-            size_t	crlf = head.find(hed_end);
-            if (crlf == std::string::npos)
-                return (this->state);
-                
-            this->state = REQ_HAVE_HEAD;
-            body = head.substr(crlf + 4);
-            head.erase(crlf + 4);
-            return (this->state);
-        }
-        
-        this->body.append(buf, siz);
-        // body.size() == content-length
-        return (this->state);
-    }
-    
-    std::string header(const char *key);
+	int         push_data(const char *buf, size_t siz);
+	int         init(void);
+	std::string header(const char *key) const;
 
-    int get_state(void) { return this->state; }
+	int         get_state(void) const { return this->state; }
+	std::string &get_body(void) { return this->body; }
+	std::string &get_fext(void) { return this->fext; }
+	
 private:
-    int state;
+	int			state;
+	std::string	head;
+	std::string body;
+	std::string exec;
+
+	std::string meth;
+	std::string path;
+	std::string file;
+	std::string fext;
+	std::string vars;
 };
 
 class Resource
@@ -72,20 +62,23 @@ public:
 class Session
 {
 public:
-    Session(void) {}
-    Request req;
+	Session(void) {}
+	Request     req;
+	Resource    res;
   
-    int push_data(const char *buf, size_t siz)
-    {
-        int err = this->req.push_data(buf, siz);
-        if (err < REQ_HAVE_HEAD)
-            return (err);
-        // have head : make rsrc
-        // conn->exec_cgi()
-        
-        return (err);
-    }
-    int req_state(void) { return this->req.get_state(); }
+	int push_data(const char *buf, size_t siz)
+	{
+		int err = this->req.push_data(buf, siz);
+		if (err < REQ_HAVE_HEAD)
+			return (err);
+		// res.push_data(body)
+		// have head : make rsrc
+		// conn->exec_cgi()
+		// tell (res) data is available
+		
+		return (err);
+	}
+	int req_state(void) { return this->req.get_state(); }
 };
 
 #endif

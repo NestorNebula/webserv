@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 16:32:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 20:59:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ int	cgi_pipes::dup_io(void)
 	if (err < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdin)"));
 	}
 
 	if (p2[1] == -1)
@@ -71,19 +71,30 @@ int	cgi_pipes::dup_io(void)
 	if (err < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdout)"));
 	}
-#if 1 // CGI_STD_ERROR
+	return (err);		
+}
+
+int	cgi_pipes::dup_err(void)
+{
+	int	err;
+	
 	int dnfd = open("/dev/null", O_WRONLY);
+	if (dnfd < 0)
+	{
+		this->shutdown();
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "open (/dev/null)"));
+	}
+
 	err = dup2(dnfd, STDERR_FILENO);
 	if (err < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stderr)"));
 	}
 	close(dnfd);
-#endif
-	return (err);		
+	return (err);
 }
 
 static	void fd_close(int *fd)
@@ -135,26 +146,11 @@ ssize_t	CgiPipe::pollin(void)
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: zero");
+		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ZERO");
 		return (-1);
 	}
-		
-	// change state of RESOURCE -- to which this belongs
-	
-	// this->state = HAS_DATA
-	// if .. cgi .. is generating data .. 
-		// not really .. but gets flow going
-	if (this->conn->state < RSRC_HAS_RESP)
-		this->conn->state = RSRC_HAS_RESP;
-
-	// rsrc_push_data() .. 
-	this->conn->ostr.append(this->ibuf, err);
-	this->conn->mod_evt(EPOLLOUT); // should not be changing (conn)
-	// this mod pollin -- but !!! that is a SEPARATE CgiPipe
-	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", this->conn->ostr.size());
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->conn->ostr);
+	if (this->conn->cgi_out(this->ibuf, err) < 0)
+		return (-1);
 	
 	return (err);
 }
@@ -166,80 +162,42 @@ ssize_t	CgiPipe::pollout(void)
 		
 	ssize_t	err;
     
-	// conn->sess->req->body
-	// conn->body (1) 
-	// conn->body_part
-	// conn->body_len  (CONTENT_LENGTH, CHUNKED)
-	// conn->body_done
-
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", this->conn->istr.size());
-
-	// cgi : needs to have received CONTENT_LENGTH .. 
-	// so it knows something is coming 
-	// otherwise we need to CLOSE its INPUT
-	// conn::state (read_data) 
-
-	// perhaps .. epoll_event data ptr is RESOURCE .. 
-	// or .. just conn .
-	// no longer a distinct client.
-	// rsrc.data_ip
-	// if conn->state = HAS_DATA
-	if (this->conn->istr.size()) // state -- BODY
+	err = this->conn->cgi_inp();
+	if (err < 0)
 	{
-		// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", this->conn->istr);
-		err = this->send(this->conn->istr);
-		if (err < 0)
-		{
-			WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
-			return (err);
-		}
-		if (err == 0)
-		{
-			WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: zero");
-			return (0);
-		}
-		// in principle
-		// BUT : we want to kick in TOGGLE SOONER
-		// BUT : we won't have the error
-		// until we've started to receive
-		// php not generating yet -- 
-		// or .. conn is not FLUSHING
-		// until it knows it can create a header 
-		if (this->conn->state < RSRC_HAS_RESP)
-			this->conn->state = RSRC_HAS_RESP;
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
-		return (0); // keep going
+		// nothing more to send to CGI (stdin)
+		// we may close down
+		return (err);
 	}
-	
-	this->mod_evt(0);
-	this->conn->mod_evt(EPOLLOUT);
-	return (0);
+	if (err == 0)
+	{
+		this->mod_evt(0);
+		return (0);
+	}
 
+	std::string & body = this->conn->sess.req.get_body();
+	
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
+
+	// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", body);
+	err = this->send(body);
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+		return (err);
+	}
+	if (err == 0)
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ZERO");
+		return (0);
+	}
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+	return (0);
 }
 
-
-// cgi::hup .. set conn state DONE 
-// epoll::state (read_data)
-	// has read data from its (fd) 
-	// that is avaiable for processing (in its ibuf)
 int		CgiPipe::hup(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-	// if POLLIN
-		// set_state() could better protect/compare 
-	// check (pid) here (?)
-	// might be (ip) .. which hangs up (when stdin is closed)
-	
-	// YEAH -- conn->cgi_hup() : TEST 
-	// NOT NECESSARILY
-	// CONN_SENT_RESP may not yet have been triggered
-	// on delete .. 
-	// RSRC_COMPLETE -- may have error
-	// check (pid) here (?)
-	// COMPLETE (?)
-	// ERROR (?)
-	this->conn->state = RSRC_BODY_DONE;
-	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }

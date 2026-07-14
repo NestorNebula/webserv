@@ -1,8 +1,6 @@
 <?php
 
-    // header('Content-type: text/plain');
-    echo "\r\n"; // home
-
+    header('Content-type: text/plain');
 
     // print_r($_GET);
     // print_r($_POST);

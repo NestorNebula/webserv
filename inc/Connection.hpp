@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 16:28:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 20:58:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@
 #define CONN_HAS_RSRC 2
 #define RSRC_HAS_RESP 3
 #define CONN_SENT_RESP 4
-#define RSRC_BODY_DONE 5
 #define RSRC_ERROR 6
 
 class Server;
@@ -48,7 +47,7 @@ class CgiPipe;
 class Connection : public EpollClient
 {
 private:
-	Connection (const Connection & that) : EpollClient(that), 
+	Connection				(const Connection & that) : EpollClient(that), 
 		serv(that.serv), req_cnt(0) {}
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
@@ -60,19 +59,19 @@ public:
 	ssize_t			pollin (void);
 	ssize_t			pollout(void);
 	int				hup    (void) { return (0); }
-	bool			timeo  (time_t now);
+	bool			timeo  (time_t now) const;
 	
 	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
 // Session
+	int				cgi_inp(void);
+	int				cgi_out(const char *buf, ssize_t siz);
 	void			rem_cgi(CgiPipe *epc);
 
 	Session			sess;
 	
-	std::string		head;
 	std::string		resp;
-	std::string		header(const char *key);
-	
+
 // Resource
 	pid_t			cgi_pid;
 	CgiPipe			*cgi_ip;
@@ -80,7 +79,6 @@ public:
 	
 public:
 	Server			&serv;
-	std::string		istr;
 	std::string		ostr;
 
 private:

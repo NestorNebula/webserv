@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 14:23:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 20:26:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ ssize_t	EpollClient::recv(void)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: zero");
+		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: ZERO");
 	return (err);
 }
 
@@ -130,7 +130,7 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
 	if (err == 0)
-		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: zero");
+		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ZERO");
 	return (err);
 }
 

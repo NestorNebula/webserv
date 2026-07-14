@@ -22,18 +22,20 @@
 # echo
 # exit 0
 
-curl -X GET 'http://localhost:8080?g1=sig_one&g2=sig_two' \
+curl -X GET 'http://localhost:8080/tst.php?g1=sig_one&g2=sig_two' \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0
-# curl -X POST http://localhost:8081 \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-# curl -X POST http://localhost:8082 \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-# exit 0
 
+curl -X POST http://localhost:8081/test.py \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
+
+curl -X POST http://localhost:8082/test.pl \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 
 # curl -X POST http://localhost:8081 \

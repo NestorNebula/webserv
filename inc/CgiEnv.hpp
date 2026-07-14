@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 16:24:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 18:33:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,18 @@ public:
 	CgiEnv (void);
 	~CgiEnv();
 	
-    int             from_conn(Connection & conn, std::string & file);
+    int             from_conn(Connection & conn);
 	void		    add(const char *key, const char *val);
 	void		    add(const char *key, int n);
 	const char	    **gen(void);
 	
+	const char					*args[3];
 private:
 	std::vector<std::string>	data;
 	const char					**res;
+	
+	std::string					exec;
+	std::string					file;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 21:22:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 20:11:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 	// that a later reattempt at connection succeeds.
 	
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 256
+#  define SERV_BACKLOG 128
 # endif
 
 
@@ -38,8 +38,8 @@ class Connection;
 class Server : public EpollClient
 {
 private:
-	Server (const Server & that) : EpollClient(that) {}
-	Server & operator = (const Server & ) { return (*this); }
+	Server				(const Server & that) : EpollClient(that) {}
+	Server & operator =	(const Server & ) { return (*this); }
 
 public:
 	Server (Epoll *_ep, unsigned short p);
@@ -48,9 +48,9 @@ public:
 	ssize_t				pollin (void);
 	ssize_t				pollout(void);
 	int					hup    (void) { return (0); }
-	bool				timeo  (time_t) { return (false); }
+	bool				timeo  (time_t)	const { return (false); }
 	
-	unsigned short		get_port(void) const { return (this->port); }
+	unsigned short		get_port(void)	const { return (this->port); }
 	
 private:
 	struct sockaddr_in	addr;

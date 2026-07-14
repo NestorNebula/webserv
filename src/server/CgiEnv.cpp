@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 15:54:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/14 19:37:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,37 +46,64 @@ void	CgiEnv::add(const char *key, int n)
 // script-URI = <scheme> "://" <server-name> ":" <server-port>
 //                    <script-path> <extra-path> "?" <query-string>
 		// PATH_TRANSLATED
-	// Maps the script's virtual path to the physical path used to call the script. 
-	// This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
-	// SCRIPT_NAME
-	// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
+// Maps the script's virtual path to the physical path used to call the script. 
+// This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
+// SCRIPT_NAME
+// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
 
-int     CgiEnv::from_conn(Connection & conn, std::string & file)
+int     CgiEnv::from_conn(Connection & conn)
 {
 	std::string val;
 	
-	val = conn.header("METH");
+	Request &req = conn.sess.req;
+
+	val = req.header("METH");
 	if (val.size())
 		this->add("REQUEST_METHOD", val.c_str());
 	else
 		this->add("REQUEST_METHOD", "GET");
-	val = conn.header("PATH");
+
+
+	// (chdir)
+	val = req.header("PATH");
 	if (val.size())
+	{
+		// relative (!)
 		this->add("_PATH", val.c_str());
-	val = conn.header("QUERY");
+		this->add("PATH_INFO", val.c_str());
+	}
+	file = req.header("FILE");
+	if (file.size())
+	{
+		this->add("SCRIPT_NAME", file.c_str());
+			// PHP CGI depends on non-standard SCRIPT_FILENAME
+		this->add("SCRIPT_FILENAME", file.c_str());	
+	}
+	else
+		return (-1);
+	
+	std::string &fext = req.get_fext();
+	if (fext == std::string("php"))
+		exec = std::string("/usr/bin/php-cgi"); 
+	else if (fext == std::string("py"))
+		exec = std::string("/usr/bin/python"); 
+	else if (fext == std::string("pl"))
+		exec = std::string("/usr/bin/perl"); 
+	else
+		return (-1);
+
+	this->args[0] = this->exec.c_str();
+	this->args[1] = file.c_str();
+	this->args[2] = NULL;
+	
+	
+	val = req.header("VARS");
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
 	else
 		this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
-// (cwd) !!!
-	this->add("PATH_INFO", "path info"); // added to PHP_SELF (?)
-	this->add("SCRIPT_NAME", file.c_str());
-		// PHP CGI depends on non-standard SCRIPT_FILENAME
-	this->add("SCRIPT_FILENAME", file.c_str()); // (php)
-
-	
-	
+		
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
@@ -92,30 +119,30 @@ int     CgiEnv::from_conn(Connection & conn, std::string & file)
 // with a 415 'Unsupported Media Type' error, where supported by the
 // protocol.
 
-	val = conn.header("Content-type");
+	val = req.header("Content-type");
 	if (val.size())
 		this->add("CONTENT_TYPE", val.c_str());
-	val = conn.header("Content-length");
+	val = req.header("Content-length");
 	if (val.size())
 		this->add("CONTENT_LENGTH", val.c_str());
 		
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
-	val = conn.header("Host");
+	val = req.header("Host");
 	if (val.size())
 		this->add("HTTP_HOST", val.c_str());
-	val = conn.header("User-Agent");
+	val = req.header("User-Agent");
 	if (val.size())
 		this->add("HTTP_USER_AGENT", val.c_str());
-	val = conn.header("Accept");
+	val = req.header("Accept");
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());
-	val = conn.header("Accept-Language");
+	val = req.header("Accept-Language");
 	if (val.size())
 		this->add("HTTP_ACCEPT_LANGUAGE", val.c_str());
-	val = conn.header("Accept-Encoding");
+	val = req.header("Accept-Encoding");
 	if (val.size())
 		this->add("HTTP_ACCEPT_ENCODING", val.c_str());
-	val = conn.header("Connection");
+	val = req.header("Connection");
 	if (val.size())
 		this->add("HTTP_CONNECTION", val.c_str());
 		// Upgrade-Insecure-Requesets
