@@ -298,19 +298,20 @@ void Session::handleUpload() {
 		return setResponseStatus(500);
 	Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
 	WsLog::_(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
-	if (bodyStream && *bodyStream) {
+	if (bodyStream) {
 		char buf[BUFSIZE];
 		while (bodyStream->read(buf, BUFSIZE))
 			ofs.write(buf, bodyStream->gcount());
 		if (bodyStream->eof() && bodyStream->gcount())
 			ofs.write(buf, bodyStream->gcount());
-	}
-	ofs.close();
-	if ((bodyStream && !bodyStream->eof()) || !ofs) {
+		if (!bodyStream->eof() || !ofs) {
 			WsLog::_(LVL_ERR, TGT_SESS, "Error during file upload, aborting");
+			ofs.close();
 			std::remove(uploadFile.c_str());
 			return setResponseStatus(500);
+		}
 	}
+	ofs.close();
 	WsLog::_(LVL_INFO, TGT_SESS, "File uploaded successfully");
 	setResponseStatus(201);
 }
