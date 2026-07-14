@@ -20,20 +20,20 @@ bool isAllowedMethod(HttpMethod method, RouteConfig &config) {
 }
 
 bool isValidVersion(const std::string &version) {
-	std::string::size_type expectedSize = std::string("HTTP/x.x").size();
-	if ((version.size() != expectedSize && version.size() != expectedSize - 2) || version.find("HTTP/") != 0)
+	static const std::string prefix("HTTP/");
+
+	if (version.size() <= prefix.size() || version.compare(0, prefix.size(), prefix) != 0)
 		return false;
-	if (version.size() == expectedSize - 2)
-		return version[version.size() - 1] >= '0' && version[version.size() - 1] <= '9';
-	std::string::size_type majorIndex = expectedSize - 3;
-	if (majorIndex == std::string::npos)
+	std::string::size_type i = prefix.size();
+	if (!std::isdigit(static_cast<unsigned char>(version[i])))
 		return false;
-	unsigned char ma = version[majorIndex], mi = version[majorIndex + 2];
-	if ((ma < '0' || ma > '9')
-			|| version[majorIndex + 1] != '.'
-			|| (mi < '0' || mi > '9'))
+	if (version.size() == i + 1)
+		return true;
+	++i;
+	if (version.size() != i + 2 || version[i] != '.')
 		return false;
-	return true;
+	++i;
+	return std::isdigit(static_cast<unsigned char>(version[i]));
 }
 
 RouteConfig *findBestRoute(const std::string &url, ServerConfig &config) {
