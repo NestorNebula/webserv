@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 22:28:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/13 13:54:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,8 @@ int		CgiPipe::hup(void)
 	// on delete .. 
 	// RSRC_COMPLETE -- may have error
 	// check (pid) here (?)
+	// COMPLETE (?)
+	// ERROR (?)
 	this->conn->state = RSRC_BODY_DONE;
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);

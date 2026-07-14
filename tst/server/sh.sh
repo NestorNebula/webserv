@@ -13,25 +13,25 @@
 # echo
 # exit 0
 
-curl -X GET http://127.0.0.1:8080/index.html
-echo
-exit 0
+# curl -X GET http://127.0.0.1:8080/index.html
+# echo
+# exit 0
 # curl -X GET http://localhost:8081?a1=one -i
 # echo
 # curl -X POST http://localhost:8082?b2=two -i
 # echo
 # exit 0
 
-curl -X POST 'http://localhost:8080?g1=sig_one&g2=sig_two' -i \
-	 -d "p1=post-one&p2=post-two"
-echo
-curl -X POST http://localhost:8081 \
-	 -d "p1=post-one&p2=post-two"
-echo
-curl -X POST http://localhost:8082 \
-	 -d "p1=post-one&p2=post-two"
-echo
-exit 0
+# curl -X POST 'http://localhost:8080?g1=sig_one&g2=sig_two' \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# curl -X POST http://localhost:8081 \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# curl -X POST http://localhost:8082 \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# exit 0
 
 
 
@@ -43,7 +43,7 @@ exit 0
 
 	# multipart/form-data
 
-# curl -X POST http://localhost:8082 \
+# curl -X POST http://localhost:8081 \
 # 	-F p1=post-one \
 # 	-F p2=post-two \
 # 	-F file=@files/2k_earth_daymap.jpg
@@ -72,11 +72,15 @@ exit 0
 	# NB : not a FORM
 	# Content-Type: application/x-www-form-urlencoded
 
-# curl -X POST http://localhost:8080 \
-# 	-H "Transfer-Encoding: chunked" \
-# 	-d @files/2k_earth_daymap.jpg
-# echo
-# exit 0
+	# -H "Transfer-Encoding: chunked" \
+
+# NB: (-d) not part of a FORM .. 
+# which is what my test.* files are expecting
+# just .. data (?)
+curl -X POST http://localhost:8081 \
+	-d @files/2k_earth_daymap.jpg
+echo
+exit 0
 
 
 # Transfer-Encoding: chunked

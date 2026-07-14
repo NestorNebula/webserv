@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 22:28:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/13 13:42:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,7 +255,7 @@ ssize_t	Connection::pollin(void)
 			this->resp += std::string("Content-Length: 734\r\n");
 			this->resp += std::string("Connection: Keep-Alive\r\n");
 #else
-			this->resp = std::string("HTTP/1.1 200 OK\r\n");
+			// this->resp = std::string("HTTP/1.1 200 OK\r\n");
 #endif			
 			break;
 		default:
@@ -338,7 +338,8 @@ ssize_t	Connection::pollout(void)
 		{
 			this->state = RSRC_ERROR;
 			// something to send 
-			this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\n");
+			this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\nError");
+			this->state = RSRC_HAS_RESP;
 		}
 	}
 	
@@ -499,8 +500,8 @@ int	Connection::exec_cgi(void)
 			file = std::string("test.pl");
 			break;
 		default:
-			path = std::string("/usr/bin/php-cgi"); // HOME : fail better
-			file = std::string("bigfile.php");
+			path = std::string("/usr/bin/php"); // HOME : fail better
+			file = std::string("test.php");
 			break;
 		}
 		
