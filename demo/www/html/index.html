@@ -3,9 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index Page</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <title>Webserv</title>
   </head>
+
   <body>
-    <div>Hello world!</div>
+    <header>
+      <h1>WEBSERV</h1>
+      <p>Demonstration Website</p>
+      <p>for our HTTP server</p>
+    </header>
+    <main>
+      <section id="index-section">
+        <p>Explore static files, redirections, error pages and much more...</p>
+        <ul class="links-list">
+          <li>
+            <a class="request" href="about.html">
+              <p class="method">GET</p>
+              <p>/about.html</p>
+              <p>Learn more about the project</p>
+            </a>
+          </li>
+          <li>
+            <a class="request" href="contact.html">
+              <p class="method">GET</p>
+              <p>/contact.html</p>
+              <p>Send us a message</p>
+            </a>
+          </li>
+          <li>
+            <a class="request" href="unknown.html">
+              <p class="method">GET</p>
+              <p>/unknown.html</p>
+              <p>Trigger a 404 error</p>
+            </a>
+          </li>
+          <li>
+            <a class="request" href="/old">
+              <p class="method">GET</p>
+              <p>/old</p>
+              <p>Use an HTTP redirection</p>
+            </a>
+          </li>
+          <li>
+            <a class="request" href="/uploads/">
+              <p class="method">GET</p>
+              <p>/uploads/</p>
+              <p>List all uploaded files</p>
+            </a>
+          </li>
+          <li>
+            <a class="request" href="/messages/">
+              <p class="method">GET</p>
+              <p>/messages/</p>
+              <p>List all uploaded messages</p>
+            </a>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>
+      <a
+        href="https://github.com/NestorNebula/webserv"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img id="gh-icon" src="/assets/icons/github.svg" alt="GitHub" />
+      </a>
+      <div>2026</div>
+    </footer>
   </body>
 </html>
