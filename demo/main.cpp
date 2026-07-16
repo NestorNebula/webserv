@@ -80,8 +80,8 @@ static void setupConfig() {
 
 	route = RouteConfig();
 	routeFromServer(route);
-	route.path = "/images";
-	route.root = "./www/images";
+	route.path = "/assets";
+	route.root = "./www/assets";
 	config.routes.push_back(route);
 
 	route = RouteConfig();
