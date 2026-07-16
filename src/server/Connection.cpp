@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:59:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 11:57:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ ssize_t	Connection::pollin(void)
 			// SEND RESP (!)
 			this->error = 501;
 			this->mod_evt(-EPOLLIN);
+			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
 		this->state = CONN_HAS_RSRC; // but body might not be done 
@@ -135,8 +136,19 @@ ssize_t	Connection::pollout(void)
 	{
 		// set (resp)
 		this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\nError");
+
+		// which may be an error .. page 
+		err = this->send(this->resp); 
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
+		if (this->resp.size())
+			return (err);
+		this->state = CONN_SENT_RESP;
+		return (-1);
+		
+		// and SEND NOW 
 	}
 
+	// rsrc died by errror .. and we need to send it 
 	if (this->state < CONN_HAS_RSRC)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no rsrc");
@@ -155,6 +167,9 @@ ssize_t	Connection::pollout(void)
 	if (!this->cgi_ip && !this->cgi_op)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: cgi DONE");
+
+// BUT : we may have some data to send
+// AND : we may not yet have sent RESP
 		int stat = 0;
 		err = waitpid(cgi_pid, &stat, 0);
 		if (WIFEXITED(stat))
@@ -326,6 +341,16 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes");
 
+	CgiEnv *cgienv = new CgiEnv;
+	err = cgienv->from_conn(*this);
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_CGI, "cgienv: FAIL");
+		// pipes.shutdown();
+		delete (cgienv);
+		return (-1);
+	}
+		
 	this->cgi_pid = fork();
 	if (cgi_pid < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
@@ -339,15 +364,8 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		CgiEnv *cgienv = new CgiEnv;
-		err = cgienv->from_conn(*this);
-		if (err < 0)
-		{
-			pipes.shutdown();
-			delete (cgienv);
-			delete (this->ep); 
-			exit(1);
-		}
+		// so .. before (fork)
+		// so we can send back error (?)
 
 		const char **envp = cgienv->gen();
 
@@ -361,6 +379,7 @@ int	Connection::exec_cgi(void)
 	
 		exit (err);
 	}		
+	delete (cgienv);
 	
 	// this->rsrc = new ResourceCgi(this, &pipes);
 	

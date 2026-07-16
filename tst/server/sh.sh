@@ -22,7 +22,7 @@
 # echo
 # exit 0
 
-curl -X GET 'http://localhost:8080/tst.php?g1=sig_one&g2=sig_two' \
+curl -X GET 'http://localhost:8080/?g1=sig_one&g2=sig_two' \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:26:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/15 12:18:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,10 @@ void	Epoll::cleanup()
 	this->clients.clear();
 	
 	if (this->epfd != -1)
+	{
 		close(this->epfd);
+		this->epfd = -1;
+	}
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);

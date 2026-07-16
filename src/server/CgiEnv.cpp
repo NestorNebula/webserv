@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 19:37:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 11:57:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,18 +80,24 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add("SCRIPT_FILENAME", file.c_str());	
 	}
 	else
+	{
+		// WOW : fucks up SERVER .. 
+		// ERROR
 		return (-1);
+	}
 	
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
-		exec = std::string("/usr/bin/php-cgi"); 
+		exec = std::string("/usr/bin/php"); // -cgi"); 
 	else if (fext == std::string("py"))
 		exec = std::string("/usr/bin/python"); 
 	else if (fext == std::string("pl"))
 		exec = std::string("/usr/bin/perl"); 
 	else
+	{
+		// ERROR
 		return (-1);
-
+	}
 	this->args[0] = this->exec.c_str();
 	this->args[1] = file.c_str();
 	this->args[2] = NULL;

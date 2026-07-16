@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:59:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 11:45:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,10 +171,14 @@ ssize_t	CgiPipe::pollout(void)
 	}
 	if (err == 0)
 	{
+
+		// why is (Server) getting killed (?)
+		// WsLog::_(LVL_ERR, TGT_CGI_SEND, "send: no input");
 		this->mod_evt(0);
 		return (0);
 	}
 
+	// rsrc.has_input
 	std::string & body = this->conn->sess.req.get_body();
 	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
