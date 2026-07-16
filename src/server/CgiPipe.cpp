@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 11:45:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 20:43:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,9 +131,11 @@ CgiPipe::~CgiPipe()
 
 ssize_t	CgiPipe::pollin(void)
 {
+	
 	if (this->conn == NULL)
 		return (-1);
 		
+	// sess->active() -- state -- alive, no error
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
@@ -149,6 +151,7 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ZERO");
 		return (-1);
 	}
+	// sess.push_op_data()
 	if (this->conn->cgi_out(this->ibuf, err) < 0)
 		return (-1);
 	
@@ -159,20 +162,24 @@ ssize_t	CgiPipe::pollout(void)
 {
 	if (this->conn == NULL)
 		return (-1);
+	// sess->active()
+	// sess->has_input_data() [ POST ]
+	if (this->conn->cgi_status()) // done .. error 
+		return (-1);
 		
 	ssize_t	err;
     
-	err = this->conn->cgi_inp();
+	// rsrc.has_body_to_send_to_cgi
+	// sess.has_input()
+	err = this->conn->cgi_inp(); // part of cgi_status
 	if (err < 0)
 	{
 		// nothing more to send to CGI (stdin)
 		// we may close down
-		return (err);
+		return (-1);
 	}
 	if (err == 0)
 	{
-
-		// why is (Server) getting killed (?)
 		// WsLog::_(LVL_ERR, TGT_CGI_SEND, "send: no input");
 		this->mod_evt(0);
 		return (0);

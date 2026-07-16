@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 11:57:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 21:24:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,17 +31,23 @@ Connection::~Connection()
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 
 	// Resource .. Session
+	// sess->close()
 	if (this->cgi_ip || this->cgi_op)
 	{
 		kill(cgi_pid, SIGKILL);
-		int stat = 0;
+		
+		int stat = -1;
 		int err = waitpid(cgi_pid, &stat, 0);
+		WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
+		WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
 		if (err < 0)
 			WsLog::_errno(LVL_ERR, TGT_CONN, "waitpid");
 		if (WIFEXITED(stat))
 			WsLog::_(LVL_DBG, TGT_CONN, "exit: ", WEXITSTATUS(stat));
 		if (WIFSIGNALED(stat))
 			WsLog::_(LVL_DBG, TGT_CONN, "sig : ", WTERMSIG(stat));
+		// what is the point of capturing exit status here ..
+		// connection is dying
 	}
 	
 	if (this->cgi_ip)
@@ -57,7 +63,34 @@ Connection::~Connection()
 };
 
 
-
+int	Connection::cgi_status(void)
+{
+	// if (cgi_stat >= 0)
+		// DONE
+	if (cgi_pid == 0)
+		return (0);
+	if (cgi_ip == NULL && cgi_op == NULL)
+		return (0);
+	int stat = -1;
+	int err = waitpid(cgi_pid, &stat, WNOHANG);
+	WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
+	WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
+	if (err == 0)
+		return (0);
+	if (err < 0)
+		WsLog::_errno(LVL_ERR, TGT_CONN, "waitpid");
+	if (WIFEXITED(stat))
+	{
+		WsLog::_(LVL_DBG, TGT_CONN, "exit: ", WEXITSTATUS(stat));
+		return (1);
+	}
+	if (WIFSIGNALED(stat))
+	{
+		WsLog::_(LVL_DBG, TGT_CONN, "sig : ", WTERMSIG(stat));
+		return (1);
+	}
+	return (0);
+}
 
 #define CONN_TIMEO 5
 
@@ -69,14 +102,18 @@ bool	Connection::timeo(time_t now) const
 	if (now < this->lact)
 		return (false);
 	if ((this->lact + CONN_TIMEO) < now)
+	{
+		// 408 Request Timeout -- set error code 
 		return (true);
-	// 408 Request Timeout -- set error code 
+	}
 	return (false);
 }
 
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
+
+	// sess.status()
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
 	err = this->recv();
@@ -85,9 +122,8 @@ ssize_t	Connection::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
 		return (err);
 	}
-	if (err == 0)
+	if (err == 0) // often with evt typ : in rdhup
 	{
-		// often with evt typ : in rdhup
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ZERO");
 		return (-1);
 	}
@@ -100,19 +136,19 @@ ssize_t	Connection::pollin(void)
 		
 	if (this->state < CONN_HAS_RSRC)
 	{
-		err = this->exec_cgi();
-		if (err < 0)
+		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
-			// SEND RESP (!)
-			this->error = 501;
+			this->error = 501; // session (?)
 			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
 		this->state = CONN_HAS_RSRC; // but body might not be done 
 	}
-	
+	// rsrc.input_data_available
+	// in sess.push_data()
+	// sess .. knows about rsrcCgi .. 
 	if (this->cgi_ip)
 		this->cgi_ip->mod_evt(EPOLLOUT);
 	return (err);
@@ -130,11 +166,12 @@ ssize_t	Connection::pollout(void)
 	ssize_t	err = 0;
 
 	// check_state
-
+	// sess.get_state()
 	// rsrc.get_state()
 	if (this->error)
 	{
 		// set (resp)
+		// or .. rsrc .. prepares this (?)
 		this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\nError");
 
 		// which may be an error .. page 
@@ -164,14 +201,23 @@ ssize_t	Connection::pollout(void)
 	// which we could have gotten .. 
 	// when the second got (rem_cgi)
 	// or .. EPOLLERR
+
+	// rsrc.state()
+	
+	// sess.check_state() -- could have tested (cgi) for errors
 	if (!this->cgi_ip && !this->cgi_op)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: cgi DONE");
 
 // BUT : we may have some data to send
 // AND : we may not yet have sent RESP
+// track cgi_status .. so we only do this once 
 		int stat = 0;
 		err = waitpid(cgi_pid, &stat, 0);
+		
+
+		WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
+		WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
 		if (WIFEXITED(stat))
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "EXIT: ", WEXITSTATUS(stat));
 		if (WIFSIGNALED(stat))
@@ -199,6 +245,7 @@ ssize_t	Connection::pollout(void)
 	if (this->state < CONN_SENT_RESP) 
 	{
 		// which may be an error .. page 
+		// resp : is built -- and sent bit-by-bit
 		err = this->send(this->resp); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
 		if (this->resp.size())
@@ -209,10 +256,13 @@ ssize_t	Connection::pollout(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
+
+	// rsrc.complete
 	if (ostr.size() == 0) // rsrc/state seems like a better check
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
 
+// UGLY
 		if (this->cgi_op == NULL) // complete
 		{
 
@@ -288,6 +338,7 @@ ssize_t	Connection::pollout(void)
 
 int	Connection::cgi_inp(void)
 {
+	// cgi_valid (?)
 	if (this->sess.req.get_body().size())
 		return (1);
 	// if (req) has NOT received full body
@@ -298,6 +349,8 @@ int	Connection::cgi_inp(void)
 	// return (-1);
 }
 
+// rsrc.odata()
+// sess
 int	Connection::cgi_out(const char *buf, ssize_t siz)
 {
 	if (this->state < RSRC_HAS_RESP)
@@ -329,18 +382,21 @@ void	Connection::rem_cgi(CgiPipe *epc)
 		this->cgi_op = NULL;
 		this->mod_evt(EPOLLOUT);
 	}
-	// both deleted .. check (exit) status (?) for error (?)
+	// if both null -- check status
 }
 
 
+// this->sess.rsrsc = new ResourceCgi(this);
 int	Connection::exec_cgi(void)
 {
 	int			err;
 	cgi_pipes	pipes;
 
 	if (pipes.init() < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes");
+		// this->set_err()
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 
+	// or : post-fork .. and .. error is detected .. elsewhere (?)
 	CgiEnv *cgienv = new CgiEnv;
 	err = cgienv->from_conn(*this);
 	if (err < 0)
@@ -353,19 +409,21 @@ int	Connection::exec_cgi(void)
 		
 	this->cgi_pid = fork();
 	if (cgi_pid < 0)
+	{
+		// pipes.shutdown();
+		delete (cgienv);
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
-		
+	}	
 	if (cgi_pid == 0)
 	{
 		err = pipes.dup_io();
 		if (err < 0)
 		{
 			pipes.shutdown();
+			delete (cgienv);
 			delete (this->ep);
 			exit(1);
 		}
-		// so .. before (fork)
-		// so we can send back error (?)
 
 		const char **envp = cgienv->gen();
 
@@ -380,8 +438,6 @@ int	Connection::exec_cgi(void)
 		exit (err);
 	}		
 	delete (cgienv);
-	
-	// this->rsrc = new ResourceCgi(this, &pipes);
 	
 	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 

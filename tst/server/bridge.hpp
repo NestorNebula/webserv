@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/15 12:03:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 20:29:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,9 @@ public:
 	
 private:
 	int			state;
+	
 	std::string	head;
-	std::string body;
+	std::string body; // sess.ip_data
 	std::string exec;
 
 	std::string meth;
@@ -55,6 +56,13 @@ private:
 class Resource
 {
 public:
+
+	std::string	ostr;
+};
+
+class ResourceCgi : public Resource
+{
+public:
 	pid_t			cgi_pid;
 	CgiPipe			*cgi_ip;
 	CgiPipe			*cgi_op;
@@ -63,9 +71,14 @@ public:
 class Session
 {
 public:
-	Session(void) {}
+	Session(void) : res(NULL) {}
+	~Session()
+	{
+		if (this->res)
+			delete (this->res);
+	}
 	Request     req;
-	Resource    res;
+	Resource    *res;
   
 	int push_data(const char *buf, size_t siz)
 	{

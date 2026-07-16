@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:58:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 20:49:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@
 class Server;
 class CgiPipe;
 
+
+
 class Connection : public EpollClient
 {
 private:
@@ -63,9 +65,10 @@ public:
 	
 	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
-// Session
+// Session/Resource
 	int				cgi_inp(void);
 	int				cgi_out(const char *buf, ssize_t siz);
+	int				cgi_status(void);
 	void			rem_cgi(CgiPipe *epc);
 
 	Session			sess;
