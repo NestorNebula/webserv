@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 20:49:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 23:45:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,20 @@ class CgiPipe;
 
 
 
+class ResourceCgi
+{
+public:
+	ResourceCgi(void) : stat(-1), pid(0), ip(NULL), op(NULL) {}
+	
+	int				stat;
+	pid_t			pid;
+	CgiPipe			*ip;
+	CgiPipe			*op;
+
+	int	status(void) { return (0); }
+	
+};
+
 class Connection : public EpollClient
 {
 private:
@@ -65,16 +79,14 @@ public:
 	
 	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
+	Session			sess;
+	std::string		resp;
+	
 // Session/Resource
 	int				cgi_inp(void);
 	int				cgi_out(const char *buf, ssize_t siz);
 	int				cgi_status(void);
 	void			rem_cgi(CgiPipe *epc);
-
-	Session			sess;
-	
-	std::string		resp;
-
 // Resource
 	pid_t			cgi_pid;
 	CgiPipe			*cgi_ip;
@@ -82,7 +94,6 @@ public:
 	
 public:
 	Server			&serv;
-	std::string		ostr;
 
 private:
 	int				exec_cgi(void);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 21:24:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 23:45:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ Connection::~Connection()
 
 	// Resource .. Session
 	// sess->close()
+	// rsrc.active()
+
+	// delete (ResourceCgi) ? 
 	if (this->cgi_ip || this->cgi_op)
 	{
 		kill(cgi_pid, SIGKILL);
@@ -63,6 +66,8 @@ Connection::~Connection()
 };
 
 
+// session::status()
+// resource::status()
 int	Connection::cgi_status(void)
 {
 	// if (cgi_stat >= 0)
@@ -70,7 +75,7 @@ int	Connection::cgi_status(void)
 	if (cgi_pid == 0)
 		return (0);
 	if (cgi_ip == NULL && cgi_op == NULL)
-		return (0);
+		return (0); // hm : assume done (?) don't think so
 	int stat = -1;
 	int err = waitpid(cgi_pid, &stat, WNOHANG);
 	WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
@@ -130,6 +135,8 @@ ssize_t	Connection::pollin(void)
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
+	// sess.write_data()
+	// set some 
 	int req_state = sess.push_data(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
@@ -258,9 +265,10 @@ ssize_t	Connection::pollout(void)
 
 
 	// rsrc.complete
-	if (ostr.size() == 0) // rsrc/state seems like a better check
+	std::string & odata = sess.read_data();
+	if (odata.size() == 0) // rsrc/state seems like a better check
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: odata.size() == 0");
 
 // UGLY
 		if (this->cgi_op == NULL) // complete
@@ -291,7 +299,7 @@ ssize_t	Connection::pollout(void)
 
 
 	
-	err = this->send(ostr);
+	err = this->send(odata);
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CONN_SEND, "send");
@@ -304,8 +312,8 @@ ssize_t	Connection::pollout(void)
 	}
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	if (ostr.size())
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", ostr.size());
+	if (odata.size())
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", odata.size());
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
 
@@ -336,6 +344,7 @@ ssize_t	Connection::pollout(void)
 
 // sess.rsrc_cgi
 
+// sess.has_input
 int	Connection::cgi_inp(void)
 {
 	// cgi_valid (?)
@@ -351,6 +360,7 @@ int	Connection::cgi_inp(void)
 
 // rsrc.odata()
 // sess
+// resource .. fills some output_buffer in session
 int	Connection::cgi_out(const char *buf, ssize_t siz)
 {
 	if (this->state < RSRC_HAS_RESP)
@@ -361,12 +371,13 @@ int	Connection::cgi_out(const char *buf, ssize_t siz)
 		this->resp = std::string("HTTP/1.1 200 OK\r\n");
 		this->state = RSRC_HAS_RESP;
 	}
-	this->ostr.append(buf, siz);
+	std::string & odata = this->sess.read_data();
+	odata.append(buf, siz);
 	this->mod_evt(EPOLLOUT);
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", this->ostr.size());
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", this->ostr);
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "odata: ", odata.size());
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "odata");
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", odata);
 	return (0);
 }
 
@@ -439,8 +450,10 @@ int	Connection::exec_cgi(void)
 	}		
 	delete (cgienv);
 	
+// fcntl .. F_SETFD .. O_CLOEXEC
 	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 
+	// ResourceCgi::init(conn, pipes, ep)
 	int cgifd_ip = dup(pipes.p1[1]);
 	if (cgifd_ip < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 20:29:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 23:29:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,17 +57,10 @@ class Resource
 {
 public:
 
-	std::string	ostr;
 };
 
-class ResourceCgi : public Resource
-{
-public:
-	pid_t			cgi_pid;
-	CgiPipe			*cgi_ip;
-	CgiPipe			*cgi_op;
-};
 
+// Session:fill_i/o .. or .. Request::fill_io
 class Session
 {
 public:
@@ -79,7 +72,9 @@ public:
 	}
 	Request     req;
 	Resource    *res;
+	std::string	ostr;
   
+	// fill_input
 	int push_data(const char *buf, size_t siz)
 	{
 		int err = this->req.push_data(buf, siz);
@@ -92,6 +87,8 @@ public:
 		
 		return (err);
 	}
+	
+	std::string & read_data(void) { return (this->ostr); }
 	int req_state(void) { return this->req.get_state(); }
 };
 

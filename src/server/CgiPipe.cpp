@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 20:43:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/16 23:41:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,12 @@ cgi_pipes::~cgi_pipes()
 
 int	cgi_pipes::init(void)
 {
-	int	err;
-	
-	err = pipe(p1);
-	if (err < 0)
+	if (pipe(p1) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
 	}
-	err = pipe(p2);
-	if (err < 0)
+	if (pipe(p2) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
@@ -48,15 +44,12 @@ int	cgi_pipes::init(void)
 
 int	cgi_pipes::dup_io(void)
 {
-	int	err;
-
 	if (p1[0] == -1)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
 	}
-	err = dup2(p1[0], STDIN_FILENO);
-	if (err < 0)
+	if (dup2(p1[0], STDIN_FILENO) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdin)"));
@@ -67,19 +60,16 @@ int	cgi_pipes::dup_io(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
 	}
-	err = dup2(p2[1], STDOUT_FILENO);
-	if (err < 0)
+	if (dup2(p2[1], STDOUT_FILENO) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdout)"));
 	}
-	return (err);		
+	return (0);		
 }
 
 int	cgi_pipes::dup_err(void)
 {
-	int	err;
-	
 	int dnfd = open("/dev/null", O_WRONLY);
 	if (dnfd < 0)
 	{
@@ -87,14 +77,13 @@ int	cgi_pipes::dup_err(void)
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "open (/dev/null)"));
 	}
 
-	err = dup2(dnfd, STDERR_FILENO);
-	if (err < 0)
+	if (dup2(dnfd, STDERR_FILENO) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stderr)"));
 	}
 	close(dnfd);
-	return (err);
+	return (0);
 }
 
 static	void fd_close(int *fd)
@@ -131,7 +120,7 @@ CgiPipe::~CgiPipe()
 
 ssize_t	CgiPipe::pollin(void)
 {
-	
+	// sess ..
 	if (this->conn == NULL)
 		return (-1);
 		
@@ -152,6 +141,7 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	}
 	// sess.push_op_data()
+	// rsrc.add_data()
 	if (this->conn->cgi_out(this->ibuf, err) < 0)
 		return (-1);
 	
