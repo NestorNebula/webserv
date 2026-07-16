@@ -76,6 +76,8 @@ h6 {
 	--foreground: #1c1c1c;
 	--http-color: #16db65;
 	--badge-color: #240046;
+	--success-color: var(--http-color);
+	--error-color: #a31621;
 }
 
 button {
@@ -286,4 +288,17 @@ footer {
 .input-container>input:focus,
 .input-container>textarea:focus {
 	border: 4px solid var(--badge-color);
+}
+
+#result {
+	font-style: italic;
+	font-size: 2rem;
+}
+
+#result:not(.error) {
+	color: var(--success-color);
+}
+
+#result.error {
+	color: var(--error-color);
 }
