@@ -65,7 +65,7 @@ std::string joinPaths(const std::string &prefix, const std::string &suffix) {
 }
 
 bool isExistingFile(const std::string &path) {
-	return access(path.c_str(), F_OK) == 0;
+	return isAccessibleFile(path);
 }
 
 bool isDirectory(const std::string &path) {
@@ -90,8 +90,8 @@ bool isCgi(const std::string &path, RouteConfig &config) {
 	return cgi;
 }
 
-bool isAccessibleFile(const std::string &path) {
-	return access(path.c_str(), R_OK) == 0;
+bool isAccessibleFile(const std::string &path, int accessMode) {
+	return access(path.c_str(), accessMode) == 0;
 }
 
 std::string getStatusReason(Response::StatusCode code) {
