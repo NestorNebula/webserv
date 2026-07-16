@@ -187,7 +187,7 @@ void Session::resolveResource() {
 void Session::validateOperation() {
 	if (_response.getCode()) return;
 	if (_next == DOCGI) {
-		if (!isAccessibleFile(_resourcePath))
+		if (!isAccessibleFile(_resourcePath, X_OK))
 			return setResponseStatus(403);
 		return;
 	}
@@ -199,7 +199,7 @@ void Session::validateOperation() {
 	}
 	if (!isExistingFile(_resourcePath))
 		return setResponseStatus(404);
-	if (!isAccessibleFile(_resourcePath))
+	if (!isAccessibleFile(_resourcePath, R_OK))
 		return setResponseStatus(403);
 	WsLog::_(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
 }
@@ -253,7 +253,7 @@ void Session::prepareErrorResource() {
 	std::map<std::string, std::string> errPages = !_route ? _server.error_pages : _route->error_pages;
 	std::string codeStr = toString(_response.getCode());
 	std::string errPage = joinPaths(_server.root, errPages.find(codeStr) != errPages.end() ? errPages[codeStr] : errPages["default"]);
-	if (!isAccessibleFile(errPage))
+	if (!isAccessibleFile(errPage, R_OK))
 		errPage = joinPaths(_server.root, errPages["default"]);
 	delete _resource;
 	WsLog::_(LVL_INFO, TGT_SESS, "Generating Error page Resource using ", errPage);
@@ -266,7 +266,7 @@ void Session::prepareDirectoryResource() {
 	bool indexFound = false;
 	for (std::vector<std::string>::const_iterator it = _route->index.begin(), ite = _route->index.end(); it != ite && !indexFound; it++) {
 		std::string indexPath = joinPaths(_resourcePath, *it);
-		if (isAccessibleFile(indexPath)) {
+		if (isAccessibleFile(indexPath, R_OK)) {
 			_resourcePath = indexPath;
 			indexFound = true;
 		}
