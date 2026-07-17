@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 11:46:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 12:32:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,9 @@ Connection::~Connection()
 // resource::status()
 int	ResourceCgi::status(int opt)
 {
+
+	WsLog::_(LVL_DBG, TGT_CONN, "stat: ", this->stat);
+	WsLog::_(LVL_DBG, TGT_CONN, "pid : ", this->pid);
 	if (this->stat != -1)
 		return (this->stat);
 	if (this->pid == 0)
