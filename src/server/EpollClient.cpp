@@ -92,7 +92,7 @@ int	EpollClient::event(struct epoll_event *e)
 	{
 
 	}
-	if (e->events == EPOLLHUP)
+	if (e->events & EPOLLHUP)
 	{
 		this->hup();
 		return (-1);
