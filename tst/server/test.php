@@ -17,8 +17,8 @@
     print("g2 : " . $g2 . PHP_EOL);
 
     print("\nPOST VARS\n");
-    $p1 = $_POST['p1'];
-    $p2 = $_POST['p2'];
+    $p1 = $_POST['p1'] ?? 'p1-default';
+    $p2 = $_POST['p2'] ?? 'p2-default';
 
     print("p1 : " . $p1 . PHP_EOL);
     print("p2 : " . $p2 . PHP_EOL);
