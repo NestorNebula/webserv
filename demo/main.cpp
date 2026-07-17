@@ -1,3 +1,4 @@
+#include "ConfigParser.hpp"
 #include "Session.hpp"
 #include <fstream>
 #include <iostream>
@@ -16,10 +17,6 @@ ServerConfig config;
 
 static bool setWorkingDirectory(const std::string &path);
 
-static void setupConfig();
-
-static void routeFromServer(RouteConfig &route);
-
 static void demoRequest(char *requestFile);
 
 int main (int argc, char *argv[]) {
@@ -32,7 +29,9 @@ int main (int argc, char *argv[]) {
 		std::cerr << "couldn't setup working directory.\n";
 		return 0;
 	}
-	setupConfig();
+	ConfigParser parser;
+	parser.parseFile("config.conf");
+	config = parser.getServers()[0];
 
 	for (int i = 1; i < argc; i++) {
 		demoRequest(argv[i]);
@@ -48,81 +47,6 @@ static bool setWorkingDirectory(const std::string &path) {
 		return true;
 	std::string directory = path.substr(0, lastSlash);
 	return chdir(directory.c_str()) == 0;
-}
-
-static void setupConfig() {
-	config.host = "127.0.0.1";
-	config.port = 8080;
-	config.error_pages["default"] = "./errors/default.html";
-	config.error_pages["404"] = "./errors/404.html";
-	config.max_body_size = 1 * (1024 * 1024);
-	config.root = "./";
-	config.methods.insert(METHOD_GET);
-
-	RouteConfig route;
-	routeFromServer(route);
-	route.path = "/";
-	route.root = "./www/html";
-	route.index.push_back("index.html");
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/css";
-	route.root = "./www/css";
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/js";
-	route.root = "./www/js";
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/assets";
-	route.root = "./www/assets";
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/old";
-	route.redirect = "/";
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/uploads";
-	route.root = "./uploads";
-	route.methods.clear();
-	route.methods.insert(METHOD_GET);
-	route.methods.insert(METHOD_POST);
-	route.methods.insert(METHOD_DELETE);
-	route.max_body_size = 100 * 1024 * 1024;
-	route.upload = true;
-	route.upload_dir = ".";
-	route.autoindex = true;
-	config.routes.push_back(route);
-
-	route = RouteConfig();
-	routeFromServer(route);
-	route.path = "/cgi";
-	route.root = "./cgi";
-	route.cgi[".php"] = "/usr/bin/php-cgi";
-	route.cgi[".py"] = "/usr/bin/python3";
-	config.routes.push_back(route);
-}
-
-static void routeFromServer(RouteConfig &route) {
-	route.root = config.root;
-	route.upload = config.upload;
-	route.upload_dir = config.upload_dir;
-	route.max_body_size = config.max_body_size;
-	route.methods = config.methods;
-	route.index = config.index;
-	route.error_pages = config.error_pages;
-
-	route.autoindex = false;
 }
 
 static void demoRequest(char *requestFile) {
