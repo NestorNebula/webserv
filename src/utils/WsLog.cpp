@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/10 10:34:16 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/17 13:26:07 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ static const std::string tgt_str[] =
     "serv  : ",
     "main  : ",
 	"cfg   : "
+    "head  : "
 };
 
 static const std::string &tgt_prefix(log_tgt tgt)
@@ -43,14 +44,17 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[6]);
 	if (tgt & TGT_PARSING)
 		return (tgt_str[7]);
+    if (tgt & TGT_HEAD)
+        return (tgt_str[7]);
 
     return (tgt_str[0]);
 }
 
-
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
     if ((msg_lvl & WsLog::lvl) == LVL_ERR)
+        return (false);
+    if ((msg_lvl & WsLog::lvl) == LVL_INFO)
         return (false);
     if ((msg_lvl & WsLog::lvl) && (msg_tgt & WsLog::tgt))
         return (false);
@@ -62,15 +66,21 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     if (WsLog::nolog(msg_lvl, msg_tgt))
         return;
 
-    std::cerr << tgt_prefix(msg_tgt) << msg << std::endl;
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << msg << std::endl;
+    std::cerr << stream.str();
+
 }
 
-void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, int n)
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
 {
     if (WsLog::nolog(msg_lvl, msg_tgt))
         return;
 
-    std::cerr << tgt_prefix(msg_tgt) << msg << "[" << n << "]" << std::endl;
+    std::stringstream stream;
+    stream<< tgt_prefix(msg_tgt) << msg << "[" << n << "]" << std::endl;
+    std::cerr << stream.str();
+
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str)
@@ -78,21 +88,31 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string 
     if (WsLog::nolog(msg_lvl, msg_tgt))
         return;
 
-    std::cerr << tgt_prefix(msg_tgt) << msg << str << std::endl;
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << msg << str << std::endl;
+    std::cerr << stream.str();
+
 }
 
-void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, int n)
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
 {
     if (WsLog::nolog(msg_lvl, msg_tgt))
         return;
 
-    std::cerr << tgt_prefix(msg_tgt) << n << std::endl;
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << n << std::endl;
+    std::cerr << stream.str();
+
 }
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
     (void) msg_lvl;
-    std::cerr << tgt_prefix(msg_tgt) << msg << std::endl;
-    std::cerr << "error : " << strerror(errno) << std::endl;
+
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << msg << std::endl;
+    stream << "error : " << strerror(errno) << std::endl;
+    std::cerr << stream.str();
+
     return (-1);
 }
