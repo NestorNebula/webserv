@@ -9,8 +9,8 @@
 
     print("PHP : hello, world!\n");  
 
-    $g1 = $_GET['g1'];
-    $g2 = $_GET['g2'];
+    $g1 = $_GET['g1'] ?? 'g1-default';
+    $g2 = $_GET['g2'] ?? 'g2-default';
 
     print("\nGET VARS\n");
     print("g1 : " . $g1 . PHP_EOL);
