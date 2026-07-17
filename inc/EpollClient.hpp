@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:26:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 10:30:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ public:
 	virtual ssize_t	pollin (void) = 0;
 	virtual ssize_t pollout(void) = 0;
 	virtual int		hup    (void) = 0;
-	virtual bool	timeo  (time_t) const { return (false); }
+	virtual bool	timeo  (time_t) { return (false); }
 
 	int				ini_evt(int e);
 	int				mod_evt(int e);
@@ -77,11 +77,7 @@ protected:
 	int					fd;
 	struct epoll_event	evt;
 	time_t				lact;
-
-public:
 	int					error;
-	
-public:
     char            	ibuf[EPC_BUF_SIZ];
 };
 

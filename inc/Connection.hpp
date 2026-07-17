@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 23:45:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 11:39:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,19 @@ class Server;
 class CgiPipe;
 
 
-
 class ResourceCgi
 {
 public:
-	ResourceCgi(void) : stat(-1), pid(0), ip(NULL), op(NULL) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1) {}
+	~ResourceCgi();
 	
-	int				stat;
 	pid_t			pid;
 	CgiPipe			*ip;
 	CgiPipe			*op;
+	int				stat;
 
-	int	status(void) { return (0); }
+	int				status(int opt);
+	void			rem(CgiPipe *epc);
 	
 };
 
@@ -67,6 +68,7 @@ private:
 		serv(that.serv), req_cnt(0) {}
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
+		
 public:
 	
 	Connection (Epoll *_ep, int _fd, Server &_serv);
@@ -75,8 +77,9 @@ public:
 	ssize_t			pollin (void);
 	ssize_t			pollout(void);
 	int				hup    (void) { return (0); }
-	bool			timeo  (time_t now) const;
+	bool			timeo  (time_t now);
 	
+	void			set_err(int e);
 	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
 	Session			sess;
@@ -85,13 +88,18 @@ public:
 // Session/Resource
 	int				cgi_inp(void);
 	int				cgi_out(const char *buf, ssize_t siz);
-	int				cgi_status(void);
-	void			rem_cgi(CgiPipe *epc);
-// Resource
-	pid_t			cgi_pid;
-	CgiPipe			*cgi_ip;
-	CgiPipe			*cgi_op;
 	
+
+	ResourceCgi		cgi;
+// 	int				cgi_status(void);
+// 	void			rem_cgi(CgiPipe *epc);
+// // Resource
+// 	pid_t			cgi_pid;
+// 	CgiPipe			*cgi_ip;
+// 	CgiPipe			*cgi_op;
+	
+
+
 public:
 	Server			&serv;
 

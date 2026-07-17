@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/15 12:18:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 11:40:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static void sigint_handler(int signo)
 {
     (void)signo;
 	
-	WsLog::_(LVL_ERR, TGT_EPOLL, "");
+	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
 
 	// *** CGI CLEANUP ***

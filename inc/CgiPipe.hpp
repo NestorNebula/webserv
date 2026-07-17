@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 20:46:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 10:17:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ public:
 	ssize_t		pollin (void);
 	ssize_t		pollout(void);
 	int			hup    (void);
-	bool		timeo  (time_t) const { return (false); }
+	bool		timeo  (time_t) { return (false); }
 
 	void		conn_closed(void) { this->conn = NULL; }
 

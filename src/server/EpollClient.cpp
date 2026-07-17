@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:26:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 10:20:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 	ep(_ep),
 	typ(_typ), 
 	fd(_fd), 
-	lact(0), 
+	lact(0),
 	error(0)
 {
 	evt.events = 0;

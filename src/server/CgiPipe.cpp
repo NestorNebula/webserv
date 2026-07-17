@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 23:41:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 11:41:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,8 +114,8 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn) :
 CgiPipe::~CgiPipe()
 {
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
-	if (this->conn)
-		this->conn->rem_cgi(this);
+	if (this->conn) // RSRC
+		this->conn->cgi.rem(this);
 }
 
 ssize_t	CgiPipe::pollin(void)
@@ -154,7 +154,7 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 	// sess->active()
 	// sess->has_input_data() [ POST ]
-	if (this->conn->cgi_status()) // done .. error 
+	if (this->conn->cgi.status(WNOHANG) >= 0) // RSRC done .. error 
 		return (-1);
 		
 	ssize_t	err;
