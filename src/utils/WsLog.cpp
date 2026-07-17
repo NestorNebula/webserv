@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 13:26:07 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/17 13:27:38 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ static const std::string tgt_str[] =
     "cgi   : ",
     "serv  : ",
     "main  : ",
+    "head  : ",
 	"cfg   : "
-    "head  : "
 };
 
 static const std::string &tgt_prefix(log_tgt tgt)
@@ -42,10 +42,10 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[5]);
     if (tgt & TGT_MAIN)
         return (tgt_str[6]);
-	if (tgt & TGT_PARSING)
-		return (tgt_str[7]);
-    if (tgt & TGT_HEAD)
+	if (tgt & TGT_HEAD)
         return (tgt_str[7]);
+	if (tgt & TGT_PARSING)
+		return (tgt_str[8]);
 
     return (tgt_str[0]);
 }
