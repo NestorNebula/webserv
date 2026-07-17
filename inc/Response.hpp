@@ -20,8 +20,8 @@ class Response {
 public:
   typedef unsigned int StatusCode;
 
-  Response(Resource *resource = NULL): _code(0), _resource(resource) {
-	  WsLog::_(LVL_DBG, TGT_RESP, "Response constructor");
+  Response(Resource *resource = NULL) : _code(0), _resource(resource) {
+    WsLog::_(LVL_DBG, TGT_RESP, "Response constructor");
   }
 
   const std::string &getVersion() const { return _version; }
@@ -43,7 +43,7 @@ public:
 
   bool isReady() const;
   bool hasBody() const;
-  
+
   void clear();
 
 private:

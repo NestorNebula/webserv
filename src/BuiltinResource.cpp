@@ -18,13 +18,14 @@ void BuiltinResource::generate() {
 
   if (_state != DEFAULT)
     throw std::logic_error("generate called multiple times");
-  WsLog::_(LVL_INFO, TGT_BUI_RES, "Generating BuiltinResource for code ", _code);
+  WsLog::_(LVL_INFO, TGT_BUI_RES, "Generating BuiltinResource for code ",
+           _code);
   _stream = new Stream(new std::stringstream());
   buildHTMLFromCode();
   if (_state == DEFAULT)
     _state = _stream->good() ? DONE : FAIL;
   if (_state != DONE)
-	  WsLog::_(LVL_WARN, TGT_BUI_RES, "BuiltinResource error for code ", _code);
+    WsLog::_(LVL_WARN, TGT_BUI_RES, "BuiltinResource error for code ", _code);
 }
 
 Stream &BuiltinResource::stream() {
@@ -46,11 +47,12 @@ void BuiltinResource::buildHTMLFromCode() {
     div << "The resource has been moved permanently.";
     break;
   default:
-	// Unreachable case. Small easter egg for debugging.
+    // Unreachable case. Small easter egg for debugging.
     _code = 418;
     reason = "I'm a teapot";
-	_state = FAIL;
-	WsLog::_(LVL_ERR, TGT_BUI_RES, "BuiltinResource called with wrong code, teapot found");
+    _state = FAIL;
+    WsLog::_(LVL_ERR, TGT_BUI_RES,
+             "BuiltinResource called with wrong code, teapot found");
     break;
   }
   div << "</div>\n";

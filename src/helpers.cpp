@@ -18,7 +18,7 @@
 
 std::string trim(std::string s, std::string set, bool beg, bool end) {
   if (s.empty())
-	  return s;
+    return s;
   std::string::size_type startIndex, endIndex;
   startIndex = beg ? s.find_first_not_of(set) : 0;
   endIndex = end ? s.find_last_not_of(set) : s.size() - 1;
@@ -59,37 +59,38 @@ long getLong(const std::string &s, bool *err, long min, long max, int base,
 }
 
 std::vector<std::string> split(const std::string &s, const std::string set) {
-	std::vector<std::string> splitStr;
-	std::string tmp;
+  std::vector<std::string> splitStr;
+  std::string tmp;
 
-	for (std::string::const_iterator it = s.begin(), ite = s.end(); it != ite; it++) {
-		if (set.find(*it) == std::string::npos)
-			tmp.push_back(*it);
-		else if (!tmp.empty()) {
-			splitStr.push_back(tmp);
-			tmp.clear();
-		}
-	}
-	if (!tmp.empty())
-		splitStr.push_back(tmp);
-	return splitStr;
+  for (std::string::const_iterator it = s.begin(), ite = s.end(); it != ite;
+       it++) {
+    if (set.find(*it) == std::string::npos)
+      tmp.push_back(*it);
+    else if (!tmp.empty()) {
+      splitStr.push_back(tmp);
+      tmp.clear();
+    }
+  }
+  if (!tmp.empty())
+    splitStr.push_back(tmp);
+  return splitStr;
 }
 
 std::string getDate() {
-	std::time_t time = std::time(NULL);
-	return (getDate(time));
+  std::time_t time = std::time(NULL);
+  return (getDate(time));
 }
 
 std::string getDate(std::time_t time) {
-	std::tm *tm = std::gmtime(&time);
-	if (tm == NULL)
-		return std::string();
-	return getDate(tm);
+  std::tm *tm = std::gmtime(&time);
+  if (tm == NULL)
+    return std::string();
+  return getDate(tm);
 }
 std::string getDate(std::tm *tm) {
-	if (tm == NULL)
-		return std::string();
-	char buf[30];
-	std::strftime(buf, 30, "%a, %d %b %Y %H:%M:%S GMT", tm);
-	return std::string(buf);
+  if (tm == NULL)
+    return std::string();
+  char buf[30];
+  std::strftime(buf, 30, "%a, %d %b %Y %H:%M:%S GMT", tm);
+  return std::string(buf);
 }
