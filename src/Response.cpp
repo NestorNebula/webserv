@@ -14,79 +14,69 @@
 #include <sstream>
 #include <stdexcept>
 
-void Response::setVersion(const std::string &version) {
-	_version = version;
-}
+void Response::setVersion(const std::string &version) { _version = version; }
 
-void Response::setCode(StatusCode code) {
-	_code = code;
-}
+void Response::setCode(StatusCode code) { _code = code; }
 
-void Response::setReason(const std::string &reason) {
-	_reason = reason;
-}
+void Response::setReason(const std::string &reason) { _reason = reason; }
 
-void Response::addHeader(const Header &header) {
-	_headers.insert(header);
-}
+void Response::addHeader(const Header &header) { _headers.insert(header); }
 
-void Response::addHeaders(Headers::const_iterator begin, Headers::const_iterator end) {
-	while (begin != end)
-		_headers.insert(*begin++);
+void Response::addHeaders(Headers::const_iterator begin,
+                          Headers::const_iterator end) {
+  while (begin != end)
+    _headers.insert(*begin++);
 }
 
 const Resource &Response::getResource() const {
-	if (_resource == NULL)
-		throw std::logic_error("No resource available");
-	return *_resource;
+  if (_resource == NULL)
+    throw std::logic_error("No resource available");
+  return *_resource;
 }
 
-void Response::setResource(Resource *resource) {
-	_resource = resource;
-}
+void Response::setResource(Resource *resource) { _resource = resource; }
 
 std::string Response::getHead() const {
-	std::ostringstream oss;
+  std::ostringstream oss;
 
-	throwIfNotReady();
-	oss << _version << " " << _code << " " << _reason << "\r\n";
-	oss << _headers.str() << "\r\n";
-	WsLog::_(LVL_INFO, TGT_RESP, "Response forwarding head");
-	return oss.str();
+  throwIfNotReady();
+  oss << _version << " " << _code << " " << _reason << "\r\n";
+  oss << _headers.str() << "\r\n";
+  WsLog::_(LVL_INFO, TGT_RESP, "Response forwarding head");
+  return oss.str();
 }
 
 Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
-	throwIfNotReady();
-	if (!hasBody())
-		throw std::logic_error("Response does not have body");
+  throwIfNotReady();
+  if (!hasBody())
+    throw std::logic_error("Response does not have body");
 
-	_resource->stream().read(buf, bufsize);
-	if (!_resource->stream() && !_resource->stream().eof())
-		return -1;
-	Stream::streamsize readCount = _resource->stream().gcount();
-	std::ostringstream oss;
-	oss << "Response forwarding " << readCount << " bytes of body";
-	WsLog::_(LVL_INFO, TGT_RESP, oss.str());
-	return readCount;
+  _resource->stream().read(buf, bufsize);
+  if (!_resource->stream() && !_resource->stream().eof())
+    return -1;
+  Stream::streamsize readCount = _resource->stream().gcount();
+  std::ostringstream oss;
+  oss << "Response forwarding " << readCount << " bytes of body";
+  WsLog::_(LVL_INFO, TGT_RESP, oss.str());
+  return readCount;
 }
 
 bool Response::isReady() const {
-	return !_version.empty() && _code && !_reason.empty() && (!_resource || hasBody());
+  return !_version.empty() && _code && !_reason.empty() &&
+         (!_resource || hasBody());
 }
 
-bool Response::hasBody() const {
-	return _resource && _resource->done();
-}
+bool Response::hasBody() const { return _resource && _resource->done(); }
 
 void Response::clear() {
-	_version.clear();
-	_code = 0;
-	_reason.clear();
-	_headers.clear();
-	_resource = NULL;
+  _version.clear();
+  _code = 0;
+  _reason.clear();
+  _headers.clear();
+  _resource = NULL;
 }
 
 void Response::throwIfNotReady() const {
-	if (!isReady())
-		throw std::logic_error("Response not in readable state");
+  if (!isReady())
+    throw std::logic_error("Response not in readable state");
 }

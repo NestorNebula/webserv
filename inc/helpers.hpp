@@ -18,7 +18,8 @@
 #include <string>
 #include <vector>
 
-std::string trim(std::string s, std::string set, bool beg = true, bool end = true);
+std::string trim(std::string s, std::string set, bool beg = true,
+                 bool end = true);
 
 void capitalize(std::string &s);
 std::string capitalize(const std::string &s);
@@ -30,21 +31,22 @@ std::vector<std::string> split(const std::string &s, const std::string set);
 
 template <typename Container>
 std::string join(Container container, const std::string &sep = ", ") {
-	std::string joined;
+  std::string joined;
 
-	for (typename Container::const_iterator it = container.begin(), ite = container.end(); it != ite; it++) {
-		joined += *it;
-		if (it + 1 != ite)
-			joined += sep;
-	}
-	return joined;
+  for (typename Container::const_iterator it = container.begin(),
+                                          ite = container.end();
+       it != ite; it++) {
+    joined += *it;
+    if (it + 1 != ite)
+      joined += sep;
+  }
+  return joined;
 }
 
-template <typename T>
-std::string toString(T t) {
-	std::ostringstream oss;
-	oss << t;
-	return oss.str();
+template <typename T> std::string toString(T t) {
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
 }
 
 std::string getDate();

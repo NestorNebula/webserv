@@ -19,14 +19,15 @@
 
 void Request::append(const std::string &data) {
   if (_state == COMPLETE || _state == INVALID) {
-	WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
+    WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
   }
   WsLog::_(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));
-	std::string line = (eol != std::string::npos) ? _raw.substr(0, eol + 2) : _raw;
+    std::string line =
+        (eol != std::string::npos) ? _raw.substr(0, eol + 2) : _raw;
     switch (_state) {
     case EMPTY:
     case START_LINE:
@@ -42,7 +43,7 @@ void Request::append(const std::string &data) {
       return;
     }
     if (eol == std::string::npos)
-		break;
+      break;
   }
 }
 
@@ -60,14 +61,16 @@ void Request::clear() {
   _hasLargeBody = false;
 }
 
-void Request::handleStartLine(std::string startLine, std::string::size_type eol) {
+void Request::handleStartLine(std::string startLine,
+                              std::string::size_type eol) {
   if (_state == EMPTY)
     _state = START_LINE;
   if (eol == std::string::npos)
     return;
   std::istringstream iss(trim(startLine, " \t\r\n"));
   std::string methodStr;
-  if (!(iss >> methodStr) || !(iss >> _url) || !(iss >> _version) || !iss.eof()) {
+  if (!(iss >> methodStr) || !(iss >> _url) || !(iss >> _version) ||
+      !iss.eof()) {
     _state = INVALID;
     return;
   }
@@ -79,13 +82,13 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
   }
   std::string decoded = decodeURI(_url);
   if (decoded.empty() || decoded[0] != '/') {
-	  _state = INVALID;
-	  return;
+    _state = INVALID;
+    return;
   }
   std::string normalized = normalizeURI(decoded);
   if (normalized.empty()) {
-	  _state = INVALID;
-	  return;
+    _state = INVALID;
+    return;
   }
   _url = normalized;
   _state = HEADERS;
@@ -93,19 +96,21 @@ void Request::handleStartLine(std::string startLine, std::string::size_type eol)
 }
 
 void Request::setMethod(const std::string &method) {
-	static const std::string methods[] = {"GET", "POST", "DELETE", ""};
+  static const std::string methods[] = {"GET", "POST", "DELETE", ""};
 
-	int i = 0;
-	while (!methods[i].empty() && method != methods[i]) i++;
-	_method = static_cast<HttpMethod>(i);
+  int i = 0;
+  while (!methods[i].empty() && method != methods[i])
+    i++;
+  _method = static_cast<HttpMethod>(i);
 }
 
-void Request::handleHeaderLine(std::string headerLine, std::string::size_type eol) {
+void Request::handleHeaderLine(std::string headerLine,
+                               std::string::size_type eol) {
   if (eol == std::string::npos)
     return;
   if (headerLine == "\r\n") {
-	_raw.erase(0, 2);
-	setupBody();
+    _raw.erase(0, 2);
+    setupBody();
     return;
   }
   std::string::size_type sep = headerLine.find(":");
@@ -125,56 +130,57 @@ void Request::handleHeaderLine(std::string headerLine, std::string::size_type eo
 }
 
 void Request::setupBody() {
-	if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
-		_state = COMPLETE;
-		return;
-	}
-	_state = BODY;
-	if (hasHeader("Content-Length") && hasHeader("Transfer-Encoding")) {
-		_state = INVALID;
-		return;
-	}
-    if (hasHeader("Content-Length")) {
-      bool err;
-      _remainingBody = getLong(_headers.find("Content-Length")->second.c_str(),
-                               &err, 0, INT_MAX);
-      if (err) {
-        _state = INVALID;
-		return;
-	  }
-    } else if (hasHeader("Transfer-Encoding")) {
-	  if (_headers.find("Transfer-Encoding")->second != "chunked") {
-		  _state = INVALID;
-		  return;
-	  }
-		_remainingBody = std::string::npos;
-	}
-	_body = new Stream(new std::stringstream);
-	_hasLargeBody = false;
-	_bodySize = 0;
+  if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
+    _state = COMPLETE;
+    return;
+  }
+  _state = BODY;
+  if (hasHeader("Content-Length") && hasHeader("Transfer-Encoding")) {
+    _state = INVALID;
+    return;
+  }
+  if (hasHeader("Content-Length")) {
+    bool err;
+    _remainingBody = getLong(_headers.find("Content-Length")->second.c_str(),
+                             &err, 0, INT_MAX);
+    if (err) {
+      _state = INVALID;
+      return;
+    }
+  } else if (hasHeader("Transfer-Encoding")) {
+    if (_headers.find("Transfer-Encoding")->second != "chunked") {
+      _state = INVALID;
+      return;
+    }
+    _remainingBody = std::string::npos;
+  }
+  _body = new Stream(new std::stringstream);
+  _hasLargeBody = false;
+  _bodySize = 0;
 }
 
 void Request::handleBody(std::string body, std::string::size_type eol) {
-	if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
-		TemporaryFileStream *bodyFile = new TemporaryFileStream();
-		*bodyFile << _body->rdbuf();
-		delete _body;
-		_body = bodyFile;
-		_hasLargeBody = true;
-	}
+  if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
+    TemporaryFileStream *bodyFile = new TemporaryFileStream();
+    *bodyFile << _body->rdbuf();
+    delete _body;
+    _body = bodyFile;
+    _hasLargeBody = true;
+  }
   if (_headers.has("Content-Length")) {
     if (body.size() > _remainingBody) {
       _state = INVALID;
       return;
     }
     *_body << body;
-	_bodySize += body.size();
+    _bodySize += body.size();
     _remainingBody -= body.size();
     if (_remainingBody == 0) {
       _state = COMPLETE;
-	} else if (eol != std::string::npos) {
-		_raw.erase(0, eol + 2);
-	} else _raw.clear();
+    } else if (eol != std::string::npos) {
+      _raw.erase(0, eol + 2);
+    } else
+      _raw.clear();
   } else if (_headers.has("Transfer-Encoding"))
     handleBodyLine(body, eol);
   else
@@ -198,8 +204,8 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
   } else if (eol != _remainingBody) {
     _state = INVALID;
   } else {
-	  _body->write(bodyLine.c_str(), eol);
-	_bodySize += _remainingBody;
+    _body->write(bodyLine.c_str(), eol);
+    _bodySize += _remainingBody;
     _remainingBody = std::string::npos;
   }
   _raw.erase(0, eol + 2);
