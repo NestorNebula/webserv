@@ -23,11 +23,11 @@
 class Request {
 public:
   Request() : _state(EMPTY), _body(NULL), _bodySize(0) {
-	  WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
+    WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
   }
   ~Request() {
-	  WsLog::_(LVL_DBG, TGT_REQ, "Request destructor");
-	  delete _body;
+    WsLog::_(LVL_DBG, TGT_REQ, "Request destructor");
+    delete _body;
   }
 
   // Methods
@@ -48,10 +48,10 @@ public:
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
   const Headers &getHeaders() const { return _headers; }
   bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
-  Stream *getBody() { 
-	  if (_body == NULL)
-		  throw std::logic_error("accessing null body Stream");
-	  return _body; 
+  Stream *getBody() {
+    if (_body == NULL)
+      throw std::logic_error("accessing null body Stream");
+    return _body;
   }
   void clear();
 

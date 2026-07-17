@@ -15,33 +15,35 @@
 #include "Resource.hpp"
 #include "WsLog.hpp"
 
-class StaticResource: public Resource {
+class StaticResource : public Resource {
 public:
-	StaticResource(const std::string &filepath): _filepath(filepath), _state(DEFAULT),
-	_stream(NULL) {
-		WsLog::_(LVL_DBG, TGT_STAT_RES, "StaticResource constructor for: ", filepath);
-	}
-	~StaticResource() {
-		WsLog::_(LVL_DBG, TGT_STAT_RES, "StaticResource destructor for: ", _filepath);
-		delete _stream;
-	}
-	virtual void generate();
-	virtual bool done() const { return _state == DONE; }
-	virtual bool inProgress() const { return false; }
-	virtual bool failed() const { return _state == FAIL; }
-	virtual Stream &stream();
+  StaticResource(const std::string &filepath)
+      : _filepath(filepath), _state(DEFAULT), _stream(NULL) {
+    WsLog::_(LVL_DBG, TGT_STAT_RES,
+             "StaticResource constructor for: ", filepath);
+  }
+  ~StaticResource() {
+    WsLog::_(LVL_DBG, TGT_STAT_RES,
+             "StaticResource destructor for: ", _filepath);
+    delete _stream;
+  }
+  virtual void generate();
+  virtual bool done() const { return _state == DONE; }
+  virtual bool inProgress() const { return false; }
+  virtual bool failed() const { return _state == FAIL; }
+  virtual Stream &stream();
 
 private:
-	typedef enum eInternalState {
-		DEFAULT,
-		DONE,
-		FAIL,
-	} InternalState;
+  typedef enum eInternalState {
+    DEFAULT,
+    DONE,
+    FAIL,
+  } InternalState;
 
-	StaticResource(const StaticResource &);
-	StaticResource &operator=(const StaticResource &);
+  StaticResource(const StaticResource &);
+  StaticResource &operator=(const StaticResource &);
 
-	std::string _filepath;
-	InternalState _state;
-	Stream *_stream;
+  std::string _filepath;
+  InternalState _state;
+  Stream *_stream;
 };

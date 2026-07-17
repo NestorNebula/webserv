@@ -14,19 +14,18 @@
 
 #include "Stream.hpp"
 
-class TemporaryFileStream: public Stream {
+class TemporaryFileStream : public Stream {
 public:
-	TemporaryFileStream();
-	virtual ~TemporaryFileStream();
+  TemporaryFileStream();
+  virtual ~TemporaryFileStream();
 
 private:
-	TemporaryFileStream(const TemporaryFileStream &);
-	TemporaryFileStream &operator=(const TemporaryFileStream &);
+  TemporaryFileStream(const TemporaryFileStream &);
+  TemporaryFileStream &operator=(const TemporaryFileStream &);
 
+  const static std::string::size_type _maxPathSize = 20;
+  char _path[_maxPathSize];
 
-	const static std::string::size_type _maxPathSize = 20;
-	char _path[_maxPathSize];
-
-	void openTmpFile();
-	std::string getNextFilePath();
+  void openTmpFile();
+  std::string getNextFilePath();
 };
