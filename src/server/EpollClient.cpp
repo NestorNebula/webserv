@@ -14,7 +14,7 @@
 #include "Epoll.hpp"
 
 // EP
-EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
+EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 	ep(_ep),
 	typ(_typ), 
 	fd(_fd), 
