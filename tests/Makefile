@@ -6,6 +6,10 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
 GTEST_CXXFLAGS = -std=c++98
 
 CPPFLAGS = -I../inc \
+		   -I../inc/http \
+		   -I../inc/resources \
+		   -I../inc/streams \
+		   -I../inc/utils \
 		   -Igtest/googletest \
 		   -Igtest/googletest/include \
 		   -Igtest/googlemock \
@@ -20,18 +24,30 @@ GTEST_DIR = gtest
 
 SRC_DIR = ../src
 
-PROJECT_SRC = $(SRC_DIR)/Headers.cpp \
-			  $(SRC_DIR)/helpers.cpp \
-			  $(SRC_DIR)/Request.cpp \
-			  $(SRC_DIR)/Response.cpp \
-			  $(SRC_DIR)/StaticResource.cpp \
-			  $(SRC_DIR)/DirectoryResource.cpp \
-			  $(SRC_DIR)/BuiltinResource.cpp \
-			  $(SRC_DIR)/Stream.cpp \
-			  $(SRC_DIR)/TemporaryFileStream.cpp \
-			  $(SRC_DIR)/http_utils.cpp \
+PROJECT_SRC = $(SRC_DIR)/http/Headers.cpp \
+			  $(SRC_DIR)/utils/helpers.cpp \
+			  $(SRC_DIR)/http/Request.cpp \
+			  $(SRC_DIR)/http/Response.cpp \
+			  $(SRC_DIR)/resources/StaticResource.cpp \
+			  $(SRC_DIR)/resources/DirectoryResource.cpp \
+			  $(SRC_DIR)/resources/BuiltinResource.cpp \
+			  $(SRC_DIR)/streams/Stream.cpp \
+			  $(SRC_DIR)/streams/TemporaryFileStream.cpp \
+			  $(SRC_DIR)/utils/http_utils.cpp \
 			  $(SRC_DIR)/utils/WsLog.cpp \
-			  $(SRC_DIR)/Session.cpp
+			  $(SRC_DIR)/http/Session.cpp \
+			  $(SRC_DIR)/parsing/ConfigParser.cpp \
+			  $(SRC_DIR)/parsing/ParseBlocks.cpp \
+			  $(SRC_DIR)/parsing/ParserTools.cpp \
+			  $(SRC_DIR)/parsing/Tokenizer.cpp \
+			  $(SRC_DIR)/parsing/Validation.cpp \
+			  $(SRC_DIR)/server/CgiEnv.cpp \
+			  $(SRC_DIR)/server/CgiPipe.cpp \
+			  $(SRC_DIR)/server/Connection.cpp \
+			  $(SRC_DIR)/server/Epoll.cpp \
+			  $(SRC_DIR)/server/EpollClient.cpp \
+			  $(SRC_DIR)/server/Server.cpp \
+			  $(SRC_DIR)/server/Socket.cpp \
 
 TEST_SRC_DIR = .
 
