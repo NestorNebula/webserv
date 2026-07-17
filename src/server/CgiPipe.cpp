@@ -176,12 +176,14 @@ ssize_t	CgiPipe::pollout(void)
 	}
 
 	// rsrc.has_input
-	std::string & body = this->conn->sess.req.get_body();
+	Stream & body = *const_cast<Request &>(this->conn->sess.getRequest()).getBody();
 	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 
 	// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", body);
-	err = this->send(body);
+	std::ostringstream oss;
+	oss << body.rdbuf();
+	err = this->send(oss.str().c_str(), oss.str().size());
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");

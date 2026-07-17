@@ -20,6 +20,7 @@
 
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
+#include "ServerConfig.hpp"
 
 	// The backlog argument defines the maximum length to which the queue
 	// of pending connections for sockfd may grow.  If a connection
@@ -42,7 +43,7 @@ private:
 	Server & operator =	(const Server & ) { return (*this); }
 
 public:
-	Server (Epoll *_ep, unsigned short p);
+	Server (Epoll *_ep, unsigned short p, ServerConfig &conf);
 	~Server();
 
 	ssize_t				pollin (void);
@@ -51,12 +52,15 @@ public:
 	bool				timeo  (time_t)	const { return (false); }
 	
 	unsigned short		get_port(void)	const { return (this->port); }
+
+	ServerConfig		&get_conf() { return (this->_conf); }
 	
 private:
 	struct sockaddr_in	addr;
 	unsigned short		port;
 	
 	int					init(void);
+	ServerConfig		_conf;
 	// std::vector<Route> route;
 };
 

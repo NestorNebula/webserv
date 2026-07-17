@@ -16,6 +16,7 @@
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
+	sess(_serv.get_conf()),
 	cgi_pid(0),
 	cgi_ip(NULL),
 	cgi_op(NULL),
@@ -137,9 +138,9 @@ ssize_t	Connection::pollin(void)
 
 	// sess.write_data()
 	// set some 
-	int req_state = sess.push_data(this->ibuf, err);
-	if (req_state < REQ_HAVE_HEAD)
-		return (err);
+	sess.write(this->ibuf, err);
+	// if (req_state < REQ_HAVE_HEAD)
+		// return (err);
 		
 	if (this->state < CONN_HAS_RSRC)
 	{
@@ -265,7 +266,9 @@ ssize_t	Connection::pollout(void)
 
 
 	// rsrc.complete
-	std::string & odata = sess.read_data();
+	char buf[4096];
+	size_t r = sess.read(buf, 4096);
+	std::string odata = std::string(buf, r);
 	if (odata.size() == 0) // rsrc/state seems like a better check
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: odata.size() == 0");
@@ -348,7 +351,7 @@ ssize_t	Connection::pollout(void)
 int	Connection::cgi_inp(void)
 {
 	// cgi_valid (?)
-	if (this->sess.req.get_body().size())
+	if (const_cast<Request &>(this->sess.getRequest()).getBody()->size())
 		return (1);
 	// if (req) has NOT received full body
 	this->mod_evt(EPOLLOUT);
@@ -371,7 +374,7 @@ int	Connection::cgi_out(const char *buf, ssize_t siz)
 		this->resp = std::string("HTTP/1.1 200 OK\r\n");
 		this->state = RSRC_HAS_RESP;
 	}
-	std::string & odata = this->sess.read_data();
+	std::string odata = std::string(buf, siz);
 	odata.append(buf, siz);
 	this->mod_evt(EPOLLOUT);
 	

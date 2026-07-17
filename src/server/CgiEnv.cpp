@@ -55,9 +55,9 @@ int     CgiEnv::from_conn(Connection & conn)
 {
 	std::string val;
 	
-	Request &req = conn.sess.req;
+	const Request &req = conn.sess.getRequest();
 
-	val = req.header("METH");
+	val = req.getMethod();
 	if (val.size())
 		this->add("REQUEST_METHOD", val.c_str());
 	else
@@ -65,14 +65,20 @@ int     CgiEnv::from_conn(Connection & conn)
 
 
 	// (chdir)
-	val = req.header("PATH");
+	if (req.getHeaders().has("PATH"))
+		val = req.getHeaders().find("PATH")->second;
+	else
+		val = "";
 	if (val.size())
 	{
 		// relative (!)
 		this->add("_PATH", val.c_str());
 		this->add("PATH_INFO", val.c_str());
 	}
-	file = req.header("FILE");
+	if (req.getHeaders().has("FILE"))
+		file = req.getHeaders().find("FILE")->second;
+	else
+		file = "";
 	if (file.size())
 	{
 		this->add("SCRIPT_NAME", file.c_str());
@@ -86,7 +92,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
-	std::string &fext = req.get_fext();
+	std::string fext = "php"; // req.get_fext();
 	if (fext == std::string("php"))
 		exec = std::string("/usr/bin/php"); // -cgi"); 
 	else if (fext == std::string("py"))
@@ -103,7 +109,10 @@ int     CgiEnv::from_conn(Connection & conn)
 	this->args[2] = NULL;
 	
 	
-	val = req.header("VARS");
+	if (req.getHeaders().has("VARS"))
+		val = req.getHeaders().find("VARS")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
 	else
@@ -125,30 +134,54 @@ int     CgiEnv::from_conn(Connection & conn)
 // with a 415 'Unsupported Media Type' error, where supported by the
 // protocol.
 
-	val = req.header("Content-type");
+	if (req.getHeaders().has("Content-Type"))
+		val = req.getHeaders().find("Content-Type")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("CONTENT_TYPE", val.c_str());
-	val = req.header("Content-length");
+	if (req.getHeaders().has("Content-Length"))
+		val = req.getHeaders().find("Content-Length")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("CONTENT_LENGTH", val.c_str());
 		
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
-	val = req.header("Host");
+	if (req.getHeaders().has("Host"))
+		val = req.getHeaders().find("Host")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_HOST", val.c_str());
-	val = req.header("User-Agent");
+	if (req.getHeaders().has("User-Agent"))
+		val = req.getHeaders().find("User-Agent")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_USER_AGENT", val.c_str());
-	val = req.header("Accept");
+	if (req.getHeaders().has("Accept"))
+		val = req.getHeaders().find("Accept")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());
-	val = req.header("Accept-Language");
+	if (req.getHeaders().has("Accept-Language"))
+		val = req.getHeaders().find("Accept-Language")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_ACCEPT_LANGUAGE", val.c_str());
-	val = req.header("Accept-Encoding");
+	if (req.getHeaders().has("Accept-Encoding"))
+		val = req.getHeaders().find("Accept-Encoding")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_ACCEPT_ENCODING", val.c_str());
-	val = req.header("Connection");
+	if (req.getHeaders().has("Connection"))
+		val = req.getHeaders().find("Connection")->second;
+	else
+		val = "";
 	if (val.size())
 		this->add("HTTP_CONNECTION", val.c_str());
 		// Upgrade-Insecure-Requesets

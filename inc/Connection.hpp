@@ -14,6 +14,7 @@
 # define CONNECTION_HPP
 
 # include <unistd.h>
+#include "Server.hpp"
 # include "Socket.hpp"
 # include <iostream>
 # include <sys/wait.h>
@@ -24,7 +25,8 @@
 # include "EpollClient.hpp"
 # include "CgiEnv.hpp"
 
-# include "bridge.hpp"
+#include "Session.hpp"
+// # include "bridge.hpp"
 // # include <map>
 
 
@@ -64,7 +66,7 @@ class Connection : public EpollClient
 {
 private:
 	Connection				(const Connection & that) : EpollClient(that), 
-		serv(that.serv), req_cnt(0) {}
+		sess(that.serv.get_conf()), serv(that.serv), req_cnt(0) {}
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
 public:

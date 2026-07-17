@@ -14,13 +14,14 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll *_ep, unsigned short p) : 
+Server::Server (Epoll *_ep, unsigned short p, ServerConfig &conf) : 
 	EpollClient(_ep, EPC_SERV, -1), 
 	port(p)
 {
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
 	this->addr.sin_port			= htons(this->port);
+	this->_conf = conf;
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
 };
