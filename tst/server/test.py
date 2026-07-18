@@ -1,11 +1,17 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import os
+
 
 # what is CWD .. when scripts are called (!)
 
 import cgi
 import cgitb
+
+
+print("Content-Type: text/plain", end="\r\n\r\n");
 
 form = cgi.FieldStorage()
 
@@ -15,7 +21,6 @@ g2 = form.getvalue("g2", "g2-default")
 p1 = form.getvalue("p1", "p1-default")
 p2 = form.getvalue("p2", "p2-default")
 
-print("Content-Type: text/plain\r\n\r\n", end="")
 print("Python : hello, world!")
 
 print ("\nGET VARS")

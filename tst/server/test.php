@@ -1,7 +1,11 @@
 <?php
 
-    header('Content-type: text/plain');
+    // header('Content-type: text/plain');
 
+    // HOME
+
+    print("Content-type: text/plain\r\n\r\n");
+    // print("\r\n");
     // print_r($_GET);
     // print_r($_POST);
     // print_r($_SERVER); // ENV shows up here

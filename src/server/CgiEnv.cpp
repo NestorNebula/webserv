@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 23:12:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 01:26:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
 	{
-		exec = std::string("/usr/bin/php-cgi"); // -cgi"); 
+		exec = std::string("/usr/bin/php"); // -cgi"); 
 		this->args[0] = this->exec.c_str();
 			// actually -- ignored
 		// this->args[1] = "-f";
@@ -130,7 +130,8 @@ int     CgiEnv::from_conn(Connection & conn)
 // if the REDIRECT_STATUS CGI variable is set
 	this->add("REDIRECT_STATUS", "1");
 	this->add("PYTHONPATH", 
-		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
+		// "/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
+		"/media/kdonlon/data/Documents/42/webserv/legacy-cgi-main/");
 
 
 // If the output of a form is being processed, check that CONTENT_TYPE

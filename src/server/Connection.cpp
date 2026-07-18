@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 23:06:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 01:42:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,7 +329,9 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	{
 		size_t	pos = ostr.find("\r\n\r\n");
 		if (pos == std::string::npos)
+		{
 			return (0);
+		}
 		this->cgi.hed = 1;
 		// WsLog::_(LVL_DBG, TGT_CGI_RECV, "head:");
 		// WsLog::_(LVL_DBG, TGT_CGI_RECV, "****\n", ostr);
@@ -419,7 +421,7 @@ int	Connection::exec_cgi(void)
 		const char **envp = cgienv->gen();
 
 		signal(SIGINT, SIG_DFL);
-		pipes.dup_err();
+		// pipes.dup_err();
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();

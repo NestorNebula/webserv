@@ -1,6 +1,6 @@
 #!/bin/bash
 
-siege -f staging-urls.txt --internet --verbose --reps=10 --concurrent=200 --no-parser --delay=0.3
+siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
 echo
 exit 0
 
@@ -24,7 +24,7 @@ exit 0
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/test.php -i \
+curl -X POST http://localhost:8081/test.py -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0
