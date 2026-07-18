@@ -27,7 +27,7 @@
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/test.pl \
+curl -X POST http://localhost:8081/tst.php -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

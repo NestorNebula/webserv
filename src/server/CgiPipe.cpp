@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 11:41:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 17:36:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,23 @@
 #include "Connection.hpp"
 #include "Server.hpp"
 
+
+static	void fd_close(int *fd)
+{
+	if (*fd == -1)
+		return;
+	close(*fd);
+	*fd = -1;
+}
+
+
 cgi_pipes::cgi_pipes (void)
 {
 	p1[0] = -1;
 	p1[1] = -1;
 	p2[0] = -1;
 	p2[1] = -1;
+	dnfd  = -1;
 }
 
 cgi_pipes::~cgi_pipes()
@@ -54,7 +65,6 @@ int	cgi_pipes::dup_io(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdin)"));
 	}
-
 	if (p2[1] == -1)
 	{
 		this->shutdown();
@@ -70,28 +80,19 @@ int	cgi_pipes::dup_io(void)
 
 int	cgi_pipes::dup_err(void)
 {
-	int dnfd = open("/dev/null", O_WRONLY);
+	dnfd = open("/dev/null", O_WRONLY);
 	if (dnfd < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "open (/dev/null)"));
 	}
-
 	if (dup2(dnfd, STDERR_FILENO) < 0)
 	{
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stderr)"));
 	}
-	close(dnfd);
+	fd_close(&dnfd);
 	return (0);
-}
-
-static	void fd_close(int *fd)
-{
-	if (*fd == -1)
-		return;
-	close(*fd);
-	*fd = -1;
 }
 
 void	cgi_pipes::shutdown(void)
@@ -100,6 +101,7 @@ void	cgi_pipes::shutdown(void)
 	fd_close(p1 + 1);
 	fd_close(p2);
 	fd_close(p2 + 1);
+	fd_close(&dnfd);
 }
 
 
@@ -114,17 +116,31 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn) :
 CgiPipe::~CgiPipe()
 {
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
-	if (this->conn) // RSRC
+	if (this->conn)
 		this->conn->cgi.rem(this);
+}
+
+bool	CgiPipe::timeo(time_t now)
+{
+	if (this->lact == 0)
+		return (false);
+	if (now < this->lact)
+		return (false);
+	if ((this->lact + EPC_TIMEOUT) < now)
+	{
+		if (this->conn)
+			this->conn->set_err(408);
+		return (true);
+	}
+	return (false);
 }
 
 ssize_t	CgiPipe::pollin(void)
 {
-	// sess ..
 	if (this->conn == NULL)
 		return (-1);
-		
-	// sess->active() -- state -- alive, no error
+// SESSION : check_status()
+
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
@@ -132,6 +148,7 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
+		this->conn->set_err(606);
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
@@ -140,9 +157,8 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ZERO");
 		return (-1);
 	}
-	// sess.push_op_data()
-	// rsrc.add_data()
-	if (this->conn->cgi_out(this->ibuf, err) < 0)
+// SESSION
+	if (this->conn->push_resp_data(this->ibuf, err) < 0)
 		return (-1);
 	
 	return (err);
@@ -152,38 +168,31 @@ ssize_t	CgiPipe::pollout(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-	// sess->active()
-	// sess->has_input_data() [ POST ]
-	if (this->conn->cgi.status(WNOHANG) >= 0) // RSRC done .. error 
+// SESSION : check_status()
+	if (this->conn->cgi.status(WNOHANG) >= 0)
+	{
+		this->conn->set_err(606);
 		return (-1);
-		
+	}	
 	ssize_t	err;
-    
-	// rsrc.has_body_to_send_to_cgi
-	// sess.has_input()
-	err = this->conn->cgi_inp(); // part of cgi_status
-	if (err < 0)
-	{
-		// nothing more to send to CGI (stdin)
-		// we may close down
+// SESSION
+	err = this->conn->req_body_status();
+	if (err < 0)	// body is complete and fully flushed
 		return (-1);
-	}
-	if (err == 0)
+	if (err == 0)	// body is not complete, but no data currently available
 	{
-		// WsLog::_(LVL_ERR, TGT_CGI_SEND, "send: no input");
 		this->mod_evt(0);
 		return (0);
 	}
 
-	// rsrc.has_input
+// SESSION : Request::body
 	std::string & body = this->conn->sess.req.get_body();
 	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
-
-	// WsLog::_(LVL_DBG, TGT_CGI_DATA, "send\n", body);
 	err = this->send(body);
 	if (err < 0)
 	{
+		this->conn->set_err(606);
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
@@ -200,5 +209,6 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn == NULL)
 		return (-1);
+	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }

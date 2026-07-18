@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 10:17:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:45:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ public:
 	int		dup_err(void);
 	void	shutdown(void);
 
-	int	p1[2];
-	int	p2[2];
-
+	int		p1[2];
+	int		p2[2];
+	int		dnfd;
 };
 
 class Connection;
@@ -51,7 +51,7 @@ public:
 	ssize_t		pollin (void);
 	ssize_t		pollout(void);
 	int			hup    (void);
-	bool		timeo  (time_t) { return (false); }
+	bool		timeo  (time_t);
 
 	void		conn_closed(void) { this->conn = NULL; }
 

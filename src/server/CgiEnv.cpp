@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 11:03:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 17:21:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
-		exec = std::string("/usr/bin/php"); // -cgi"); 
+		exec = std::string("/usr/bin/php-cgi"); // -cgi"); 
 	else if (fext == std::string("py"))
 		exec = std::string("/usr/bin/python"); 
 	else if (fext == std::string("pl"))

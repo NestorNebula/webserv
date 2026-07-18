@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 10:20:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 17:40:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,10 @@ int	EpollClient::event(struct epoll_event *e)
 
 	this->lact = time(&this->lact);
 	if (e->events & EPOLLERR)
+	{
+		this->hup();
 		return (-1);
+	}
 	if (e->events & EPOLLIN)
 	{
 		err = this->pollin();
@@ -111,7 +114,7 @@ ssize_t	EpollClient::recv(void)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv: ZERO");
+		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv:  ZERO");
 	return (err);
 }
 
@@ -130,7 +133,7 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
 	if (err == 0)
-		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ZERO");
+		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send:  ZERO");
 	return (err);
 }
 
@@ -138,6 +141,8 @@ ssize_t	EpollClient::send(std::string & str)
 {
 	ssize_t	err;
 
+	if (fcntl(this->fd, F_GETFD) < 0)
+		return (-1);
 	err = this->send(str.c_str(), str.size());
 	if (err <= 0)
 		return (err);
@@ -154,7 +159,6 @@ ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 	str.erase(0, err); // here (?) or caller (?)
 	return (err);
 }
-
 
 static const char *epc_str[] = 
 {

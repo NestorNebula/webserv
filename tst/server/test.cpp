@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 11:06:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 17:29:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ int main (int, char **, char **envp)
         | TGT_EPC_RECV
         | TGT_EPC_SEND
         
-        | TGT_HEAD
         
         // | TGT_CONN
         | TGT_CONN_RECV
@@ -46,8 +45,11 @@ int main (int, char **, char **envp)
         | TGT_CGI_SEND
         // | TGT_CGI_DATA
 
-        | TGT_SERV
+        // | TGT_SERV
         // | TGT_MAIN
+
+        // | TGT_HEAD
+        | TGT_CGI_RSRC
     ;
     
     // WsLog::tgt = TGT_NONE;

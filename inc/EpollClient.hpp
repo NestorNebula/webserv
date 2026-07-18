@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 10:30:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:12:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,14 @@
 
 # include <unistd.h>
 # include <sys/epoll.h>
+# include <fcntl.h>
 # include <string>
 # include <vector>
 # include "WsLog.hpp"
 
+# ifndef EPC_TIMEOUT
+#  define EPC_TIMEOUT 5
+# endif
 
 # ifndef EPC_BUF_SIZ
 #  define EPC_BUF_SIZ 8192
@@ -55,10 +59,10 @@ public:
 	ssize_t			send(std::string & str);
 	ssize_t			send(std::string & str, ssize_t cnt);
 	
-	virtual ssize_t	pollin (void) = 0;
-	virtual ssize_t pollout(void) = 0;
-	virtual int		hup    (void) = 0;
-	virtual bool	timeo  (time_t) { return (false); }
+	virtual ssize_t	pollin (void)   = 0;
+	virtual ssize_t pollout(void)   = 0;
+	virtual int		hup    (void)   = 0;
+	virtual bool	timeo  (time_t) = 0;
 
 	int				ini_evt(int e);
 	int				mod_evt(int e);

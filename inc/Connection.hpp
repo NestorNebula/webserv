@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 11:39:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:33:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,19 +86,10 @@ public:
 	std::string		resp;
 	
 // Session/Resource
-	int				cgi_inp(void);
-	int				cgi_out(const char *buf, ssize_t siz);
+	int				req_body_status(void);
+	int				push_resp_data(const char *buf, ssize_t siz);
 	
-
 	ResourceCgi		cgi;
-// 	int				cgi_status(void);
-// 	void			rem_cgi(CgiPipe *epc);
-// // Resource
-// 	pid_t			cgi_pid;
-// 	CgiPipe			*cgi_ip;
-// 	CgiPipe			*cgi_op;
-	
-
 
 public:
 	Server			&serv;

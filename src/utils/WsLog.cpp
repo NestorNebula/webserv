@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/11 09:53:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:37:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ static const std::string tgt_str[] =
     "cgi   : ",
     "serv  : ",
     "main  : ",
-    "head  : "
+    "head  : ",
+    "rsrc  : "
 };
 
 static const std::string &tgt_prefix(log_tgt tgt)
@@ -43,6 +44,8 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[6]);
     if (tgt & TGT_HEAD)
         return (tgt_str[7]);
+    if (tgt & TGT_CGI_RSRC)
+        return (tgt_str[8]);
 
     return (tgt_str[0]);
 }

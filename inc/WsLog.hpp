@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 20:59:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:37:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,12 @@ typedef long unsigned int log_tgt;
 # define TGT_CGI_DATA	(1L << 10)
 # define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND | TGT_CGI_DATA)
 
-# define TGT_SERV		(1L << 11)
-# define TGT_MAIN		(1L << 12)
+# define TGT_CGI_RSRC	(1L << 11)
 
-# define TGT_HEAD		(1L << 13)
+# define TGT_SERV		(1L << 12)
+# define TGT_MAIN		(1L << 13)
+
+# define TGT_HEAD		(1L << 14)
 
 
 # define TGT_MAX		(1UL << 63)
