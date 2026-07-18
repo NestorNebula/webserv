@@ -1,26 +1,14 @@
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"
 #include "Server.hpp"
-#include "Session.hpp"
-#include "WsLog.hpp"
 #include "unistd.h"
-#include <fstream>
 #include <iostream>
-
-#ifndef BUFSIZE
-#define BUFSIZE 4096
-#endif
-
-#define COLOR_DEF "\x1b[0m"
-#define RED "\x1b[31m"
-#define GREEN "\x1b[32m"
-#define BLUE "\x1b[34m"
 
 static bool setWorkingDirectory(const std::string &path);
 
 int main(int argc, char *argv[], char **envp) {
-  WsLog::tgt = TGT_CONN_SEND; // TGT_MAX >> 1;
-  WsLog::lvl = LVL_ALL;
+  // WsLog::tgt = TGT_CONN_SEND; // TGT_MAX >> 1;
+  // WsLog::lvl = LVL_ALL;
   if (argc < 2) {
     std::cerr << "usage: demo <config>\n";
     return 0;
