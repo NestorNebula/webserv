@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 12:32:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/17 13:15:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,9 +112,9 @@ int	ResourceCgi::status(int opt)
 		return (this->stat);
 	if (this->pid == 0)
 		return (this->stat);
-	if (this->ip == NULL && this->op == NULL)
-		return (this->stat);
-	 // hm : assume done (?) don't think so
+		
+	// if (this->ip == NULL && this->op == NULL)
+	// 	return (this->stat);
 	
 	int err = waitpid(this->pid, &this->stat, opt);
 	// CGI_CTL
