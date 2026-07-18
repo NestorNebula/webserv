@@ -6,6 +6,8 @@
 
 static bool setWorkingDirectory(const std::string &path);
 
+static std::string getConfigFileName(const std::string &path);
+
 int main(int argc, char *argv[], char **envp) {
   // WsLog::tgt = TGT_CONN_SEND; // TGT_MAX >> 1;
   // WsLog::lvl = LVL_ALL;
@@ -19,7 +21,7 @@ int main(int argc, char *argv[], char **envp) {
     return 0;
   }
   ConfigParser parser;
-  parser.parseFile(argv[1]);
+  parser.parseFile(getConfigFileName(argv[1]));
   const std::vector<ServerConfig> &servers = parser.getServers();
 
   Epoll epoll(envp);
@@ -38,4 +40,11 @@ static bool setWorkingDirectory(const std::string &path) {
     return true;
   std::string directory = path.substr(0, lastSlash);
   return chdir(directory.c_str()) == 0;
+}
+
+static std::string getConfigFileName(const std::string &path) {
+	std::string::size_type lastSlash = path.find_last_of('/');
+	if (lastSlash == std::string::npos)
+		return path;
+	return path.substr(lastSlash + 1);
 }
