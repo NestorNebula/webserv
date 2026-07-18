@@ -14,7 +14,7 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll *_ep, unsigned short p, ServerConfig &conf) : 
+Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &conf) : 
 	EpollClient(_ep, EPC_SERV, -1), 
 	port(p)
 {

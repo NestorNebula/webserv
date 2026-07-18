@@ -43,7 +43,7 @@ private:
 	Server & operator =	(const Server & ) { return (*this); }
 
 public:
-	Server (Epoll *_ep, unsigned short p, ServerConfig &conf);
+	Server (Epoll *_ep, unsigned short p, const ServerConfig &conf);
 	~Server();
 
 	ssize_t				pollin (void);
