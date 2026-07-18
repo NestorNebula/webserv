@@ -1,4 +1,4 @@
-NAME = http-demo
+NAME = demo
 
 CXX = c++
 
