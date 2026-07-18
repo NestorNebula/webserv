@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 16:12:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 20:54:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include "WsLog.hpp"
 
 # ifndef EPC_TIMEOUT
-#  define EPC_TIMEOUT 5
+#  define EPC_TIMEOUT 3
 # endif
 
 # ifndef EPC_BUF_SIZ

@@ -1,17 +1,14 @@
 #!/bin/bash
 
-# siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=255 --no-parser -b
-# echo
-# exit 0
+siege -f staging-urls.txt --internet --verbose --reps=10 --concurrent=200 --no-parser --delay=0.3
+echo
+exit 0
 
 # KEEP_ALIVE
-# siege --delay=0.01 -f staging-urls.txt --internet --verbose --reps=1 --concurrent=80 --no-parser -b --header="Connection:keep-alive"
+# siege -f staging-urls.txt --internet --verbose --reps=1 --concurrent=4 --no-parser -b
 # echo
 # exit 0
 
-# siege --delay=0.1 -f staging-urls.txt --internet --verbose --reps=2 --concurrent=2 --no-parser 
-# echo
-# exit 0
 
 # curl -X GET http://127.0.0.1:8080/index.html
 # echo
@@ -27,7 +24,7 @@
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/tst.php -i \
+curl -X POST http://localhost:8081/test.php -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

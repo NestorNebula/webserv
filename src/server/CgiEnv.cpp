@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 17:21:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 23:12:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,19 +88,34 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
+	{
 		exec = std::string("/usr/bin/php-cgi"); // -cgi"); 
+		this->args[0] = this->exec.c_str();
+			// actually -- ignored
+		// this->args[1] = "-f";
+		this->args[1] = file.c_str();
+		this->args[2] = NULL;		
+	}
 	else if (fext == std::string("py"))
+	{
 		exec = std::string("/usr/bin/python"); 
+		this->args[0] = this->exec.c_str();
+		this->args[1] = file.c_str();
+		this->args[2] = NULL;		
+	}
 	else if (fext == std::string("pl"))
+	{
 		exec = std::string("/usr/bin/perl"); 
+		this->args[0] = this->exec.c_str();
+		this->args[1] = file.c_str();
+		this->args[2] = NULL;		
+	}
 	else
 	{
 		// ERROR
 		return (-1);
 	}
-	this->args[0] = this->exec.c_str();
-	this->args[1] = file.c_str();
-	this->args[2] = NULL;
+
 	
 	
 	val = req.header("VARS");
@@ -285,6 +300,10 @@ An example of this is the HTTP_ACCEPT variable which was defined in CGI/1.0. Ano
 
 https://www.ibm.com/docs/en/netcoolomnibus/8.1.0?topic=scripts-environment-variables-in-cgi-script
 
+
+https://www.php.net/manual/en/reserved.variables.server.php
+
+Some server supplied environment variables are not defined in the current CGI/1.1 specification. Only the following variables are defined there: AUTH_TYPE, CONTENT_LENGTH, CONTENT_TYPE, GATEWAY_INTERFACE, PATH_INFO, PATH_TRANSLATED, QUERY_STRING, REMOTE_ADDR, REMOTE_HOST, REMOTE_IDENT, REMOTE_USER, REQUEST_METHOD, SCRIPT_NAME, SERVER_NAME, SERVER_PORT, SERVER_PROTOCOL, and SERVER_SOFTWARE. 
 
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 10:06:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 20:10:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Request
 {
 public:
 	Request(void) : state(REQ_INIT) {}
+	~Request() {}
 
 	int         push_data(const char *buf, size_t siz);
 	int         init(void);
@@ -39,6 +40,7 @@ public:
 	std::string &get_body(void) { return this->body; }
 	std::string &get_fext(void) { return this->fext; }
 	
+	void		clear(void);
 private:
 	int			state;
 	
@@ -72,7 +74,6 @@ public:
 	}
 	Request     req;
 	Resource    *res;
-	std::string	ostr;
   
 	// fill_input
 	int push_data(const char *buf, size_t siz)
@@ -88,7 +89,6 @@ public:
 		return (err);
 	}
 	
-	std::string & read_data(void) { return (this->ostr); }
 	int req_state(void) { return this->req.get_state(); }
 };
 

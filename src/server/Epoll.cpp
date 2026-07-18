@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 16:16:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 22:58:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ int	Epoll::add(EpollClient *cli)
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : already exists");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : already exists");
 		// return (this->mod(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
@@ -178,10 +178,11 @@ int	Epoll::mod(EpollClient *cli)
 	int	err;
 
 	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()));
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod cli  : does not exist");
 		// return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
@@ -200,7 +201,7 @@ int	Epoll::del(EpollClient *cli)
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "del cli  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -224,8 +225,9 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "rem cli  : does not exist");
 	}
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
 
 	return (0);
 }
@@ -259,7 +261,6 @@ struct epoll_event	*Epoll::get_evt(int idx)
 int	Epoll::exec(void)
 {
 	// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...");
-	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
@@ -282,9 +283,6 @@ void	Epoll::check_timeo(void)
 		if ((*it)->timeo(n))
 		{
 			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
-			// cgi  timeout (?)
-			// conn timeout 
-			// 408 Request Timeout 
 		}
 		it++;
 	}

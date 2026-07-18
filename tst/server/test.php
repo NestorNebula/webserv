@@ -28,7 +28,16 @@
     foreach  ($_SERVER as $k => $v)
         print ("$k = $v\n");
 
+// HTTP/1.1 200 OK
+// Status: 500 Internal Server Error
+// X-Powered-By: PHP/8.4.21
+// Content-type: text/html; charset=UTF-8
 
+// HTTP/1.1 808 err description
+
+// Error Data
+
+ 
     $chk_hed = 'REMOTE_ADDR';
     print("\n$chk_hed : " . $_SERVER[$chk_hed] . PHP_EOL);
 
@@ -44,6 +53,6 @@
 
 // POST Content-Length of 14976173 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 
-    print_r($_FILES['file']); // Array
-    move_uploaded_file($_FILES['file']['tmp_name'], "./" . $_FILES['file']['name']);
+    // print_r($_FILES['file']); // Array
+    // move_uploaded_file($_FILES['file']['tmp_name'], "./" . $_FILES['file']['name']);
 ?>

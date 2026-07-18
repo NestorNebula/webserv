@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 17:36:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 21:55:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,8 @@ bool	CgiPipe::timeo(time_t now)
 	if ((this->lact + EPC_TIMEOUT) < now)
 	{
 		if (this->conn)
-			this->conn->set_err(408);
+			this->conn->set_err(408); // script timed out .. 
+		// kill (?)
 		return (true);
 	}
 	return (false);
@@ -148,17 +149,17 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-		this->conn->set_err(606);
+		this->conn->set_err(500);
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ZERO");
+		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
 // SESSION
-	if (this->conn->push_resp_data(this->ibuf, err) < 0)
+	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	
 	return (err);
@@ -169,16 +170,19 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->conn == NULL)
 		return (-1);
 // SESSION : check_status()
-	if (this->conn->cgi.status(WNOHANG) >= 0)
+	if (this->conn->cgi.status(WNOHANG) > 0)
 	{
-		this->conn->set_err(606);
+		this->conn->set_err(500);
 		return (-1);
 	}	
 	ssize_t	err;
 // SESSION
 	err = this->conn->req_body_status();
 	if (err < 0)	// body is complete and fully flushed
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: body complete");
 		return (-1);
+	}
 	if (err == 0)	// body is not complete, but no data currently available
 	{
 		this->mod_evt(0);
@@ -192,13 +196,13 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->conn->set_err(606);
+		this->conn->set_err(500);
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ZERO");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);

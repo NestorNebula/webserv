@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 19:53:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 20:10:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,21 @@ int Request::push_data(const char *buf, size_t siz)
     
     this->body.append(buf, siz);
     return (this->state);
+}
+
+void Request::clear(void)
+{
+    head.clear();
+    body.clear();
+    exec.clear();
+
+    meth.clear();
+    path.clear();
+    file.clear();
+    fext.clear();
+    vars.clear();
+
+    state = REQ_INIT;
 }
 
 int Request::init(void)

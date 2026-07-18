@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 17:16:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 21:47:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ private:
 	int						epfd;
 	int						ecnt;
 	struct epoll_event		evts[EPOLL_MAX_EVT];
-	static const int		toms = 10000;
+	static const int		toms = 3000;
 	
 	std::set<EpollClient*>	clients;
 

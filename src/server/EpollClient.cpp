@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 17:40:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 22:59:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int	EpollClient::ini_evt(int e)
 {
 	if (evt.data.ptr != NULL)
 	{
-		WsLog::_(LVL_WARN, TGT_EPC, "ini_evt: already initialized");
+		WsLog::_(LVL_ERR, TGT_EPC, "ini_evt: already initialized");
 		return (this->mod_evt(e));
 	}
 	evt.data.ptr = this;
@@ -49,7 +49,7 @@ int	EpollClient::mod_evt(int e)
 {
 	if (evt.data.ptr == NULL)
 	{
-		WsLog::_(LVL_WARN, TGT_EPC, "mod_evt: not yet initialized");
+		WsLog::_(LVL_ERR, TGT_EPC, "mod_evt: not yet initialized");
 		return (this->ini_evt(e));
 	}
 
@@ -93,9 +93,10 @@ int	EpollClient::event(struct epoll_event *e)
 	}	
 	if (e->events & EPOLLRDHUP)
 	{
-
+		this->hup();
+		return (-1);
 	}
-	if (e->events == EPOLLHUP)
+	if (e->events & EPOLLHUP)
 	{
 		this->hup();
 		return (-1);
@@ -114,7 +115,7 @@ ssize_t	EpollClient::recv(void)
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-		WsLog::_(LVL_ERR, TGT_EPC_RECV, "recv:  ZERO");
+		WsLog::_(LVL_DBG, TGT_EPC_RECV, "recv:  ZERO");
 	return (err);
 }
 
@@ -139,10 +140,13 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 
 ssize_t	EpollClient::send(std::string & str)
 {
+	if (str.size() == 0)
+		return (0);
+		
 	ssize_t	err;
 
-	if (fcntl(this->fd, F_GETFD) < 0)
-		return (-1);
+	// if (fcntl(this->fd, F_GETFD) < 0)
+	// 	return (-1);
 	err = this->send(str.c_str(), str.size());
 	if (err <= 0)
 		return (err);

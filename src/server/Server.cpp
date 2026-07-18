@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/12 20:04:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 22:53:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@
 
 Server::Server (Epoll *_ep, unsigned short p) : 
 	EpollClient(_ep, EPC_SERV, -1), 
-	port(p)
+	port(p),
+	acc_cnt(0)
 {
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
@@ -27,7 +28,8 @@ Server::Server (Epoll *_ep, unsigned short p) :
 
 Server::~Server()
 {
-	WsLog::_(LVL_DBG, TGT_SERV, "(~) Server");
+	WsLog::_(LVL_ERR, TGT_SERV, "(~) Server");
+	WsLog::_(LVL_ERR, TGT_SERV, "accepted: ", acc_cnt);
 };
 
 int Server::init(void)
@@ -91,6 +93,7 @@ ssize_t	Server::pollin(void)
 		delete (c);
 		return (err);
 	}
+	this->acc_cnt++;
 	c->set_addr(&conn_addr);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 16:33:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 20:03:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,40 +25,25 @@
 # include "CgiEnv.hpp"
 
 # include "bridge.hpp"
-// # include <map>
-
-
-
-// CONN_HEAD_COMPLETE
-// CONN_BODY_COMPLETE
-
-// RSRC_SENT_HEAD
-// RSRC_COMPLETE -- check error
-
-#define CONN_HAS_HEAD 1
-#define CONN_HAS_RSRC 2
-#define RSRC_HAS_RESP 3
-#define CONN_SENT_RESP 4
-#define RSRC_ERROR 6
 
 class Server;
 class CgiPipe;
 
-
 class ResourceCgi
 {
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0) {}
 	~ResourceCgi();
 	
-	pid_t			pid;
-	CgiPipe			*ip;
-	CgiPipe			*op;
-	int				stat;
+	pid_t		pid;
+	CgiPipe		*ip;
+	CgiPipe		*op;
+	int			stat;
+	int			hed;
 
-	int				status(int opt);
-	void			rem(CgiPipe *epc);
-	
+	int			status(int opt);
+	void		rem(CgiPipe *epc);
+	void		reset(void);
 };
 
 class Connection : public EpollClient
@@ -76,18 +61,17 @@ public:
 	
 	ssize_t			pollin (void);
 	ssize_t			pollout(void);
-	int				hup    (void) { return (0); }
+	int				hup    (void);
 	bool			timeo  (time_t now);
 	
 	void			set_err(int e);
 	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
 
 	Session			sess;
-	std::string		resp;
 	
 // Session/Resource
 	int				req_body_status(void);
-	int				push_resp_data(const char *buf, ssize_t siz);
+	int				cgi_data(const char *buf, ssize_t siz);
 	
 	ResourceCgi		cgi;
 
@@ -96,9 +80,11 @@ public:
 
 private:
 	int				exec_cgi(void);
+	std::string		ostr;
 	
 public:
 	struct sockaddr_in	addr;
+	
 private:
 	int				req_cnt;
 public:

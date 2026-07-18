@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 17:16:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/18 22:45:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ private:
 	unsigned short		port;
 	
 	int					init(void);
+	int					acc_cnt;
 	// std::vector<Route> route;
 };
 
