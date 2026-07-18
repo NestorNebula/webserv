@@ -13,6 +13,7 @@
 #include "Connection.hpp"
 #include "Server.hpp"
 #include "CgiPipe.hpp"
+#include "Session.hpp"
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
@@ -139,26 +140,30 @@ ssize_t	Connection::pollin(void)
 	// sess.write_data()
 	// set some 
 	sess.write(this->ibuf, err);
-	// if (req_state < REQ_HAVE_HEAD)
-		// return (err);
-		
-	if (this->state < CONN_HAS_RSRC)
-	{
-		if (this->exec_cgi() < 0)
-		{
-			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
-			this->error = 501; // session (?)
-			this->mod_evt(-EPOLLIN);
+	switch (sess.nextAction()) {
+		case Session::DOCGI:
+			if (this->exec_cgi() < 0)
+			{
+				WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
+				this->error = 501; // session (?)
+				this->mod_evt(-EPOLLIN);
+				this->mod_evt(EPOLLOUT);
+				return (0);
+			}
+			if (this->cgi_ip)
+				this->cgi_ip->mod_evt(EPOLLOUT);
+			break;
+		case Session::WRSOCK:
 			this->mod_evt(EPOLLOUT);
-			return (0);
-		}
-		this->state = CONN_HAS_RSRC; // but body might not be done 
+			break;
+		case Session::RDSOCK:
+		case Session::KPALIVE:
+		case Session::CLOSE:
+			break;
 	}
 	// rsrc.input_data_available
 	// in sess.push_data()
 	// sess .. knows about rsrcCgi .. 
-	if (this->cgi_ip)
-		this->cgi_ip->mod_evt(EPOLLOUT);
 	return (err);
 }
 
@@ -176,6 +181,7 @@ ssize_t	Connection::pollout(void)
 	// check_state
 	// sess.get_state()
 	// rsrc.get_state()
+	/*
 	if (this->error)
 	{
 		// set (resp)
@@ -192,13 +198,16 @@ ssize_t	Connection::pollout(void)
 		
 		// and SEND NOW 
 	}
+	*/
 
 	// rsrc died by errror .. and we need to send it 
+	/*
 	if (this->state < CONN_HAS_RSRC)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no rsrc");
 		return (0);
 	}
+	*/
 
 	// rsrc.state / error 
 	// error
@@ -213,7 +222,9 @@ ssize_t	Connection::pollout(void)
 	// rsrc.state()
 	
 	// sess.check_state() -- could have tested (cgi) for errors
-	if (!this->cgi_ip && !this->cgi_op)
+	if (sess.nextAction() != Session::WRSOCK)
+		return 0;
+    if (!this->cgi_ip && !this->cgi_op)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: cgi DONE");
 
@@ -243,13 +254,16 @@ ssize_t	Connection::pollout(void)
 		}
 	}
 	
+	/*
 	if (this->state < RSRC_HAS_RESP) // or ERROR
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no resp");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
 	}
+	*/
 	
+	/*
 	if (this->state < CONN_SENT_RESP) 
 	{
 		// which may be an error .. page 
@@ -261,38 +275,41 @@ ssize_t	Connection::pollout(void)
 		this->state = CONN_SENT_RESP;
 		return (0);
 	}
+	*/
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
 
 	// rsrc.complete
 	char buf[4096];
-	size_t r = sess.read(buf, 4096);
-	std::string odata = std::string(buf, r);
-	if (odata.size() == 0) // rsrc/state seems like a better check
+	Stream::streamsize r = sess.read(buf, 4096);
+	if (r > 0)
+		err = this->send(buf, r);
+	if (sess.nextAction() != Session::WRSOCK) // rsrc/state seems like a better check
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: odata.size() == 0");
+		//WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: odata.size() == 0");
 
 // UGLY
-		if (this->cgi_op == NULL) // complete
+		// if (this->cgi_op == NULL) // complete
 		{
 
 // Keepalive : with chunked transfer encoding
 // Keepalive makes it difficult for the client to determine where one response ends and the next response begins, particularly during pipelined HTTP operation.[11] This is a serious problem when Content-Length cannot be used due to streaming.[12] To solve this problem, HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
-#if KEEP_ALIVE // -- would REQUIRE CONTENT-LENGTH from (cgi)
+// #if KEEP_ALIVE // -- would REQUIRE CONTENT-LENGTH from (cgi)
+			if (sess.nextAction() == Session::KPALIVE) {
 
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
 			// hm : did this only work when we sent back Content-Length
 			// see more HUP => read [0] with THIS .. AND NOT siege.conf
-			this->istr.clear();
-			this->state = 0;
+			// this->istr.clear();
+			// this->state = 0;
+			this->sess.reset();
 			this->mod_evt(-EPOLLOUT); // no rsrc
 			this->mod_evt(EPOLLIN);
 			return (0);
-#else
+			}
 			// TEST : content-length header .. longer than what we send
-			return (-1);		
-#endif			
+			// return (-1);		
 		}
 		// LUCKY .. send has probably already happened 
 		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
@@ -302,7 +319,6 @@ ssize_t	Connection::pollout(void)
 
 
 	
-	err = this->send(odata);
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CONN_SEND, "send");
@@ -315,8 +331,8 @@ ssize_t	Connection::pollout(void)
 	}
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	if (odata.size())
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", odata.size());
+	if (r)
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", r);
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
 
@@ -351,7 +367,7 @@ ssize_t	Connection::pollout(void)
 int	Connection::cgi_inp(void)
 {
 	// cgi_valid (?)
-	if (const_cast<Request &>(this->sess.getRequest()).getBody()->size())
+	if (this->sess.nextAction() == Session::DOCGI && this->sess.getRequest().hasBody())
 		return (1);
 	// if (req) has NOT received full body
 	this->mod_evt(EPOLLOUT);
@@ -366,6 +382,8 @@ int	Connection::cgi_inp(void)
 // resource .. fills some output_buffer in session
 int	Connection::cgi_out(const char *buf, ssize_t siz)
 {
+	/*
+	 Can't compile with that code.
 	if (this->state < RSRC_HAS_RESP)
 	{
 		// assume success if we get here (?)
@@ -374,13 +392,17 @@ int	Connection::cgi_out(const char *buf, ssize_t siz)
 		this->resp = std::string("HTTP/1.1 200 OK\r\n");
 		this->state = RSRC_HAS_RESP;
 	}
-	std::string odata = std::string(buf, siz);
+	std::string & odata = this->sess.read_data();
 	odata.append(buf, siz);
 	this->mod_evt(EPOLLOUT);
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "odata: ", odata.size());
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "odata");
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", odata);
+	*/
+
+	(void) buf;
+	(void) siz;
 	return (0);
 }
 
