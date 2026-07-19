@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 20:03:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 10:03:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <cstring>
 # include <algorithm>
 
+# include "Socket.hpp"
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
 # include "CgiEnv.hpp"
@@ -55,7 +56,6 @@ private:
 		{ return (*this); }
 		
 public:
-	
 	Connection (Epoll *_ep, int _fd, Server &_serv);
 	~Connection();
 	
@@ -65,30 +65,27 @@ public:
 	bool			timeo  (time_t now);
 	
 	void			set_err(int e);
-	void			set_addr(struct sockaddr_in *a) { this->addr = *a; }
-
+	void			set_addr(struct sockaddr_in *a);
+	std::string		&get_addr(void);
+	
 	Session			sess;
 	
 // Session/Resource
+	ResourceCgi		cgi;
 	int				req_body_status(void);
 	int				cgi_data(const char *buf, ssize_t siz);
 	
-	ResourceCgi		cgi;
-
-public:
+	// only CgiEnv::server_port
 	Server			&serv;
 
 private:
-	int				exec_cgi(void);
-	std::string		ostr;
+	int					exec_cgi(void);
+	std::string			ostr;
 	
-public:
 	struct sockaddr_in	addr;
+	std::string			astr;
 	
-private:
-	int				req_cnt;
-public:
-	int				state;
+	int					req_cnt;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 21:55:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 09:40:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,7 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->conn->req_body_status();
 	if (err < 0)	// body is complete and fully flushed
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: body complete");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: complete");
 		return (-1);
 	}
 	if (err == 0)	// body is not complete, but no data currently available

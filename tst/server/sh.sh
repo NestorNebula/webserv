@@ -1,13 +1,13 @@
 #!/bin/bash
 
-siege -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
-echo
-exit 0
-
-# KEEP_ALIVE
-# siege -f staging-urls.txt --internet --verbose --reps=1 --concurrent=4 --no-parser -b
+# siege -D -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
 # echo
 # exit 0
+
+# KEEP_ALIVE
+siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser -b
+echo
+exit 0
 
 
 # curl -X GET http://127.0.0.1:8080/index.html
@@ -24,7 +24,7 @@ exit 0
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/test.py -i \
+curl -X POST http://localhost:8081/ka.php -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

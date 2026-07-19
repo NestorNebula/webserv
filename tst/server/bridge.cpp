@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 20:10:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 09:29:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ std::string Request::header(const char *key) const
         return (this->file);
 	if (kstr == std::string("FEXT"))
         return (this->fext);
-	if (kstr == std::string("QUERY"))
+	if (kstr == std::string("VARS"))
         return (this->vars);
 	
 	std::string::const_iterator it = std::search(

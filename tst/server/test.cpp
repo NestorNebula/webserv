@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 01:32:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 09:51:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int main (int, char **, char **envp)
         // | TGT_CGI
         | TGT_CGI_RECV
         | TGT_CGI_SEND
-        | TGT_CGI_DATA
+        // | TGT_CGI_DATA
 
         // | TGT_SERV
         // | TGT_MAIN

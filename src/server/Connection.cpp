@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 01:42:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 10:20:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,8 +105,7 @@ void	ResourceCgi::rem(CgiPipe *epc)
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
 	serv(_serv), 
-	req_cnt(0),
-	state(0)
+	req_cnt(0)
 {
 };
 
@@ -236,7 +235,6 @@ ssize_t	Connection::pollout(void)
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
 			this->sess.req.clear();
 			this->cgi.reset();
-			this->state = 0;
 			this->mod_evt(-EPOLLOUT);
 			this->mod_evt(EPOLLIN);
 			return (0);
@@ -283,14 +281,23 @@ ssize_t	Connection::pollout(void)
 
 int	Connection::hup(void)
 {
+
+	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
 	return (-1);
 }
 
 
 
+void	Connection::set_addr(struct sockaddr_in *a)
+{
+	this->addr = *a; 
+	this->astr = addr_2_str(a);
+}
 
-
-
+std::string		&Connection::get_addr(void) 
+{
+	return (this->astr);
+}
 
 
 // multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
@@ -309,7 +316,7 @@ int	Connection::req_body_status(void)
 		return (1);
 	// if (body-fully-received) // ASSUMED
 	{
-		// this->mod_evt(-EPOLLIN); // KEEP_ALIVE (?)
+		this->mod_evt(-EPOLLIN); // keep-alive (?)
 		this->mod_evt(EPOLLOUT);		
 		return (-1);
 	}
@@ -338,31 +345,13 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		pos = ostr.find("Status");
 		if (pos == std::string::npos)
 		{
-/*
-	// this is why php is sucky
-X-Powered-By: PHP/8.4.21HTTP/1.1 200 OK
-
-Content-type: text/plain;charset=UTF-8
-
-
-cgi   : ****
-
-Content-type: text/plain;charset=UTF-8
-
-
-cgi   : ****
-HTTP/1.1 200 OK
-
-
-*/	
-// or -- for some reason .. php is shutting down ... 
-			size_t	pos = ostr.find("\r\n\r\n");
-			WsLog::_(LVL_ERR, TGT_CGI_DATA, "ostr");
-			WsLog::_(LVL_ERR, TGT_CGI_DATA, "****\n", ostr.substr(0, pos + 4));
+// size_t	pos = ostr.find("\r\n\r\n");
+// WsLog::_(LVL_ERR, TGT_CGI_DATA, "ostr");
+// WsLog::_(LVL_ERR, TGT_CGI_DATA, "****\n", ostr.substr(0, pos + 4));
 			
 			this->ostr.insert(0, std::string("HTTP/1.1 200 OK\r\n"));
-			pos = ostr.find("\r\n\r\n");
-			WsLog::_(LVL_ERR, TGT_CGI_DATA, "****\n", ostr.substr(0, pos + 4));			
+// pos = ostr.find("\r\n\r\n");
+// WsLog::_(LVL_ERR, TGT_CGI_DATA, "****\n", ostr.substr(0, pos + 4));			
 			return (0);
 		}
 
@@ -371,7 +360,6 @@ HTTP/1.1 200 OK
 		std::string val;
 		line >> key >> val;
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "stat: ", val);
-		
 
 		int http_stat = atoi(val.c_str());
 		if (http_stat != 200)
@@ -421,7 +409,7 @@ int	Connection::exec_cgi(void)
 		const char **envp = cgienv->gen();
 
 		signal(SIGINT, SIG_DFL);
-		// pipes.dup_err();
+		pipes.dup_err();
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();

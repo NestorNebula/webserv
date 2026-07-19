@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 01:26:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 10:00:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add("REQUEST_METHOD", "GET");
 
 
-	// (chdir)
+	// (chdir) ? 
 	val = req.header("PATH");
 	if (val.size())
 	{
@@ -121,14 +121,15 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("VARS");
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
-	else
-		this->add("QUERY_STRING", "g1=get-one&g2=get-two");
+	// else
+	// 	this->add("QUERY_STRING", "g1=get-one&g2=get-two");
 
 		
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
 	this->add("REDIRECT_STATUS", "1");
+	// webserv_root + 
 	this->add("PYTHONPATH", 
 		// "/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
 		"/media/kdonlon/data/Documents/42/webserv/legacy-cgi-main/");
@@ -171,7 +172,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		// Sec-Fetch
 	this->add("HTTP_COOKIE", "chocolate chip");
 	
-	this->add("REMOTE_ADDR", addr_2_str(&conn.addr).c_str());
+	this->add("REMOTE_ADDR", conn.get_addr().c_str());
 	// this->add("REMOTE_HOST", "remote host");
 	// this->add("REMOTE_USER", "remote user");
 	
