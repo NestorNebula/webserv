@@ -302,3 +302,46 @@ footer {
 #result.error {
 	color: var(--error-color);
 }
+
+#dir-list-section {
+	font-size: 2.5rem;
+	gap: 2rem;
+}
+
+.dir-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.file-link {
+	position: relative;
+	color: var(--badge-color);
+	text-decoration: none;
+	font-style: italic;
+	transition: color 0.25s ease-in;
+}
+
+.file-link::before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 100%;
+	width: 0; 
+	height: 2px;
+	background-color: var(--http-color);
+	transition: width 0.25s ease-out;
+}
+
+.file-link:hover {
+	color: var(--http-color);
+}
+
+.file-link:hover::before {
+	width: 100%;
+}
+
+#error-section {
+	color: var(--error-color);
+	letter-spacing: 0.1rem;
+}
