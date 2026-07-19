@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 09:51:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:47:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ int main (int, char **, char **envp)
         | TGT_EPOLL_EVT
         | TGT_EPOLL_CTL
         
-        | TGT_EPC
-        | TGT_EPC_RECV
-        | TGT_EPC_SEND
+        // | TGT_EPC
+        // | TGT_EPC_RECV
+        // | TGT_EPC_SEND
         
         
         // | TGT_CONN

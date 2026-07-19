@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 10:03:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:33:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class CgiPipe;
 class ResourceCgi
 {
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), xit(-1), sig(-1) {}
 	~ResourceCgi();
 	
 	pid_t		pid;
@@ -41,6 +41,8 @@ public:
 	CgiPipe		*op;
 	int			stat;
 	int			hed;
+	int			xit;
+	int			sig;
 
 	int			status(int opt);
 	void		rem(CgiPipe *epc);
@@ -71,9 +73,14 @@ public:
 	Session			sess;
 	
 // Session/Resource
+private:
 	ResourceCgi		cgi;
+	
+public:
 	int				req_body_status(void);
 	int				cgi_data(const char *buf, ssize_t siz);
+	void			cgi_rem(CgiPipe *epc);
+	int				cgi_status(int opt);
 	
 	// only CgiEnv::server_port
 	Server			&serv;

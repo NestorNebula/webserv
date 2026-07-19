@@ -1,20 +1,25 @@
 #!/bin/bash
 
-# siege -D -f staging-urls.txt --internet --verbose --reps=2 --concurrent=200 --no-parser -b
+# siege -f staging-urls.sh --internet --verbose --reps=4 --concurrent=200 --no-parser -b
 # echo
 # exit 0
 
-# KEEP_ALIVE
-siege -f staging-urls.txt --internet --verbose --reps=4 --concurrent=4 --no-parser -b
+siege -f staging-urls.sh --internet --verbose --reps=8 --concurrent=200 --no-parser -b
 echo
 exit 0
 
 
-# curl -X GET http://127.0.0.1:8080/index.html
+# curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
 # echo
 # exit 0
-# curl -X GET http://localhost:8081?a1=one -i
+
+# curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
 # echo
+# exit 0
+
+curl -X GET http://localhost:8081/suck.pl -i
+echo
+exit 0
 # curl -X POST http://localhost:8082?b2=two -i
 # echo
 # exit 0
@@ -24,15 +29,15 @@ exit 0
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/ka.php -i \
-	 -d "p1=post-one&p2=post-two"
-echo
-exit 0
+# curl -X POST http://localhost:8081/ka.php -i \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# exit 0
 
-curl -X POST http://localhost:8082/test.pl \
-	 -d "p1=post-one&p2=post-two"
-echo
-exit 0
+# curl -X POST http://localhost:8082/test.pl \
+# 	 -d "p1=post-one&p2=post-two"
+# echo
+# exit 0
 
 
 # curl -X POST http://localhost:8081 \

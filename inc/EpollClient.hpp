@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 09:46:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:53:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 #  define EPC_BUF_SIZ 8192
 # endif
 
+// ATTN : small values .. 
+// may not flush PIPE quickly enough
 # ifndef EPC_OUT_SIZ
 #  define EPC_OUT_SIZ 8192 // (3) -- good test for cgi-out
 # endif

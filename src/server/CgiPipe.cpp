@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 09:40:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:32:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ CgiPipe::~CgiPipe()
 {
 	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
 	if (this->conn)
-		this->conn->cgi.rem(this);
+		this->conn->cgi_rem(this);
 }
 
 bool	CgiPipe::timeo(time_t now)
@@ -170,9 +170,12 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->conn == NULL)
 		return (-1);
 // SESSION : check_status()
-	if (this->conn->cgi.status(WNOHANG) > 0)
+	if (this->conn->cgi_status(WNOHANG) > 0)
 	{
-		this->conn->set_err(500);
+		// if (this->conn->cgi.xit == 2)
+		// 	this->conn->set_err(404);
+		// else
+		// 	this->conn->set_err(500);
 		return (-1);
 	}	
 	ssize_t	err;

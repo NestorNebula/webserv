@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 10:20:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:59:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	ResourceCgi::reset(void)
 	{
 		if (this->stat == -1)
 		{
-			// kill(this->pid, SIGKILL);
+			kill(this->pid, SIGKILL);
 			this->status(0);
 		}
 	}
@@ -48,16 +48,19 @@ void	ResourceCgi::reset(void)
 	this->hed  = 0;
 }
 
-// session::status()
-// resource::status()
 int	ResourceCgi::status(int opt)
 {
 	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "pid : ", this->pid);
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "xit : ", this->xit);
 	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "stat: ", this->stat);
 	if (this->stat != -1)
+	{
 		return (this->stat);
+	}
 	if (this->pid == 0)
+	{
 		return (this->stat);
+	}
 	
 	int err = waitpid(this->pid, &this->stat, opt);
 	
@@ -71,11 +74,15 @@ int	ResourceCgi::status(int opt)
 		WsLog::_errno(LVL_ERR, TGT_CGI_RSRC, "waitpid");
 	if (WIFEXITED(stat))
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "exit: ", WEXITSTATUS(stat));
+		this->xit = WEXITSTATUS(stat);
+		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "exit: ", xit);
+		// (2) : No such file or directory
+		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "exit: ", strerror(xit));
 	}
 	else if (WIFSIGNALED(stat))
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "sig : ", WTERMSIG(stat));
+		this->sig = WTERMSIG(stat);
+		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "sig : ", sig);
 	}
 	this->pid = 0;
 	return (this->stat);
@@ -85,19 +92,11 @@ int	ResourceCgi::status(int opt)
 void	ResourceCgi::rem(CgiPipe *epc)
 {
 	if (epc == this->ip)
-	{
 		this->ip = NULL;
-	}
 	else if (epc == this->op)
-	{
 		this->op = NULL;
-		// this->mod_evt(EPOLLOUT); // conn
-	}
 	if (this->ip == NULL && this->op == NULL)
-	{
 		this->status(0);
-		// may need to set conn->error
-	}
 }
 
 
@@ -156,13 +155,20 @@ ssize_t	Connection::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
 		return (err);
 	}
-	if (err == 0) // FWIW : often with evt typ : in rdhup
+	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-
-		// this->mod_evt(-EPOLLIN);
-		// this->mod_evt(EPOLLOUT);
-		return (-1); // (0) here : EPOLLRDHUP => hup
+#if 1
+		if (this->cgi.status(WNOHANG) > 0)
+			return (-1); // (?)
+#else
+			// sets error .. 
+			// but we may already be sending (?)
+		if (this->cgi_status(WNOHANG) > 0)
+			this->mod_evt(EPOLLOUT);
+#endif
+		this->mod_evt(-EPOLLIN);
+		return (0);
 	}
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
@@ -174,6 +180,7 @@ ssize_t	Connection::pollin(void)
 		
 	if (this->cgi.pid == 0)
 	{
+		this->req_cnt++;
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
@@ -182,11 +189,10 @@ ssize_t	Connection::pollin(void)
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
-		this->req_cnt++;
 	}
-	
 	if (this->cgi.ip)
 	{
+		// cig.input_available()
 		this->cgi.ip->mod_evt(EPOLLOUT);
 		// this->mod_evt(EPOLLOUT);
 	}
@@ -205,10 +211,8 @@ ssize_t	Connection::pollout(void)
 	ssize_t	err = 0;
 	
 	if (this->error == 0)
-	{
-		if (this->cgi.status(WNOHANG) > 0)
-			this->set_err(500);
-	}
+		this->cgi_status(WNOHANG);
+		
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: error");
@@ -221,6 +225,11 @@ ssize_t	Connection::pollout(void)
 		return (-1);
 	}
 	
+	if (!this->cgi.hed)
+	{
+		this->mod_evt(-EPOLLOUT); 
+		return (0);
+	}
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
 	
@@ -245,8 +254,7 @@ ssize_t	Connection::pollout(void)
 		// if (this->cgi.pid)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
-			// LUCKY .. send has probably already happened 
-			this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
+			this->mod_evt(-EPOLLOUT);
 			return (0);
 		}
 		return (-1);
@@ -281,7 +289,6 @@ ssize_t	Connection::pollout(void)
 
 int	Connection::hup(void)
 {
-
 	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
 	return (-1);
 }
@@ -323,7 +330,6 @@ int	Connection::req_body_status(void)
 	return (0);
 }
 
-// SESSION
 int	Connection::cgi_data(const char *buf, ssize_t siz)
 {
 	this->ostr.append(buf, siz);
@@ -336,12 +342,11 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	{
 		size_t	pos = ostr.find("\r\n\r\n");
 		if (pos == std::string::npos)
-		{
 			return (0);
-		}
+			
 		this->cgi.hed = 1;
-		// WsLog::_(LVL_DBG, TGT_CGI_RECV, "head:");
-		// WsLog::_(LVL_DBG, TGT_CGI_RECV, "****\n", ostr);
+// WsLog::_(LVL_DBG, TGT_CGI_RECV, "head:");
+// WsLog::_(LVL_DBG, TGT_CGI_RECV, "****\n", ostr);
 		pos = ostr.find("Status");
 		if (pos == std::string::npos)
 		{
@@ -367,9 +372,28 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		else
 			this->ostr.insert(0, std::string("HTTP/1.1 200 OK\r\n"));
 	}
-
-
 	return (0);
+}
+
+
+void	Connection::cgi_rem(CgiPipe *epc)
+{
+	this->cgi.rem(epc);
+}
+
+int		Connection::cgi_status(int opt)
+{ 
+	int	err;
+
+	err = this->cgi.status(opt);
+	if (err > 0)
+	{
+		if (this->cgi.xit == 2)
+			this->set_err(404);
+		else
+			this->set_err(500);
+	}
+	return (err); 
 }
 
 int	Connection::exec_cgi(void)

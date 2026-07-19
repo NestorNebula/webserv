@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 10:08:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 12:56:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,21 +82,23 @@ int	EpollClient::event(struct epoll_event *e)
 	if (e->events & EPOLLIN)
 	{
 		err = this->pollin();
-		if (err < 0) // && state (?)
+		if (err < 0)
 			return (err);
 	}
 	if (e->events & EPOLLOUT)
 	{
 		err = this->pollout();
-		if (err < 0) // && state (?)
+		if (err < 0)
 			return (err);
 	}	
-	if (e->events & EPOLLRDHUP)
+	// in out hup : may not have fully flushed (read/write)
+	if (e->events == EPOLLRDHUP)
 	{
+		// this->mod_evt(EPOLLIN);
 		this->hup();
 		return (-1);
 	}
-	if (e->events & EPOLLHUP)
+	if (e->events == EPOLLHUP)
 	{
 		this->hup();
 		return (-1);
@@ -111,7 +113,6 @@ ssize_t	EpollClient::recv(void)
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
 	WsLog::_(LVL_DBG, TGT_EPC_RECV, "recv: ", err);
-	
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
@@ -128,6 +129,9 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
 
+	// if (fcntl(this->fd, F_GETFD) < 0)
+	// 	return (-1);
+	
 	err = write(this->fd, buf, siz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
@@ -145,14 +149,13 @@ ssize_t	EpollClient::send(std::string & str)
 		
 	ssize_t	err;
 
-	// if (fcntl(this->fd, F_GETFD) < 0)
-	// 	return (-1);
 	err = this->send(str.c_str(), str.size());
 	if (err <= 0)
 		return (err);
-	str.erase(0, err); // here (?) or caller (?)
+	str.erase(0, err);
 	return (err);
 }
+
 ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 {
 	ssize_t	err;
@@ -160,7 +163,7 @@ ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 	err = this->send(str.c_str(), cnt);
 	if (err <= 0)
 		return (err);
-	str.erase(0, err); // here (?) or caller (?)
+	str.erase(0, err);
 	return (err);
 }
 

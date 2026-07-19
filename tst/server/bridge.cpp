@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 09:29:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 11:08:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ int Request::init(void)
         fext = file.substr(pos + 1);
     }
     
+	WsLog::_(LVL_DBG, TGT_HEAD, "head: ", head);
 	WsLog::_(LVL_DBG, TGT_HEAD, "meth: ", meth);
 	WsLog::_(LVL_DBG, TGT_HEAD, "path: ", path);
 	WsLog::_(LVL_DBG, TGT_HEAD, "file: ", file);
