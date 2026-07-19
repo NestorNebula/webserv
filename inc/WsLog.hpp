@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 16:37:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 23:42:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ public:
 	
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n);
+	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n);
 

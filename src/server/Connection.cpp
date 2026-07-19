@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 14:27:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 23:42:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,11 @@ int	ResourceCgi::status(int opt)
 void	ResourceCgi::rem(CgiPipe *epc)
 {
 	if (epc == this->ip)
+	{
 		this->ip = NULL;
+		if (this->op)
+			this->op->mod_evt(EPOLLIN);
+	}
 	else if (epc == this->op)
 		this->op = NULL;
 	if (this->ip == NULL && this->op == NULL)
@@ -202,7 +206,7 @@ ssize_t	Connection::pollin(void)
 		this->req_cnt++;
 		if (this->exec_cgi() < 0)
 		{
-			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
+			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
 			this->set_err(500);
 			// this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
@@ -212,8 +216,11 @@ ssize_t	Connection::pollin(void)
 	if (this->cgi.ip)
 	{
 		// cig.input_available()
-		// not seeing this 
-		this->cgi.ip->mod_evt(EPOLLOUT);
+		// NOT SEEING THIS 
+		// this->mod_evt(-EPOLLIN);
+		// at some point .. cgi_ip .. stops draining
+		WsLog::_(LVL_ERR, TGT_CONN, "push: cgi");
+		// this->cgi.ip->mod_evt(EPOLLOUT);
 		// this->mod_evt(EPOLLOUT);
 	}
 	return (err);

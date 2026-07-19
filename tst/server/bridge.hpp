@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 15:22:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 22:10:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ private:
 	size_t	blen;
 	size_t	clen;
 	int		chnk;
-	int		csiz;
+	ssize_t	csiz;
 
 	std::string meth;
 	std::string path;

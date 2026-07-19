@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 10:29:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 23:00:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	this->add("REDIRECT_STATUS", "1");
 	// webserv_root + 
 	this->add("PYTHONPATH", 
-		// "/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
-		"/media/kdonlon/data/Documents/42/webserv/legacy-cgi-main/");
+		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
+		// "/media/kdonlon/data/Documents/42/webserv/legacy-cgi-main/");
 
 
 // If the output of a form is being processed, check that CONTENT_TYPE
@@ -156,6 +156,11 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("User-Agent");
 	if (val.size())
 		this->add("HTTP_USER_AGENT", val.c_str());
+
+	val = req.header("Transfer-Encoding");
+	if (val.size())
+		this->add("HTTP_TRANSFER_ENCODING", val.c_str());
+
 	val = req.header("Accept");
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());

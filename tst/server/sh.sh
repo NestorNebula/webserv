@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=2 --concurrent=50 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=2 --concurrent=200 --no-parser -b
 	echo
 	exit 0
 fi
@@ -42,15 +42,13 @@ fi
 # echo
 # exit 0
 
-	# multipart/form-data
-
-
-curl -X POST http://localhost:8081/test.php -i \
-	-F p1=post-one \
-	-F p2=post-two \
-	-F file=@files/2k_earth_daymap.jpg
-echo
-exit 0
+	# multipart/form-data by default
+# curl -X POST http://localhost:8081/test.php -i \
+# 	-F p1=dash-f-one \
+# 	-F p2=dash-f-two \
+# 	-F file=@files/2k_earth_daymap.jpg
+# echo
+# exit 0
 
 
 
@@ -102,15 +100,20 @@ exit 0
 # Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
 # Expect: 100-continue
 
-# without (chunked)
+# curl -X POST http://localhost:8082/test.php \
+# 	-F file=@files/2k_earth_daymap.jpg
+# echo
+# exit 0
+
 # content-length tells cgi when it has enough
 	# -H "Transfer-Encoding: chunked" \
 
+	# -H "Content-Type: application/x-www-form-urlencoded" \
 curl -X POST http://localhost:8082/test.php \
 	-H "Transfer-Encoding: chunked" \
+	-F p1=chunked_one \
+	-F p2=chunked_two \
 	-F file=@files/2k_earth_daymap.jpg
-
-	
 echo
 exit 0
 

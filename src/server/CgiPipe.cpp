@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 14:27:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 23:03:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,10 +184,12 @@ ssize_t	CgiPipe::pollout(void)
 	if (err < 0)	// body is complete and fully flushed
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: complete");
+		// close fd .. should trigger script, right (?)
 		return (-1);
 	}
 	if (err == 0)	// body is not complete, but no data currently available
 	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: waiting");
 		this->mod_evt(0);
 		return (0);
 	}

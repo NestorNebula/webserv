@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 16:09:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 23:37:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,16 @@ static unsigned int	chunk_size(std::string & str, size_t off)
 	unsigned int x;   
 	std::stringstream ss(str.substr(off));
 	ss >> std::hex >> x;
-	size_t pos = ss.tellg();
-	str.erase(0, pos + 2); // CRLF
+	size_t pos = ss.tellg(); // end of string (!) -- what .. don't have \r\n !!!
+    WsLog::_(LVL_DBG, TGT_HEAD, "csiz: erase ", off, pos);
+    if (pos == std::string::npos)
+    {
+        str.erase(off);
+        return (x);
+    }
+	str.erase(off, pos + 2); // CRLF
 	if (x == 0)
-		str.erase(0, pos + 4); // CRLF CRLF
+		str.erase(off, 2);
 	return (x);
 }
 int Request::push_data(const char *buf, size_t siz)
@@ -47,61 +53,119 @@ int Request::push_data(const char *buf, size_t siz)
         head.erase(crlf + 4);
         this->init();
         blen = body.size();
+        if (!chnk)
+            return (this->state);
+        csiz = chunk_size(body, 0);
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+        csiz -= body.size();      
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+
+        WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(0, 256));
         return (this->state);
+    }
+    else
+    {
+        this->body.append(buf, siz);
+        blen += siz; // including chunk info
+        
     }
     // is chunked "nice" .. sending only the header
     // so we can approve (?)
     // so we only need to un-chunk here (?)
     
-    this->body.append(buf, siz);
-    blen += siz; // including chunk info
     
     WsLog::_(LVL_DBG, TGT_HEAD, "blen: ", blen);
-    if (chnk)
-    {
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-        if (csiz > 0)
-        {
-            csiz -= siz;
-            if (csiz <= 0)
-            {
-                WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-                WsLog::_(LVL_DBG, TGT_HEAD, "bsiz: ", body.size());   
-            }
-        }
-        if (csiz <= 0)
-        {
-            if (csiz < 0)
-            {
-                WsLog::_(LVL_DBG, TGT_HEAD, "new: ", body.substr(body.size() + csiz));
-            }
-            // WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(0, 128));
-            // NOPE : need to strip ..
-            // from : what just came in 
-            std::string crlf("\r\n\r\n");
-            size_t	pos = body.find(crlf);
-            if (pos == std::string::npos)
-            {
-                WsLog::_(LVL_DBG, TGT_HEAD, "crlf: not found");
-                pos = 3;
-            }
-            size_t beg = body.rfind(crlf, pos - 5);
-            if (beg == std::string::npos)
-            {
-                WsLog::_(LVL_DBG, TGT_HEAD, "beg : not found");
-                beg = 0;
-            }
-            csiz = chunk_size(body, beg);
-            // and .. subtract what we just received 
-            WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-            WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(beg, 128));
-            // blen = body.size();
-        }
-    }
-    else
+    if (!chnk)
     {
         WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
+        return (this->state);
     }
+
+    csiz -= siz;
+    WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+    WsLog::_(LVL_DBG, TGT_HEAD, "bsiz: ", body.size());
+    // if (csiz > -2)
+    // {
+    //     if (csiz <= 0)
+    //     {
+    //         WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+    //         WsLog::_(LVL_DBG, TGT_HEAD, "bsiz: ", body.size());   
+    //     }
+    // }
+    if (csiz <= -8)
+    {
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: refresh");
+        
+// MAY NEED MORE BODY DATA
+        size_t end = body.size() + csiz;
+        WsLog::_(LVL_DBG, TGT_HEAD, "end : ", end);
+        
+        WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(end, 128));
+
+        std::string crlf("\r\n");
+        size_t	chk = body.find(crlf, end);
+        if (chk != end)
+        {
+            WsLog::_(LVL_DBG, TGT_HEAD, "end : expected crlf ", chk, end);
+            return (this->state);
+            // chnk = 0;
+            // return (this->state);
+            // as long as chk is not npos .. we should be ok
+        }
+        body.erase(chk, 2);
+        WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(chk, 128));
+        csiz = chunk_size(body, chk);
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+            // should have been erased .. 
+        WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(chk, 128));
+        csiz -= (body.size() - chk);
+        // have not yet got \r\n following -- not part of body size 
+        // so .. two bytes short
+        
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+
+        // if (chk + csiz < (ssize_t) body.size())
+        //     WsLog::_(LVL_DBG, TGT_HEAD, "CSIZ: check again");
+        // chnk = 0;
+#if 0
+        ssize_t beg = body.size() - siz;
+        if (beg < 0)
+            beg = 0;
+        WsLog::_(LVL_DBG, TGT_HEAD, "beg : ", beg);
+        
+        std::string crlf("\r\n");
+        
+        // could be finding eol of DATA (!)
+        size_t	eol = body.find(crlf, beg);
+        if (eol == std::string::npos)
+        {
+            WsLog::_(LVL_DBG, TGT_HEAD, "eol : not found");
+        }
+        // is eol end of DATA (?)
+        csiz = chunk_size(body, beg);
+        // and .. subtract what we just received 
+        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+        chnk = 0;
+        // size_t beg = body.rfind(crlf, pos);
+        // if (beg == std::string::npos)
+        // {
+        //     WsLog::_(LVL_DBG, TGT_HEAD, "beg : not found");
+        //     beg = 0;
+        // }
+        // csiz = chunk_size(body, beg);
+        // // and .. subtract what we just received 
+        // WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
+        // WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(beg, 128));
+        // // blen = body.size()
+#endif
+    }
+    // something not clean here 
+    if (csiz < 0)
+    {
+        size_t end = body.size() + csiz;
+        WsLog::_(LVL_DBG, TGT_HEAD, "END : ", body.substr(end, 128));
+    }
+    
     return (this->state);
 }
 
@@ -182,7 +246,11 @@ int Request::body_stat(void)
     if (this->body.size())
         return (1);
     if (this->chnk)
+    {
+        if (csiz < 0)
+            return (-1);
         return (0);
+    }
     if (clen && blen < clen)
         return (0);
     return (-1);

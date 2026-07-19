@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:15:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 21:45:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << std::endl;
     std::cerr << stream.str();
-
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
@@ -80,8 +79,18 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
     std::stringstream stream;
     stream<< tgt_prefix(msg_tgt) << msg << "[" << n << "]" << std::endl;
     std::cerr << stream.str();
-    
 }
+
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j)
+{
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return;
+
+    std::stringstream stream;
+    stream<< tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]" << std::endl;
+    std::cerr << stream.str();
+}
+
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str)
 {
@@ -91,7 +100,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string 
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << str << std::endl;
     std::cerr << stream.str();
-
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
@@ -102,8 +110,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << n << std::endl;
     std::cerr << stream.str();
-
 }
+
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
