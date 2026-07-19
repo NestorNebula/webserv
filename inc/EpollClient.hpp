@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:53:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 13:48:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@
 # include <vector>
 # include "WsLog.hpp"
 
+
+// CONFIG
 # ifndef EPC_TIMEOUT
-#  define EPC_TIMEOUT 5
+#  define EPC_TIMEOUT 55
 # endif
 
 # ifndef EPC_BUF_SIZ
@@ -51,9 +53,11 @@ private:
 	EpollClient & operator = (const EpollClient & ) 
 		{ return (*this); }
 public:
-	EpollClient (Epoll *_ep, epc_typ _typ, int _fd);
-	EpollClient (const EpollClient & that) : 
+	EpollClient				 (const EpollClient & that) : 
 		ep(that.ep), typ(that.typ), fd(that.fd) {}
+		
+	EpollClient (Epoll *_ep, epc_typ _typ, int _fd);
+	
 	virtual ~EpollClient();
 
 	ssize_t			recv(void);
@@ -70,11 +74,8 @@ public:
 	int				mod_evt(int e);
 	int				event(struct epoll_event *e);
 
-	int					get_fd  (void) const
-		{ return (this->fd); }
-	struct epoll_event	*get_evt(void)
-		{ return (&this->evt); }
-		
+	int					get_fd  (void) const;
+	struct epoll_event	*get_evt(void);
     std::string 		typ_str(void);
 	
 protected:

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:33:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 13:18:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ public:
 	void			cgi_rem(CgiPipe *epc);
 	int				cgi_status(int opt);
 	
-	// only CgiEnv::server_port
 	Server			&serv;
 
 private:

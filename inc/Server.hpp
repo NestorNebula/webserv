@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 22:45:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 13:06:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,10 @@ public:
 
 	ssize_t				pollin (void);
 	ssize_t				pollout(void);
-	int					hup    (void) { return (0); }
-	bool				timeo  (time_t) { return (false); }
+	int					hup    (void);
+	bool				timeo  (time_t);
 	
-	unsigned short		get_port(void)	const { return (this->port); }
+	unsigned short		get_port(void)	const;
 	
 private:
 	struct sockaddr_in	addr;

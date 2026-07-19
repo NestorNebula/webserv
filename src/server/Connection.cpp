@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:59:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 14:27:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,24 @@
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "(~) ResourceCgi");
+	
+#if 1
 	this->reset();
+#else
+	// this may be gentler
+	// if we only delete .. when connection is deleting
+	if (this->ip)
+	{
+		this->ip->conn_closed();
+		// this->ip->mod_evt(EPOLLIN);
+	}
+	if (this->op)
+	{
+		this->op->conn_closed();
+		// this->op->mod_evt(EPOLLOUT);
+	}
+	this->status(0);
+#endif
 }
 
 void	ResourceCgi::reset(void)
@@ -83,6 +100,7 @@ int	ResourceCgi::status(int opt)
 	{
 		this->sig = WTERMSIG(stat);
 		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "sig : ", sig);
+		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "sig : ", strsignal(sig));
 	}
 	this->pid = 0;
 	return (this->stat);
@@ -121,7 +139,7 @@ bool	Connection::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + EPC_TIMEOUT) < now)
+	if ((this->lact + EPC_TIMEOUT) < now) // server (?)
 	{
 		this->set_err(408);
 		this->mod_evt(EPOLLOUT);
@@ -140,7 +158,8 @@ void	Connection::set_err(int e)
 	this->error = e;
 	std::string err_str = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n\r\nError Data\r\n");
 
-	this->ostr.insert(0, err_str);
+	// this->ostr.insert(0, err_str);
+	this->ostr = err_str;
 	this->mod_evt(EPOLLOUT);
 }
 
@@ -193,6 +212,7 @@ ssize_t	Connection::pollin(void)
 	if (this->cgi.ip)
 	{
 		// cig.input_available()
+		// not seeing this 
 		this->cgi.ip->mod_evt(EPOLLOUT);
 		// this->mod_evt(EPOLLOUT);
 	}
@@ -255,6 +275,8 @@ ssize_t	Connection::pollout(void)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
 			this->mod_evt(-EPOLLOUT);
+			// POST-DATA
+			this->mod_evt(EPOLLIN); // 
 			return (0);
 		}
 		return (-1);
@@ -301,7 +323,7 @@ void	Connection::set_addr(struct sockaddr_in *a)
 	this->astr = addr_2_str(a);
 }
 
-std::string		&Connection::get_addr(void) 
+std::string		&Connection::get_addr(void)
 {
 	return (this->astr);
 }
@@ -319,15 +341,16 @@ std::string		&Connection::get_addr(void)
 // SESSION
 int	Connection::req_body_status(void)
 {
-	if (this->sess.req.get_body().size())
+	int	err = this->sess.req.body_stat();
+
+	if (err == 1) // body.size()
 		return (1);
-	// if (body-fully-received) // ASSUMED
-	{
-		this->mod_evt(-EPOLLIN); // keep-alive (?)
-		this->mod_evt(EPOLLOUT);		
-		return (-1);
-	}
-	return (0);
+	if (err == 0)
+		return (0); // not done
+		
+	this->mod_evt(-EPOLLIN); 
+	this->mod_evt(EPOLLOUT);		
+	return (-1);
 }
 
 int	Connection::cgi_data(const char *buf, ssize_t siz)
@@ -433,7 +456,7 @@ int	Connection::exec_cgi(void)
 		const char **envp = cgienv->gen();
 
 		signal(SIGINT, SIG_DFL);
-		pipes.dup_err();
+		// pipes.dup_err();
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();

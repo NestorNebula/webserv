@@ -54,6 +54,6 @@
 
 // POST Content-Length of 14976173 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 
-    // print_r($_FILES['file']); // Array
-    // move_uploaded_file($_FILES['file']['tmp_name'], "./" . $_FILES['file']['name']);
+    print_r($_FILES['file']); // Array
+    move_uploaded_file($_FILES['file']['tmp_name'], "./uploads/" . $_FILES['file']['name']);
 ?>

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 18:58:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 13:07:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ public:
 	int			hup    (void);
 	bool		timeo  (time_t);
 
-	void		conn_closed(void) { this->conn = NULL; }
+	void		conn_closed(void);
 
 private:
 	Connection		*conn;

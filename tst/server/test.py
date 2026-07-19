@@ -40,6 +40,6 @@ if "file" in form:
     if file_item.filename:
         print("file name", file_item.filename)
         file_name = file_item.filename
-        file_path = './' + file_name
+        file_path = './uploads/' + file_name
         with open(file_path, 'wb') as file:
             file.write(file_item.file.read())

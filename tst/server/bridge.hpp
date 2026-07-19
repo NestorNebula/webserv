@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/18 20:10:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 14:46:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,11 @@
 class Request
 {
 public:
-	Request(void) : state(REQ_INIT) {}
+	Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
 	~Request() {}
 
 	int         push_data(const char *buf, size_t siz);
+	int			body_stat(void);
 	int         init(void);
 	std::string header(const char *key) const;
 
@@ -47,6 +48,10 @@ private:
 	std::string	head;
 	std::string body; // sess.ip_data
 	std::string exec;
+
+	size_t	blen;
+	size_t	clen;
+	int		chnk;
 
 	std::string meth;
 	std::string path;

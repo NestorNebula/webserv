@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:56:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 13:03:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,17 @@ ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 	return (err);
 }
 
+
+int	EpollClient::get_fd  (void) const
+{
+	return (this->fd);
+}
+
+struct epoll_event	*EpollClient::get_evt(void)
+{
+	return (&this->evt);
+}
+	
 static const char *epc_str[] = 
 {
 	"serv",

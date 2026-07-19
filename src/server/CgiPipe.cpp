@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 12:32:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 14:27:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,11 +126,11 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + EPC_TIMEOUT) < now)
+	if ((this->lact + EPC_TIMEOUT) < now) // server (?)
 	{
 		if (this->conn)
 			this->conn->set_err(408); // script timed out .. 
-		// kill (?)
+		// kill here (?)
 		return (true);
 	}
 	return (false);
@@ -218,4 +218,9 @@ int		CgiPipe::hup(void)
 		return (-1);
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
+}
+
+void	CgiPipe::conn_closed(void)
+{ 
+	this->conn = NULL;
 }

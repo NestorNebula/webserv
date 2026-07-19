@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 11:08:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 15:15:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,26 @@ int Request::push_data(const char *buf, size_t siz)
         body = head.substr(crlf + 4);
         head.erase(crlf + 4);
         this->init();
+        blen = body.size();
         return (this->state);
     }
+    // is chunked "nice" .. sending only the header
+    // so we can approve (?)
+    // so we only need to un-chunk here (?)
     
     this->body.append(buf, siz);
+    blen += siz; 
+    
+    WsLog::_(LVL_DBG, TGT_HEAD, "blen: ", blen);
+    WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
+    if (chnk)
+    {
+        // parse 
+        WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(0, 256));
+    }
     return (this->state);
 }
+
 
 void Request::clear(void)
 {
@@ -53,6 +67,8 @@ void Request::clear(void)
     fext.clear();
     vars.clear();
 
+    blen = 0;
+    clen = 0;
     state = REQ_INIT;
 }
 
@@ -92,7 +108,33 @@ int Request::init(void)
 	WsLog::_(LVL_DBG, TGT_HEAD, "fext: ", fext);
 	WsLog::_(LVL_DBG, TGT_HEAD, "vars: ", vars);
     
+    std::string val = header("content-length");
+    if (val.size())
+        clen = atoi(val.c_str());
+    WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
+
+    val = header("transfer-encoding");
+    if (val.size())
+    {
+        pos = val.find("chunked"); // case (!)
+        if (pos != std::string::npos)
+        {
+            chnk = 1;
+        }
+    }
+	WsLog::_(LVL_DBG, TGT_HEAD, "chnk: ", chnk);
     return (0);
+}
+
+int Request::body_stat(void)
+{
+    if (this->body.size())
+        return (1);
+    if (this->chnk)
+        return (0);
+    if (clen && blen < clen)
+        return (0);
+    return (-1);
 }
 
 static bool	icmp(char a, char b)

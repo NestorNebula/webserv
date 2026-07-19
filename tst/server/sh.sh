@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# siege -f staging-urls.sh --internet --verbose --reps=4 --concurrent=200 --no-parser -b
-# echo
-# exit 0
-
-siege -f staging-urls.sh --internet --verbose --reps=8 --concurrent=200 --no-parser -b
-echo
-exit 0
-
+if [ "$1" == "s" ]; then
+	siege -f staging-urls.sh --internet --verbose --reps=2 --concurrent=50 --no-parser -b
+	echo
+	exit 0
+fi
 
 # curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
 # echo
@@ -17,15 +14,14 @@ exit 0
 # echo
 # exit 0
 
-curl -X GET http://localhost:8081/suck.pl -i
-echo
-exit 0
-# curl -X POST http://localhost:8082?b2=two -i
+# curl -X GET http://localhost:8081/bigvideo.php -i --output data.mkv
 # echo
 # exit 0
 
-# curl -X GET 'http://localhost:8080/?g1=sig_one&g2=sig_two' \
-# 	 -d "p1=post-one&p2=post-two"
+
+
+
+# curl -X GET http://localhost:8081/to.php -i
 # echo
 # exit 0
 
@@ -40,7 +36,7 @@ exit 0
 # exit 0
 
 
-# curl -X POST http://localhost:8081 \
+# curl -X POST http://localhost:8081/test.pl -i \
 # 	-H "Content-Type: application/x-www-form-urlencoded" \
 # 	-d "p1=post-one&p2=post-two"
 # echo
@@ -48,11 +44,23 @@ exit 0
 
 	# multipart/form-data
 
-# curl -X POST http://localhost:8081 \
+
+# curl -X POST http://localhost:8081/test.php -i \
 # 	-F p1=post-one \
 # 	-F p2=post-two \
 # 	-F file=@files/2k_earth_daymap.jpg
-# 	# -F file=@files/Kanan.mp3
+# echo
+# exit 0
+
+
+
+	
+
+# PHP Warning:  POST Content-Length of 14976149 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
+# curl -X POST http://localhost:8081/test.php -i \
+# 	-F p1=post-one \
+# 	-F p2=post-two \
+# 	-F file=@files/Kanan.mp3
 # echo
 # exit 0
 
@@ -79,13 +87,12 @@ exit 0
 
 	# -H "Transfer-Encoding: chunked" \
 
+
+
 # NB: (-d) not part of a FORM .. 
-# which is what my test.* files are expecting
-# just .. data (?)
-
-# "file upload"
-
-# curl -X POST http://localhost:8081 \
+# cgi .. not looking for more data
+# content-length is STRANGE here 
+# curl -X POST http://localhost:8081/test.php -i \
 # 	-d @files/2k_earth_daymap.jpg
 # echo
 # exit 0
@@ -99,13 +106,11 @@ exit 0
 # content-length tells cgi when it has enough
 	# -H "Transfer-Encoding: chunked" \
 
-curl -X POST http://localhost:8082 \
+curl -X POST http://localhost:8082/test.php \
 	-H "Transfer-Encoding: chunked" \
-	-F p1=post-one \
-	-F p2=post-two \
-	-F file=@files/Kanan.mp3
+	-F file=@files/2k_earth_daymap.jpg
 
-	# -F file=@files/2k_earth_daymap.jpg
+	
 echo
 exit 0
 
