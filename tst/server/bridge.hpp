@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 14:46:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/19 15:22:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 class Request
 {
 public:
-	Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
+	Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0), csiz(0) {}
 	~Request() {}
 
 	int         push_data(const char *buf, size_t siz);
@@ -52,6 +52,7 @@ private:
 	size_t	blen;
 	size_t	clen;
 	int		chnk;
+	int		csiz;
 
 	std::string meth;
 	std::string path;

@@ -45,12 +45,12 @@ fi
 	# multipart/form-data
 
 
-# curl -X POST http://localhost:8081/test.php -i \
-# 	-F p1=post-one \
-# 	-F p2=post-two \
-# 	-F file=@files/2k_earth_daymap.jpg
-# echo
-# exit 0
+curl -X POST http://localhost:8081/test.php -i \
+	-F p1=post-one \
+	-F p2=post-two \
+	-F file=@files/2k_earth_daymap.jpg
+echo
+exit 0
 
 
 
