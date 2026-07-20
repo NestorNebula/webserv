@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 16:35:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 17:15:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,6 +161,8 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
 
 		err = this->cgi_done();
+// KEEP_ALIVE
+	// Session::reset
 		return (err);
 	}
 	
@@ -318,7 +320,7 @@ int		Connection::cgi_done(void)
 {
 	if (this->cgi.status(WNOHANG) != -1) // CGI is DONE
 	{
-// SESSION / REQUEST
+// SESSION / REQUEST - move back to pollout
 #if 0 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");

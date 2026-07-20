@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 16:37:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 17:10:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,6 +184,10 @@ ssize_t	CgiPipe::pollout(void)
 	//		  BUT .. more needs to be received to complete the request
 	// (-1) : there is no more body data to write to the CGI
 	
+// hasBody()
+// getBody()
+// isComplete()
+
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -224,6 +228,7 @@ int		CgiPipe::hup(void)
 	if (this->conn == NULL)
 		return (-1);
 	// only one of the two ... 
+	// also : cgi_rem => conn->cgi.rem
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }
@@ -316,22 +321,20 @@ int	ResourceCgi::status(int opt)
 	return (this->stat);
 }
 
+// ~CgiPipe
 void	ResourceCgi::rem(CgiPipe *epc)
 {
 	if (epc == this->ip)
 	{
-		epc->conn_closed();
 		this->ip = NULL;
 		if (this->op)
 			this->op->mod_evt(EPOLLIN);
 	}
 	else if (epc == this->op)
 	{
-		epc->conn_closed();
 		this->op = NULL;
 	}
-	// probably cleanest ... 
-	// if (this->ip == NULL && this->op == NULL)
-	// 	this->status(0);
+	if (this->ip == NULL && this->op == NULL)
+		this->status(0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 16:30:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 17:54:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,12 @@ int     CgiEnv::from_conn(Connection & conn)
 // SESSION / REQUEST - absolute path (?) (chdir) ? 
 // kd : I'm not 100% sure what I need here .. absolute, relative, relative-to-what
 	file = req.header("FILE");
+	// so .. relative to .. PWD -- the folder in which webserv was launched
+	// test : upload : writes to "./" .. 
+	// which should depend on where the script is 
+	// php (./) would expect .. to write in the same folder as the script
+	// NOT .. the PWD -- where the application was launched 
+	// file = std::string("tst/server/") + file;
 	if (file.size())
 	{
 // SCRIPT_NAME

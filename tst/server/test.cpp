@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 16:33:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 17:52:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,11 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
-int main (int, char **, char **envp)
+int main (int, char ** argv, char **envp)
 {
+    std::cerr << "pwd : " << getenv("PWD") << std::endl;
+    std::cerr << "argv[0] : " << argv[0] << std::endl;
+    
     WsLog::lvl = LVL_NONE
         | LVL_ERR 
         | LVL_WARN
