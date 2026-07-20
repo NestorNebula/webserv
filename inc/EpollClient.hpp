@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 23:21:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 01:03:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,13 @@
 # endif
 
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ 1024
+#  define EPC_BUF_SIZ (8192)
 # endif
 
 // ATTN : small values .. 
 // may not flush PIPE quickly enough
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ 1024 // (3) -- good test for cgi-out
+#  define EPC_OUT_SIZ (8192) // (3) -- good test for cgi-out
 # endif
 
 typedef enum

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 22:10:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 00:54:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <sstream>
 # include <algorithm>
+# include <cctype>
 # include <CgiPipe.hpp>
 # include <WsLog.hpp>
 
