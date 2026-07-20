@@ -10,10 +10,11 @@ function monitorForm() {
 }
 
 async function sendMessage(username, message) {
+	const url = `/messages/${username}${Date.now()}.txt`;
 	try {
-		const response = await fetch("/messages/", {
+		const response = await fetch(url, {
 			method: "POST",
-			body: JSON.stringify({ name: username, message: message }),
+			body: `${message} - ${username}`,
 			headers: {
 				"Content-Type": "application/json",
 			},
