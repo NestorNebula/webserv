@@ -21,7 +21,12 @@ int main(int argc, char *argv[], char **envp) {
     return 0;
   }
   ConfigParser parser;
-  parser.parseFile(getConfigFileName(argv[1]));
+  try {
+	parser.parseFile(getConfigFileName(argv[1]));
+  } catch (std::exception &e) {
+	  std::cout << e.what() << "\n";
+	  return 0;
+  }
   const std::vector<ServerConfig> &servers = parser.getServers();
 
   Epoll epoll(envp);
