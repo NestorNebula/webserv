@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 09:12:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 13:54:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ static	void fd_close(int *fd)
 	close(*fd);
 	*fd = -1;
 }
-
 
 cgi_pipes::cgi_pipes (void)
 {
@@ -166,6 +165,7 @@ ssize_t	CgiPipe::pollin(void)
 	return (err);
 }
 
+// The server is in no way obligated to send end-of-file after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
 	if (this->conn == NULL)
@@ -173,22 +173,20 @@ ssize_t	CgiPipe::pollout(void)
 // SESSION : check_status()
 	if (this->conn->cgi_status(WNOHANG) > 0)
 	{
-		// if (this->conn->cgi.xit == 2)
-		// 	this->conn->set_err(404);
-		// else
-		// 	this->conn->set_err(500);
 		return (-1);
 	}	
+	
 	ssize_t	err;
+	
 // SESSION
 	err = this->conn->req_body_status();
-	if (err < 0)	// body is complete and fully flushed
+	if (err < 0) // body is complete AND fully flushed
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: complete");
 		// close fd .. should trigger script, right (?)
 		return (-1);
 	}
-	if (err == 0)	// body is not complete, but no data currently available
+	if (err == 0) // body is not complete, but no data currently available
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: waiting");
 		this->mod_evt(0);
@@ -294,7 +292,8 @@ int	ResourceCgi::status(int opt)
 	{
 		this->xit = WEXITSTATUS(stat);
 		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "exit: ", xit);
-		WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", strerror(xit));
+		char *serr = std::strerror(xit);
+		WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", std::string(serr)); // valgrind
 	}
 	else if (WIFSIGNALED(stat))
 	{

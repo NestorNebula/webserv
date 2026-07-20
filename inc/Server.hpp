@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 13:06:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 12:09:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 # define SERVER_HPP
 
 # include <iostream>
-# include <unistd.h>		/* close(fd) */
-# include <arpa/inet.h>		/* struct sockaddr_in */
+# include <unistd.h>
+# include <arpa/inet.h>	
 # include <fcntl.h>
 
 # include "Epoll.hpp"
@@ -31,7 +31,6 @@
 # ifndef SERV_BACKLOG
 #  define SERV_BACKLOG 256
 # endif
-
 
 class Connection;
 

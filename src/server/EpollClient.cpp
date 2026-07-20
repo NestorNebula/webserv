@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 09:13:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 12:08:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,9 @@ ssize_t	EpollClient::recv(void)
 {
 	ssize_t	err = 0;
 
+	// if (fcntl(this->fd, F_GETFD) < 0)
+	// 	return (-1);
+	
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
 	WsLog::_(LVL_DBG, TGT_EPC_RECV, "recv: ", err);

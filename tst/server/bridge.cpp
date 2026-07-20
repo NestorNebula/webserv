@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 08:34:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 12:57:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,15 +37,13 @@ int Request::push_data(const char *buf, size_t siz)
         blen = body.size();
         return (this->state);
     }
-    else
-    {
-        this->body.append(buf, siz);
-        blen += siz;
-    }
-    
-    WsLog::_(LVL_DBG, TGT_HEAD, "blen: ", blen);
+
+    this->body.append(buf, siz);
+    blen += siz;
+
+    WsLog::_(LVL_DBG, TGT_BODY, "blen: ", blen);
     if (!chnk)
-        WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
+        WsLog::_(LVL_DBG, TGT_BODY, "clen: ", clen);
     return (this->state);
 }
 
@@ -96,7 +94,7 @@ int Request::init(void)
         fext = file.substr(pos + 1);
     }
     
-	WsLog::_(LVL_DBG, TGT_HEAD, "head: ", head);
+	WsLog::_(LVL_DBG, TGT_HEAD, "\n", head);
 	WsLog::_(LVL_DBG, TGT_HEAD, "meth: ", meth);
 	WsLog::_(LVL_DBG, TGT_HEAD, "path: ", path);
 	WsLog::_(LVL_DBG, TGT_HEAD, "file: ", file);

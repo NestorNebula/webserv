@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 08:30:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 12:10:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,16 +82,11 @@ public:
 	Resource    *res;
   
 	// fill_input
-	int push_data(const char *buf, size_t siz)
+	int write(const char *buf, size_t siz)
 	{
 		int err = this->req.push_data(buf, siz);
 		if (err < REQ_HAVE_HEAD)
 			return (err);
-		// res.push_data(body)
-		// have head : make rsrc
-		// conn->exec_cgi()
-		// tell (res) data is available
-		
 		return (err);
 	}
 	

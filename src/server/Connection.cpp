@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 09:10:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 13:50:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	req_cnt(0)
 {
 };
-
 
 Connection::~Connection()
 {
@@ -88,7 +87,7 @@ ssize_t	Connection::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 // SESSION : write()
-	int req_state = sess.push_data(this->ibuf, err);
+	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
 		
@@ -103,10 +102,12 @@ ssize_t	Connection::pollin(void)
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
+		// std::string cont("HTTP/1.1 100 Continue\r\n\r\n");
+		// this->send(cont);
 	}
 	if (this->cgi.ip)
 	{
-		WsLog::_(LVL_ERR, TGT_CONN, "push: cgi");
+		// WsLog::_(LVL_ERR, TGT_BODY, "push: cgi");
 		this->cgi.ip->mod_evt(EPOLLOUT);
 		// cgi::input_available()
 			// NOT SEEING THIS 
