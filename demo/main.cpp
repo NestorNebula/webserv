@@ -9,8 +9,8 @@ static bool setWorkingDirectory(const std::string &path);
 static std::string getConfigFileName(const std::string &path);
 
 int main(int argc, char *argv[], char **envp) {
-  // WsLog::tgt = TGT_CONN_SEND; // TGT_MAX >> 1;
-  // WsLog::lvl = LVL_ALL;
+  WsLog::tgt = (TGT_SERV | TGT_HTTP);
+  WsLog::lvl = LVL_ALL;
   if (argc < 2) {
     std::cerr << "usage: demo <config>\n";
     return 0;
