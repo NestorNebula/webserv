@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 01:11:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 08:34:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,73 +19,6 @@
 
 // Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
-
-#if 0 // chatgpt
-std::string decodeChunked(const std::string& chunked) {
-    std::string body;
-    size_t pos = 0;
-
-    while (true) {
-        size_t lineEnd = chunked.find("\r\n", pos);
-        if (lineEnd == std::string::npos)
-            throw std::runtime_error("Malformed chunked encoding");
-
-        std::string lenStr = chunked.substr(pos, lineEnd - pos);
-        size_t chunkSize = std::stoul(lenStr, nullptr, 16);
-
-        pos = lineEnd + 2;
-
-        if (chunkSize == 0)
-            break;
-
-        if (pos + chunkSize > chunked.size())
-            throw std::runtime_error("Incomplete chunk");
-
-        body.append(chunked, pos, chunkSize);
-
-        pos += chunkSize;
-
-        if (chunked.substr(pos, 2) != "\r\n")
-            throw std::runtime_error("Missing CRLF after chunk");
-
-        pos += 2;
-    }
-
-    return body;
-}
-#endif
-static ssize_t	chunk_size(std::string & str, size_t off)
-{
-    size_t lineEnd = str.find("\r\n", off);
-    if (lineEnd == std::string::npos)
-        return (0);
-
-    std::string lenStr = str.substr(off, lineEnd - off);
-    ssize_t chunkSize = strtoul(lenStr.c_str(), NULL, 16);
-    // off = lineEnd + 2;
-    str.erase(off, lineEnd - off + 2);
-    if (chunkSize == 0)
-        return (0);
-
-    // if (pos + chunkSize > chunked.size())
-    //     throw std::runtime_error("Incomplete chunk");
-    return (chunkSize);
-    
-    // unsigned int x;   
-	// std::stringstream ss(str.substr(off));
-	// ss >> std::hex >> x;
-	// size_t pos = ss.tellg(); // end of string (!) -- what .. don't have \r\n !!!
-    // WsLog::_(LVL_DBG, TGT_HEAD, "csiz: erase ", off, pos);
-    // if (pos == std::string::npos)
-    // {
-    //     str.erase(off);
-    //     return (x);
-    // }
-	// str.erase(off, pos + 2); // CRLF
-	// if (x == 0)
-	// 	str.erase(off, 2);
-	// return (x);
-}
 int Request::push_data(const char *buf, size_t siz)
 {
     if (this->state < REQ_HAVE_HEAD)
@@ -102,135 +35,17 @@ int Request::push_data(const char *buf, size_t siz)
         head.erase(crlf + 4);
         this->init();
         blen = body.size();
-        if (!chnk)
-            return (this->state);
-        csiz = chunk_size(body, 0);
-        if (csiz <= 0)
-            return (this->state);
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-        csiz -= body.size();      
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-
-        WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(0, 256));
         return (this->state);
     }
     else
     {
         this->body.append(buf, siz);
-        blen += siz; // including chunk info
-        
+        blen += siz;
     }
-    // off of previous -- will change 
-    // if we are erasing from (body)
-    // is chunked "nice" .. sending only the header
-    // so we can approve (?)
-    // so we only need to un-chunk here (?)
-    
     
     WsLog::_(LVL_DBG, TGT_HEAD, "blen: ", blen);
     if (!chnk)
-    {
         WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
-        return (this->state);
-    }
-
-    WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-    WsLog::_(LVL_DBG, TGT_HEAD, "bsiz: ", body.size());
-    if (csiz > 0)
-    {
-        csiz -= siz;
-        if (csiz <= 0)
-        {
-            WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-            WsLog::_(LVL_DBG, TGT_HEAD, "bsiz: ", body.size());   
-        }
-    }
-    if (csiz <= 0)
-    {
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: refresh");
-        
-#if 1
-// MAY NEED MORE BODY DATA
-        size_t end = body.size() + csiz;
-        if (csiz == 0)
-            end = 0;
-        WsLog::_(LVL_DBG, TGT_HEAD, "end : ", end);
-        
-        WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(end, 128));
-
-        csiz = chunk_size(body, end);
-        // if (csiz < 0)
-            // need more 
-        if (csiz)
-            csiz -= (body.size() - end);
-        // else
-            // maybe not enough
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-        WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(end, 128));
-
-        // std::string crlf("\r\n");
-        // size_t	chk = body.find(crlf, end);
-        // if (chk != end)
-        // {
-        //     WsLog::_(LVL_DBG, TGT_HEAD, "end : expected crlf ", chk, end);
-        //     return (this->state);
-        //     // chnk = 0;
-        //     // return (this->state);
-        //     // as long as chk is not npos .. we should be ok
-        // }
-        // body.erase(chk, 2);
-        // 
-        // 
-        //     // should have been erased .. 
-        // WsLog::_(LVL_DBG, TGT_HEAD, "BODY: ", body.substr(chk, 128));
-        // csiz -= (body.size() - chk);
-        // have not yet got \r\n following -- not part of body size 
-        // so .. two bytes short
-        
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-#endif
-        // if (chk + csiz < (ssize_t) body.size())
-        //     WsLog::_(LVL_DBG, TGT_HEAD, "CSIZ: check again");
-        // chnk = 0;
-#if 0
-        ssize_t beg = body.size() - siz;
-        if (beg < 0)
-            beg = 0;
-        WsLog::_(LVL_DBG, TGT_HEAD, "beg : ", beg);
-        
-        std::string crlf("\r\n");
-        
-        // could be finding eol of DATA (!)
-        size_t	eol = body.find(crlf, beg);
-        if (eol == std::string::npos)
-        {
-            WsLog::_(LVL_DBG, TGT_HEAD, "eol : not found");
-        }
-        // is eol end of DATA (?)
-        csiz = chunk_size(body, beg);
-        // and .. subtract what we just received 
-        WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-        chnk = 0;
-        // size_t beg = body.rfind(crlf, pos);
-        // if (beg == std::string::npos)
-        // {
-        //     WsLog::_(LVL_DBG, TGT_HEAD, "beg : not found");
-        //     beg = 0;
-        // }
-        // csiz = chunk_size(body, beg);
-        // // and .. subtract what we just received 
-        // WsLog::_(LVL_DBG, TGT_HEAD, "csiz: ", csiz);
-        // WsLog::_(LVL_DBG, TGT_HEAD, "body: ", body.substr(beg, 128));
-        // // blen = body.size()
-#endif
-    }
-    // something not clean here 
-    if (csiz < 0)
-    {
-        size_t end = body.size() + csiz;
-        WsLog::_(LVL_DBG, TGT_HEAD, "END : ", body.substr(end, 128));
-    }
-    
     return (this->state);
 }
 
@@ -298,9 +113,7 @@ int Request::init(void)
     {
         pos = val.find("chunked"); // case (!)
         if (pos != std::string::npos)
-        {
             chnk = 1;
-        }
     }
 	WsLog::_(LVL_DBG, TGT_HEAD, "chnk: ", chnk);
     return (0);
@@ -312,8 +125,7 @@ int Request::body_stat(void)
         return (1);
     if (this->chnk)
     {
-        if (csiz < 0)
-            return (-1);
+        // check something here 
         return (0);
     }
     if (clen && blen < clen)

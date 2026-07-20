@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 23:03:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 08:37:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,3 +226,112 @@ void	CgiPipe::conn_closed(void)
 { 
 	this->conn = NULL;
 }
+
+
+
+
+ResourceCgi::~ResourceCgi()
+{
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "(~) ResourceCgi");
+	
+#if 1
+	this->reset();
+#else
+	// this may be gentler
+	// if we only delete .. when connection is deleting
+	if (this->ip)
+	{
+		this->ip->conn_closed();
+		// this->ip->mod_evt(EPOLLIN);
+	}
+	if (this->op)
+	{
+		this->op->conn_closed();
+		// this->op->mod_evt(EPOLLOUT);
+	}
+	this->status(0);
+#endif
+}
+
+void	ResourceCgi::reset(void)
+{
+	if (this->ip || this->op) // pid, stat (?)
+	{
+		if (this->stat == -1)
+		{
+			kill(this->pid, SIGKILL);
+			this->status(0);
+		}
+	}
+	if (this->ip)
+	{
+		this->ip->conn_closed();
+		// this->ip->mod_evt(EPOLLIN);
+	}
+	if (this->op)
+	{
+		this->op->conn_closed();
+		// this->op->mod_evt(EPOLLOUT);
+	}
+	this->pid  = 0;
+	this->ip   = NULL;
+	this->op   = NULL;
+	this->stat = -1;
+	this->hed  = 0;
+}
+
+int	ResourceCgi::status(int opt)
+{
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "pid : ", this->pid);
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "xit : ", this->xit);
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "stat: ", this->stat);
+	if (this->stat != -1)
+	{
+		return (this->stat);
+	}
+	if (this->pid == 0)
+	{
+		return (this->stat);
+	}
+	
+	int err = waitpid(this->pid, &this->stat, opt);
+	
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "wait: ", err);
+	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "stat: ", stat);
+
+	// hm : (0) for (0)
+	if (err == 0)
+		return (this->stat); // WNOHANG : no change .. (-1)
+	if (err < 0)
+		WsLog::_errno(LVL_ERR, TGT_CGI_RSRC, "waitpid");
+	if (WIFEXITED(stat))
+	{
+		this->xit = WEXITSTATUS(stat);
+		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "exit: ", xit);
+		// (2) : No such file or directory
+		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "exit: ", strerror(xit));
+	}
+	else if (WIFSIGNALED(stat))
+	{
+		this->sig = WTERMSIG(stat);
+		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "sig : ", sig);
+		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "sig : ", strsignal(sig));
+	}
+	this->pid = 0;
+	return (this->stat);
+}
+
+void	ResourceCgi::rem(CgiPipe *epc)
+{
+	if (epc == this->ip)
+	{
+		this->ip = NULL;
+		if (this->op)
+			this->op->mod_evt(EPOLLIN);
+	}
+	else if (epc == this->op)
+		this->op = NULL;
+	if (this->ip == NULL && this->op == NULL)
+		this->status(0);
+}
+

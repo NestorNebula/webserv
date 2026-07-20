@@ -90,6 +90,7 @@ fi
 # NB: (-d) not part of a FORM .. 
 # cgi .. not looking for more data
 # content-length is STRANGE here 
+
 # curl -X POST http://localhost:8081/test.php -i \
 # 	-d @files/2k_earth_daymap.jpg
 # echo
@@ -100,20 +101,20 @@ fi
 # Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
 # Expect: 100-continue
 
-# curl -X POST http://localhost:8082/test.php \
-# 	-F file=@files/2k_earth_daymap.jpg
-# echo
-# exit 0
+curl -X POST http://localhost:8082/test.php \
+	-F file=@files/2k_earth_daymap.jpg
+echo
+exit 0
 
 # content-length tells cgi when it has enough
 	# -H "Transfer-Encoding: chunked" \
 
 	# -H "Content-Type: application/x-www-form-urlencoded" \
-curl -X POST http://localhost:8082/test.php \
-	-H "Transfer-Encoding: chunked" \
-	-F p1=chunked_one \
-	-F p2=chunked_two \
-	-F file=@files/2k_earth_daymap.jpg
-echo
-exit 0
+# curl -X POST http://localhost:8082/test.php \
+# 	-H "Transfer-Encoding: chunked" \
+# 	-F p1=chunked_one \
+# 	-F p2=chunked_two \
+# 	-F file=@files/2k_earth_daymap.jpg
+# echo
+# exit 0
 

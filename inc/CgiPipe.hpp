@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 13:07:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 08:38:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,27 @@ private:
 	// Session		*sess;
 };
 
+class ResourceCgi
+{
+private:
+	ResourceCgi				 (const ResourceCgi & ) {}
+	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
+public:
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), xit(-1), sig(-1) {}
+	~ResourceCgi();
+	
+	pid_t		pid;
+	CgiPipe		*ip;
+	CgiPipe		*op;
+	int			stat;
+	int			hed;
+	int			xit;
+	int			sig;
+
+	int			status(int opt);
+	void		rem(CgiPipe *epc);
+	void		reset(void);
+};
 
 
 #endif
