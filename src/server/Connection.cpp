@@ -132,14 +132,17 @@ ssize_t	Connection::pollin(void)
 	if (err == 0) // often with evt typ : in rdhup
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ZERO");
-		return (-1);
+		// return (-1);
+		this->mod_evt(-EPOLLIN);
+		return 0;
 	}
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 	// sess.write_data()
 	// set some 
-	sess.write(this->ibuf, err);
+	if (sess.nextAction() == Session::RDSOCK)
+		sess.write(this->ibuf, err);
 	switch (sess.nextAction()) {
 		case Session::DOCGI:
 			if (this->exec_cgi() < 0)
@@ -313,7 +316,7 @@ ssize_t	Connection::pollout(void)
 		}
 		// LUCKY .. send has probably already happened 
 		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
-		return (0);
+		return (-1);
 	}
 	
 
