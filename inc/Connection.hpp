@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 12:10:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 15:48:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,11 @@ private:
 	
 public:
 	int				req_body_status(void);
-	int				cgi_data(const char *buf, ssize_t siz);
-	void			cgi_rem(CgiPipe *epc);
+	
 	int				cgi_status(int opt);
+	int				cgi_data(const char *buf, ssize_t siz);
+	int				cgi_done(void);
+	void			cgi_rem(CgiPipe *epc);
 	
 	Server			&serv;
 

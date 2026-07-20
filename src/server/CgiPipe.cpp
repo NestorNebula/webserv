@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 13:59:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 16:37:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,8 +139,8 @@ ssize_t	CgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-		
-// SESSION : check_status()
+	if (this->conn->cgi_status(WNOHANG) > 0)
+		return (-1);
 
 	ssize_t	err = 0;
 	
@@ -158,7 +158,7 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
-// SESSION
+	
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	
@@ -170,30 +170,36 @@ ssize_t	CgiPipe::pollout(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-// SESSION : check_status()
+
 	if (this->conn->cgi_status(WNOHANG) > 0)
-	{
 		return (-1);
-	}	
 	
 	ssize_t	err;
 	
-// SESSION
+// SESSION / REQUEST
+// kd : CGI input may need to know :
+	// (1)	: body data has been received by the Connection
+	//		  and needs to be written to the (stdin) of the CGI
+	// (0)	: no body data is currently available
+	//		  BUT .. more needs to be received to complete the request
+	// (-1) : there is no more body data to write to the CGI
+	
 	err = this->conn->req_body_status();
-	if (err < 0) // body is complete AND fully flushed
+	if (err < 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: complete");
-		// close fd .. should trigger script, right (?)
 		return (-1);
 	}
-	if (err == 0) // body is not complete, but no data currently available
+	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: waiting");
 		this->mod_evt(0);
 		return (0);
 	}
 
-// SESSION : Request::body
+// SESSION / REQUEST
+// kd : Connection currently stores the request body in a std::string
+	// EpollClient::send() erases the sent bytes from the head of the string
 	std::string & body = this->conn->sess.req.get_body();
 	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
@@ -217,6 +223,7 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn == NULL)
 		return (-1);
+	// only one of the two ... 
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }
@@ -292,14 +299,14 @@ int	ResourceCgi::status(int opt)
 	{
 		this->xit = WEXITSTATUS(stat);
 		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "exit: ", xit);
-		char *serr = std::strerror(xit);
-		WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", std::string(serr)); // valgrind
+		if (xit)
+			WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", std::strerror(xit)); // valgrind (!)
 	}
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
 		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "sig : ", sig);
-		WsLog::_(LVL_ERR, TGT_RSRC, "sig : ", strsignal(sig));
+		WsLog::_(LVL_INFO, TGT_RSRC, "sig : ", strsignal(sig));
 	}
 	else
 	{
@@ -313,13 +320,18 @@ void	ResourceCgi::rem(CgiPipe *epc)
 {
 	if (epc == this->ip)
 	{
+		epc->conn_closed();
 		this->ip = NULL;
 		if (this->op)
 			this->op->mod_evt(EPOLLIN);
 	}
 	else if (epc == this->op)
+	{
+		epc->conn_closed();
 		this->op = NULL;
-	if (this->ip == NULL && this->op == NULL)
-		this->status(0);
+	}
+	// probably cleanest ... 
+	// if (this->ip == NULL && this->op == NULL)
+	// 	this->status(0);
 }
 

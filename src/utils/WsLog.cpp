@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 12:55:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 16:18:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ static const std::string tgt_str[] =
     "epc   : ",
     "conn  : ",
     "cgi   : ",
+    "env   : ",
     "serv  : ",
     "main  : ",
     "head  : ",
@@ -39,18 +40,18 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[3]);
     if (tgt & TGT_CGI)
         return (tgt_str[4]);
-    if (tgt & TGT_SERV)
+    if (tgt & TGT_CGI_ENV)
         return (tgt_str[5]);
-    if (tgt & TGT_MAIN)
+    if (tgt & TGT_SERV)
         return (tgt_str[6]);
-    if (tgt & TGT_HEAD)
+    if (tgt & TGT_MAIN)
         return (tgt_str[7]);
-    if (tgt & TGT_BODY)
+    if (tgt & TGT_HEAD)
         return (tgt_str[8]);
-    if (tgt & TGT_RSRC)
+    if (tgt & TGT_BODY)
         return (tgt_str[9]);
-    if (tgt & TGT_RSRC_INFO)
-        return (tgt_str[9]);
+    if (tgt & (TGT_RSRC | TGT_RSRC_INFO))
+        return (tgt_str[10]);
 
     return (tgt_str[0]);
 }
@@ -59,8 +60,8 @@ bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
     if ((msg_lvl & WsLog::lvl) == LVL_ERR)
         return (false);
-    if ((msg_lvl & WsLog::lvl) == LVL_INFO)
-        return (false);
+    // if ((msg_lvl & WsLog::lvl) == LVL_INFO)
+    //     return (false);
     if ((msg_lvl & WsLog::lvl) && (msg_tgt & WsLog::tgt))
         return (false);
     return (true);

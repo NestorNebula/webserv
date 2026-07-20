@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 12:08:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 16:26:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,19 +21,18 @@
 # include "WsLog.hpp"
 
 
-// CONFIG
 # ifndef EPC_TIMEOUT
-#  define EPC_TIMEOUT 55
+#  define EPC_TIMEOUT 5
 # endif
 
+// smaller : less timeout with concurrent (?)
+// or .. something in my pollin/pollout switching could be better (?)
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ (8192)
+#  define EPC_BUF_SIZ (8192 << 1)
 # endif
 
-// ATTN : small values .. 
-// may not flush PIPE quickly enough
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ (8192) // (3) -- good test for cgi-out
+#  define EPC_OUT_SIZ (8192 << 1) // (3) -- good test for cgi-out
 # endif
 
 typedef enum

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 14:11:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 16:30:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,9 @@ CgiEnv::~CgiEnv()
 		delete[] res;
 }
 
-// like this .. we store the backing data for envp
 void	CgiEnv::add(const char *key, const char *val)
 {
-	// <map> first [keky]
+	// <map> first [key]
 	data.push_back(std::string(key) + std::string("=") + std::string(val));
 }
 
@@ -63,14 +62,10 @@ int     CgiEnv::from_conn(Connection & conn)
 	else
 		this->add("REQUEST_METHOD", "GET");
 
-
-// SESSION
-	// (chdir) ? 
 	val = req.header("PATH");
 	if (val.size())
 	{
-		// relative (!)
-		this->add("_PATH", val.c_str());
+		this->add("_PATH", val.c_str()); // NB : relative 
 // PATH_INFO
 // The extra path information, as given by the client. 
 // In other words, scripts can be accessed by their virtual pathname, 
@@ -78,7 +73,6 @@ int     CgiEnv::from_conn(Connection & conn)
 // The extra information is sent as PATH_INFO.
 // This information should be decoded by the server 
 // if it comes from a URL before it is passed to the CGI script.
-
 // http://example.com/cgi-bin/printenv.pl/with/additional/path?and=a&query=string
 // If a slash and additional directory name(s) are appended to the URL immediately after the name of the script (in this example, /with/additional/path), then that path is stored in the PATH_INFO environment variable before the script is called. 
 		// this->add("PATH_INFO", val.c_str());
@@ -86,6 +80,9 @@ int     CgiEnv::from_conn(Connection & conn)
 // The server provides a translated version of PATH_INFO, 
 // which takes the path and does any virtual-to-physical mapping to it. 		
 	}
+	
+// SESSION / REQUEST - absolute path (?) (chdir) ? 
+// kd : I'm not 100% sure what I need here .. absolute, relative, relative-to-what
 	file = req.header("FILE");
 	if (file.size())
 	{
@@ -97,12 +94,12 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else
 	{
-		// WOW : fucks up SERVER .. 
-		// ERROR
-		return (-1);
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE not set");
+		return (-1); // ERROR (!)
 	}
 	
-// SESSION
+// SESSION / REQUEST / CONFIG : exec_path
+// kd : I imagine this could be set during the parsing of the request/config
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
 	{
@@ -129,26 +126,24 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else
 	{
-		// ERROR
-		return (-1);
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "EXEC not set");
+		return (-1); // ERROR (!)
 	}
 
 	val = req.header("VARS");
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
-
-
-// chemin relatif from config ..
-
 		
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
 	this->add("REDIRECT_STATUS", "1");
-// SERVER
+	
+// CONFIG : server_root/pycgi
+// kd : this should be relative to .. something. Perhaps in the cgi-bin.
 	this->add("PYTHONPATH", 
-		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
-		// "/media/kdonlon/data/Documents/42/webserv/legacy-cgi-main/");
+		"/home/kdonlon/Documents/Projects/webserv/git/pycgi/");
+		// "/media/kdonlon/data/Documents/42/webserv/git/pycgi/");
 
 
 // If the output of a form is being processed, check that CONTENT_TYPE
