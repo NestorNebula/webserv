@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 08:37:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 09:10:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,12 +106,11 @@ ssize_t	Connection::pollin(void)
 	}
 	if (this->cgi.ip)
 	{
-		// cig.input_available()
-		// NOT SEEING THIS 
-		// this->mod_evt(-EPOLLIN);
-		// at some point .. cgi_ip .. stops draining
 		WsLog::_(LVL_ERR, TGT_CONN, "push: cgi");
-		// this->cgi.ip->mod_evt(EPOLLOUT);
+		this->cgi.ip->mod_evt(EPOLLOUT);
+		// cgi::input_available()
+			// NOT SEEING THIS 
+		// this->mod_evt(-EPOLLIN); // BAD IDEA
 		// this->mod_evt(EPOLLOUT);
 	}
 	return (err);
@@ -150,7 +149,6 @@ ssize_t	Connection::pollout(void)
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
-	
 	if (ostr.size() == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
@@ -169,12 +167,17 @@ ssize_t	Connection::pollout(void)
 			return (-1);		
 #endif			
 		}
+		// CGI MAY have Content-Length header .. 
 		// if (this->cgi.pid)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
 			this->mod_evt(-EPOLLOUT);
 			// POST-DATA
-			this->mod_evt(EPOLLIN); // 
+			this->mod_evt(EPOLLIN);
+			if (this->cgi.ip)
+				this->cgi.ip->mod_evt(EPOLLOUT);
+			if (this->cgi.op)
+				this->cgi.op->mod_evt(EPOLLIN);
 			return (0);
 		}
 		return (-1);

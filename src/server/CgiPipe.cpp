@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 08:37:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 09:12:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ ssize_t	CgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
 		return (-1);
+		
 // SESSION : check_status()
 
 	ssize_t	err = 0;
@@ -232,25 +233,9 @@ void	CgiPipe::conn_closed(void)
 
 ResourceCgi::~ResourceCgi()
 {
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "(~) ResourceCgi");
+	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
 	
-#if 1
 	this->reset();
-#else
-	// this may be gentler
-	// if we only delete .. when connection is deleting
-	if (this->ip)
-	{
-		this->ip->conn_closed();
-		// this->ip->mod_evt(EPOLLIN);
-	}
-	if (this->op)
-	{
-		this->op->conn_closed();
-		// this->op->mod_evt(EPOLLOUT);
-	}
-	this->status(0);
-#endif
 }
 
 void	ResourceCgi::reset(void)
@@ -282,40 +267,44 @@ void	ResourceCgi::reset(void)
 
 int	ResourceCgi::status(int opt)
 {
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "pid : ", this->pid);
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "xit : ", this->xit);
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "stat: ", this->stat);
+	WsLog::_(LVL_DBG, TGT_RSRC, "pid : ", this->pid);
+	WsLog::_(LVL_DBG, TGT_RSRC, "xit : ", this->xit);
+	WsLog::_(LVL_DBG, TGT_RSRC, "stat: ", this->stat);
 	if (this->stat != -1)
 	{
+		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
 	if (this->pid == 0)
 	{
+		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
 	
 	int err = waitpid(this->pid, &this->stat, opt);
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "wait: ", err);
-	WsLog::_(LVL_DBG, TGT_CGI_RSRC, "stat: ", stat);
+	WsLog::_(LVL_DBG, TGT_RSRC, "wait: ", err);
+	WsLog::_(LVL_DBG, TGT_RSRC, "stat: ", stat);
 
-	// hm : (0) for (0)
 	if (err == 0)
 		return (this->stat); // WNOHANG : no change .. (-1)
 	if (err < 0)
-		WsLog::_errno(LVL_ERR, TGT_CGI_RSRC, "waitpid");
+		WsLog::_errno(LVL_ERR, TGT_RSRC, "waitpid");
 	if (WIFEXITED(stat))
 	{
 		this->xit = WEXITSTATUS(stat);
-		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "exit: ", xit);
-		// (2) : No such file or directory
-		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "exit: ", strerror(xit));
+		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "exit: ", xit);
+		WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", strerror(xit));
 	}
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-		WsLog::_(LVL_DBG, TGT_CGI_RSRC, "sig : ", sig);
-		WsLog::_(LVL_ERR, TGT_CGI_RSRC, "sig : ", strsignal(sig));
+		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "sig : ", sig);
+		WsLog::_(LVL_ERR, TGT_RSRC, "sig : ", strsignal(sig));
+	}
+	else
+	{
+		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "STAT: ", stat);
 	}
 	this->pid = 0;
 	return (this->stat);

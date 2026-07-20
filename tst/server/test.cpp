@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 01:07:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 08:57:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@ int main (int, char **, char **envp)
         // | TGT_MAIN
 
         | TGT_HEAD
-        // | TGT_CGI_RSRC
+        // | TGT_RSRC
+        | TGT_RSRC_INFO
     ;
     
     // WsLog::tgt = TGT_NONE;

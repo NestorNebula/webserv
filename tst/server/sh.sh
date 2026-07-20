@@ -10,9 +10,9 @@ fi
 # echo
 # exit 0
 
-# curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
-# echo
-# exit 0
+curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
+echo
+exit 0
 
 # curl -X GET http://localhost:8081/bigvideo.php -i --output data.mkv
 # echo
