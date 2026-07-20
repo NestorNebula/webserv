@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 13:50:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 14:11:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ bool	Connection::timeo(time_t now)
 	}
 	return (false);
 }
+
+// SESSION::error
 
 void	Connection::set_err(int e)
 {

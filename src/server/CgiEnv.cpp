@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 12:22:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/20 14:11:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,9 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("VARS");
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
+
+
+// chemin relatif from config ..
 
 		
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
