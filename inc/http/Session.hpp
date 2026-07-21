@@ -45,8 +45,17 @@ public:
   // Write data to the Session Request. Corresponds to RDSOCK Action.
   Stream::streamsize write(const char *buf, Stream::streamsize count);
 
+  struct CgiInfo {
+    std::string scriptPath;
+    std::string executablePath;
+  };
+
   // Give access to the Session Request. Should only be called on DOCGI action.
   const Request &getRequest() const;
+
+  // Give informations about the CGI to be executed. Should only be called on
+  // DOCGI action.
+  Session::CgiInfo getCgiInfo() const;
 
   // Give access to the data of an executed CGI script. Corresponds to DOCGI
   // Action.
