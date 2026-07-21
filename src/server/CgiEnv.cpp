@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 17:54:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 14:05:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,14 @@ CgiEnv::~CgiEnv()
 
 void	CgiEnv::add(const char *key, const char *val)
 {
-	// <map> first [key]
-	data.push_back(std::string(key) + std::string("=") + std::string(val));
+	this->kv[ std::string(key) ] = std::string(val);
+	// data.push_back(std::string(key) + std::string("=") + std::string(val));
 }
 
 void	CgiEnv::add(const char *key, int n)
 {
-	data.push_back(std::string(key) + std::string("=") + num_2_str(n));
+	this->kv[ std::string (key) ] = num_2_str(n);
+	// data.push_back(std::string(key) + std::string("=") + num_2_str(n));
 }
 
 // From the meta-variables thus generated, a URI, the 'Script-URI', can
@@ -56,11 +57,17 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	Request &req = conn.sess.req;
 
+	this->kv.clear();
+	this->data.clear();
+	
 	val = req.header("METH");
 	if (val.size())
 		this->add("REQUEST_METHOD", val.c_str());
 	else
-		this->add("REQUEST_METHOD", "GET");
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "METHOD not set");
+		return (-1);
+	}
 
 	val = req.header("PATH");
 	if (val.size())
@@ -215,6 +222,15 @@ const char	**CgiEnv::gen(void)
 {
 	if (res)
 		delete[] res;
+
+	
+	std::map<std::string, std::string>::iterator kvit = kv.begin();
+	while (kvit != kv.end())
+	{
+		data.push_back(std::string(kvit->first) + std::string("=") + std::string(kvit->second));
+		kvit++;
+	}
+	
 	size_t	cnt	= data.size();
 
 	res = new const char*[cnt + 1];

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 08:39:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 14:01:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CGI_ENV_HPP
 
 # include <string>
+# include <map>
 # include <vector>
 # include <sstream>
 
@@ -33,7 +34,7 @@ class Connection;
 class CgiEnv
 {
 private:
-	CgiEnv				(const CgiEnv & that);
+	CgiEnv				(const CgiEnv & );
 	CgiEnv & operator = (const CgiEnv & ) { return (*this); }
 public:
 	CgiEnv (void);
@@ -46,11 +47,12 @@ public:
 	
 	const char					*args[4];
 private:
-	std::vector<std::string>	data;
-	const char					**res;
+	std::map<std::string, std::string>	kv;
+	std::vector<std::string>			data;
+	const char							**res;
 	
-	std::string					exec;
-	std::string					file;
+	std::string							exec;
+	std::string							file;
 };
 
 #endif
