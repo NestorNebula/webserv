@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 16:18:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 16:31:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,4 +129,45 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::cerr << stream.str();
 
     return (-1);
+}
+
+
+void    WsLog::kd(void)
+{
+    WsLog::lvl = LVL_NONE
+        | LVL_ERR 
+        | LVL_WARN
+        | LVL_INFO
+        | LVL_DBG
+    ;
+    WsLog::tgt = TGT_NONE
+        // | TGT_EPOLL 
+        | TGT_EPOLL_EVT
+        | TGT_EPOLL_CTL
+        
+        // | TGT_EPC
+        // | TGT_EPC_RECV
+        // | TGT_EPC_SEND
+        
+        
+        | TGT_CONN
+        | TGT_CONN_RECV
+        | TGT_CONN_SEND
+        // | TGT_CONN_DATA
+
+        // | TGT_CGI - dangerous data 
+        | TGT_CGI_RECV
+        | TGT_CGI_SEND
+        // | TGT_CGI_DATA
+
+        // | TGT_SERV
+        // | TGT_MAIN
+
+        // | TGT_HEAD
+        // | TGT_BODY
+        | TGT_RSRC
+        | TGT_RSRC_INFO
+    ;
+    
+    WsLog::tgt = TGT_NONE;
 }

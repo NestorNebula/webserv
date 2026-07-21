@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 15:59:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 16:30:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,10 @@ public:
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n);
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
+
+	static void	kd(void);
+	static void mm(void) {}
+	static void	nh(void) {}
 private:
 	static bool nolog(log_lvl msg_lvl, log_tgt msg_tgt);
 };
