@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 15:29:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:46:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ static void sigint_handler(int signo)
 	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
 
-	// *** CGI CLEANUP ***
     stop = 1;
 }
 static void sigpipe_handler(int signo)
@@ -88,7 +87,10 @@ void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
+	{
+		// this->del(*it); // necessary (?)
 		delete (*it++);
+	}
 	this->clients.clear();
 	
 	if (this->epfd != -1)
@@ -282,9 +284,6 @@ int	Epoll::loop(void)
 			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			if (epc->event(evt) < 0)
 			{
-				// set DONE .. do not remove right away
-				// in case conn <=> cgi are pointing to each other
-				// -- which might have been a bad idea
 				this->rem(epc);
 			}
         }

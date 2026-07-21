@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 17:15:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:52:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
+	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection"); // , this->fd);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 };
 
@@ -49,8 +49,12 @@ void	Connection::set_err(int e)
 {
 	if (this->error)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
+		WsLog::_(LVL_ERR, TGT_CONN, "err:  already set!");
 	}
+
+	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
+	WsLog::_(LVL_DBG, TGT_CONN, "ostr: ", this->ostr.size());
+	
 	// ATTN : some errors (500) are not siege-friendly
 	this->error = e;
 	this->ostr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n\r\nError Data\r\n");
@@ -75,8 +79,9 @@ ssize_t	Connection::pollin(void)
 		if (this->cgi.status(WNOHANG) > 0)
 		{
 			// ATTN : seems like we'd want to send an error here ...
-			// this->mod_evt(EPOLLOUT);
-			return (-1);
+			// or .. let pollout take care of it 
+			this->mod_evt(EPOLLOUT);
+			// return (-1);
 		}
 		this->mod_evt(-EPOLLIN);
 		return (0);
@@ -96,7 +101,7 @@ ssize_t	Connection::pollin(void)
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
-			this->set_err(500);
+			this->set_err(503);
 			// this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			return (0);
@@ -110,7 +115,6 @@ ssize_t	Connection::pollin(void)
 	{
 		// WsLog::_(LVL_ERR, TGT_BODY, "push: cgi");
 		this->cgi.ip->mod_evt(EPOLLOUT);
-		// this->mod_evt(EPOLLOUT);
 	}
 	return (err);
 }
@@ -133,9 +137,10 @@ ssize_t	Connection::pollout(void)
 	//  How should we "switch" from ResourceCgi to ResourceError (send file ...)
 	if (this->error)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: error");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
 		err = this->send(this->ostr); 
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "err : ", err);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		if (err < 0)
 			return (-1);
 		if (this->ostr.size())
@@ -283,7 +288,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		std::string key;
 		std::string val;
 		line >> key >> val;
-		WsLog::_(LVL_ERR, TGT_CGI_RECV, "stat: ", val);
+		WsLog::_(LVL_DBG, TGT_CGI_DATA, "stat:  ", val);
 
 		int http_stat = atoi(val.c_str());
 		if (http_stat != 200)
@@ -298,20 +303,32 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 // may trigger cgi.status(0)
 void	Connection::cgi_rem(CgiPipe *epc)
 {
-	this->cgi.rem(epc);
+	switch (this->cgi.rem(epc))
+	{
+	case 1: // (ip)
+		// this->mod_evt(EPOLLOUT);
+		break;
+	case 2: // (op)
+		this->mod_evt(EPOLLOUT);
+		break;
+	default:
+		break;
+	}
 }
 
 int		Connection::cgi_status(int opt)
 { 
 	int	err;
 
+	// may be sig .. 
 	err = this->cgi.status(opt);
 	if (err > 0)
 	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "stat: ", this->cgi.xit);
 		if (this->cgi.xit == 2)
 			this->set_err(404);
 		else
-			this->set_err(500);
+			this->set_err(504);
 	}
 	return (err); 
 }
@@ -321,7 +338,7 @@ int		Connection::cgi_done(void)
 	if (this->cgi.status(WNOHANG) != -1) // CGI is DONE
 	{
 // SESSION / REQUEST - move back to pollout
-#if 0 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
+#if 1 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
 		this->sess.req.clear();
@@ -383,7 +400,8 @@ int	Connection::exec_cgi(void)
 		const char **envp = cgienv->gen();
 
 		signal(SIGINT, SIG_DFL);
-		// pipes.dup_err();
+		// WsLog : CGI_ERR
+		pipes.dup_err();
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();

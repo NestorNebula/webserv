@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=1 --concurrent=255 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=20 --no-parser -b
 	echo
 	exit 0
 fi
 
-curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
-echo
-exit 0
+# curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
+# echo
+# exit 0
 
 # curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
 # echo
@@ -32,10 +32,10 @@ exit 0
 # echo
 # exit 0
 
-# curl -X POST http://localhost:8081/ka.php -i \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-# exit 0
+curl -X POST http://localhost:8081/ka.php -i \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 # curl -X POST http://localhost:8082/test.pl \
 # 	 -d "p1=post-one&p2=post-two"

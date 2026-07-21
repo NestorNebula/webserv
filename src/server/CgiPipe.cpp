@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 17:10:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:48:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,8 +139,6 @@ ssize_t	CgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-	if (this->conn->cgi_status(WNOHANG) > 0)
-		return (-1);
 
 	ssize_t	err = 0;
 	
@@ -149,7 +147,7 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-		this->conn->set_err(500);
+		this->conn->set_err(501);
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
@@ -168,13 +166,13 @@ ssize_t	CgiPipe::pollin(void)
 // The server is in no way obligated to send end-of-file after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
+	ssize_t	err;
+	
 	if (this->conn == NULL)
 		return (-1);
-
-	if (this->conn->cgi_status(WNOHANG) > 0)
+	if (this->conn->cgi_status(WNOHANG) >= 0)
 		return (-1);
 	
-	ssize_t	err;
 	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
@@ -205,12 +203,11 @@ ssize_t	CgiPipe::pollout(void)
 // kd : Connection currently stores the request body in a std::string
 	// EpollClient::send() erases the sent bytes from the head of the string
 	std::string & body = this->conn->sess.req.get_body();
-	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->conn->set_err(500);
+		this->conn->set_err(502);
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
@@ -227,9 +224,6 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn == NULL)
 		return (-1);
-	// only one of the two ... 
-	// also : cgi_rem => conn->cgi.rem
-	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }
 
@@ -244,7 +238,6 @@ void	CgiPipe::conn_closed(void)
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-	
 	this->reset();
 }
 
@@ -254,6 +247,7 @@ void	ResourceCgi::reset(void)
 	{
 		if (this->stat == -1)
 		{
+			WsLog::_(LVL_DBG, TGT_RSRC, "kill");
 			kill(this->pid, SIGKILL);
 			this->status(0);
 		}
@@ -277,64 +271,73 @@ void	ResourceCgi::reset(void)
 
 int	ResourceCgi::status(int opt)
 {
-	WsLog::_(LVL_DBG, TGT_RSRC, "pid : ", this->pid);
-	WsLog::_(LVL_DBG, TGT_RSRC, "xit : ", this->xit);
-	WsLog::_(LVL_DBG, TGT_RSRC, "stat: ", this->stat);
+	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "pid : ", this->pid);
+	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "xit : ", this->xit);
+	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", this->stat);
 	if (this->stat != -1)
 	{
-		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "done: ", this->stat);
+		WsLog::_(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
 	if (this->pid == 0)
 	{
-		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "done: ", this->stat);
+		WsLog::_(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
 	
 	int err = waitpid(this->pid, &this->stat, opt);
 	
-	WsLog::_(LVL_DBG, TGT_RSRC, "wait: ", err);
-	WsLog::_(LVL_DBG, TGT_RSRC, "stat: ", stat);
+	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
+	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);
 
 	if (err == 0)
-		return (this->stat); // WNOHANG : no change .. (-1)
+		return (this->stat); // WNOHANG => no change => (-1)
 	if (err < 0)
 		WsLog::_errno(LVL_ERR, TGT_RSRC, "waitpid");
 	if (WIFEXITED(stat))
 	{
 		this->xit = WEXITSTATUS(stat);
-		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "exit: ", xit);
-		if (xit)
-			WsLog::_(LVL_ERR, TGT_RSRC, "exit: ", std::strerror(xit)); // valgrind (!)
+		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
+		// "Unknown error 255" is malloc'ed (!)
+		if (xit < 255)
+			WsLog::_(LVL_DBG, TGT_RSRC, "exit:  ", std::strerror(xit));
+		else
+			WsLog::_(LVL_DBG, TGT_RSRC, "exit:  unknown");
 	}
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "sig : ", sig);
-		WsLog::_(LVL_INFO, TGT_RSRC, "sig : ", strsignal(sig));
+		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
+		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}
 	else
 	{
-		WsLog::_(LVL_INFO, TGT_RSRC_INFO, "STAT: ", stat);
+		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	this->pid = 0;
 	return (this->stat);
 }
 
 // ~CgiPipe
-void	ResourceCgi::rem(CgiPipe *epc)
+int	ResourceCgi::rem(CgiPipe *epc)
 {
+	int err = 0;
+
 	if (epc == this->ip)
 	{
+		err = 1;
 		this->ip = NULL;
 		if (this->op)
 			this->op->mod_evt(EPOLLIN);
 	}
 	else if (epc == this->op)
 	{
+		err = 2;
 		this->op = NULL;
 	}
 	if (this->ip == NULL && this->op == NULL)
 		this->status(0);
+		
+	return (err);
 }
 

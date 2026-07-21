@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/19 14:13:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 16:34:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ Server::Server (Epoll *_ep, unsigned short p) :
 
 Server::~Server()
 {
-	WsLog::_(LVL_ERR, TGT_SERV, "(~) Server");
-	WsLog::_(LVL_ERR, TGT_SERV, "accepted: ", acc_cnt);
+	WsLog::_(LVL_DBG, TGT_SERV, "(~) Server");
+	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 
 int Server::init(void)
@@ -93,8 +93,9 @@ ssize_t	Server::pollin(void)
 		delete (c);
 		return (err);
 	}
-	this->acc_cnt++;
 	c->set_addr(&conn_addr);
+
+	this->acc_cnt++;
 	return (0);
 }
 

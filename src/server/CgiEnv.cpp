@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 14:05:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:46:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,11 @@ CgiEnv::~CgiEnv()
 void	CgiEnv::add(const char *key, const char *val)
 {
 	this->kv[ std::string(key) ] = std::string(val);
-	// data.push_back(std::string(key) + std::string("=") + std::string(val));
 }
 
 void	CgiEnv::add(const char *key, int n)
 {
 	this->kv[ std::string (key) ] = num_2_str(n);
-	// data.push_back(std::string(key) + std::string("=") + num_2_str(n));
 }
 
 // From the meta-variables thus generated, a URI, the 'Script-URI', can
@@ -43,23 +41,25 @@ void	CgiEnv::add(const char *key, int n)
 //    with the same values for the SCRIPT_NAME, PATH_INFO and QUERY_STRING
 //    meta-variables.
 
-// script-URI = <scheme> "://" <server-name> ":" <server-port>
-//                    <script-path> <extra-path> "?" <query-string>
+// script-URI = 
+// <scheme> "://" <server-name> ":" <server-port>
+//<script-path> <extra-path> "?" <query-string>
+
 		// PATH_TRANSLATED
 // Maps the script's virtual path to the physical path used to call the script. 
 // This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
+
 // SCRIPT_NAME
 // Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
 
 int     CgiEnv::from_conn(Connection & conn)
 {
-	std::string val;
-	
 	Request &req = conn.sess.req;
 
 	this->kv.clear();
-	this->data.clear();
 	
+	std::string val;
+
 	val = req.header("METH");
 	if (val.size())
 		this->add("REQUEST_METHOD", val.c_str());
@@ -108,7 +108,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	else
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE not set");
-		return (-1); // ERROR (!)
+		return (-1);
 	}
 	
 // SESSION / REQUEST / CONFIG : exec_path
@@ -118,8 +118,6 @@ int     CgiEnv::from_conn(Connection & conn)
 	{
 		exec = std::string("/usr/bin/php-cgi"); 
 		this->args[0] = this->exec.c_str();
-			// actually -- ignored
-		// this->args[1] = "-f";
 		this->args[1] = file.c_str();
 		this->args[2] = NULL;		
 	}
@@ -142,7 +140,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		WsLog::_(LVL_DBG, TGT_CGI_ENV, "EXEC not set");
 		return (-1); // ERROR (!)
 	}
-
+// SESSION
 	val = req.header("VARS");
 	if (val.size())
 		this->add("QUERY_STRING", val.c_str());
@@ -152,8 +150,7 @@ int     CgiEnv::from_conn(Connection & conn)
 // if the REDIRECT_STATUS CGI variable is set
 	this->add("REDIRECT_STATUS", "1");
 	
-// CONFIG : server_root/pycgi
-// kd : this should be relative to .. something. Perhaps in the cgi-bin.
+// SERVER / CONFIG : server_root/pycgi
 	this->add("PYTHONPATH", 
 		"/home/kdonlon/Documents/Projects/webserv/git/pycgi/");
 		// "/media/kdonlon/data/Documents/42/webserv/git/pycgi/");
@@ -174,6 +171,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add("CONTENT_LENGTH", val.c_str());
 		
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
+
 	val = req.header("Host");
 	if (val.size())
 		this->add("HTTP_HOST", val.c_str());
@@ -200,15 +198,15 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("Connection");
 	if (val.size())
 		this->add("HTTP_CONNECTION", val.c_str());
-		// Upgrade-Insecure-Requesets
-		// Sec-Fetch
+// SERVER		
 	this->add("HTTP_COOKIE", "chocolate chip");
 	
 	this->add("REMOTE_ADDR", conn.get_addr().c_str());
 	// this->add("REMOTE_HOST", "remote host");
 	// this->add("REMOTE_USER", "remote user");
 	
-	this->add("SERVER_NAME", "webserv"); // virtual
+// SERVER
+	this->add("SERVER_NAME", "webserv");
 	this->add("SERVER_PORT", conn.serv.get_port());
 	this->add("SERVER_PROTOCOL", "HTTP/1.1");
 	this->add("SERVER_SOFTWARE", "webserv");
@@ -220,10 +218,10 @@ int     CgiEnv::from_conn(Connection & conn)
 
 const char	**CgiEnv::gen(void)
 {
+	this->data.clear();
 	if (res)
 		delete[] res;
 
-	
 	std::map<std::string, std::string>::iterator kvit = kv.begin();
 	while (kvit != kv.end())
 	{

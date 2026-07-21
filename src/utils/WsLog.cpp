@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 16:31:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:17:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[8]);
     if (tgt & TGT_BODY)
         return (tgt_str[9]);
-    if (tgt & (TGT_RSRC | TGT_RSRC_INFO))
+    if (tgt & (TGT_RSRC | TGT_RSRC_INFO | TGT_RSRC_WAIT))
         return (tgt_str[10]);
 
     return (tgt_str[0]);
@@ -143,7 +143,7 @@ void    WsLog::kd(void)
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
         | TGT_EPOLL_EVT
-        | TGT_EPOLL_CTL
+        // | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV
@@ -156,8 +156,8 @@ void    WsLog::kd(void)
         // | TGT_CONN_DATA
 
         // | TGT_CGI - dangerous data 
-        | TGT_CGI_RECV
-        | TGT_CGI_SEND
+        // | TGT_CGI_RECV
+        // | TGT_CGI_SEND
         // | TGT_CGI_DATA
 
         // | TGT_SERV
@@ -167,7 +167,11 @@ void    WsLog::kd(void)
         // | TGT_BODY
         | TGT_RSRC
         | TGT_RSRC_INFO
+        // | TGT_RSRC_WAIT
     ;
     
-    WsLog::tgt = TGT_NONE;
+    // WsLog::tgt = TGT_NONE;
+
+    // WsLog::lvl = LVL_INFO;
+    // WsLog::tgt = TGT_ALL;
 }

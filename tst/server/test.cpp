@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 17:52:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 17:42:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,43 +21,7 @@ int main (int, char ** argv, char **envp)
     std::cerr << "pwd : " << getenv("PWD") << std::endl;
     std::cerr << "argv[0] : " << argv[0] << std::endl;
     
-    WsLog::lvl = LVL_NONE
-        | LVL_ERR 
-        | LVL_WARN
-        | LVL_INFO
-        | LVL_DBG
-    ;
-    WsLog::tgt = TGT_NONE
-        // | TGT_EPOLL 
-        | TGT_EPOLL_EVT
-        | TGT_EPOLL_CTL
-        
-        // | TGT_EPC
-        // | TGT_EPC_RECV
-        // | TGT_EPC_SEND
-        
-        
-        | TGT_CONN
-        | TGT_CONN_RECV
-        | TGT_CONN_SEND
-        // | TGT_CONN_DATA
-
-        // | TGT_CGI - dangerous data 
-        | TGT_CGI_RECV
-        | TGT_CGI_SEND
-        // | TGT_CGI_DATA
-
-        // | TGT_SERV
-        // | TGT_MAIN
-
-        // | TGT_HEAD
-        // | TGT_BODY
-        // | TGT_RSRC
-        | TGT_RSRC_INFO
-    ;
-    
-    // WsLog::tgt = TGT_NONE;
-
+    WsLog::kd();
     
     int     err = 0;
     Epoll   *ep = NULL;
