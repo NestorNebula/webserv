@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:52:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/21 20:51:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,14 +148,29 @@ ssize_t	Connection::pollout(void)
 		return (-1);
 	}
 	
-// kd : cgi-only .. not sure where else to put this
-	if (!this->cgi.hed)
-	{
-		this->mod_evt(-EPOLLOUT); 
-		return (0);
-	}
-
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+
+	err = this->cgi_done(); // cgi_check();
+	// (-1) : done : close / keep-alive
+	// (0)  : in progress, no data
+	// (1)  : have data to write
+	if (err == 0)
+		return (0);
+	if (err < 0)
+	{
+// SESSION / REQUEST - move back to pollout
+#if 1 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
+
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
+		this->sess.req.clear();
+		this->cgi.reset();
+		this->mod_evt(-EPOLLOUT);
+		this->mod_evt(EPOLLIN);
+		return (0);
+#else
+		return (-1);		
+#endif		
+	}
 
 // SESSION
 // kd : integration
@@ -335,24 +350,22 @@ int		Connection::cgi_status(int opt)
 
 int		Connection::cgi_done(void)
 {
+	if (!this->cgi.hed)
+	{
+		this->mod_evt(-EPOLLOUT); 
+		return (0);
+	}
+	
+	if (ostr.size())
+		return (1);
+	// we just checked this in pollout
 	if (this->cgi.status(WNOHANG) != -1) // CGI is DONE
 	{
-// SESSION / REQUEST - move back to pollout
-#if 1 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
-
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
-		this->sess.req.clear();
-		this->cgi.reset();
-		this->mod_evt(-EPOLLOUT);
-		this->mod_evt(EPOLLIN);
-		return (0);
-#else
-		return (-1);		
-#endif			
+		
 	}
 	// CGI is still active ... 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
-// TIMEOUT 
+// TIMEOUT (?)
 	this->mod_evt(-EPOLLOUT);
 	if (this->cgi.op)
 		this->cgi.op->mod_evt(EPOLLIN);
