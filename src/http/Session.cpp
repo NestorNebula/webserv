@@ -43,6 +43,17 @@ const Request &Session::getRequest() const {
   return _request;
 }
 
+Session::CgiInfo Session::getCgiInfo() const {
+  throwIfNotAction(DOCGI);
+  CgiInfo info;
+
+  info.scriptPath = _resourcePath;
+  std::string ext = _resourcePath.substr(_resourcePath.find_last_of("."));
+  std::map<std::string, std::string>::const_iterator it = _route->cgi.find(ext);
+  info.executablePath = it->second;
+  return info;
+}
+
 void Session::setCgiResource(Resource *cgiResource) {
   throwIfNotAction(DOCGI);
   delete _resource;
