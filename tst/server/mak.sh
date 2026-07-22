@@ -10,5 +10,5 @@ tput reset
 if [ "$1" == "v" ]; then
 	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test
 else
-	./test
+	./test "$1"
 fi

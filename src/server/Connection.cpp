@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 20:51:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 11:34:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ void	Connection::set_err(int e)
 	WsLog::_(LVL_DBG, TGT_CONN, "ostr: ", this->ostr.size());
 	
 	// ATTN : some errors (500) are not siege-friendly
+// SESSION
 	this->error = e;
 	this->ostr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n\r\nError Data\r\n");
 
@@ -79,6 +80,8 @@ ssize_t	Connection::pollin(void)
 		if (this->cgi.status(WNOHANG) > 0)
 		{
 			// ATTN : seems like we'd want to send an error here ...
+			// assume it's been set (?)
+			// keep-alive (?)
 			// or .. let pollout take care of it 
 			this->mod_evt(EPOLLOUT);
 			// return (-1);
@@ -95,6 +98,7 @@ ssize_t	Connection::pollin(void)
 		
 // SESSION
 // kd : integration
+	// sess::rsrc = new ResourceCgi(conn!)
 	if (this->cgi.pid == 0)
 	{
 		this->req_cnt++;
@@ -103,13 +107,17 @@ ssize_t	Connection::pollin(void)
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
 			this->set_err(503);
 			// this->mod_evt(-EPOLLIN);
-			this->mod_evt(EPOLLOUT);
+// or .. wait for cgi to send us data (?)
+			// this->mod_evt(EPOLLOUT);
 			return (0);
 		}
 		// chunked
 		// std::string cont("HTTP/1.1 100 Continue\r\n\r\n");
 		// this->send(cont);
 	}
+	// session::write .. 
+		// should "pass" this to the resource
+		// this code should be in there 
 	// Each time we receive request data, let the cgi resource know
 	if (this->cgi.ip)
 	{
@@ -139,6 +147,7 @@ ssize_t	Connection::pollout(void)
 	{
 		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->fd);
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
+// SESSION
 		err = this->send(this->ostr); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		if (err < 0)
@@ -150,6 +159,12 @@ ssize_t	Connection::pollout(void)
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 
+
+// ALL THIS : when requesting data from Session/Resource
+
+// which will .. for cgi
+// check cgi.hed
+// 
 	err = this->cgi_done(); // cgi_check();
 	// (-1) : done : close / keep-alive
 	// (0)  : in progress, no data
@@ -159,11 +174,13 @@ ssize_t	Connection::pollout(void)
 	if (err < 0)
 	{
 // SESSION / REQUEST - move back to pollout
-#if 1 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
-
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
-		this->sess.req.clear();
+#if 0 // KEEP_ALIVE : WORKS, but requires CONTENT-LENGTH from (cgi)
+// AND : we need to know that we have SENT everything to the client
+		// resource::tlen
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  keep-alive ", this->req_cnt);
+		this->sess.reset();
 		this->cgi.reset();
+		this->ostr.clear();
 		this->mod_evt(-EPOLLOUT);
 		this->mod_evt(EPOLLIN);
 		return (0);
@@ -176,16 +193,23 @@ ssize_t	Connection::pollout(void)
 // kd : integration
 	//  the std::string ostr is flushed to the client,
 	//  but may be filled by the CGI
+#if 0
 	if (ostr.size() == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ostr.size() == 0");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  ostr.size() == 0");
 
 		err = this->cgi_done();
 // KEEP_ALIVE
 	// Session::reset
 		return (err);
 	}
-	
+#endif
+// SESSION : fetch from resource .. if necessary
+	// into fixed (ostr) here (?)
+	// sess->fetch(str & ostr)
+		// if (ostr.size())
+			// return it 
+		// else .. fill from .. stream
 	err = this->send(ostr);
 	if (err < 0)
 	{
@@ -203,9 +227,12 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", ostr.size());
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 		// this->mod_evt(-EPOLLOUT); 
 	}
+// SESSION
+	// detect "done" from resource here (?)
+	
 	
 	return (err); // (!) bytes written
 }
@@ -247,6 +274,9 @@ std::string		&Connection::get_addr(void)
 	// (0)	: no body data is currently available
 	//		  BUT .. more needs to be received to complete the request
 	// (-1) : there is no more body data to write to the CGI
+
+// Sesssion : should have pushed data to resource 
+// ResourceCgi (!)
 int	Connection::req_body_status(void)
 {
 	int	err = this->sess.req.body_stat(); // SESSION / REQUEST
@@ -262,6 +292,14 @@ int	Connection::req_body_status(void)
 }
 
 // (CgiPipe::pollin)
+// so .. the CgiPipe .. should really
+// just push to its RESOURCE
+// which will track what we need 
+	// stat
+	// head
+	// body
+// and answer the request for data accordingly
+// ResourceCgi (!)
 int	Connection::cgi_data(const char *buf, ssize_t siz)
 {
 	this->ostr.append(buf, siz);
@@ -271,6 +309,19 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", ostr);
 	
+	// OR 
+	// (cgi)
+	// str	stat;
+	// str	head;
+	// str	body;
+
+// RESOURCE::push_data()
+	// request (ostr) from Resource (like the others)
+	// track how much of (clen) sent
+	// so we know -- WITHIN THE RESOURCE
+	// when we're done
+	// the problem (for keep-alive)
+		// "done" was detected by cgi closing
 	if (this->cgi.hed == 0)
 	{
 		size_t	pos = ostr.find("\r\n\r\n");
@@ -278,13 +329,24 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 			return (0);
 			
 		this->cgi.hed = 1;
-
+		this->cgi.hlen = pos + 4;
 // REQUEST
 // kd : 
 
 // WsLog::_(LVL_DBG, TGT_CGI_RECV, "head:");
 // WsLog::_(LVL_DBG, TGT_CGI_RECV, "****\n", ostr);
-		pos = ostr.find("Status");
+		pos = ostr.find("Content-Length"); // case (!)
+		if (pos != std::string::npos)
+		{
+			std::stringstream	line(ostr.substr(pos));
+			std::string key;
+			line >> key >> this->cgi.clen;
+			WsLog::_(LVL_DBG, TGT_CGI_DATA, "clen: ", this->cgi.clen);
+			this->cgi.tlen = this->cgi.hlen + this->cgi.clen;
+			WsLog::_(LVL_DBG, TGT_CGI_DATA, "tlen: ", this->cgi.tlen);
+			// plus HTTP STATUS LINE 
+		}
+		pos = ostr.find("Status"); // case (!)
 		if (pos == std::string::npos)
 		{
 // size_t	pos = ostr.find("\r\n\r\n");
@@ -299,6 +361,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		// we are able to "Keep-Alive"
 		// if the CGI has provided "Content-Length"
 
+// header.get(str, off)
 	    std::stringstream	line(ostr.substr(pos));
 		std::string key;
 		std::string val;
@@ -316,14 +379,17 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 
 // called in ~CgiPipe()
 // may trigger cgi.status(0)
+// ResourceCgi (!)
 void	Connection::cgi_rem(CgiPipe *epc)
 {
 	switch (this->cgi.rem(epc))
 	{
 	case 1: // (ip)
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (ip) ", this->fd);
 		// this->mod_evt(EPOLLOUT);
 		break;
 	case 2: // (op)
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (op) ", this->fd);
 		this->mod_evt(EPOLLOUT);
 		break;
 	default:
@@ -331,6 +397,7 @@ void	Connection::cgi_rem(CgiPipe *epc)
 	}
 }
 
+// ResourceCgi (!)
 int		Connection::cgi_status(int opt)
 { 
 	int	err;
@@ -340,6 +407,8 @@ int		Connection::cgi_status(int opt)
 	if (err > 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "stat: ", this->cgi.xit);
+		// OR : rsrc HOLDS ERROR
+		// which conn chekcs at pollout
 		if (this->cgi.xit == 2)
 			this->set_err(404);
 		else
@@ -348,23 +417,42 @@ int		Connection::cgi_status(int opt)
 	return (err); 
 }
 
+// ResourceCgi (!)
 int		Connection::cgi_done(void)
 {
 	if (!this->cgi.hed)
 	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no cgi hed");
 		this->mod_evt(-EPOLLOUT); 
 		return (0);
 	}
 	
+	// resource state
+		// sent stat
+		// sent head
+		// sent body
+		// unknown (no content-length : wait for cgi-close)
 	if (ostr.size())
 		return (1);
 	// we just checked this in pollout
-	if (this->cgi.status(WNOHANG) != -1) // CGI is DONE
+	if (this->cgi.status(WNOHANG) != -1)
 	{
-		
+		 // CGI is DONE	
+		 return (-1);
 	}
+
+// fine .. 
+// but have not RESET 
 	// CGI is still active ... 
+
+// PROBLEM : we get more keep-alive data BEFORE our cgi finishes cleanly
+
+	// could know DONE here .. from content-length
+// need to track : cgi: clen && slen
+	// BUT : may have sent ALL on keep-alive
+	// AND : cgi is taking its time closing ...
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
+	
 // TIMEOUT (?)
 	this->mod_evt(-EPOLLOUT);
 	if (this->cgi.op)
@@ -393,13 +481,13 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 		
-	cgi.pid = fork();
-	if (cgi.pid < 0)
+	pid_t pid = fork();
+	if (pid < 0)
 	{
 		delete (cgienv);
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 	}	
-	if (cgi.pid == 0)
+	if (pid == 0)
 	{
 		err = pipes.dup_io();
 		if (err < 0)
@@ -425,6 +513,10 @@ int	Connection::exec_cgi(void)
 	}		
 	delete (cgienv);
 	
+
+	// new ResourceCgi(pid, pipes, this)
+	
+	cgi.pid = pid;
 // fcntl .. F_SETFD .. O_CLOEXEC
 	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
 
@@ -432,7 +524,7 @@ int	Connection::exec_cgi(void)
 	int cgifd_ip = dup(pipes.p1[1]);
 	if (cgifd_ip < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
-	
+
 	int cgifd_op = dup(pipes.p2[0]);
 	if (cgifd_op < 0)
 	{
@@ -440,6 +532,7 @@ int	Connection::exec_cgi(void)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
 	}	
 
+	// (rsrc)
 	this->cgi.ip = new CgiPipe(this->ep, cgifd_ip, this);
 	err = this->cgi.ip->ini_evt(EPOLLOUT);
 	if (err < 0)

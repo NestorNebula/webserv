@@ -2,7 +2,7 @@
 
 header('Content-type: text/plain');
 header('Connection: keep-alive');
-header('Content-length: 17');
+header('Content-Length: 17');
 
 ?>
 I'm not dead yet.

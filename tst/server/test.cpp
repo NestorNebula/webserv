@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:42:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 11:29:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,15 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
-int main (int, char ** argv, char **envp)
+int main (int argc, char ** argv, char **envp)
 {
     std::cerr << "pwd : " << getenv("PWD") << std::endl;
     std::cerr << "argv[0] : " << argv[0] << std::endl;
     
     WsLog::kd();
+
+    if (argc > 1 && argv[1][0] == '0')
+        WsLog::tgt = TGT_NONE;
     
     int     err = 0;
     Epoll   *ep = NULL;

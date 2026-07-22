@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:48:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 11:34:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,9 @@ bool	CgiPipe::timeo(time_t now)
 
 ssize_t	CgiPipe::pollin(void)
 {
+	// rsrc::
+	// conn should have told (rsrc) something 
+	// when it closed
 	if (this->conn == NULL)
 		return (-1);
 
@@ -147,6 +150,7 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
+// rsrc::set_err() 
 		this->conn->set_err(501);
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
@@ -156,7 +160,7 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
-	
+	// rsrc::push_data()
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	
@@ -170,6 +174,7 @@ ssize_t	CgiPipe::pollout(void)
 	
 	if (this->conn == NULL)
 		return (-1);
+	// rsrc::status
 	if (this->conn->cgi_status(WNOHANG) >= 0)
 		return (-1);
 	
@@ -185,16 +190,16 @@ ssize_t	CgiPipe::pollout(void)
 // hasBody()
 // getBody()
 // isComplete()
-
+	// rsrc:: should have been filled from sess::write
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: complete");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body:  complete");
 		return (-1);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body: waiting");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body:  waiting");
 		this->mod_evt(0);
 		return (0);
 	}
@@ -202,12 +207,19 @@ ssize_t	CgiPipe::pollout(void)
 // SESSION / REQUEST
 // kd : Connection currently stores the request body in a std::string
 	// EpollClient::send() erases the sent bytes from the head of the string
+	
+	// sess::write
+	// should have pushed non-header data (body)
+	// to rsrc::idata ...
+	// rsrc::get_body
+	// which should have been properly filled
+	// by sess::write
 	std::string & body = this->conn->sess.req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->conn->set_err(502);
+		this->conn->set_err(502); // rsrc
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
@@ -243,6 +255,7 @@ ResourceCgi::~ResourceCgi()
 
 void	ResourceCgi::reset(void)
 {
+	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
 	if (this->ip || this->op) // pid, stat (?)
 	{
 		if (this->stat == -1)
@@ -254,7 +267,7 @@ void	ResourceCgi::reset(void)
 	}
 	if (this->ip)
 	{
-		this->ip->conn_closed();
+		this->ip->conn_closed(); // rsrc_closed
 		// this->ip->mod_evt(EPOLLIN);
 	}
 	if (this->op)
@@ -267,6 +280,10 @@ void	ResourceCgi::reset(void)
 	this->op   = NULL;
 	this->stat = -1;
 	this->hed  = 0;
+	this->clen = 0;
+	this->hlen = 0;
+	this->tlen = 0;
+	this->slen = 0;
 }
 
 int	ResourceCgi::status(int opt)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:17:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 10:35:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,17 +153,17 @@ void    WsLog::kd(void)
         | TGT_CONN
         | TGT_CONN_RECV
         | TGT_CONN_SEND
-        // | TGT_CONN_DATA
+        | TGT_CONN_DATA
 
         // | TGT_CGI - dangerous data 
-        // | TGT_CGI_RECV
-        // | TGT_CGI_SEND
-        // | TGT_CGI_DATA
+        | TGT_CGI_RECV
+        | TGT_CGI_SEND
+        | TGT_CGI_DATA
 
         // | TGT_SERV
         // | TGT_MAIN
 
-        // | TGT_HEAD
+        | TGT_HEAD
         // | TGT_BODY
         | TGT_RSRC
         | TGT_RSRC_INFO

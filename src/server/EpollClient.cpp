@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:48:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 09:09:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,9 @@ int	EpollClient::event(struct epoll_event *e)
 	// in out hup : may not have fully flushed (read/write)
 	if (e->events == EPOLLRDHUP)
 	{
-		// this->mod_evt(EPOLLIN);
+		this->mod_evt(-EPOLLIN);
 		// WITH : kills cgi
+		// not good for keep-alive (?)
 		this->hup();
 		return (-1);
 	}

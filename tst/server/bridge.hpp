@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 17:17:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 11:17:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
 	std::string &get_body(void) { return this->body; }
 	std::string &get_fext(void) { return this->fext; }
 	
-	void		clear(void);
+	void		reset(void);
 private:
 	int			state;
 	
@@ -50,9 +50,9 @@ private:
 	std::string body; // sess.ip_data
 	std::string exec;
 
-	size_t	blen;
-	size_t	clen;
-	int		chnk;
+	size_t		blen;
+	size_t		clen;
+	int			chnk;
 
 	std::string meth;
 	std::string path;
@@ -84,12 +84,29 @@ public:
 	// fill_input
 	int write(const char *buf, size_t siz)
 	{
+		// if have_head and (rsrc == NULL))
+
+		// Request : should hold ONLY HEADER
 		int err = this->req.push_data(buf, siz);
 		if (err < REQ_HAVE_HEAD)
 			return (err);
+
+		// BODY/POST -- the rest!
+		// needs to get pushed to (rsrc)
+
+		// if (this->cgi.pid == 0)
+		// if (res == NULL)
+		// new ResourceCgi
+
+		// rsrc::push_data
+		// else
+		// this->cgi.ip->mod_evt(EPOLLOUT);
 		return (err);
 	}
-	
+	void	reset(void)
+	{
+		this->req.reset();	
+	}
 	int req_state(void) { return this->req.get_state(); }
 };
 

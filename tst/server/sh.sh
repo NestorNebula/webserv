@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=20 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=10 --no-parser -b
 	echo
 	exit 0
 fi
