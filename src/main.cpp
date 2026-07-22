@@ -6,11 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:51:20 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 13:56:22 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:29:47 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
+#include "WsLog.hpp"
 #include <iostream>
 
 static void	printServer(const ServerConfig& server, size_t index)
@@ -71,6 +72,9 @@ static void	printServer(const ServerConfig& server, size_t index)
 
 int	main(int argc, char **argv)
 {
+	WsLog::lvl = LVL_ALL;
+	WsLog::tgt = TGT_PARSING;
+
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
@@ -87,7 +91,7 @@ int	main(int argc, char **argv)
 		for (size_t i = 0; i < servers.size(); ++i)
 			printServer(servers[i], i);
 	} catch (const std::exception& e) {
-		std::cerr << "\033[0;91m" << e.what() << "\033[0;39m" << std::endl;
+		WsLog::_(LVL_ERR, TGT_CONFIG, e.what());
 		return (1);
 	}
 	return (0);

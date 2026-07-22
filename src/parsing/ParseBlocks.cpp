@@ -6,12 +6,13 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 13:29:56 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:28:31 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include "ParserUtils.hpp"
+#include "WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
 
@@ -67,6 +68,7 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		}
 	}
 	current_server.routes.push_back(route);
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parser route: ", route.path);
 }
 
 void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives_map,
@@ -190,6 +192,7 @@ void	ConfigParser::parseServer()
 
 	validateServerConfig(server);
 	_servers.push_back(server);
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parser server on port ", server.port);
 }
 
 
