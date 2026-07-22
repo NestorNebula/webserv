@@ -6,12 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:15:36 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/22 12:25:50 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:42:56 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
-#include "WsLog.hpp"
+#include "utils/WsLog.hpp"
 
 #define SPACE		' '
 #define TAB			'\t'

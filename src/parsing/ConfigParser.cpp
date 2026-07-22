@@ -6,12 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/22 12:24:19 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:42:47 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
-#include "WsLog.hpp"
+#include "utils/WsLog.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -62,7 +62,8 @@ void	ConfigParser::parseFile(const std::string& filename)
 	}
 	if (_servers.empty())
 		throw	ConfigException("No server block found in configuration.");
-	WsLog::_(LVL_INFO, TGT_CONFIG, "Configuration parsed successfully");
+	WsLog::_(LVL_INFO, TGT_CONFIG, "Configuration parsed successfully, servers: ",
+		static_cast<int>(_servers.size()));
 }
 
 

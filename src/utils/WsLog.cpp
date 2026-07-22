@@ -6,11 +6,11 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/17 13:27:38 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:43:56 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "WsLog.hpp"
+#include "utils/WsLog.hpp"
 
 log_lvl WsLog::lvl = LVL_NONE;
 log_tgt WsLog::tgt = TGT_NONE;
@@ -46,7 +46,6 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[7]);
 	if (tgt & TGT_PARSING)
 		return (tgt_str[8]);
-
     return (tgt_str[0]);
 }
 

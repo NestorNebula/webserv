@@ -6,11 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/22 12:18:11 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:43:14 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
+#include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
@@ -187,6 +188,7 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 		if (it->second.empty() || it->second[0] != '/')
 			throw	ConfigException("CGI executable must be an absolute path: "
 				+ it->second);
+		WsLog::_(LVL_DBG, TGT_VALIDATE, "Checking CGI executable: ", it->second);
 		if (access(it->second.c_str(), X_OK) != 0)
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");
@@ -195,8 +197,9 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 
 void	ConfigParser::validateDirExists(const std::string& path, const std::string& context)
 {
-	struct stat	info;
+	WsLog::_(LVL_DBG, TGT_VALIDATE, "Checking directory exists: ", path);
 
+	struct stat	info;
 	if (stat(path.c_str(), &info) != 0)
 		throw	ConfigException(context + ": directory does not exist: " + path);
 	if (!S_ISDIR(info.st_mode))

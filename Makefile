@@ -6,7 +6,7 @@
 #    By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/29 15:47:03 by mamarti           #+#    #+#              #
-#    Updated: 2026/07/03 12:55:21 by mamarti          ###   ########.fr        #
+#    Updated: 2026/07/22 12:42:07 by mamarti          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ RED         = \033[0;91m
 
 SRC =	main.cpp parsing/ConfigParser.cpp parsing/Tokenizer.cpp \
 		parsing/ParserTools.cpp parsing/ParseBlocks.cpp parsing/Validation.cpp \
+		utils/WsLog.cpp \
 
 SRC_DIR			=	src
 SRCS			=	$(addprefix $(SRC_DIR)/, $(SRC))

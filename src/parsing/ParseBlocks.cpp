@@ -6,13 +6,13 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/22 12:28:31 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/07/22 12:43:07 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include "ParserUtils.hpp"
-#include "WsLog.hpp"
+#include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
 
@@ -67,8 +67,8 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 			route.cgi[ext] = it->second;
 		}
 	}
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed route: ", route.path);
 	current_server.routes.push_back(route);
-	WsLog::_(LVL_INFO, TGT_PARSER, "Parser route: ", route.path);
 }
 
 void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives_map,
@@ -107,6 +107,7 @@ void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives
 
 	if (value.empty())
 		throw	ConfigException("Empty value for directive: " + full_key);
+	WsLog::_(LVL_DBG, TGT_PARSER, "Directive parsed: ", full_key);
 	directives_map[full_key] = value;
 	if (peek().type == TOKEN_NEWLINE)
 		consume();
@@ -191,8 +192,8 @@ void	ConfigParser::parseServer()
 	}
 
 	validateServerConfig(server);
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed server on port ", server.port);
 	_servers.push_back(server);
-	WsLog::_(LVL_INFO, TGT_PARSER, "Parser server on port ", server.port);
 }
 
 
