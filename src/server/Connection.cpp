@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 11:34:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/23 15:57:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -338,6 +338,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		pos = ostr.find("Content-Length"); // case (!)
 		if (pos != std::string::npos)
 		{
+// need this for KEEP_ALIVE
 			std::stringstream	line(ostr.substr(pos));
 			std::string key;
 			line >> key >> this->cgi.clen;
@@ -441,6 +442,7 @@ int		Connection::cgi_done(void)
 		 return (-1);
 	}
 
+// KEEP_ALIVE
 // fine .. 
 // but have not RESET 
 	// CGI is still active ... 

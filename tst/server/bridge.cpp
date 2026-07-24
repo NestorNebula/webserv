@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 10:27:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/23 15:59:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,22 @@ static bool	icmp(char a, char b)
 		std::tolower(static_cast<unsigned char>(b));		
 }
 
+std::string hed_val(std::string & str, const char *key)
+{
+	std::string	kstr(key);
+	std::string	val("");
+
+	std::string::const_iterator it = std::search(
+		str.begin(), str.end(),
+		kstr.begin(), kstr.end(),
+		icmp);
+    // return iterator
+	if (it == str.end())
+	{
+		// std::cerr << "header: not found\n";
+		return (val);
+	}
+}
 std::string Request::header(const char *key) const
 {
 	std::string	kstr(key);

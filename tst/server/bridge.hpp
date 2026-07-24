@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 11:17:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/23 15:56:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@
 # define REQ_READ_BODY 3
 # define REQ_HAVE_BODY 4
 # define REQ_DONE 5
+
+
+std::string hed_val(std::string & str, const char *key);
 
 class Request
 {

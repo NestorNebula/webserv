@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 11:29:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/22 11:36:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ int main (int argc, char ** argv, char **envp)
     std::cerr << "argv[0] : " << argv[0] << std::endl;
     
     WsLog::kd();
-
     if (argc > 1 && argv[1][0] == '0')
         WsLog::tgt = TGT_NONE;
     
