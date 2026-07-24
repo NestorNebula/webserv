@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 17:41:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 22:26:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,8 @@ ssize_t	CgiPipe::pollin(void)
 	// conn should have told (rsrc) something 
 	// when it closed
 	if (this->conn == NULL)
+		return (-1);
+	if (this->rsrc == NULL)
 		return (-1);
 
 	ssize_t	err = 0;

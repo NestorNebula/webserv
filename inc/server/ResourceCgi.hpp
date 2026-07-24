@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 17:52:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 18:38:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,9 @@ public:
 
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
 	
-	void        push_data(void);
+	void        push_body(void);
+	// void        push_data(const char *buf, ssize_t siz);
+    
 	void		set_err(int e) { this->error = e; }
 	
 	pid_t		pid;

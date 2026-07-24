@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 09:09:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 21:32:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,10 @@ int	EpollClient::event(struct epoll_event *e)
 	if (e->events == EPOLLRDHUP)
 	{
 		this->mod_evt(-EPOLLIN);
+		this->mod_evt(EPOLLOUT);
 		// WITH : kills cgi
 		// not good for keep-alive (?)
+		// who needed this (!)
 		this->hup();
 		return (-1);
 	}

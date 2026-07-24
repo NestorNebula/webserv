@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 17:51:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 23:11:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,15 @@ void	ResourceCgi::reset(void)
 	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
 	if (this->ip || this->op) // pid, stat (?)
 	{
-		if (this->stat == -1)
+		if (this->pid && this->stat == -1)
 		{
 			WsLog::_(LVL_DBG, TGT_RSRC, "kill");
+// PROBLEM : kill => sig => error .. is sent out on "keep-alive" socket
+
 			kill(this->pid, SIGKILL);
 			this->status(0);
+
+			// this->status(WNOHANG);
 		}
 	}
 	if (this->ip)
@@ -42,6 +46,7 @@ void	ResourceCgi::reset(void)
 		this->op->rsrc_closed();
 		// this->op->mod_evt(EPOLLOUT);
 	}
+	
 	this->pid  = 0;
 	this->ip   = NULL;
 	this->op   = NULL;
@@ -51,7 +56,8 @@ void	ResourceCgi::reset(void)
 	this->hlen = 0;
 	this->tlen = -1;
 	this->slen = 0;
-	this->ka   = 0;
+	this->error = 0;
+	// this->ka   = 0;
 }
 
 int	ResourceCgi::status(int opt)
@@ -103,7 +109,7 @@ int	ResourceCgi::status(int opt)
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-		this->set_err(504);
+		this->set_err(505); // hm : kill .. gets sent .. ugh
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}
@@ -138,11 +144,12 @@ int	ResourceCgi::rem(CgiPipe *epc)
 	return (err);
 }
 
-void    ResourceCgi::push_data(void)
+void    ResourceCgi::push_body(void)
 {
     if (this->ip)
         this->ip->mod_evt(EPOLLOUT);
 }
+
 int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 17:39:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 19:03:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ public:
 private:
 	ResourceCgi		*cgi;
 	void			reset(void);
+	int				rsrc_send(int cnt);
 	
 public:
 	int				req_body_status(void);

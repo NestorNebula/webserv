@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=22 --concurrent=200 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=10 --concurrent=10 --no-parser -b
 	echo
 	exit 0
 fi
@@ -19,13 +19,13 @@ fi
 # exit 0
 
 
-# curl -X GET http://localhost:8081/suck.php -i
+# curl -X GET http://localhost:8080/suck.php -i
 # echo
-# curl -X GET http://localhost:8081/suck.py -i
+curl -X GET http://localhost:8081/suck.py -i
+echo
+# curl -X GET http://localhost:8082/suck.pl -i
 # echo
-# curl -X GET http://localhost:8081/suck.pl -i
-# echo
-# exit 0
+exit 0
 
 
 # curl -X GET http://localhost:8081/to.php -i
