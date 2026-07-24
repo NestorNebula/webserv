@@ -32,7 +32,8 @@ FILES = \
 	server/Socket.cpp \
 	server/Connection.cpp \
 	server/CgiEnv.cpp \
-	server/CgiPipe.cpp
+	server/CgiPipe.cpp \
+	server/ResourceCgi.cpp
 
 TPP = 
 

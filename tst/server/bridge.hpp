@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 12:55:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 17:52:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ private:
 class Resource
 {
 public:
-
+	virtual ~Resource() {}
+	virtual void	push_data(void) = 0;
 };
 
 
@@ -93,6 +94,7 @@ public:
 				// new Resource
 			// else
 				// push data to resource .. 
+			// tell resource body data is available
 		}
 
 		// Request : should hold ONLY HEADER
@@ -111,6 +113,12 @@ public:
 		// else
 		// this->cgi.ip->mod_evt(EPOLLOUT);
 		return (err);
+	}
+	int		pull_data(std::string & dst)
+	{
+		(void)dst;
+		// cgi_done
+		return (0);
 	}
 	void	reset(void)
 	{

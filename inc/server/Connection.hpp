@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 13:16:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 17:39:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 
 class Server;
 class CgiPipe;
+class ResourceCgi;
 
 class Connection : public EpollClient
 {
@@ -55,7 +56,7 @@ public:
 	
 // Session/Resource
 private:
-	ResourceCgi		cgi;
+	ResourceCgi		*cgi;
 	void			reset(void);
 	
 public:

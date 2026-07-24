@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 12:02:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 17:49:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ int Request::init(void)
 }
 
 int Request::body_stat(void)
-{\
+{
     // WsLog::_(LVL_DBG, TGT_CONN_RECV, "body:  size ", this->body.size());
     if (this->body.size())
         return (1);
