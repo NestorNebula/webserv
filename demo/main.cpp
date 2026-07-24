@@ -16,7 +16,7 @@ int main(int argc, char *argv[], char **envp) {
     return 0;
   }
 
-  if (!setWorkingDirectory(argv[1])) { // Replace with config path in real main
+  if (!setWorkingDirectory(argv[1])) {
     std::cerr << "couldn't setup working directory.\n";
     return 0;
   }
