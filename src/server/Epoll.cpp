@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 09:29:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 10:21:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,7 +280,7 @@ int	Epoll::loop(void)
 				continue;
 			}
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 			if (epc->event(evt) < 0)
 			{

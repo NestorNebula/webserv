@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 11:21:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 13:15:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ public:
 };
 
 class Connection;
+class ResourceCgi;
 
 class CgiPipe : public EpollClient
 {
@@ -50,7 +51,7 @@ private:
 		conn(that.conn) {};
 	CgiPipe & operator=	(const CgiPipe & ) { return (*this); }
 public:
-	CgiPipe (Epoll *_ep, int _fd, Connection * _conn);
+	CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc);
 	~CgiPipe();
 	
 	ssize_t		pollin (void);
@@ -58,10 +59,11 @@ public:
 	int			hup    (void);
 	bool		timeo  (time_t);
 
-	void		conn_closed(void);
+	void		rsrc_closed(void);
 
 private:
-	Connection		*conn; // rsrc
+	Connection		*conn;
+	ResourceCgi		*rsrc;
 	// Session		*sess;
 };
 
@@ -71,8 +73,11 @@ private:
 	ResourceCgi				 (const ResourceCgi & ) {}
 	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), clen(0), hlen(0), tlen(0), slen(0), xit(-1), sig(-1) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), clen(0), hlen(0), tlen(0), slen(0), xit(-1), sig(-1), ka(0), error(0) {}
 	~ResourceCgi();
+	
+	
+	void		set_err(int e) { this->error = e; }
 	
 	pid_t		pid;
 	CgiPipe		*ip;
@@ -85,6 +90,8 @@ public:
 	int			slen;
 	int			xit;
 	int			sig;
+	int			ka;
+	int			error;
 
 	int			status(int opt);
 	int			rem(CgiPipe *epc);

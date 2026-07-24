@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 11:34:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 13:21:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,9 +106,10 @@ void	cgi_pipes::shutdown(void)
 
 
 
-CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn) : 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) : 
 	EpollClient(_ep, EPC_CGI, _fd), 
-	conn(_conn)
+	conn(_conn),
+	rsrc(_rsrc)
 {
 }
 	
@@ -127,8 +128,8 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	if ((this->lact + EPC_TIMEOUT) < now) // server (?)
 	{
-		if (this->conn)
-			this->conn->set_err(408); // script timed out .. 
+		if (this->rsrc)
+			this->rsrc->set_err(408); // CGI : timed out .. 
 		// kill here (?)
 		return (true);
 	}
@@ -151,7 +152,7 @@ ssize_t	CgiPipe::pollin(void)
 	if (err < 0)
 	{
 // rsrc::set_err() 
-		this->conn->set_err(501);
+		this->rsrc->set_err(501); // CGI : read failed
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
@@ -160,7 +161,7 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
-	// rsrc::push_data()
+	// rsrc::push_data() => rsrc::ostr
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	
@@ -174,8 +175,10 @@ ssize_t	CgiPipe::pollout(void)
 	
 	if (this->conn == NULL)
 		return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
 	// rsrc::status
-	if (this->conn->cgi_status(WNOHANG) >= 0)
+	if (this->rsrc->status(WNOHANG) >= 0)
 		return (-1);
 	
 	
@@ -191,6 +194,8 @@ ssize_t	CgiPipe::pollout(void)
 // getBody()
 // isComplete()
 	// rsrc:: should have been filled from sess::write
+
+	// sess::
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -219,7 +224,7 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->conn->set_err(502); // rsrc
+		this->rsrc->set_err(502); // CGI : write failed
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
@@ -234,14 +239,13 @@ ssize_t	CgiPipe::pollout(void)
 
 int		CgiPipe::hup(void)
 {
-	if (this->conn == NULL)
-		return (-1);
 	return (-1);
 }
 
-void	CgiPipe::conn_closed(void)
+void	CgiPipe::rsrc_closed(void)
 { 
 	this->conn = NULL;
+	this->rsrc = NULL;
 }
 
 
@@ -267,12 +271,12 @@ void	ResourceCgi::reset(void)
 	}
 	if (this->ip)
 	{
-		this->ip->conn_closed(); // rsrc_closed
+		this->ip->rsrc_closed(); // rsrc_closed
 		// this->ip->mod_evt(EPOLLIN);
 	}
 	if (this->op)
 	{
-		this->op->conn_closed();
+		this->op->rsrc_closed();
 		// this->op->mod_evt(EPOLLOUT);
 	}
 	this->pid  = 0;
@@ -282,8 +286,9 @@ void	ResourceCgi::reset(void)
 	this->hed  = 0;
 	this->clen = 0;
 	this->hlen = 0;
-	this->tlen = 0;
+	this->tlen = -1;
 	this->slen = 0;
+	this->ka   = 0;
 }
 
 int	ResourceCgi::status(int opt)
@@ -314,8 +319,19 @@ int	ResourceCgi::status(int opt)
 	if (WIFEXITED(stat))
 	{
 		this->xit = WEXITSTATUS(stat);
+		switch (this->xit)
+		{
+		case 0:
+			break;
+		case 2:
+			this->set_err(404);
+			break;
+		default:
+			this->set_err(504);
+			break;
+		}
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
-		// "Unknown error 255" is malloc'ed (!)
+		// valgrind : "Unknown error 255" is malloc'ed (!)
 		if (xit < 255)
 			WsLog::_(LVL_DBG, TGT_RSRC, "exit:  ", std::strerror(xit));
 		else
@@ -324,6 +340,7 @@ int	ResourceCgi::status(int opt)
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
+		this->set_err(504);
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}

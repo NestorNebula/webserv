@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=10 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=2 --concurrent=4 --no-parser -b
 	echo
 	exit 0
 fi
@@ -32,15 +32,15 @@ fi
 # echo
 # exit 0
 
-curl -X POST http://localhost:8081/ka.php -i \
+curl -X POST http://localhost:8081/ka.py -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0
 
-# curl -X POST http://localhost:8082/test.pl \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-# exit 0
+curl -X POST http://localhost:8082/tst.pl \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 
 # curl -X POST http://localhost:8081/test.pl -i \

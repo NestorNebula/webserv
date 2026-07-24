@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 15:48:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 13:16:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,11 @@ public:
 // Session/Resource
 private:
 	ResourceCgi		cgi;
+	void			reset(void);
 	
 public:
 	int				req_body_status(void);
 	
-	int				cgi_status(int opt);
 	int				cgi_data(const char *buf, ssize_t siz);
 	int				cgi_done(void);
 	void			cgi_rem(CgiPipe *epc);
@@ -70,6 +70,7 @@ public:
 private:
 	int					exec_cgi(void);
 	std::string			ostr;
+	std::string			estr;
 	
 	struct sockaddr_in	addr;
 	std::string			astr;

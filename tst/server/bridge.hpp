@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/23 15:56:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 12:55:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # define REQ_DONE 5
 
 
-std::string hed_val(std::string & str, const char *key);
+std::string hedval_str(std::string & str, const char *key);
 
 class Request
 {
@@ -87,7 +87,13 @@ public:
 	// fill_input
 	int write(const char *buf, size_t siz)
 	{
-		// if have_head and (rsrc == NULL))
+		// if (have_head)
+		{
+			// if (rsrc == NULL)
+				// new Resource
+			// else
+				// push data to resource .. 
+		}
 
 		// Request : should hold ONLY HEADER
 		int err = this->req.push_data(buf, siz);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/22 09:28:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/24 11:54:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,18 +49,19 @@ typedef long unsigned int log_tgt;
 # define TGT_CGI_RECV	(1UL << 8)
 # define TGT_CGI_SEND	(1UL << 9)
 # define TGT_CGI_DATA	(1UL << 10)
-# define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND | TGT_CGI_DATA)
-# define TGT_CGI_ENV	(1UL << 11)
+# define TGT_CGI_HEAD	(1UL << 11)
+# define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND | TGT_CGI_DATA | TGT_CGI_HEAD)
+# define TGT_CGI_ENV	(1UL << 12)
 
-# define TGT_RSRC		(1UL << 12)
-# define TGT_RSRC_INFO	(1UL << 13)
-# define TGT_RSRC_WAIT	(1UL << 14)
+# define TGT_RSRC		(1UL << 13)
+# define TGT_RSRC_INFO	(1UL << 14)
+# define TGT_RSRC_WAIT	(1UL << 15)
 
-# define TGT_SERV		(1UL << 15)
-# define TGT_MAIN		(1UL << 16)
+# define TGT_SERV		(1UL << 16)
+# define TGT_MAIN		(1UL << 17)
 
-# define TGT_HEAD		(1UL << 17)
-# define TGT_BODY		(1UL << 18)
+# define TGT_HEAD		(1UL << 18)
+# define TGT_BODY		(1UL << 19)
 
 
 # define TGT_MAX		(1UL << 63)
