@@ -6,6 +6,8 @@ function monitorForm() {
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
 		await sendMessage(username.value, message.value);
+		username.value = "";
+		message.value = "";
 	});
 }
 
