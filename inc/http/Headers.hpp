@@ -36,6 +36,7 @@ public:
   std::string str(const std::string eol = "\r\n") const;
   void clear() { _container.clear(); }
   size_type size() const { return _container.size(); }
+  std::string get(const std::string &key) const;
 
   // Iterators
   iterator begin() { return _container.begin(); }
