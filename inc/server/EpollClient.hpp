@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 20:28:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:49:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ public:
 	
 	virtual ssize_t	pollin (void)   = 0;
 	virtual ssize_t pollout(void)   = 0;
+	virtual int		rdhup  (void)   = 0;
 	virtual int		hup    (void)   = 0;
 	virtual bool	timeo  (time_t) = 0;
 

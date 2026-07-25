@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 17:46:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:51:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,3 +243,5 @@ const char	**CgiEnv::gen(void)
 	*ins = NULL;
 	return (res);
 }
+
+// FCGI

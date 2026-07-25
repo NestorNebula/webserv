@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 23:30:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 11:31:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ ssize_t	Connection::pollin(void)
 			// return (-1);
 		}
 #endif
-		this->mod_evt(-EPOLLIN);
+		// this->mod_evt(-EPOLLIN); // (ka)
 		return (0);
 	}
 
@@ -166,9 +166,7 @@ int		Connection::rsrc_send(int cnt)
 			// return (0);
 		}
 	}
-	// (0) .. "pull data"
-
-	err = this->cgi_done(); // (error) : should return (1)
+	err = this->cgi_done(); 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi  done  ", err);
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  conn error ", this->error);
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi  error ", this->cgi->error);
@@ -196,19 +194,6 @@ int		Connection::rsrc_send(int cnt)
 		}
 		return (-1);		
 	}
-	// (1) .. error .. but keep-alive 
-	// something to send .. 
-// 	epoll : evt tgt  : conn
-// epoll : evt typ  : out 
-// conn  : done:  cgi  done  [1]
-// conn  : done:  conn error [404]
-// conn  : done:  cgi  error [404]
-// conn  : send:  error [404]
-// conn  : sent: [44]
-// conn  : (~) Connection
-// conn  : req cnt: [1]
-// rsrc  : (~) ResourceCgi
-// rsrc  : reset
 	return (err);
 }
 
@@ -226,6 +211,8 @@ ssize_t	Connection::pollout(void)
 	//  How should we "switch" from ResourceCgi to ResourceError (send file ...)
 	if (this->error)
 	{
+		if (this->error == 408 && this->cgi && this->cgi->ka)
+			return (-1);
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
 		err = this->send(this->estr); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
@@ -266,15 +253,50 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 		// this->mod_evt(-EPOLLOUT); 
 	}
-	// keep-alive .. done .. kill resource 
-	// or .. just close it down .. and let it die .. 
 	return (this->rsrc_send(err));
 }
 
-// rdhup : may want to close (cgi.ip)
+// FUCK : why would re-directing stderr make this work (?)
+// but : NOT when logging NO ERRORS
+// but : no log at all .. same problem
+// some sort of .. slow-down (?)
+int	Connection::rdhup(void)
+{
+	// this->mod_evt(-EPOLLIN); // (ka)
+	this->mod_evt(EPOLLOUT);
+	
+	// fuck : current REQUEST
+	if (this->cgi == NULL)
+		return (0);
+
+	// or : kill on "out rdhup"
+#if 0
+	if (this->cgi->ip)
+	{
+		this->cgi->ip->rsrc_closed(); // rsrc_closed
+		// this->ip->mod_evt(EPOLLIN);
+	}
+	if (this->cgi->op)
+	{
+		this->cgi->op->rsrc_closed();
+		// this->op->mod_evt(EPOLLOUT);
+	}
+#endif
+	if (this->sess.req.ka)
+	{
+		delete (this->cgi);
+		this->cgi = NULL;
+		return (-1);
+	}
+	return (0);
+}
+
 int	Connection::hup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
+	if (this->cgi == NULL)
+		return (-1);
+		
 	if (this->cgi->ip)
 	{
 		this->cgi->ip->rsrc_closed(); // rsrc_closed
@@ -419,11 +441,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		}
 		else
 		{
-			// fuck -- error does not like this (?)
-			// res->ka = 0; // siege may not like this 
-			
-			// can we "send" an EOF (?)
-			// After sending data through a socket, one should either close or shutdown the socket descriptor, which triggers an EOF to be sent to the other end.
+			res->ka = 0; // ATTN : error (?)
 			this->ostr.insert(0, conn_close);
 		}
 
@@ -532,6 +550,11 @@ int		Connection::cgi_done(void)
 	if (this->error)
 		return (1);
 		
+	// if (res->status(WNOHANG) != -1)
+	// {
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (exited)");
+	// 	return (-1); // DONE
+	// }
 	if (!res->hed)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (no head)");
@@ -562,7 +585,7 @@ int		Connection::cgi_done(void)
 
 // post-send-checks
 // more like "done" tests here 
-	// we just checked this in pollout
+	// // we just checked this in pollout
 	if (res->status(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (exited)");
@@ -587,7 +610,7 @@ int		Connection::cgi_done(void)
 // need to track : cgi: clen && slen
 	// BUT : may have sent ALL on keep-alive
 	// AND : cgi is taking its time closing ...
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: wait for data");
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  wait for data");
 	
 // TIMEOUT (?)
 	// this->mod_evt(-EPOLLOUT); // => pollout

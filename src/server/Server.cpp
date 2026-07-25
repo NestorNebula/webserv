@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 16:34:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:12:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,15 +106,21 @@ ssize_t	Server::pollout(void)
 }
 
 
+int	Server::rdhup(void) 
+{
+	return (0);
+}
 
 int	Server::hup(void) 
 {
 	return (0);
 }
+
 bool	Server::timeo  (time_t)
 {
 	return (false);
 }
+
 unsigned short		Server::get_port(void)	const
 {
 	return (this->port);

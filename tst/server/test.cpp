@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 13:31:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:59:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@
 
 int main (int argc, char ** argv, char **envp)
 {
-    std::cerr << "pwd : " << getenv("PWD") << std::endl;
-    std::cerr << "argv[0] : " << argv[0] << std::endl;
+    // std::cerr << "pwd : " << getenv("PWD") << std::endl;
+    // std::cerr << "argv[0] : " << argv[0] << std::endl;
     
     WsLog::kd();
     if (argc > 1)

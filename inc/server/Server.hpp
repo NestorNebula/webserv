@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/20 12:09:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:12:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ public:
 
 	ssize_t				pollin (void);
 	ssize_t				pollout(void);
+	int					rdhup  (void);
 	int					hup    (void);
 	bool				timeo  (time_t);
 	

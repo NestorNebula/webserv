@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 22:26:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/25 10:54:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,21 +127,19 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + EPC_TIMEOUT) < now) // server (?)
+	if ((this->lact + EPC_TIMEOUT) < now)
 	{
 		if (this->rsrc)
-			this->rsrc->set_err(408); // CGI : timed out .. 
-		// kill here (?)
+			this->rsrc->set_err(409); // CGI_ERR : TIMEOUT
 		return (true);
 	}
 	return (false);
 }
 
+// if called from (Conn)
+// FLAG : for deletion in Epoll
 ssize_t	CgiPipe::pollin(void)
 {
-	// rsrc::
-	// conn should have told (rsrc) something 
-	// when it closed
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
@@ -154,8 +152,7 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-// rsrc::set_err() 
-		this->rsrc->set_err(501); // CGI : read failed
+		this->rsrc->set_err(501); // CGI_ERR : read failed
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		return (err);
 	}
@@ -180,10 +177,8 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-	// rsrc::status
 	if (this->rsrc->status(WNOHANG) >= 0)
 		return (-1);
-	
 	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
@@ -197,8 +192,6 @@ ssize_t	CgiPipe::pollout(void)
 // getBody()
 // isComplete()
 	// rsrc:: should have been filled from sess::write
-
-	// sess::
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -227,7 +220,7 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->rsrc->set_err(502); // CGI : write failed
+		this->rsrc->set_err(502); // CGI_ERR : write failed
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
 		return (err);
 	}
@@ -238,6 +231,11 @@ ssize_t	CgiPipe::pollout(void)
 	}
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 	return (0);
+}
+
+int		CgiPipe::rdhup(void)
+{
+	return (-1);
 }
 
 int		CgiPipe::hup(void)
