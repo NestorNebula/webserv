@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/26 12:16:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 17:22:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,7 @@ public:
 		// if (res == NULL)
 		// new ResourceCgi
 
-		// rsrc::push_data
-		// else
-		// this->cgi.ip->mod_evt(EPOLLOUT);
+		// rsrc::push_body
 		return (err);
 	}
 	int		pull_data(std::string & dst)

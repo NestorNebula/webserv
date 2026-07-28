@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 22:54:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 18:19:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,8 @@ static bool	icmp(char a, char b)
 
 std::string hedval_str(std::string & str, const char *key)
 {
-	std::string	kstr = std::string("\n") + std::string(key);
+	// std::string	kstr = std::string("\n") + std::string(key);
+	std::string	kstr = std::string(key);
 	std::string	val("");
 
 	std::string::const_iterator it = std::search(
@@ -158,6 +159,8 @@ std::string hedval_str(std::string & str, const char *key)
 		kstr.begin(), kstr.end(),
 		icmp);
 	if (it == str.end())
+        return (val);
+    if (it != str.begin() && *(it-1) != '\n')
         return (val);
         
     std::stringstream	line(str.substr(it - str.begin()));

@@ -6,3 +6,6 @@ data*
 tmp*
 uploads
 wtf*
+FcgiConn*
+HttpServer*
+bak*

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/26 12:00:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 20:48:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	EpollClient::ini_evt(int e)
 {
 	if (evt.data.ptr != NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPC, "ini_evt: already initialized");
+		WsLog::_(LVL_ERR, TGT_EPC, "ini_evt  : already initialized");
 		return (this->mod_evt(e));
 	}
 	evt.data.ptr = this;
@@ -48,7 +48,7 @@ int	EpollClient::mod_evt(int e)
 {
 	if (evt.data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPC, "mod_evt: not yet initialized");
+		WsLog::_(LVL_ERR, TGT_EPC, "mod_evt  : not yet initialized");
 		return (this->ini_evt(e));
 	}
 
@@ -57,14 +57,32 @@ int	EpollClient::mod_evt(int e)
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
 	
+	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : CUR ", evt_type(evt.events));
+	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : MOD ", evt_type(e));
+	
 	if (e == 0)
 		evt.events = e;
 	else if (e < 0)
-		evt.events &= ~(-e);
+	{
+		e = -e;
+		evt.events &= ~e;
+	}
 	else
+	{
+		if (evt.events == (e | EPOLLRDHUP))
+		{
+			WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : no change");
+			// fuck :: we don't get here .. 
+			// unless tgt | EPC .. 
+			// but we should 
+			// std::cerr << "SOMETHING!\n";
+			return (0);
+		}
 		evt.events |= e;
-		
+	}	
 	evt.events |= EPOLLRDHUP;
+	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : RES ", evt_type(evt.events));
+
 	return (this->ep->mod(this));
 }
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/26 11:33:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 20:42:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,20 @@ void	ResourceCgi::reset(void)
 	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
 	if (this->ip || this->op) // pid, stat (?)
 	{
+		this->status(WNOHANG);
 		if (this->pid && this->stat == -1)
 		{
 			WsLog::_(LVL_DBG, TGT_RSRC, "kill");
 // PROBLEM : kill => sig => error .. is sent out on "keep-alive" socket
 
-			kill(this->pid, SIGKILL);
+// kill seems heavy .. if we're deleting the resource 
+// after all data has been sent
+// seems like cgi hup is the place to do it 
+// conn->cgi_rem ... 
+
+// BUT : USER-STOPPED .. in the middle of large-file delivery ... 
+
+			// kill(this->pid, SIGKILL);
 			this->status(0);
 
 			// this->status(WNOHANG);
@@ -39,12 +47,12 @@ void	ResourceCgi::reset(void)
 	if (this->ip)
 	{
 		this->ip->rsrc_closed(); // rsrc_closed
-		// this->ip->mod_evt(EPOLLIN);
+		this->ip->mod_evt(EPOLLIN);
 	}
 	if (this->op)
 	{
 		this->op->rsrc_closed();
-		// this->op->mod_evt(EPOLLOUT);
+		this->op->mod_evt(EPOLLOUT);
 	}
 	
 	this->pid  = 0;
@@ -138,9 +146,12 @@ int	ResourceCgi::rem(CgiPipe *epc)
 		err = 2;
 		this->op = NULL;
 	}
+	// let caller deal (?)
 	if (this->ip == NULL && this->op == NULL)
+	{
+		err = 3;
 		this->status(0);
-		
+	}	
 	return (err);
 }
 

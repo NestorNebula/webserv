@@ -13,10 +13,4 @@
         echo $data;
     }
     fclose($fp);
-    while (!feof($fp))
-    {
-        $data = fread($fp, 4096);
-        echo $data;
-    }
-    fclose($fp);
 ?>

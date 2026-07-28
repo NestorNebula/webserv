@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 10:50:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 20:25:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 # ifndef EPOLL_MAX_EVT
 #  define EPOLL_MAX_EVT 256
 # endif
+
+std::string evt_type(int evt);
 
 class EpollClient;
 

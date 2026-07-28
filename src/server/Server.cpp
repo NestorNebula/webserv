@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 10:12:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 16:57:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
 	this->addr.sin_port			= htons(this->port);
+// ATTN : catch failed Server construction individually (?)
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
 };
@@ -74,8 +75,9 @@ ssize_t	Server::pollin(void)
 	ssize_t				err;
 	struct sockaddr_in	conn_addr;
 	socklen_t			conn_asiz = sizeof(conn_addr);
-	
-	int conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
+	int					conn_fd;
+
+	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "accept"));
 		
@@ -85,6 +87,7 @@ ssize_t	Server::pollin(void)
 		close(conn_fd);
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
 	}
+	
 	Connection *c = new Connection(this->ep, conn_fd, *this);
 	
 	err = c->ini_evt(EPOLLIN);
@@ -101,7 +104,6 @@ ssize_t	Server::pollin(void)
 
 ssize_t	Server::pollout(void)
 {
-		// When would we ever write to the Server's (fd)
 	return (0);
 }
 
@@ -121,7 +123,7 @@ bool	Server::timeo  (time_t)
 	return (false);
 }
 
-unsigned short		Server::get_port(void)	const
+unsigned short	Server::get_port(void)	const
 {
 	return (this->port);
 }

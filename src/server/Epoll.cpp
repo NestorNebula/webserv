@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/26 11:58:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 20:46:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,24 +46,27 @@ static const char *evt_name[] =
 	NULL
 };
 
-static std::string evt_type(struct epoll_event *evt)
+std::string evt_type(int evt)
 {
 	std::string typ("");
 
-	if (evt == NULL)
-		return (typ);
+	if (evt < 0)
+	{
+		typ += "(-) ";
+		evt = -evt;
+	}
 	
-	if (evt->events & EPOLLIN)
+	if (evt & EPOLLIN)
 		typ += (evt_name[0]);
-	if (evt->events & EPOLLOUT)
+	if (evt & EPOLLOUT)
 		typ += (evt_name[1]);
-	if (evt->events & EPOLLRDHUP)
+	if (evt & EPOLLRDHUP)
 		typ += (evt_name[2]);
-	if (evt->events & EPOLLPRI)
+	if (evt & EPOLLPRI)
 		typ += (evt_name[3]);
-	if (evt->events & EPOLLERR)
+	if (evt & EPOLLERR)
 		typ += (evt_name[4]);
-	if (evt->events & EPOLLHUP)
+	if (evt & EPOLLHUP)
 		typ += (evt_name[5]);
 	return (typ);
 }
@@ -145,7 +148,7 @@ int	Epoll::mod(EpollClient *cli)
 	int	err;
 
 	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()));
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
@@ -270,6 +273,8 @@ int	Epoll::loop(void)
 	// writes to  Cgi .. if it can
 // conn : op
 	// reads from Cgi .. if it can
+// or : edge-trigger .. sets state .. until we flush it (?)
+// and then .. add again .. if necssary
 		for (int k=0; k < e; k++)
         {
 			evt = this->get_evt(k);
@@ -286,9 +291,10 @@ int	Epoll::loop(void)
 			}
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
 			if (epc->event(evt) < 0)
 			{
+				// flag for removal (?)
 				this->rem(epc);
 			}
         }

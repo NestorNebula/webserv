@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/26 12:18:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 19:39:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,8 +136,6 @@ bool	CgiPipe::timeo(time_t now)
 	return (false);
 }
 
-// if called from (Conn)
-// FLAG : for deletion in Epoll
 ssize_t	CgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
@@ -161,10 +159,11 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
+	
 // RSRC
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
-	
+	// this->mod_evt(-EPOLLIN); // speed hit (!)
 	return (err);
 }
 
@@ -242,7 +241,6 @@ int		CgiPipe::rdhup(void)
 
 int		CgiPipe::hup(void)
 {
-	// 
 	return (-1);
 }
 
