@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:45 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/21 15:45:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:20:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,13 @@ int sock_non_block(int fd)
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1)
         return (-1);
-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK); //  | O_CLOEXEC);
 }
+
+// SOCK_CLOEXEC
+// Set the close-on-exec (FD_CLOEXEC) flag on the new file
+// descriptor.  See the description of the O_CLOEXEC flag in
+// open(2) for reasons why this may be useful.
 
 std::string addr_2_str(struct sockaddr_in *addr)
 {

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:48:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 22:56:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ int	EpollClient::mod_evt(int e)
 	}
 	else
 	{
+#if 0
 		if (evt.events == (e | EPOLLRDHUP))
 		{
 			WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : no change");
@@ -78,7 +79,9 @@ int	EpollClient::mod_evt(int e)
 			// std::cerr << "SOMETHING!\n";
 			return (0);
 		}
-		evt.events |= e;
+#endif
+		// evt.events |= e;
+		evt.events = e;
 	}	
 	evt.events |= EPOLLRDHUP;
 	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : RES ", evt_type(evt.events));
@@ -98,12 +101,17 @@ int	EpollClient::event(struct epoll_event *e)
 	}
 	if (e->events & EPOLLIN)
 	{
+		// if (fcntl(this->fd, F_GETFD) < 0)
+		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
+			
 		err = this->pollin();
 		if (err < 0)
 			return (err);
 	}
 	if (e->events & EPOLLOUT)
 	{
+		// if (fcntl(this->fd, F_GETFD) < 0)
+		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
 		err = this->pollout();
 		if (err < 0)
 			return (err);

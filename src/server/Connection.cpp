@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:50:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:41:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	Connection::set_err(int e)
 		WsLog::_(LVL_ERR, TGT_CONN, "err:  already set!");
 		WsLog::_(LVL_ERR, TGT_CONN, "cur:  ", this->error);
 		WsLog::_(LVL_ERR, TGT_CONN, "new:  ", e);
+		this->mod_evt(EPOLLOUT);
 		return;
 	}
 
@@ -125,7 +126,7 @@ ssize_t	Connection::pollin(void)
 // conn  : req cnt: [4]
 
 		this->mod_evt(-EPOLLIN);
-		// this->mod_evt(EPOLLOUT);
+		this->mod_evt(EPOLLOUT);
 		return (0);
 	}
 
@@ -148,7 +149,7 @@ ssize_t	Connection::pollin(void)
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
 			this->set_err(503); // CONN - new ResourceCgi failed
 			// this->mod_evt(-EPOLLIN);
-			// this->mod_evt(EPOLLOUT); wait for data from CGI
+			this->mod_evt(EPOLLOUT); // wait for data from CGI
 			return (0);
 		}
 		// does cgi need to know this (?)
@@ -177,18 +178,16 @@ int		Connection::rsrc_send(int cnt)
 	if (this->cgi == NULL)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsrc:  cgi (NULL)");
+		if (this->ostr.size())
+			return (1);
 		if (this->ka)
 		{
 			// need to reset here (?)
 			// timeout (?)
-			WsLog::_(LVL_DBG, TGT_CONN, "-out: rsrc_send  (1)");
-			this->mod_evt(-EPOLLOUT);
-// conn  : -out: rsrc_send (1)
-// epc   : mod_evt  : CUR in out 
-// epc   : mod_evt  : NEW out rdhup err hup 
-
-
-			return (0);
+			WsLog::_(LVL_DBG, TGT_CONN, "-out: rsrc_send   (1)");
+			// no sense : cgi done .. but data to send (ostr)
+			// this->mod_evt(-EPOLLOUT);
+			return (-1);
 		}
 		return (-1);
 	}
@@ -217,11 +216,8 @@ int		Connection::rsrc_send(int cnt)
 	{
 		// not ready -- need to wait for data from cgi
 		WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc_send  (2)");
-// conn  : -out:  rsrc_send  (2)
-// epc   : mod_evt  : CUR in out rdhup 
-// epc   : mod_evt  : NEW out rdhup err hup 
-
-		this->mod_evt(-(EPOLLOUT));
+		this->cgi->op->mod_evt(EPOLLIN);
+		// this->mod_evt(-(EPOLLOUT));
 		return (0);
 	}
 	if (err < 0)
@@ -250,6 +246,10 @@ int		Connection::rsrc_send(int cnt)
 // fuck : did the cgi finishing .. CLOSE the socket .. across the FORK (?)
 ssize_t	Connection::pollout(void)
 {
+// conn  : send:  POLLOUT
+// epoll : rem cli  : conn
+// epoll : del cli  : conn
+// conn  : (~) Connection [7]
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	ssize_t	err = 0;
@@ -266,9 +266,12 @@ ssize_t	Connection::pollout(void)
 	//  How should we "switch" from ResourceCgi to ResourceError (send file ...)
 	if (this->error)
 	{
-		if (this->error == 408 && this->ka) // cgi && this->cgi->ka)
-			return (-1);
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
+		if (this->error == 408 && this->ka)
+		{
+			this->error = 0;
+			return (0);
+		}
 		err = this->send(this->estr); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		if (err < 0)
@@ -359,12 +362,12 @@ int	Connection::hup(void)
 	if (this->cgi->ip)
 	{
 		this->cgi->ip->rsrc_closed(); // rsrc_closed
-		// this->ip->mod_evt(EPOLLIN);
+		this->cgi->ip->mod_evt(EPOLLIN);
 	}
 	if (this->cgi->op)
 	{
 		this->cgi->op->rsrc_closed();
-		// this->op->mod_evt(EPOLLOUT);
+		this->cgi->op->mod_evt(EPOLLOUT);
 	}
 	return (-1);
 }
@@ -445,6 +448,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	
 	this->ostr.append(buf, siz);
 
+// does mod_evt .. in loop .. suck (?)
 	// rsrc::conn
 	this->mod_evt(EPOLLOUT); // only if hed ?
 
@@ -482,7 +486,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 // may set_error .. which HAS CONTENT_LENGTH .. and CAN DO KEEP_ALIVE
 
 		
-	std::string stat("HTTP/1.1 200 OK\r\n");
+	std::string stat("HTTP/1.0 200 OK\r\n");
 	
 	std::string stat_val = hedval_str(ostr, "Status");
 	
@@ -585,15 +589,15 @@ void	Connection::cgi_rem(CgiPipe *epc)
 	switch (this->cgi->rem(epc))
 	{
 	case 1: // (ip)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (ip) ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (ip)   ", this->fd);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);
 		this->mod_evt(-EPOLLIN);
-		// this->mod_evt(EPOLLOUT);
+		this->mod_evt(EPOLLOUT);
 		break;
 	case 2: // (op)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (op) ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op) ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (op)   ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op)   ", this->cgi->error);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);
 		// not seeing this (!)
@@ -601,7 +605,7 @@ void	Connection::cgi_rem(CgiPipe *epc)
 		break;
 	case 3: // (done)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (DONE) ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op) ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op)   ", this->cgi->error);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);		
 		delete(this->cgi);
@@ -719,7 +723,7 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
-		
+	
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -741,7 +745,14 @@ int	Connection::exec_cgi(void)
 
 		signal(SIGINT, SIG_DFL);
 		// WsLog : CGI_ERR
-		// pipes.dup_err();
+		pipes.dup_err();
+		// delete(this->ep);
+		// this->ep->dupx();
+		// any (fd) CLOSED here ... 
+		// will be removed from the epoll set of the parent  
+
+		int sf = dup(this->fd);
+		(void)sf;
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();

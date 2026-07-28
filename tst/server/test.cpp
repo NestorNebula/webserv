@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:42:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:29:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,6 @@ int main (int argc, char ** argv, char **envp)
     // std::cerr << "pwd : " << getenv("PWD") << std::endl;
     // std::cerr << "argv[0] : " << argv[0] << std::endl;
     
-    std::cerr << "in    " << EPOLLIN << std::endl;
-    std::cerr << "out   " << EPOLLOUT << std::endl;
-    std::cerr << "rdhup " << EPOLLRDHUP << std::endl; // 8192
-    std::cerr << "pri   " << EPOLLPRI << std::endl;
-    std::cerr << "err   " << EPOLLERR << std::endl;
-    std::cerr << "hup   " << EPOLLHUP << std::endl;
     WsLog::kd();
     if (argc > 1)
     {

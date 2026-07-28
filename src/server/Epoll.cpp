@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:46:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:06:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,23 @@ Epoll::~Epoll()
 	this->cleanup();
 };
 
+#if 0
+void	Epoll::dupx(void)
+{
+	std::set<EpollClient*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		int cfd = (*it)->get_fd();
+		// close(cfd);
+		// // int d = 
+		dup(cfd);
+		// close(cfd);
+		this->del(*it); // necessary (?)
+		it++;
+
+	}
+}
+#endif
 void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
@@ -123,6 +140,7 @@ int	Epoll::add(EpollClient *cli)
 	{
 		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : already exists");
 		// return (this->mod(cli));
+		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
 	if (err < 0)

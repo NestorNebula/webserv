@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 19:39:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:33:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,11 @@ int	cgi_pipes::init(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
 	}
+		// bytes missing 
+	// sock_non_block(p1[0]);
+	// sock_non_block(p1[1]);
+	// sock_non_block(p2[0]);
+	// sock_non_block(p2[1]);
 	return (0);
 }
 
@@ -112,11 +117,12 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) 
 	conn(_conn),
 	rsrc(_rsrc)
 {
+	sock_non_block(this->fd);
 }
 	
 CgiPipe::~CgiPipe()
 {
-	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
+	WsLog::_(LVL_ERR, TGT_CGI, "(~) Cgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
 }
@@ -163,7 +169,7 @@ ssize_t	CgiPipe::pollin(void)
 // RSRC
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
-	// this->mod_evt(-EPOLLIN); // speed hit (!)
+	this->mod_evt(-EPOLLIN); // speed hit (!)
 	return (err);
 }
 

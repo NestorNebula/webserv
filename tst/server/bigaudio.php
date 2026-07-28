@@ -13,4 +13,5 @@
         echo $data;
     }
     fclose($fp);
+    // sleep(3); // before closing (stdout)
 ?>

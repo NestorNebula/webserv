@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:42:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:39:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void	ResourceCgi::reset(void)
 
 // BUT : USER-STOPPED .. in the middle of large-file delivery ... 
 
-			// kill(this->pid, SIGKILL);
+			kill(this->pid, SIGKILL);
 			this->status(0);
 
 			// this->status(WNOHANG);
@@ -150,7 +150,7 @@ int	ResourceCgi::rem(CgiPipe *epc)
 	if (this->ip == NULL && this->op == NULL)
 	{
 		err = 3;
-		this->status(0);
+		this->status(WNOHANG);
 	}	
 	return (err);
 }
@@ -185,7 +185,7 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 		close(cgifd_ip);
 		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
 	}	
-
+	
 	// (rsrc)
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
 	err = this->ip->ini_evt(EPOLLOUT);

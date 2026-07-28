@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 20:40:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/28 23:45:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 
 # ifndef EPC_TIMEOUT
-#  define EPC_TIMEOUT 5
+#  define EPC_TIMEOUT 100
 # endif
 
 # ifndef EPC_BUF_SIZ
