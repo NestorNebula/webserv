@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 11:31:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/26 12:20:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection"); // , this->fd);
+	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection ", this->fd);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (this->cgi)
 		delete (this->cgi);
@@ -71,10 +71,10 @@ void	Connection::set_err(int e)
 	
 	this->error = e;
 	this->estr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n");
-	// ah : (ka) NOT FORCED BY SERVER -- which is kinda stupid
 
 	// fuck : error set .. before head parsed (?)
-	if (this->cgi->ka)
+	// Q: always close on error (?)
+	if (this->cgi && this->cgi->ka)
 		this->estr += std::string("Connection: keep-alive\r\n");
 	else
 		this->estr += std::string("Connection: close\r\n");
@@ -93,25 +93,34 @@ ssize_t	Connection::pollin(void)
 	err = this->recv();
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
+		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv", err);
 		return (err);
 	}
 	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-#if 1 // unclear if this is necessary
-		// cgi_state() ? 
-		if (this->cgi->status(WNOHANG) > 0)
+#if 0
+		// fuck .. xit is (0)
+		// but stat is (-1)
+		// because WE RESET 
+		if (this->cgi && this->cgi->status(WNOHANG) >= 0)
 		{
 			// ATTN : seems like we'd want to send an error here ...
 			// assume it's been set (?)
 			// keep-alive (?)
 			// or .. let pollout take care of it 
-			this->mod_evt(EPOLLOUT);
+			this->mod_evt(-EPOLLIN);
 			// return (-1);
 		}
 #endif
-		// this->mod_evt(-EPOLLIN); // (ka)
+// epoll : evt typ  : in out rdhup 
+// conn  : recv
+// conn  : recv:  ZERO
+// conn  : (~) Connection
+// conn  : req cnt: [4]
+
+		this->mod_evt(-EPOLLIN);
+		// this->mod_evt(EPOLLOUT);
 		return (0);
 	}
 
@@ -120,6 +129,7 @@ ssize_t	Connection::pollin(void)
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
+	this->ka = sess.req.ka; // ugly
 // SESSION::error
 	// have_head
 	// init_rsrc
@@ -136,6 +146,7 @@ ssize_t	Connection::pollin(void)
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
+		// does cgi need to know this (?)
 		this->cgi->ka = this->sess.req.ka;
 	}
 // SESSION
@@ -152,9 +163,17 @@ ssize_t	Connection::pollin(void)
 int		Connection::rsrc_send(int cnt)
 {
 	int	err;
-	
-	// cgi null 
 
+	if (this->cgi == NULL)
+	{
+		if (this->ka)
+		{
+			// need to reset here (?)
+			this->mod_evt(-EPOLLOUT);
+			return (0);
+		}
+		return (-1);
+	}
 	if (cnt && this->cgi->ka)
 	{
 		if (cnt < this->cgi->tlen)
@@ -172,7 +191,7 @@ int		Connection::rsrc_send(int cnt)
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi  error ", this->cgi->error);
 	if (err == 0)
 	{
-		this->mod_evt(-EPOLLOUT);
+		// this->mod_evt(-EPOLLOUT); // (?)
 		return (0);
 	}
 	if (err < 0)
@@ -262,32 +281,33 @@ ssize_t	Connection::pollout(void)
 // some sort of .. slow-down (?)
 int	Connection::rdhup(void)
 {
+	WsLog::_(LVL_DBG, TGT_CONN, "rdhup");
 	// this->mod_evt(-EPOLLIN); // (ka)
 	this->mod_evt(EPOLLOUT);
 	
 	// fuck : current REQUEST
-	if (this->cgi == NULL)
-		return (0);
+	// if (this->cgi == NULL)
+	// 	return (0);
 
 	// or : kill on "out rdhup"
-#if 0
-	if (this->cgi->ip)
+#if 1
+	if (this->cgi && this->cgi->ip)
 	{
 		this->cgi->ip->rsrc_closed(); // rsrc_closed
 		// this->ip->mod_evt(EPOLLIN);
 	}
-	if (this->cgi->op)
+	if (this->cgi && this->cgi->op)
 	{
 		this->cgi->op->rsrc_closed();
 		// this->op->mod_evt(EPOLLOUT);
 	}
 #endif
-	if (this->sess.req.ka)
-	{
-		delete (this->cgi);
-		this->cgi = NULL;
-		return (-1);
-	}
+	// if (this->sess.req.ka)
+	// {
+	// 	delete (this->cgi);
+	// 	this->cgi = NULL;
+	// 	return (-1);
+	// }
 	return (0);
 }
 
@@ -314,7 +334,9 @@ int	Connection::hup(void)
 void	Connection::reset(void)
 {
 	this->sess.reset();
-	this->cgi->reset(); // ugh - may (kill) prematurely
+	// this->cgi->reset(); // ugh - may (kill) prematurely
+	delete (this->cgi);
+	this->cgi = NULL;
 	this->ostr.clear();
 	this->estr.clear();
 	this->error = 0; // really (?)
@@ -434,7 +456,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "tlen: ", res->tlen);
 			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
 			
-			if (res->ka) // sess.req.ka)
+			if (this->ka)
 				this->ostr.insert(0, conn_keep);
 			else
 				this->ostr.insert(0, conn_close);
@@ -442,6 +464,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		else
 		{
 			res->ka = 0; // ATTN : error (?)
+			this->ka = 0;
 			this->ostr.insert(0, conn_close);
 		}
 
@@ -496,7 +519,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		{
 			this->ostr.insert(0, stat);
 			// tlen may not have been set (!)
-			if (res->ka)
+			if (this->ka)
 				res->tlen += stat.size();
 			return (0);
 		}
@@ -506,7 +529,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		else
 		{
 			this->ostr.insert(0, stat);
-			if (res->ka)
+			if (this->ka)
 				res->tlen += stat.size();
 		}
 		// I .. may need to ADD keep-alive here (?)
@@ -561,7 +584,8 @@ int		Connection::cgi_done(void)
 		// may still have more to send (1)
 		if (this->error > 0)
 		{
-			this->cgi->ka = 0;
+			res->ka = 0;
+			this->ka = 0;
 			// this->req_cnt > 1 .... 
 			// may still have to send error page ...
 			// on failed (cgi) startup 

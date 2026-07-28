@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 10:59:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/26 12:00:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ int	EpollClient::event(struct epoll_event *e)
 		if (err < 0)
 			return (err);
 	}	
-	// in out hup : may not have fully flushed (read/write)
 	if (e->events == EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
@@ -107,11 +106,11 @@ ssize_t	EpollClient::recv(void)
 	
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
-	WsLog::_(LVL_DBG, TGT_EPC_RECV, "recv: ", err);
+	WsLog::_(LVL_DBG, TGT_EPC_RECV, "read: ", err);
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-		WsLog::_(LVL_DBG, TGT_EPC_RECV, "recv:  ZERO");
+		WsLog::_(LVL_DBG, TGT_EPC_RECV, "read:  ZERO");
 	return (err);
 }
 
@@ -119,14 +118,14 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 {
 	ssize_t err;
 	
+	// if (fcntl(this->fd, F_GETFD) < 0)
+	// 	return (-1);
+	
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
 
-	// if (fcntl(this->fd, F_GETFD) < 0)
-	// 	return (-1);
-	
 	err = write(this->fd, buf, siz);
 
 	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);

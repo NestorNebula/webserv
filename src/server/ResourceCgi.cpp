@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/24 23:11:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/26 11:33:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	ResourceCgi::reset(void)
 	this->tlen = -1;
 	this->slen = 0;
 	this->error = 0;
-	// this->ka   = 0;
+	// NB : NOT (ka)
 }
 
 int	ResourceCgi::status(int opt)
@@ -109,7 +109,7 @@ int	ResourceCgi::status(int opt)
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-		this->set_err(505); // hm : kill .. gets sent .. ugh
+		this->set_err(505); 
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}
@@ -118,7 +118,7 @@ int	ResourceCgi::status(int opt)
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	this->pid = 0;
-	return (this->stat);
+	return (this->stat); // xit (?)
 }
 
 // ~CgiPipe
@@ -157,8 +157,11 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 	this->reset();
 
 	this->pid = _pid;
-// fcntl .. F_SETFD .. O_CLOEXEC
-	WsLog::_(LVL_DBG, TGT_RSRC, "exec cgi");
+	
+// SHIT : I re-use .. because I only test cgi
+// next request .. might not be a cgi .. 
+// so .. keep-alive .. should DELETE the RESOURCE 
+	WsLog::_(LVL_DBG, TGT_RSRC, "init cgi");
 
 	// ResourceCgi::init(conn, pipes, ep)
 	int cgifd_ip = dup(pipes->p1[1]);

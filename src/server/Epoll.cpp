@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 11:07:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/26 11:58:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,7 +265,12 @@ int	Epoll::loop(void)
         e = this->exec();
         if (e < 0)
 			return (1);
-		for (int k=0; k < e; k++) 
+// SET STATE
+// conn : ip
+	// writes to  Cgi .. if it can
+// conn : op
+	// reads from Cgi .. if it can
+		for (int k=0; k < e; k++)
         {
 			evt = this->get_evt(k);
 			if (evt == NULL)
@@ -280,13 +285,14 @@ int	Epoll::loop(void)
 				continue;
 			}
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
 			if (epc->event(evt) < 0)
 			{
 				this->rem(epc);
 			}
         }
+		// and kill epc->state == DONE
 		this->check_timeo();
     }
 	return (0);

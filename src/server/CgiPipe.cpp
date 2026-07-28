@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 10:54:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/26 12:18:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
-	// rsrc::push_data() => rsrc::ostr
+// RSRC
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	
@@ -191,6 +191,7 @@ ssize_t	CgiPipe::pollout(void)
 // hasBody()
 // getBody()
 // isComplete()
+// SESS
 	// rsrc:: should have been filled from sess::write
 	err = this->conn->req_body_status();
 	if (err < 0)
@@ -215,6 +216,7 @@ ssize_t	CgiPipe::pollout(void)
 	// rsrc::get_body
 	// which should have been properly filled
 	// by sess::write
+// SESS
 	std::string & body = this->conn->sess.req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
@@ -240,6 +242,7 @@ int		CgiPipe::rdhup(void)
 
 int		CgiPipe::hup(void)
 {
+	// 
 	return (-1);
 }
 
