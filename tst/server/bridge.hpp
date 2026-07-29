@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 17:22:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 11:50:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,14 @@ public:
 
 	int			ka;
 	
-private:
+// private:
 	int			state;
 	
 	std::string	head;
 	std::string body; // sess.ip_data
 	std::string exec;
 
+private:
 	size_t		blen;
 	size_t		clen;
 	int			chnk;

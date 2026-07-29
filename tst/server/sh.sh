@@ -3,7 +3,7 @@
 tput reset
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=10 --concurrent=255 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=2 --concurrent=10 --no-parser -b
 	echo
 	exit 0
 fi
@@ -12,9 +12,9 @@ curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
 echo
 exit 0
 
-# curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
-# echo
-# exit 0
+curl -X GET http://127.0.0.1:8081/bigimage.php -i --output data.jpg
+echo
+exit 0
 
 # curl -X GET http://localhost:8081/bigvideo.php --output data.mkv
 # echo

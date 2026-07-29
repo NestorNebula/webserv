@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 23:29:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 12:04:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,20 @@ static const std::string tgt_str[] =
     "body  : ",
     "rsrc  : "
 };
+
+// so .. log .. takes more time 
+// cgi .. finishes in "background" sooner (?)
+
+// Lots of writes to stderr can confuse socket communication by causing I/O blocking, buffer saturation, and timing disruptions in the application event loop. When a program spams error logs, it starves network tasks of CPU time and resources.
+
+// While the CPU waits for stderr to clear, it cannot read from or write to the network socket
+
+
+// Why Logging Interferes with SocketsBlocking I/O: Writing to stderr often blocks execution if the destination stream (like a terminal or a slow log file) cannot process data instantly. While the CPU waits for stderr to clear, it cannot read from or write to the network socket.
+
+// Buffer Backpressure: If stderr fills up operating system pipes, the process pauses. This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
+
+// Event Loop Starvation: In single-threaded event loops (like Node.js or Python asyncio), synchronous or heavy logging operations monopolize the thread. The application fails to poll socket descriptors, delaying packet reads and handshakes.
 
 static const std::string &tgt_prefix(log_tgt tgt)
 {
@@ -73,8 +87,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << msg; //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
@@ -83,8 +97,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
         return;
 
     std::stringstream stream;
-    stream<< tgt_prefix(msg_tgt) << msg << "[" << n << "]" << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << msg << "[" << n << "]"; //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j)
@@ -93,8 +107,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
         return;
 
     std::stringstream stream;
-    stream<< tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]" << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]"; //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 }
 
 
@@ -104,8 +118,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string 
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << str << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << msg << str; //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
@@ -114,8 +128,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << n << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << n; //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 }
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
@@ -123,9 +137,9 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     (void) msg_lvl;
     
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << std::endl;
-    stream << "error : " << strerror(errno) << std::endl;
-    std::cerr << stream.str();
+    stream << tgt_prefix(msg_tgt) << msg << "\n"; //  std::endl;
+    stream << "error : " << strerror(errno); //  << std::endl;
+    std::cerr << stream.str() << "\n"; // std::endl;
 
     return (-1);
 }
@@ -142,7 +156,7 @@ void    WsLog::kd(void)
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
         | TGT_EPOLL_EVT
-        // | TGT_EPOLL_CTL
+        | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV
@@ -158,7 +172,7 @@ void    WsLog::kd(void)
         // | TGT_CGI_RECV
         // | TGT_CGI_SEND
         // | TGT_CGI_DATA
-        // | TGT_CGI_HEAD
+        | TGT_CGI_HEAD
 
         // | TGT_SERV
         // | TGT_MAIN
@@ -167,10 +181,11 @@ void    WsLog::kd(void)
         // | TGT_BODY
         | TGT_RSRC
         | TGT_RSRC_INFO
-        | TGT_RSRC_WAIT
+        // | TGT_RSRC_WAIT
     ;
     
     // WsLog::tgt = TGT_NONE;
+    WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;

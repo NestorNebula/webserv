@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 18:42:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 11:51:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add("REQUEST_METHOD", val.c_str());
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "METHOD not set");
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
 		return (-1);
 	}
 
@@ -107,7 +107,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE not set");
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "FILE not set");
 		return (-1);
 	}
 	
@@ -137,7 +137,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "EXEC not set");
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
+		std::cerr << req.head;
 		return (-1); // ERROR (!)
 	}
 // SESSION

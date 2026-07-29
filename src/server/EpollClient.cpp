@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 22:56:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 10:13:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,8 @@ int	EpollClient::mod_evt(int e)
 			return (0);
 		}
 #endif
-		// evt.events |= e;
-		evt.events = e;
+		evt.events |= e;
+		// evt.events = e;
 	}	
 	evt.events |= EPOLLRDHUP;
 	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : RES ", evt_type(evt.events));

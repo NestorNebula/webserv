@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 23:39:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 11:04:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-	this->reset();
+	this->reset(false);
 }
 
-void	ResourceCgi::reset(void)
+void	ResourceCgi::reset(bool reuse)
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
 	if (this->ip || this->op) // pid, stat (?)
@@ -54,11 +54,13 @@ void	ResourceCgi::reset(void)
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLOUT);
 	}
-	
 	this->pid  = 0;
 	this->ip   = NULL;
 	this->op   = NULL;
 	this->stat = -1;
+	if (!reuse)
+		return;
+
 	this->hed  = 0;
 	this->clen = 0;
 	this->hlen = 0;
@@ -165,7 +167,7 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
 
-	this->reset();
+	this->reset(true);
 
 	this->pid = _pid;
 	

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 23:33:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/29 12:13:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,12 +117,12 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) 
 	conn(_conn),
 	rsrc(_rsrc)
 {
-	sock_non_block(this->fd);
+	// sock_non_block(this->fd); // dangerous (?)
 }
 	
 CgiPipe::~CgiPipe()
 {
-	WsLog::_(LVL_ERR, TGT_CGI, "(~) Cgi");
+	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
 }
@@ -167,6 +167,8 @@ ssize_t	CgiPipe::pollin(void)
 	}
 	
 // RSRC
+	// track : (clen)
+	// why (hup) when too much stderr .. pipe blocked (?) done (?)
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
 	this->mod_evt(-EPOLLIN); // speed hit (!)
