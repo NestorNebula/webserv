@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 12:11:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 21:08:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ ssize_t	Server::pollin(void)
 
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
-		return (WsLog::_errno(LVL_ERR, TGT_SERV, "accept"));
+		return (WsLog::_errno(LVL_DBG, TGT_SERV, "accept"));
 		
 	err = sock_non_block(conn_fd);
 	if (err < 0)

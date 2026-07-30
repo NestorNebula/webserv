@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 15:39:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 21:06:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,20 +70,14 @@ int	EpollClient::mod_evt(int e)
 	}
 	else
 	{
-#if 1
 		if (evt.events == (e | EPOLLRDHUP))
 		{
 			WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
-			// fuck :: we don't get here .. 
-			// unless tgt | EPC .. 
-			// but we should 
-			// std::cerr << "SOMETHING!\n";
 			return (0);
 		}
-#endif
 		evt.events |= e;
-		// evt.events = e;
-	}	
+	}
+	
 	evt.events |= EPOLLRDHUP;
 	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
 
@@ -117,7 +111,7 @@ int	EpollClient::event(struct epoll_event *e)
 		if (err < 0)
 			return (err);
 	}	
-	if (e->events == EPOLLRDHUP)
+	if (e->events & EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
 		return (this->hup());

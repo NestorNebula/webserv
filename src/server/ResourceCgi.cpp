@@ -6,19 +6,12 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 15:20:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 21:32:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ResourceCgi.hpp"
 
-
-
-ResourceCgi::~ResourceCgi()
-{
-	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-// 	this->reset(false);
-// }
 
 
 // It is not currently possible to reliably delete epoll items when using the same epoll set from multiple threads. After calling epoll_ctl with EPOLL_CTL_DEL, another thread might still be executing code related to an event for that epoll item (in response to epoll_wait). Therefore the deleting thread does not know when it is safe to delete resources pertaining to the associated epoll item because another thread might be using those resources. 
@@ -36,53 +29,39 @@ ResourceCgi::~ResourceCgi()
 // EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
 
 
-// void	ResourceCgi::reset(bool reuse)
-// {
-	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
-	if (this->ip || this->op) // pid, stat (?)
+ResourceCgi::~ResourceCgi()
+{
+	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
+	// if (this->ip || this->op) // pid, stat (?)
 	{
 		this->status(WNOHANG);
-		if (this->pid && this->stat == -1)
+		if (this->stat == -1 && this->pid)
 		{
 			WsLog::_(LVL_DBG, TGT_RSRC, "kill");
-// PROBLEM : kill => sig => error .. is sent out on "keep-alive" socket
-
-// kill seems heavy .. if we're deleting the resource 
-// after all data has been sent
-// seems like cgi hup is the place to do it 
-// conn->cgi_rem ... 
-
-// BUT : USER-STOPPED .. in the middle of large-file delivery ... 
-
 			kill(this->pid, SIGKILL);
-			this->status(0);
-
-			// this->status(WNOHANG);
+			this->status(0); // WNOHANG);
 		}
 	}
 	if (this->ip)
 	{
-		this->ip->rsrc_closed(); // rsrc_closed
-		this->ip->mod_evt(EPOLLIN);
+		this->ip->rsrc_closed();
+		this->ip->mod_evt(EPOLLOUT);
 	}
 	if (this->op)
 	{
 		this->op->rsrc_closed();
-		this->op->mod_evt(EPOLLOUT);
+		this->op->mod_evt(EPOLLIN);
 	}
-	this->pid  = 0;
-	this->ip   = NULL;
-	this->op   = NULL;
-	this->stat = -1;
-	// if (!reuse)
-	// 	return;
-
-	this->hed  = 0;
-	this->clen = 0;
-	this->hlen = 0;
-	this->tlen = -1;
-	this->slen = 0;
-	this->error = 0;
+	// this->pid  = 0;
+	// this->ip   = NULL;
+	// this->op   = NULL;
+	// this->stat = -1;
+	// this->hed  = 0;
+	// this->clen = 0;
+	// this->hlen = 0;
+	// this->tlen = -1;
+	// this->slen = 0;
+	// this->error = 0;
 	// NB : NOT (ka)
 }
 
@@ -122,9 +101,6 @@ int	ResourceCgi::status(int opt)
 			this->set_err(404);
 			break;
 		default:
-		// should NOT have gotten this for suck.php
-		// head parsing .. should have caught it ... 
-		// but .. we're testing status .. too early (?)
 			this->set_err(504);
 			break;
 		}
@@ -147,7 +123,7 @@ int	ResourceCgi::status(int opt)
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	this->pid = 0;
-	return (this->stat); // xit (?)
+	return (this->stat);
 }
 
 // ~CgiPipe
@@ -167,7 +143,7 @@ int	ResourceCgi::rem(CgiPipe *epc)
 		err = 2;
 		this->op = NULL;
 	}
-	// let caller deal (?)
+	
 	if (this->ip == NULL && this->op == NULL)
 	{
 		err = 3;
@@ -185,9 +161,7 @@ void    ResourceCgi::push_body(void)
 int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
-
-	// this->reset(true);
-
+	
 	this->pid = _pid;
 	
 // SHIT : I re-use .. because I only test cgi

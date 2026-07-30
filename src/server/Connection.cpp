@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 16:03:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 21:26:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	EpollClient(_ep, EPC_CONN, _fd), 
 	cgi(NULL),
 	serv(_serv), 
-	req_cnt(0)
+	req_cnt(0),
+	ka(0)
 {
 };
 
@@ -53,9 +54,10 @@ void	Connection::set_err(int e)
 		return;
 	if (this->error)
 	{
-		WsLog::_(LVL_ERR, TGT_CONN, "err:  already set!");
-		WsLog::_(LVL_ERR, TGT_CONN, "cur:  ", this->error);
-		WsLog::_(LVL_ERR, TGT_CONN, "new:  ", e);
+		// cgi_data => head => php (404) => 504
+		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
+		WsLog::_(LVL_DBG, TGT_CONN, "cur:  ", this->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "new:  ", e);
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
@@ -110,15 +112,9 @@ ssize_t	Connection::pollin(void)
 			// return (-1);
 		}
 #endif
-// epoll : evt typ  : in out rdhup 
-// conn  : recv
-// conn  : recv:  ZERO
-// conn  : (~) Connection
-// conn  : req cnt: [4]
-
-// seems cleaner when we hit this
-		this->mod_evt(-EPOLLIN);
-		this->mod_evt(EPOLLOUT);
+			// not 100% sure here 
+		// this->mod_evt(-EPOLLIN);
+		this->mod_evt(EPOLLOUT); 
 		return (0);
 	}
 
@@ -127,8 +123,6 @@ ssize_t	Connection::pollin(void)
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
-	
-	// this->ka = sess.req.ka;
 
 // SESSION::error
 	// have_head
@@ -136,7 +130,7 @@ ssize_t	Connection::pollin(void)
 	if (this->cgi == NULL)
 	{
 		this->cgi = new ResourceCgi;
-		this->ka = sess.req.ka; // just once (?)
+		this->ka = sess.req.ka;
 	}
 	if (this->cgi->pid == 0)
 	{
@@ -146,8 +140,8 @@ ssize_t	Connection::pollin(void)
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
 			// this->set_err(503); // CONN - new ResourceCgi failed
 			this->set_err(404);
+			// this->mod_evt(-EPOLLIN); // uncertain
 			return (0); // send error (!)
-			// return (-1);
 		}
 	}
 // SESSION
@@ -164,12 +158,23 @@ int		Connection::cgi_done(void)
 	ResourceCgi *res = this->cgi;
 	
 	if (this->error)
+	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  error");
 		return (1); // have data to send
+	}
 
-#if 0 // VERY VERY PROBLEMATIC
+
+	if (res == NULL)
+	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (NULL)");
+		return (-1);
+	}
+#if 0 // VERY VERY PROBLEMATIC -- working well without this 
 	if (res->status(WNOHANG) != -1)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (exited)");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (exited)");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (stat) ", res->stat);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (err ) ", res->error);		
 		if (res->error)
 		{
 			this->set_err(res->error); // where SHOULD this have happened (?)
@@ -179,17 +184,12 @@ int		Connection::cgi_done(void)
 	}
 #endif
 
-	if (res == NULL)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  res (NULL)");
-		return (-1);
-	}
 
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  res (stat) ", res->stat);
-	// fuck .. stat (0) .. but no head .. because .. nothing sent 
+
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (stat) ", res->stat);
 	if (!res->hed)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (no head)");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (no head)");
 		return (0); // NEED_HEAD
 	}
 	
@@ -200,6 +200,7 @@ int		Connection::cgi_done(void)
 		// unknown (no content-length : wait for cgi-close)
 	
 	// Q: move into ResourceCgi (?)
+	// works well -- not the right place for it 
 	if (ostr.size()) 
 		return (1); // HAVE_DATA
 
@@ -210,10 +211,10 @@ int		Connection::cgi_done(void)
 	// // we just checked this in pollout
 	if (res->status(WNOHANG) != -1)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (exited)");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (exited)");
 		if (res->error)
 		{
-			this->set_err(res->error); // where SHOULD this have happend (?)
+			this->set_err(res->error); // where SHOULD this have happened (?)
 			return (1);
 		}	
 		return (-1); // DONE
@@ -221,12 +222,13 @@ int		Connection::cgi_done(void)
 
 
 // KEEP_ALIVE
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi (tlen) ", res->tlen);
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (tlen) ", res->tlen);
 
 	// tlen -- even if not (ka) ? 
 	if (this->ka && res->tlen == 0)
 	{
-		return (-1); // DONE
+		// working well 
+		return (-1); // DONE -- but test for (ka) should decide to kill
 	}
 	// NEED_DATA
 // fine .. 
@@ -239,14 +241,14 @@ int		Connection::cgi_done(void)
 // need to track : cgi: clen && slen
 	// BUT : may have sent ALL on keep-alive
 	// AND : cgi is taking its time closing ...
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  wait for data");
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  wait for data");
 	
 // TIMEOUT (?)
 	// this->mod_evt(-EPOLLOUT); // => pollout
 	if (res->op)
 		res->op->mod_evt(EPOLLIN);
 		
-	this->mod_evt(EPOLLIN); // only if more body to send
+	// this->mod_evt(EPOLLIN); // only if more body to send
 	if (res->ip)
 		res->ip->mod_evt(EPOLLOUT);
 	return (0); // NEED_DATA
@@ -265,16 +267,16 @@ int		Connection::rsrc_send(int cnt)
 
 	if (this->error)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsrc:  error ", this->error);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  error ", this->error);
 		return (1);
 	}
 	if (this->cgi == NULL)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsrc:  cgi (NULL)");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL)");
 		if (this->ostr.size())
 			return (1);
 
-#if 0
+#if 1
 		if (this->ka)
 		{
 			// need to reset here (?)
@@ -285,7 +287,7 @@ int		Connection::rsrc_send(int cnt)
 				// not quite
 			// should have been called when (cgi) was deleted
 			// fucks with pollin
-			// this->reset();
+			this->reset();
 			return (0);
 		}
 #endif
@@ -304,22 +306,16 @@ int		Connection::rsrc_send(int cnt)
 			// this->reset();
 			// return (0);
 		}
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsrc:  cgi tlen ", this->cgi->tlen);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi tlen ", this->cgi->tlen);
 	}
-// conn  : send:  cgi (exited)
-// conn  : done:  cgi  data  [-1]
-// conn  : done:  conn error [0]
-// conn  : done:  cgi  error [404]
-// conn  : done:  conn ka    [0]
-// conn  : done:  cgi  ka    [0]
-
+	
 	err = this->cgi_done();
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi  data  ", err);
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
 	if (err <= 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  conn error ", this->error);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi  error ", this->cgi->error);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  conn ka    ", this->ka);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn error ", this->error);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  error ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn ka    ", this->ka);
 	}
 	if (err == 0)
 	{
@@ -334,7 +330,7 @@ int		Connection::rsrc_send(int cnt)
 	{
 		if (this->ka)
 		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  conn keep-alive ", this->req_cnt);
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn keep-alive ", this->req_cnt);
 			// ugh : may KILL prematurely
 			// BEFORE we SEND
 			// maybe nothing sent 
@@ -344,7 +340,8 @@ int		Connection::rsrc_send(int cnt)
 		}
 		else
 		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  cgi  delete");
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  delete (?)");
+			// test elsewhere (?)
 			// delete (this->cgi);
 			// this->cgi = NULL; // wtf
 		}
@@ -367,11 +364,6 @@ int		Connection::rsrc_send(int cnt)
 // fuck : did the cgi finishing .. CLOSE the socket .. across the FORK (?)
 ssize_t	Connection::pollout(void)
 {
-// conn  : send:  POLLOUT
-// epoll : cli rem  : conn
-// epoll : cli del  : conn
-// conn  : (~) Connection [7]
-
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	ssize_t	err = 0;
 	
@@ -407,8 +399,9 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
 		if (this->error == 408 && this->ka)
 		{
-			this->error = 0;
-			return (0);
+			// this->error = 0;
+			// return (0);
+			return (-1);
 		}
 		err = this->send(this->estr); 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
@@ -479,12 +472,12 @@ int	Connection::rdhup(void)
 	if (this->cgi && this->cgi->ip)
 	{
 		this->cgi->ip->rsrc_closed(); // rsrc_closed
-		// this->ip->mod_evt(EPOLLIN);
+		this->cgi->ip->mod_evt(EPOLLIN);
 	}
 	if (this->cgi && this->cgi->op)
 	{
 		this->cgi->op->rsrc_closed();
-		// this->op->mod_evt(EPOLLOUT);
+		this->cgi->op->mod_evt(EPOLLOUT);
 	}
 #endif
 	// (!)
@@ -529,7 +522,8 @@ int	Connection::hup(void)
 void	Connection::reset(void)
 {
 	this->sess.reset();
-	delete (this->cgi);
+	if (this->cgi)
+		delete (this->cgi);
 	this->cgi = NULL;
 	
 	this->ostr.clear();
@@ -690,37 +684,34 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 // ResourceCgi (!)
 void	Connection::cgi_rem(CgiPipe *epc)
 {
-	// or : rsrc (cgi) holds pointer to (conn)
 	switch (this->cgi->rem(epc))
 	{
 	case 1: // (ip)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (ip)   ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi : (ip)   ", this->fd);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
 	case 2: // (op)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (op)   ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op)   ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi : (op)   ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err : (op)   ", this->cgi->error);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);
 		this->mod_evt(EPOLLOUT);
 		break;
 	case 3: // (done)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : cgi (DONE) ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem : err (op)   ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi : (DONE) ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err : (op)   ", this->cgi->error);
 		if (this->cgi->error)
 			this->set_err(this->cgi->error);	
-			// dangerous : need info in there (?)	
-		// delete(this->cgi);
-		// this->cgi = NULL;
+		delete(this->cgi);
+		this->cgi = NULL;
 		this->mod_evt(EPOLLOUT);
 		break;
 	default:
 		break;
 	}
-	// if both are null 
 }
 
 int	Connection::exec_cgi(void)

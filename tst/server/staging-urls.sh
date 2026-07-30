@@ -10,6 +10,19 @@
 # http://127.0.0.1:8081/test.php
 # http://127.0.0.1:8082/test.php
 
+http://127.0.0.1:8080/ka.php
+http://127.0.0.1:8081/ka.php
+http://127.0.0.1:8082/ka.php
+
+http://127.0.0.1:8080/ka.py
+http://127.0.0.1:8081/ka.py
+http://127.0.0.1:8082/ka.py
+
+
+http://127.0.0.1:8080/ka.pl
+http://127.0.0.1:8081/ka.pl
+http://127.0.0.1:8082/ka.pl
+
 
 
 # http://127.0.0.1:8080/suck.pl
@@ -25,18 +38,11 @@
 # http://127.0.0.1:8082/suck.php
 
 
-http://127.0.0.1:8080/ka.php
-http://127.0.0.1:8081/ka.php
-http://127.0.0.1:8082/ka.php
-
-http://127.0.0.1:8080/ka.py
-http://127.0.0.1:8081/ka.py
-http://127.0.0.1:8082/ka.py
 
 
-http://127.0.0.1:8080/bigimage.php
-http://127.0.0.1:8081/bigimage.php
-http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8080/bigimage.php
+# http://127.0.0.1:8081/bigimage.php
+# http://127.0.0.1:8082/bigimage.php
 
 
 # http://127.0.0.1:8080/bigaudio.php

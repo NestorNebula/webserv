@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 15:25:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 20:57:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ public:
 
 	int			status(int opt);
 	int			rem(CgiPipe *epc);
-	// void		reset(bool reuse);
 };
 
 

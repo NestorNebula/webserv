@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 16:05:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 20:59:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,6 @@ int	cgi_pipes::init(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
 	}
-		// bytes missing 
-	// sock_non_block(p1[0]);
-	// sock_non_block(p1[1]);
-	// sock_non_block(p2[0]);
-	// sock_non_block(p2[1]);
 	return (0);
 }
 
@@ -117,7 +112,7 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) 
 	conn(_conn),
 	rsrc(_rsrc)
 {
-	// sock_non_block(this->fd); // dangerous (?)
+	sock_non_block(this->fd); // should work (!)
 }
 	
 CgiPipe::~CgiPipe()
@@ -170,11 +165,9 @@ ssize_t	CgiPipe::pollin(void)
 	}
 	
 // RSRC
-	// track : (clen)
-	// why (hup) when too much stderr .. pipe blocked (?) done (?)
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
-	// this->mod_evt(-EPOLLIN); // speed hit (!)
+	// this->mod_evt(-EPOLLIN); // bad idea (?) speed hit (!)
 	return (err);
 }
 
@@ -248,7 +241,6 @@ ssize_t	CgiPipe::pollout(void)
 
 int		CgiPipe::rdhup(void)
 {
-	// cgi_rem .. if (ip)
 	return (-1);
 }
 
@@ -256,7 +248,7 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn)
 	{
-		this->conn->cgi_rem(this);
+		this->conn->cgi_rem(this); // strangely important
 		this->conn = NULL;
 	}
 	return (-1);
