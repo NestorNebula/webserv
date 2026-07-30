@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 12:05:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 14:50:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,10 @@
 # include <vector>
 # include "WsLog.hpp"
 
+
+// The default connection timeout of Apache httpd 1.3 and 2.0 is as little as 15 seconds[6][7] and just 5 seconds for Apache httpd 2.2 and above.
+
+// HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
 
 # ifndef EPC_TIMEOUT
 #  define EPC_TIMEOUT 60
@@ -73,6 +77,8 @@ public:
 	int				event(struct epoll_event *e);
 
 	int					get_fd  (void) const;
+	void				set_rem (int r);
+	int					get_rem (void) const;
 	struct epoll_event	*get_evt(void);
     std::string 		typ_str(void);
 	
@@ -84,6 +90,7 @@ protected:
 	time_t				lact;
 	int					error;
     char            	ibuf[EPC_BUF_SIZ];
+	int					REM;
 };
 
 #endif

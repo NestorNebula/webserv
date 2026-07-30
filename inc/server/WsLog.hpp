@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 11:11:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 14:58:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ typedef long unsigned int log_tgt;
 # define TGT_CONN_RECV	(1UL << 5)
 # define TGT_CONN_SEND	(1UL << 6)
 # define TGT_CONN_DATA	(1UL << 7)
-# define TGT_CONN		(TGT_CONN_RECV | TGT_CONN_SEND | TGT_CONN_DATA)
+# define TGT_CONN		(TGT_CONN_RECV | TGT_CONN_SEND)
 
 # define TGT_CGI_RECV	(1UL << 8)
 # define TGT_CGI_SEND	(1UL << 9)

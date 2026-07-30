@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 10:54:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 15:25:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ private:
 	ResourceCgi				 (const ResourceCgi & ) {}
 	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), clen(0), hlen(0), tlen(0), slen(0), xit(-1), sig(-1), ka(0), error(0) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), clen(0), hlen(0), tlen(0), slen(0), xit(-1), sig(-1), error(0) {}
 	~ResourceCgi();
 
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
@@ -45,12 +45,11 @@ public:
 	int			slen;
 	int			xit;
 	int			sig;
-	int			ka;
 	int			error;
 
 	int			status(int opt);
 	int			rem(CgiPipe *epc);
-	void		reset(bool reuse);
+	// void		reset(bool reuse);
 };
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 10:13:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 15:39:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 	typ(_typ), 
 	fd(_fd), 
 	lact(0),
-	error(0)
+	error(0),
+	REM(0)
 {
 	evt.events = 0;
 	evt.data.ptr = NULL;
@@ -35,7 +36,7 @@ int	EpollClient::ini_evt(int e)
 {
 	if (evt.data.ptr != NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPC, "ini_evt  : already initialized");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "ini_evt  : already initialized");
 		return (this->mod_evt(e));
 	}
 	evt.data.ptr = this;
@@ -48,7 +49,7 @@ int	EpollClient::mod_evt(int e)
 {
 	if (evt.data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPC, "mod_evt  : not yet initialized");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod_evt  : not yet initialized");
 		return (this->ini_evt(e));
 	}
 
@@ -57,8 +58,8 @@ int	EpollClient::mod_evt(int e)
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
 	
-	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : CUR ", evt_type(evt.events));
-	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : MOD ", evt_type(e));
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
 	if (e == 0)
 		evt.events = e;
@@ -69,10 +70,10 @@ int	EpollClient::mod_evt(int e)
 	}
 	else
 	{
-#if 0
+#if 1
 		if (evt.events == (e | EPOLLRDHUP))
 		{
-			WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : no change");
+			WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
 			// fuck :: we don't get here .. 
 			// unless tgt | EPC .. 
 			// but we should 
@@ -84,7 +85,7 @@ int	EpollClient::mod_evt(int e)
 		// evt.events = e;
 	}	
 	evt.events |= EPOLLRDHUP;
-	WsLog::_(LVL_DBG, TGT_EPC, "mod_evt  : RES ", evt_type(evt.events));
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
 
 	return (this->ep->mod(this));
 }
@@ -191,6 +192,16 @@ ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 int	EpollClient::get_fd  (void) const
 {
 	return (this->fd);
+}
+
+void	EpollClient::set_rem (int r)
+{
+	this->REM = r;
+}
+
+int	EpollClient::get_rem (void) const
+{
+	return (this->REM);
 }
 
 struct epoll_event	*EpollClient::get_evt(void)

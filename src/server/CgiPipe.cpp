@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 12:13:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 16:05:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,9 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
+		// VERY FUCKING BAD IDEA 
+	// if (this->rsrc->status(WNOHANG) >= 0)
+	// 	return (-1);
 
 	ssize_t	err = 0;
 	
@@ -156,8 +159,8 @@ ssize_t	CgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-		this->rsrc->set_err(501); // CGI_ERR : read failed
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
+		this->rsrc->set_err(501); // CGI_ERR : read failed
 		return (err);
 	}
 	if (err == 0)
@@ -171,7 +174,7 @@ ssize_t	CgiPipe::pollin(void)
 	// why (hup) when too much stderr .. pipe blocked (?) done (?)
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
-	this->mod_evt(-EPOLLIN); // speed hit (!)
+	// this->mod_evt(-EPOLLIN); // speed hit (!)
 	return (err);
 }
 
@@ -184,8 +187,9 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-	if (this->rsrc->status(WNOHANG) >= 0)
-		return (-1);
+		// BAD IDEA
+	// if (this->rsrc->status(WNOHANG) >= 0)
+	// 	return (-1);
 	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
@@ -229,8 +233,8 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->send(body);
 	if (err < 0)
 	{
-		this->rsrc->set_err(502); // CGI_ERR : write failed
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+		this->rsrc->set_err(502); // CGI_ERR : write failed
 		return (err);
 	}
 	if (err == 0)
@@ -244,11 +248,17 @@ ssize_t	CgiPipe::pollout(void)
 
 int		CgiPipe::rdhup(void)
 {
+	// cgi_rem .. if (ip)
 	return (-1);
 }
 
 int		CgiPipe::hup(void)
 {
+	if (this->conn)
+	{
+		this->conn->cgi_rem(this);
+		this->conn = NULL;
+	}
 	return (-1);
 }
 

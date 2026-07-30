@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 11:04:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 15:20:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,27 @@
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-	this->reset(false);
-}
+// 	this->reset(false);
+// }
 
-void	ResourceCgi::reset(bool reuse)
-{
+
+// It is not currently possible to reliably delete epoll items when using the same epoll set from multiple threads. After calling epoll_ctl with EPOLL_CTL_DEL, another thread might still be executing code related to an event for that epoll item (in response to epoll_wait). Therefore the deleting thread does not know when it is safe to delete resources pertaining to the associated epoll item because another thread might be using those resources. 
+
+// HM : do not delete ..CgiPipe .. until .. we are sure (cgi) is complete (?)
+// so .. keep them in the epoll .. but .. disabled
+
+// the reading application would be tied up for a long period; 
+// meanwhile, it does not service I/O events on the other file descriptors—those descriptors are starved of service by the application. 
+
+// The solution to file descriptor starvation is for the application to maintain a user-space data structure that caches the readiness of each of the file descriptors that it is monitoring. 
+
+// so .. cache as (READY) .. until .. recv/send ZERO ...
+
+// EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
+
+
+// void	ResourceCgi::reset(bool reuse)
+// {
 	WsLog::_(LVL_DBG, TGT_RSRC, "reset");
 	if (this->ip || this->op) // pid, stat (?)
 	{
@@ -58,8 +74,8 @@ void	ResourceCgi::reset(bool reuse)
 	this->ip   = NULL;
 	this->op   = NULL;
 	this->stat = -1;
-	if (!reuse)
-		return;
+	// if (!reuse)
+	// 	return;
 
 	this->hed  = 0;
 	this->clen = 0;
@@ -106,6 +122,9 @@ int	ResourceCgi::status(int opt)
 			this->set_err(404);
 			break;
 		default:
+		// should NOT have gotten this for suck.php
+		// head parsing .. should have caught it ... 
+		// but .. we're testing status .. too early (?)
 			this->set_err(504);
 			break;
 		}
@@ -167,7 +186,7 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
 
-	this->reset(true);
+	// this->reset(true);
 
 	this->pid = _pid;
 	

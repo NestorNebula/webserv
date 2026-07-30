@@ -1,9 +1,10 @@
 <?php
 
-    header('Content-Type: image/jpg');
     $path = 'files/2k_earth_daymap.jpg';
     $fsiz = filesize($path);
-    // header('Content-Length: ' . $fsiz);
+    
+    header('Content-Type: image/jpg');
+    header('Content-Length: ' . $fsiz);
 
     $fp = fopen($path, "rb");
 

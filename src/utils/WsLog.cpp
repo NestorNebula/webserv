@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 12:04:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 16:03:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 void    WsLog::kd(void)
 {
     WsLog::lvl = LVL_NONE
-        | LVL_ERR 
+        | LVL_ERR
         | LVL_WARN
         | LVL_INFO
         | LVL_DBG
@@ -165,10 +165,10 @@ void    WsLog::kd(void)
         
         | TGT_CONN
         // | TGT_CONN_RECV
-        | TGT_CONN_SEND
-        | TGT_CONN_DATA
+        // | TGT_CONN_SEND
+        // | TGT_CONN_DATA
 
-        // | TGT_CGI - dangerous data 
+        | TGT_CGI
         // | TGT_CGI_RECV
         // | TGT_CGI_SEND
         // | TGT_CGI_DATA

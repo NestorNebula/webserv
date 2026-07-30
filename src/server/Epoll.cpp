@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 12:10:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 15:08:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,17 +128,17 @@ int	Epoll::add(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : bad data ptr");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "add cli  : already exists");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
 		// return (this->mod(cli));
 		return (0);
 	}
@@ -159,18 +159,18 @@ int	Epoll::mod(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod cli  : bad data ptr");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
 		// return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
@@ -185,11 +185,11 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "del cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -203,7 +203,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->clients.find(cli);
 	if (it != this->clients.end())
 	{
@@ -213,10 +213,9 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "rem cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
 	}
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
-
 	return (0);
 }
 
@@ -233,8 +232,8 @@ EpollClient	*Epoll::get_epc(void *cli)
 	epc = reinterpret_cast<EpollClient*>(cli);
 	if (epc == NULL)
 		return (NULL);
-	// if (!this->has_client(epc))
-	// 	return (NULL);
+	if (!this->has_client(epc))
+		return (NULL);
 	return (epc);
 }
 
@@ -248,9 +247,10 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
+	// why would this fail in (gdb) with "Interrupted system call"
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
-		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
+		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
 	if (this->ecnt == 0)
 		return (this->ecnt);
 	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\necnt  : ", this->ecnt);
@@ -264,7 +264,9 @@ void	Epoll::check_timeo(void)
 	
 	n = time(&n);
 	
-	std::set<EpollClient*>::iterator it = this->clients.begin();
+	std::set<EpollClient*>::iterator it;
+	
+	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
 		if ((*it)->timeo(n))
@@ -307,6 +309,7 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "");
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
@@ -314,10 +317,34 @@ int	Epoll::loop(void)
 			{
 				// flag for removal (?)
 				this->rem(epc);
+				// epc->set_rem(1);
 			}
         }
-		// and kill epc->state == DONE
 		this->check_timeo();
+#if 0 // does not help STDERR problem
+		for (int k=0; k < e; k++)
+        {
+			evt = this->get_evt(k);
+			if (evt == NULL)
+			{
+				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
+				continue;
+			}
+			epc = this->get_epc(evt->data.ptr);
+			if (epc == NULL)
+			{
+				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
+				continue;
+			}
+			if (epc->get_rem())
+				this->rem(epc);
+		}
+		std::set<EpollClient*>::iterator it = this->clients.begin();
+		while (it != this->clients.end())
+		{
+			this->mod(*it++);
+		}		
+#endif		
     }
 	return (0);
 }
