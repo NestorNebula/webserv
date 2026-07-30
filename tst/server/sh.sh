@@ -3,7 +3,7 @@
 tput reset
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=255 -b
+	siege -f staging-urls.sh --internet --verbose --reps=55 --concurrent=255 -b
 	echo
 	exit 0
 fi

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 21:26:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/30 22:15:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,22 +98,7 @@ ssize_t	Connection::pollin(void)
 	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-#if 0
-		// fuck .. xit is (0)
-		// but stat is (-1)
-		// because WE RESET 
-		if (this->cgi && this->cgi->status(WNOHANG) >= 0)
-		{
-			// ATTN : seems like we'd want to send an error here ...
-			// assume it's been set (?)
-			// keep-alive (?)
-			// or .. let pollout take care of it 
-			this->mod_evt(-EPOLLIN);
-			// return (-1);
-		}
-#endif
-			// not 100% sure here 
-		// this->mod_evt(-EPOLLIN);
+		// this->mod_evt(-EPOLLIN); // uncertain
 		this->mod_evt(EPOLLOUT); 
 		return (0);
 	}
@@ -139,9 +124,9 @@ ssize_t	Connection::pollin(void)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
 			// this->set_err(503); // CONN - new ResourceCgi failed
-			this->set_err(404);
+			this->set_err(404); // siege-friendly
 			// this->mod_evt(-EPOLLIN); // uncertain
-			return (0); // send error (!)
+			return (0); // send error
 		}
 	}
 // SESSION
@@ -162,8 +147,6 @@ int		Connection::cgi_done(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  error");
 		return (1); // have data to send
 	}
-
-
 	if (res == NULL)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (NULL)");
@@ -183,8 +166,6 @@ int		Connection::cgi_done(void)
 		return (-1); // DONE
 	}
 #endif
-
-
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (stat) ", res->stat);
 	if (!res->hed)
@@ -310,6 +291,7 @@ int		Connection::rsrc_send(int cnt)
 	}
 	
 	err = this->cgi_done();
+	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
 	if (err <= 0)
 	{
@@ -331,9 +313,6 @@ int		Connection::rsrc_send(int cnt)
 		if (this->ka)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn keep-alive ", this->req_cnt);
-			// ugh : may KILL prematurely
-			// BEFORE we SEND
-			// maybe nothing sent 
 			if (cnt)
 				this->reset();
 			return (0);
@@ -341,7 +320,7 @@ int		Connection::rsrc_send(int cnt)
 		else
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  delete (?)");
-			// test elsewhere (?)
+			// test here .. execute elsewhere (?)
 			// delete (this->cgi);
 			// this->cgi = NULL; // wtf
 		}
@@ -361,13 +340,12 @@ int		Connection::rsrc_send(int cnt)
 		// ka / tlen
 		
 
-// fuck : did the cgi finishing .. CLOSE the socket .. across the FORK (?)
+
 ssize_t	Connection::pollout(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	ssize_t	err = 0;
 	
-
 // sometimes, bigimage.php does not send all data .... 
 // wanna be : real careful .. about when (cgi) is deleted / done
 // mod_evt(0)
@@ -399,8 +377,7 @@ ssize_t	Connection::pollout(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
 		if (this->error == 408 && this->ka)
 		{
-			// this->error = 0;
-			// return (0);
+			this->error = 0;
 			return (-1);
 		}
 		err = this->send(this->estr); 
@@ -428,11 +405,9 @@ ssize_t	Connection::pollout(void)
 	}
 	if (err == 0)
 	{
-		// we get here .. if we did not check rsrc_send at head of function
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
-		// cgi.status() 
-		this->mod_evt(-EPOLLOUT);
 		WsLog::_(LVL_DBG, TGT_CONN, "-out:  send");
+		this->mod_evt(-EPOLLOUT);
 		return (0);
 	}
 
@@ -443,61 +418,34 @@ ssize_t	Connection::pollout(void)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	}
-	// we do NOT want to kill right away (?)
-	
-	// return (err);
-	// we DO need to check (tlen) stuff ...
-	// 
 	this->rsrc_send(err);
+	// we do NOT want to kill right away (!)
 	return (err);
-	// return (this->rsrc_send(err));
 }
 
-// FUCK : why would re-directing stderr make this work (?)
-// but : NOT when logging NO ERRORS
-// but : no log at all .. same problem
-// some sort of .. slow-down (?)
 int	Connection::rdhup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
 	this->ka = 0;
 	this->mod_evt(EPOLLOUT);
 	
-	// fuck : current REQUEST
-	// if (this->cgi == NULL)
-	// 	return (0);
-
-	// or : kill on "out rdhup"
 #if 1
-	if (this->cgi && this->cgi->ip)
+	if (this->cgi)
 	{
-		this->cgi->ip->rsrc_closed(); // rsrc_closed
-		this->cgi->ip->mod_evt(EPOLLIN);
-	}
-	if (this->cgi && this->cgi->op)
-	{
-		this->cgi->op->rsrc_closed();
-		this->cgi->op->mod_evt(EPOLLOUT);
+		if (this->cgi->ip)
+		{
+			this->cgi->ip->rsrc_closed(); // rsrc_closed
+			this->cgi->ip->mod_evt(EPOLLIN);
+		}
+		if (this->cgi->op)
+		{
+			this->cgi->op->rsrc_closed();
+			this->cgi->op->mod_evt(EPOLLOUT);
+		}
 	}
 #endif
-	// (!)
-	return (-1);
+	return (-1); // (hm)
 }
-
-
-// epoll : evt tgt  : cgi
-// epoll : evt fd   : [13]
-// epoll : evt typ  : hup 
-// epoll : cli rem  : cgi
-// epoll : cli del  : cgi
-// rsrc  : done: [0]
-// conn  : rem : cgi (DONE) [7]
-// conn  : rem : err (op)   [0]
-// rsrc  : (~) ResourceCgi
-// rsrc  : reset
-// epoll : cli mod  : conn
-
-
 
 int	Connection::hup(void)
 {
