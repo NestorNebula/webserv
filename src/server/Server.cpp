@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 21:08:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 18:57:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Server::Server (Epoll *_ep, unsigned short p) :
 
 Server::~Server()
 {
-	WsLog::_(LVL_DBG, TGT_SERV, "(~) Server");
+	WsLog::_(LVL_DBG, TGT_SERV, " (~) Server");
 	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 

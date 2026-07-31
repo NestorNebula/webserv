@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 17:52:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 19:33:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,10 @@
 
 ResourceCgi::~ResourceCgi()
 {
-	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-	this->shutdown();
-}
-
-int ResourceCgi::shutdown(void)
-{
+	WsLog::_(LVL_DBG, TGT_RSRC, " (~) ResourceCgi");
+	
+	// not sure this is the place ...
+	// CgiPipe => hup => Epoll::rem => this
 	this->status(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
@@ -45,7 +43,6 @@ int ResourceCgi::shutdown(void)
 		this->status(0); // dangerous (?)
 	}
 	this->conn_closed();
-	return (this->stat);
 }
 
 void	ResourceCgi::conn_closed(void)
@@ -129,7 +126,7 @@ int	ResourceCgi::status(int opt)
 	return (this->stat);
 }
 
-// ~CgiPipe
+// ~CgiPipe - from Epoll (!)
 int	ResourceCgi::rem(CgiPipe *epc)
 {
 	int err = 0;

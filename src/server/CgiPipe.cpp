@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 17:31:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 19:33:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) 
 	
 CgiPipe::~CgiPipe()
 {
-	WsLog::_(LVL_DBG, TGT_CGI, "(~) Cgi");
+	WsLog::_(LVL_DBG, TGT_CGI, " (~) Cgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
 }
@@ -246,8 +246,8 @@ int		CgiPipe::hup(void)
 		// otherwise .. not set to (NULL) in rsrc .. 
 		// but will be deleted in epoll
 		// so .. kinda .. no longer exists (?)
-		this->conn->cgi_rem(this); 
-		this->conn = NULL;
+		// this->conn->cgi_rem(this); 
+		// this->conn = NULL;
 	}
 	return (-1);
 }
