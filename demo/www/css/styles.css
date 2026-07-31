@@ -74,9 +74,8 @@ h6 {
 		sans-serif;
 	--background: #fafaff;
 	--foreground: #1c1c1c;
-	--http-color: #16db65;
+	--success-color: #16db65;
 	--badge-color: #240046;
-	--success-color: var(--http-color);
 	--error-color: #a31621;
 }
 
@@ -177,7 +176,7 @@ footer {
 	color: var(--foreground);
 	transition:
 		transform 0.25s,
-		color 0.25s ease-out;
+		font-weight 0.25s ease-out;
 }
 
 .request>p:nth-of-type(2) {
@@ -186,7 +185,7 @@ footer {
 
 .request:hover {
 	transform: translate(-0.2rem, -0.2rem);
-	color: var(--http-color);
+	font-weight: bold;
 }
 
 .request>p:last-of-type {
@@ -319,7 +318,7 @@ footer {
 	color: var(--badge-color);
 	text-decoration: none;
 	font-style: italic;
-	transition: color 0.25s ease-in;
+	transition: font-weight 0.25s ease-out;
 }
 
 .file-link::before {
@@ -329,12 +328,12 @@ footer {
 	top: 100%;
 	width: 0; 
 	height: 2px;
-	background-color: var(--http-color);
+	background-color: var(--foreground);
 	transition: width 0.25s ease-out;
 }
 
 .file-link:hover {
-	color: var(--http-color);
+	font-weight: bold;
 }
 
 .file-link:hover::before {
