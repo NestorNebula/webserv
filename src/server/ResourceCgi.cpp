@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 11:53:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 17:52:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,11 @@
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
+	this->shutdown();
+}
+
+int ResourceCgi::shutdown(void)
+{
 	this->status(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
@@ -39,6 +44,12 @@ ResourceCgi::~ResourceCgi()
 		kill(this->pid, SIGKILL);
 		this->status(0); // dangerous (?)
 	}
+	this->conn_closed();
+	return (this->stat);
+}
+
+void	ResourceCgi::conn_closed(void)
+{
 	if (this->ip)
 	{
 		this->ip->rsrc_closed();
@@ -50,7 +61,6 @@ ResourceCgi::~ResourceCgi()
 		this->op->mod_evt(EPOLLIN);
 	}
 }
-
 int	ResourceCgi::status(int opt)
 {
 	int	err;
@@ -90,6 +100,10 @@ int	ResourceCgi::status(int opt)
 			this->set_err(404);
 			break;
 		default:
+			// (res)
+			// do not override .. 
+			// may be killing a successfully "finished" -- 
+			// but not timed out
 			this->set_err(504);
 			break;
 		}
@@ -139,6 +153,75 @@ int	ResourceCgi::rem(CgiPipe *epc)
 		this->status(WNOHANG);
 	}	
 	return (err);
+}
+
+
+int		ResourceCgi::chk_rsp_hed(std::string & ostr)
+{
+	size_t	pos = ostr.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (0);
+		
+// rsrc::parse_head
+	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	this->hed = 1;
+	this->hlen = pos + 4;
+	
+// std::string stat;
+// std::string head;
+// std::string body; // (ostr)
+	std::string stat_val = hedval_str(ostr, "Status");
+	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_val);
+	if (stat_val.size())
+	{
+		int http_stat = atoi(stat_val.c_str());
+		if (http_stat != 200)
+		{
+			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "STAT: ", http_stat);
+			this->error = http_stat;
+			return (0);
+		}		
+	}
+
+	std::string conn_close("Connection: close\r\n");
+	std::string conn_keep("Connection: keep-alive\r\n");
+	
+// PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
+	std::string conn_val = hedval_str(ostr, "Content-Length");
+	if (conn_val.size())
+	{
+		this->clen = atoi(conn_val.c_str());
+		this->tlen = this->hlen + this->clen;
+		
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "hlen: ", this->hlen);
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "clen: ", this->clen);
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "tlen: ", this->tlen);
+		
+		if (this->ka)
+		{
+			ostr.insert(0, conn_keep);
+			this->tlen += conn_keep.size();
+		}
+		else
+		{
+			ostr.insert(0, conn_close);
+			this->tlen += conn_close.size();
+		}
+	}
+	else
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: error ", this->error);
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : error ", this->error);
+		this->ka = 0;
+		ostr.insert(0, conn_close);
+	}
+	
+	std::string stat_200("HTTP/1.0 200 OK\r\n");
+	ostr.insert(0, stat_200);
+	this->tlen += stat_200.size();
+	
+	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", OSTR);	
+	return (0);
 }
 
 void    ResourceCgi::push_body(void)

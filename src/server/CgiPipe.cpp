@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 11:57:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 17:31:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,11 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn)
 	{
-		this->conn->cgi_rem(this); // strangely important
+		// strangely important
+		// otherwise .. not set to (NULL) in rsrc .. 
+		// but will be deleted in epoll
+		// so .. kinda .. no longer exists (?)
+		this->conn->cgi_rem(this); 
 		this->conn = NULL;
 	}
 	return (-1);

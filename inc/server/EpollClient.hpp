@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 20:52:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 14:33:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@
 # endif
 
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ (4096)
+#  define EPC_BUF_SIZ (8192 << 1)
 # endif
 
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ (4096) 
+#  define EPC_OUT_SIZ (8192 << 1) 
 # endif
 
 typedef enum

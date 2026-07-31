@@ -3,13 +3,13 @@
 tput reset
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=10 --concurrent=255 -b
+	siege -f staging-urls.sh --internet --verbose --reps=5 --concurrent=255 -b
 	echo
 	exit 0
 fi
 
 if [ "$1" == "k" ]; then
-	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=10 --concurrent=255 -b
+	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=5 --concurrent=250 -b
 	echo
 	exit 0
 	# curl -X GET http://localhost:8080/ka.pl -i
