@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 14:58:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 12:17:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ typedef long unsigned int log_tgt;
 # define LVL_DBG	(1UL << 1)
 # define LVL_ERR	(1UL << 2)
 # define LVL_WARN	(1UL << 3)
-# define LVL_MAX	(1UL << 4)
+# define LVL_TMP	(1UL << 4)
+# define LVL_MAX	(1UL << 5)
 # define LVL_ALL	(LVL_MAX - 1)
 
 

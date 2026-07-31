@@ -1,6 +1,11 @@
 <?php
     header('Content-Type: video/x-matroska');
-    $fp = fopen('files/Black.Mirror.S07E04.mkv', "rb");
+
+    $path = 'files/Black.Mirror.S07E04.mkv';
+    $fsiz = filesize($path);
+    header('Content-Length: ' . $fsiz);
+
+    $fp = fopen($path, "rb");
 
     // one extra byte
     while (!feof($fp))

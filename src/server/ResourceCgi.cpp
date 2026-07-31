@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 21:32:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 11:53:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,12 @@
 ResourceCgi::~ResourceCgi()
 {
 	WsLog::_(LVL_DBG, TGT_RSRC, "(~) ResourceCgi");
-	// if (this->ip || this->op) // pid, stat (?)
+	this->status(WNOHANG);
+	if (this->stat == -1 && this->pid)
 	{
-		this->status(WNOHANG);
-		if (this->stat == -1 && this->pid)
-		{
-			WsLog::_(LVL_DBG, TGT_RSRC, "kill");
-			kill(this->pid, SIGKILL);
-			this->status(0); // WNOHANG);
-		}
+		WsLog::_(LVL_DBG, TGT_RSRC, "kill");
+		kill(this->pid, SIGKILL);
+		this->status(0); // dangerous (?)
 	}
 	if (this->ip)
 	{
@@ -52,24 +49,16 @@ ResourceCgi::~ResourceCgi()
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
-	// this->pid  = 0;
-	// this->ip   = NULL;
-	// this->op   = NULL;
-	// this->stat = -1;
-	// this->hed  = 0;
-	// this->clen = 0;
-	// this->hlen = 0;
-	// this->tlen = -1;
-	// this->slen = 0;
-	// this->error = 0;
-	// NB : NOT (ka)
 }
 
 int	ResourceCgi::status(int opt)
 {
+	int	err;
+	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "pid : ", this->pid);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "xit : ", this->xit);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", this->stat);
+
 	if (this->stat != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
@@ -81,7 +70,7 @@ int	ResourceCgi::status(int opt)
 		return (this->stat);
 	}
 	
-	int err = waitpid(this->pid, &this->stat, opt);
+	err = waitpid(this->pid, &this->stat, opt);
 	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);
@@ -164,12 +153,8 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 	
 	this->pid = _pid;
 	
-// SHIT : I re-use .. because I only test cgi
-// next request .. might not be a cgi .. 
-// so .. keep-alive .. should DELETE the RESOURCE 
 	WsLog::_(LVL_DBG, TGT_RSRC, "init cgi");
 
-	// ResourceCgi::init(conn, pipes, ep)
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)
 		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
@@ -181,7 +166,6 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
 	}	
 	
-	// (rsrc)
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
 	err = this->ip->ini_evt(EPOLLOUT);
 	if (err < 0)

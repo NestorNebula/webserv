@@ -3,29 +3,70 @@
 tput reset
 
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=55 --concurrent=255 -b
+	siege -f staging-urls.sh --internet --verbose --reps=10 --concurrent=255 -b
 	echo
 	exit 0
 fi
 
-# curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
-# echo
-# exit 0
+if [ "$1" == "k" ]; then
+	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=10 --concurrent=255 -b
+	echo
+	exit 0
+	# curl -X GET http://localhost:8080/ka.pl -i
+	# echo
+	# curl -X GET http://localhost:8080/ka.php -i
+	# echo
+	# curl -X GET http://localhost:8080/ka.py -i
+	# echo
+	# exit 0
+fi
 
-# curl -X GET http://127.0.0.1:8081/bigimage.php -i --output data.jpg
-# echo
-# exit 0
 
-# curl -X GET http://localhost:8081/bigvideo.php --output data.mkv
-# echo
-# exit 0
+if [ "$1" == "a" ]; then
+	curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
+	echo
+	exit 0
+fi
+
+if [ "$1" == "j" ]; then
+	curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
+	echo
+	exit 0
+fi
+
+if [ "$1" == "v" ]; then
+	curl -X GET http://localhost:8081/bigvideo.php --output data.mkv
+	echo
+	exit 0
+fi
 
 
-# -- not sieged well ..
+if [ "$1" == "u" ]; then
+	# FILE="Kanan.mp3"
+	FILE="earth.jpg"
+	curl -X POST http://localhost:8081/test.php -i \
+		-F p1=dash-f-one \
+		-F p2=dash-f-two \
+		-F file=@files/$FILE
+	echo
+	curl -X POST http://localhost:8081/test.pl -i \
+		-F p1=dash-f-one \
+		-F p2=dash-f-two \
+		-F file=@files/$FILE
+	echo
+	curl -X POST http://localhost:8081/test.py -i \
+		-F p1=dash-f-one \
+		-F p2=dash-f-two \
+		-F file=@files/$FILE
+	echo
+	exit 0
+fi
 
-curl -X GET http://localhost:8080/ka.pl -i
+
+curl -X GET http://localhost:8081/stat.php -i
 echo
 exit 0
+
 # curl -X GET http://localhost:8081/suck.py -i
 # echo
 # curl -X GET http://localhost:8082/suck.pl -i
@@ -34,11 +75,6 @@ exit 0
 
 
 # curl -X GET http://localhost:8081/to.php -i
-# echo
-# exit 0
-
-# curl -X POST http://localhost:8081/ka.py -i \
-# 	 -d "p1=post-one&p2=post-two"
 # echo
 # exit 0
 
@@ -66,12 +102,6 @@ exit 0
 
 # PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 
-curl -X POST http://localhost:8081/test.php -i \
-	-F p1=dash-f-one \
-	-F p2=dash-f-two \
-	-F file=@files/Kanan.mp3
-echo
-exit 0
 
 
 
@@ -96,7 +126,7 @@ exit 0
 # content-length is STRANGE here 
 
 # curl -X POST http://localhost:8081/test.php -i \
-# 	-d @files/2k_earth_daymap.jpg
+# 	-d @files/earth.jpg
 # echo
 # exit 0
 
@@ -106,7 +136,7 @@ exit 0
 # Expect: 100-continue
 
 # curl -X POST http://localhost:8082/test.php \
-# 	-F file=@files/2k_earth_daymap.jpg
+# 	-F file=@files/earth.jpg
 # echo
 # exit 0
 
@@ -118,7 +148,7 @@ exit 0
 # 	-H "Transfer-Encoding: chunked" \
 # 	-F p1=chunked_one \
 # 	-F p2=chunked_two \
-# 	-F file=@files/2k_earth_daymap.jpg
+# 	-F file=@files/earth.jpg
 # echo
 # exit 0
 

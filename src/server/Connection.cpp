@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 22:15:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 12:30:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ bool	Connection::timeo(time_t now)
 }
 
 // SESSION
-// kd : How should this be handled when in "cgi" mode 
 void	Connection::set_err(int e)
 {
 	if (e == 0)
@@ -63,7 +62,6 @@ void	Connection::set_err(int e)
 	}
 
 	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
-	WsLog::_(LVL_DBG, TGT_CONN, "ostr: ", ostr.size());
 	
 	// ATTN : some errors (500) are not siege-friendly
 // SESSION - get_op_data .. 
@@ -98,7 +96,6 @@ ssize_t	Connection::pollin(void)
 	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-		// this->mod_evt(-EPOLLIN); // uncertain
 		this->mod_evt(EPOLLOUT); 
 		return (0);
 	}
@@ -117,15 +114,14 @@ ssize_t	Connection::pollin(void)
 		this->cgi = new ResourceCgi;
 		this->ka = sess.req.ka;
 	}
-	if (this->cgi->pid == 0)
+	if (this->cgi->pid == 0) // strange
 	{
 		this->req_cnt++;
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
-			// this->set_err(503); // CONN - new ResourceCgi failed
+			// this->set_err(503);
 			this->set_err(404); // siege-friendly
-			// this->mod_evt(-EPOLLIN); // uncertain
 			return (0); // send error
 		}
 	}
@@ -145,28 +141,18 @@ int		Connection::cgi_done(void)
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  error");
-		return (1); // have data to send
+		return (1); // have (error) data to send
 	}
 	if (res == NULL)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (NULL)");
 		return (-1);
 	}
-#if 0 // VERY VERY PROBLEMATIC -- working well without this 
-	if (res->status(WNOHANG) != -1)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (exited)");
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (stat) ", res->stat);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (err ) ", res->error);		
-		if (res->error)
-		{
-			this->set_err(res->error); // where SHOULD this have happened (?)
-			return (1);
-		}			
-		return (-1); // DONE
-	}
-#endif
+	
+	// if (res->stat != -1)
+	// {
 
+	// }
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (stat) ", res->stat);
 	if (!res->hed)
 	{
@@ -180,52 +166,34 @@ int		Connection::cgi_done(void)
 		// sent body
 		// unknown (no content-length : wait for cgi-close)
 	
-	// Q: move into ResourceCgi (?)
-	// works well -- not the right place for it 
+		// RESOURCE 
 	if (ostr.size()) 
 		return (1); // HAVE_DATA
 
-	// (ostr.size() == 0)
+// ostr == EMPTY
 
-// post-send-checks
-// more like "done" tests here 
-	// // we just checked this in pollout
 	if (res->status(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (exited)");
 		if (res->error)
 		{
-			this->set_err(res->error); // where SHOULD this have happened (?)
+			// where SHOULD this have happened (?)
+			this->set_err(res->error); 
 			return (1);
 		}	
 		return (-1); // DONE
 	}
 
-
 // KEEP_ALIVE
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (tlen) ", res->tlen);
-
-	// tlen -- even if not (ka) ? 
 	if (this->ka && res->tlen == 0)
 	{
 		// working well 
-		return (-1); // DONE -- but test for (ka) should decide to kill
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (tlen) ", res->tlen);
+		return (-1);
 	}
-	// NEED_DATA
-// fine .. 
-// but have not RESET 
-	// CGI is still active ... 
 
-// PROBLEM : we get more keep-alive data BEFORE our cgi finishes cleanly
-
-	// could know DONE here .. from content-length
-// need to track : cgi: clen && slen
-	// BUT : may have sent ALL on keep-alive
-	// AND : cgi is taking its time closing ...
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  wait for data");
 	
-// TIMEOUT (?)
-	// this->mod_evt(-EPOLLOUT); // => pollout
 	if (res->op)
 		res->op->mod_evt(EPOLLIN);
 		
@@ -256,37 +224,20 @@ int		Connection::rsrc_send(int cnt)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL)");
 		if (this->ostr.size())
 			return (1);
-
-#if 1
 		if (this->ka)
 		{
-			// need to reset here (?)
-			// timeout (?)
 			WsLog::_(LVL_DBG, TGT_CONN, "-out: rsrc send   (1)");
-			// this->mod_evt(-EPOLLOUT);
-			// RESET
-				// not quite
-			// should have been called when (cgi) was deleted
-			// fucks with pollin
 			this->reset();
 			return (0);
 		}
-#endif
-// and : we LOSE fucking cgi tlen .. when we delete the cgi
-// fuck ; stderr seems to play a role here .. wtf
-		// return (1); // still data in the pipe to read (?)
 		return (-1);
 	}
-	if (cnt && this->cgi) // ->ka)
+	if (cnt && this->cgi)
 	{
 		if (cnt < this->cgi->tlen)
 			this->cgi->tlen -= cnt;
 		else
-		{
 			this->cgi->tlen = 0;
-			// this->reset();
-			// return (0);
-		}
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi tlen ", this->cgi->tlen);
 	}
 	
@@ -303,9 +254,6 @@ int		Connection::rsrc_send(int cnt)
 	{
 		// not ready -- need to wait for data from cgi
 		WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc send  (2)");
-		// if (this->cgi && this->cgi->op)
-		// 	this->cgi->op->mod_evt(EPOLLIN);
-		// this->mod_evt(-(EPOLLOUT));
 		return (0);
 	}
 	if (err < 0)
@@ -320,9 +268,6 @@ int		Connection::rsrc_send(int cnt)
 		else
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  delete (?)");
-			// test here .. execute elsewhere (?)
-			// delete (this->cgi);
-			// this->cgi = NULL; // wtf
 		}
 		return (-1);
 	}
@@ -340,38 +285,26 @@ int		Connection::rsrc_send(int cnt)
 		// ka / tlen
 		
 
-
+// need to be real careful .. about when (cgi) is deleted / done
 ssize_t	Connection::pollout(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
+	
 	ssize_t	err = 0;
 	
-// sometimes, bigimage.php does not send all data .... 
-// wanna be : real careful .. about when (cgi) is deleted / done
-// mod_evt(0)
-// actually deleted / removed ... with connection (?)
-// feels fucky to have that happening in the Epoll::loop()
+	// err = this->sess.pull_data();
+	std::string & OSTR = this->ostr;
 
-// PROOF (of problem) : keep-alive sucks
-
-// bigimage.php : byte count is DIFFERENT under (siege) ... 
-
-	// err = this->sess.pull_data(this->ostr);
-#if 1
 	err = this->rsrc_send(0);
 	if (err <= 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
-		// this->mod_evt(0); // get clean (rdhup)
 		this->mod_evt(-EPOLLOUT);
-		// fucking (cgi == NULL) + (ka) = reset => POLLIN
 		return (err);
 	}	
-#endif
 // SESSION
 // kd : integration
 	//  How should we "switch" from ResourceCgi to ResourceError (send file ...)
-// not on some mp3 waiting .. 
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
@@ -395,9 +328,12 @@ ssize_t	Connection::pollout(void)
 		return (-1);
 	}
 	
+
+
+
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , this->ostr.size());
-	err = this->send(ostr);
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+	err = this->send(OSTR);
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
@@ -412,14 +348,16 @@ ssize_t	Connection::pollout(void)
 	}
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	if (ostr.size())
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", ostr.size());
+	if (OSTR.size())
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
 	else
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	}
+
+
+	
 	this->rsrc_send(err);
-	// we do NOT want to kill right away (!)
 	return (err);
 }
 
@@ -429,7 +367,6 @@ int	Connection::rdhup(void)
 	this->ka = 0;
 	this->mod_evt(EPOLLOUT);
 	
-#if 1
 	if (this->cgi)
 	{
 		if (this->cgi->ip)
@@ -443,7 +380,6 @@ int	Connection::rdhup(void)
 			this->cgi->op->mod_evt(EPOLLOUT);
 		}
 	}
-#endif
 	return (-1); // (hm)
 }
 
@@ -474,7 +410,7 @@ void	Connection::reset(void)
 		delete (this->cgi);
 	this->cgi = NULL;
 	
-	this->ostr.clear();
+	this->ostr.clear(); // RSRC
 	this->estr.clear();
 	this->error = 0;
 	WsLog::_(LVL_DBG, TGT_CONN, "-out: reset");
@@ -522,31 +458,23 @@ int	Connection::req_body_status(void)
 	if (err == 0) // not done
 		return (0); 
 		
-	// this->mod_evt(-EPOLLIN); 
 	this->mod_evt(EPOLLOUT);		
 	return (-1);
 }
 
-// (CgiPipe::pollin)
-// so .. the CgiPipe .. should really
-// just push to its RESOURCE
-// which will track what we need 
-	// stat
-	// head
-	// body
-// and answer the request for data accordingly
-// ResourceCgi (!)
 
-// rsrc::push_data
+// rsrc::push_data - from cgi->op
 int	Connection::cgi_data(const char *buf, ssize_t siz)
 {
 	ResourceCgi *res = this->cgi;
 	
-	this->ostr.append(buf, siz);
+	std::string & OSTR = this->ostr;
 
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", ostr.size());
+	OSTR.append(buf, siz);
+
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", OSTR.size());
 	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", ostr);
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", OSTR);
 	
 	if (res->hed)
 	{
@@ -561,7 +489,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	// the problem (for keep-alive)
 		// "done" was detected by cgi closing
 
-	size_t	pos = ostr.find("\r\n\r\n");
+	size_t	pos = OSTR.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (0);
 		
@@ -573,7 +501,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 // std::string stat;
 // std::string head;
 // std::string body; // (ostr)
-	std::string stat_val = hedval_str(ostr, "Status");
+	std::string stat_val = hedval_str(OSTR, "Status");
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_val);
 	if (stat_val.size())
 	{
@@ -581,7 +509,7 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		if (http_stat != 200)
 		{
 			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "STAT: ", http_stat);
-			this->set_err(http_stat); // CGI : Status header
+			res->error = http_stat;
 			return (0);
 		}		
 	}
@@ -589,7 +517,8 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 	std::string conn_close("Connection: close\r\n");
 	std::string conn_keep("Connection: keep-alive\r\n");
 	
-	std::string conn_val = hedval_str(this->ostr, "Content-Length");
+// PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
+	std::string conn_val = hedval_str(OSTR, "Content-Length");
 	if (conn_val.size())
 	{
 		res->clen = atoi(conn_val.c_str());
@@ -601,12 +530,12 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		
 		if (this->ka)
 		{
-			this->ostr.insert(0, conn_keep);
+			OSTR.insert(0, conn_keep);
 			res->tlen += conn_keep.size();
 		}
 		else
 		{
-			this->ostr.insert(0, conn_close);
+			OSTR.insert(0, conn_close);
 			res->tlen += conn_close.size();
 		}
 	}
@@ -615,21 +544,17 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: error ", this->error);
 		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : error ", res->error);
 		this->ka = 0;
-		this->ostr.insert(0, conn_close);
+		OSTR.insert(0, conn_close);
 	}
 	
 	std::string stat_200("HTTP/1.0 200 OK\r\n");
-	this->ostr.insert(0, stat_200);
+	OSTR.insert(0, stat_200);
 	res->tlen += stat_200.size();
 	
-	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
+	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", OSTR);	
 	return (0);
 }
 
-
-// called in ~CgiPipe()
-// may trigger cgi->status(0)
-// ResourceCgi (!)
 void	Connection::cgi_rem(CgiPipe *epc)
 {
 	switch (this->cgi->rem(epc))
@@ -695,19 +620,10 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
+		pipes.dup_err();
 
 		const char **envp = cgienv->gen();
 
-		// signal(SIGINT, SIG_DFL);
-		// WsLog : CGI_ERR
-		pipes.dup_err();
-		// delete(this->ep);
-		// this->ep->dupx();
-		// any (fd) CLOSED here ... 
-		// will be removed from the epoll set of the parent  
-
-		// int sf = dup(this->fd);
-		// (void)sf;
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();
@@ -717,11 +633,7 @@ int	Connection::exec_cgi(void)
 		exit (err);
 	}		
 	delete (cgienv);
-
-	// this->cgi = new ResourceCgi;
-
+	
 	err = this->cgi->init(this->ep, pid, &pipes, this);
-	// if (err < 0)
-	// 	this->cgi->reset();
 	return (err);
 }

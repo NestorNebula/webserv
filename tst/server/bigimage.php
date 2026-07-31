@@ -1,6 +1,6 @@
 <?php
 
-    $path = 'files/2k_earth_daymap.jpg';
+    $path = 'files/earth.jpg';
     $fsiz = filesize($path);
     
     header('Content-Type: image/jpg');

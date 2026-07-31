@@ -40,7 +40,7 @@ if ($f)
 
     my $fp = $cgi->upload('file');
     print($fp);
-    open UPLOADFILE, ">./$f";
+    open UPLOADFILE, ">./uploads/pl-$f";
     binmode UPLOADFILE;
     while ( <$fp> ) { print UPLOADFILE; }
     close UPLOADFILE;

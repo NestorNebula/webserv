@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 21:29:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 12:17:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,13 @@ static const std::string &tgt_prefix(log_tgt tgt)
 
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
-    if ((msg_lvl & WsLog::lvl) == LVL_ERR)
+    if (msg_lvl == LVL_ERR)
         return (false);
-    // if ((msg_lvl & WsLog::lvl) == LVL_INFO)
-    //     return (false);
-    if ((msg_lvl & WsLog::lvl) && (msg_tgt & WsLog::tgt))
+    if (msg_lvl == LVL_TMP)
+        return (false);
+    
+    log_lvl msk = (msg_lvl & WsLog::lvl);
+    if (msk && (msg_tgt & WsLog::tgt))
         return (false);
     return (true);
 }
@@ -87,8 +89,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg; //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << msg;
+    std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
@@ -97,8 +99,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "[" << n << "]"; //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << msg << "[" << n << "]";
+    std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j)
@@ -107,8 +109,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]"; //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]";
+    std::cerr << stream.str() << "\n";
 }
 
 
@@ -118,8 +120,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string 
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << str; //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << msg << str;
+    std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
@@ -128,8 +130,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << n; //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << n;
+    std::cerr << stream.str() << "\n";
 }
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
@@ -137,9 +139,9 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     (void) msg_lvl;
     
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "\n"; //  std::endl;
-    stream << "error : " << strerror(errno); //  << std::endl;
-    std::cerr << stream.str() << "\n"; // std::endl;
+    stream << tgt_prefix(msg_tgt) << msg << "\n";
+    stream << "error : " << strerror(errno);
+    std::cerr << stream.str() << "\n";
 
     return (-1);
 }
@@ -156,7 +158,7 @@ void    WsLog::kd(void)
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
         | TGT_EPOLL_EVT
-        | TGT_EPOLL_CTL
+        // | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV
@@ -181,7 +183,7 @@ void    WsLog::kd(void)
         // | TGT_BODY
         | TGT_RSRC
         | TGT_RSRC_INFO
-        | TGT_RSRC_WAIT
+        // | TGT_RSRC_WAIT
     ;
     
     // WsLog::tgt = TGT_NONE;

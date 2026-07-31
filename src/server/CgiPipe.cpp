@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 20:59:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/31 11:57:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) 
 	conn(_conn),
 	rsrc(_rsrc)
 {
-	sock_non_block(this->fd); // should work (!)
+	sock_non_block(this->fd);
 }
 	
 CgiPipe::~CgiPipe()
@@ -143,9 +143,6 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-		// VERY FUCKING BAD IDEA 
-	// if (this->rsrc->status(WNOHANG) >= 0)
-	// 	return (-1);
 
 	ssize_t	err = 0;
 	
@@ -167,7 +164,6 @@ ssize_t	CgiPipe::pollin(void)
 // RSRC
 	if (this->conn->cgi_data(this->ibuf, err) < 0)
 		return (-1);
-	// this->mod_evt(-EPOLLIN); // bad idea (?) speed hit (!)
 	return (err);
 }
 
@@ -181,8 +177,6 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 		// BAD IDEA
-	// if (this->rsrc->status(WNOHANG) >= 0)
-	// 	return (-1);
 	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
