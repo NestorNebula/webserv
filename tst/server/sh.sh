@@ -80,7 +80,6 @@ echo
 exit 0
 
 
-
 curl -X GET http://localhost:8081/stat.php -i
 echo
 exit 0

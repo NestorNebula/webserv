@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 19:51:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 20:33:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,7 +339,7 @@ void    WsLog::kd(void)
     ;
     
     // WsLog::tgt = TGT_NONE;
-    WsLog::tgt = TGT_CGI_HEAD | TGT_CONN_SEND | TGT_BODY;
+    WsLog::tgt = TGT_CGI_HEAD | TGT_CONN_SEND;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;

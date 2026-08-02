@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 19:04:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 20:35:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
 	
 	void        push_body(void);
-	// void        push_data(const char *buf, ssize_t siz);o
+	// void        push_data(const char *buf, ssize_t siz);
     
 	int			chk_rsp_hed(std::string & ostr);
 	void		set_err(int e) { this->error = e; }

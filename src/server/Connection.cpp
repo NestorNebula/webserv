@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 20:14:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 20:36:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,11 +108,7 @@ ssize_t	Connection::pollin(void)
 
 	if (this->cgi == NULL)
 	{
-		this->cgi = new ResourceCgi;
-		this->ka = sess.req.ka;
-		this->cgi->ka = sess.req.ka;
-		this->req_cnt++;
-		
+		// this->cgi = new ResourceCgi;
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
@@ -120,6 +116,10 @@ ssize_t	Connection::pollin(void)
 			this->set_err(404); // siege-friendly
 			return (0); // send error
 		}
+
+		this->ka = sess.req.ka;
+		this->cgi->ka = sess.req.ka;
+		this->req_cnt++;
 	}
 	
 // SESSION
@@ -650,14 +650,18 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
-	
-	// need : ep, fd, env, this
-	// this->cgi = new ResourceFcgi(cgienv)
+
+
+	// need new EpollClient .. 
+	// which is constructed with an EXISTING (fd)
+	// so .. resource .. would create the sock 
+	// this->cgi = new ResourceFastCgi(ep, fd, cgienv, this)
 
 	cgi_pipes	pipes;
 
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
+
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -688,6 +692,12 @@ int	Connection::exec_cgi(void)
 	}		
 	delete (cgienv);
 	
+	this->cgi = new ResourceCgi;
 	err = this->cgi->init(this->ep, pid, &pipes, this);
+	if (err < 0)
+	{
+		delete (this->cgi);
+		this->cgi = NULL;
+	}
 	return (err);
 }

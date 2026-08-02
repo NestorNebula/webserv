@@ -419,3 +419,9 @@
 [02-Aug-2026 18:20:32 UTC] PHP Warning:  Trying to access array offset on null in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
 [02-Aug-2026 18:20:32 UTC] PHP Warning:  Undefined array key "file" in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
 [02-Aug-2026 18:20:32 UTC] PHP Warning:  Trying to access array offset on null in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Undefined array key "REMOTE_ADDR" in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 31
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Undefined array key "file" in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 35
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Undefined array key "file" in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Trying to access array offset on null in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Undefined array key "file" in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
+[02-Aug-2026 18:27:05 UTC] PHP Warning:  Trying to access array offset on null in /home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php on line 36
