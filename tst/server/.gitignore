@@ -6,7 +6,7 @@ data*
 tmp*
 uploads
 wtf*
-FcgiConn*
 HttpServer*
 bak*
 diff*
+fcgi*

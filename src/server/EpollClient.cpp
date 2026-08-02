@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 18:21:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 19:07:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 
 EpollClient::~EpollClient()
 {
-	WsLog::_(LVL_DBG, TGT_EPC, "(~) EpollClient");
+	WsLog::_(LVL_DBG, TGT_EPC, " (~) EpollClient");
 	if (this->fd != -1)
 		close(this->fd);
 }

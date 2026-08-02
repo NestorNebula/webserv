@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 12:17:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 19:52:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ typedef long unsigned int log_tgt;
 # define TGT_HEAD		(1UL << 18)
 # define TGT_BODY		(1UL << 19)
 
+# define TGT_FCGI		(1 << 20)
+
 
 # define TGT_MAX		(1UL << 63)
 # define TGT_ALL		(TGT_MAX - 1)
@@ -75,9 +77,11 @@ private:
 	WsLog (void) {}
 
 public:
-	static log_lvl  lvl;
-	static log_tgt  tgt; 
-	
+	static log_lvl  	lvl;
+	static log_tgt  	tgt; 
+	static std::string	col;
+
+	static void color(int c);
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 	static void _(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j);
@@ -91,6 +95,8 @@ public:
 	static void	nh(void) {}
 private:
 	static bool nolog(log_lvl msg_lvl, log_tgt msg_tgt);
+	static void op(std::stringstream & stream);
 };
 
 #endif
+

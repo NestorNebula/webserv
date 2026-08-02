@@ -2,29 +2,32 @@
 
 tput reset
 
+C=255
+R=2
 if [ "$1" == "s" ]; then
-	siege -f staging-urls.sh --internet --verbose --reps=10 --concurrent=4 --no-parser -b
+	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 	exit 0
 fi
 
 if [ "$1" == "k" ]; then
-	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=4 --concurrent=40 --no-parser -b
+	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 	exit 0
-	# curl -X GET http://localhost:8080/ka.pl -i
-	# echo
-	# curl -X GET http://localhost:8080/ka.php -i
-	# echo
-	# curl -X GET http://localhost:8080/ka.py -i
-	# echo
-	# exit 0
+fi
+
+
+if [ "$1" == "f" ]; then
+	siege -f fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# siege -f fnf.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+	exit 0
 fi
 
 if [ "$1" == "x" ]; then
-	siege -f exit.sh --internet --verbose --reps=4 --concurrent=4 --no-parser -b
-		# keep-alive : MUCH WORSE
-	# siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=4 --concurrent=40 -b
+	# siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# UGLY - why
+	siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C -b
 	echo
 	exit 0
 fi
@@ -69,6 +72,13 @@ if [ "$1" == "u" ]; then
 	echo
 	exit 0
 fi
+
+curl -X POST http://localhost:8081/test.php -i \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
+
 
 
 curl -X GET http://localhost:8081/stat.php -i

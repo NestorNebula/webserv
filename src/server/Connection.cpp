@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 19:37:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 20:14:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	WsLog::color(2);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (this->cgi)
 		delete (this->cgi);
@@ -53,7 +54,6 @@ void	Connection::set_err(int e)
 		return;
 	if (this->error)
 	{
-		// cgi_data => head => php (404) => 504
 		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
 		WsLog::_(LVL_DBG, TGT_CONN, "cur:  ", this->error);
 		WsLog::_(LVL_DBG, TGT_CONN, "new:  ", e);
@@ -142,6 +142,7 @@ int		Connection::cgi_done(void)
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  error");
 		return (1); // have (error) data to send
 	}
+	// DELETE_CGI
 	if (res == NULL)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (NULL)");
@@ -247,6 +248,27 @@ conn  : -out:  reset
 
 
 
+int		Connection::have_data(void)
+{
+	ResourceCgi *res = this->cgi;
+	std::string & OSTR = this->ostr;
+	
+	if (this->error)
+		return (1);
+	if (OSTR.size())
+		return (1);
+	if (res->status(WNOHANG) != -1)
+		return (-1);
+	// if (!res->hed)
+	// 	return (0);
+		
+	if (res->op)
+		res->op->mod_evt(EPOLLIN);
+	if (res->ip)
+		res->ip->mod_evt(EPOLLOUT);
+	return (0);
+}
+
 int		Connection::rsrc_send(int cnt)
 {
 	int	err;
@@ -274,12 +296,17 @@ int		Connection::rsrc_send(int cnt)
 #if 1
 	// CGI_DONE
 	// if (this->cgi && this->cgi->done)
-	if (this->cgi == NULL) //  || this->cgi->done)
+	// status -- so .. how different from cgi_done
+	// DELETE_CGI
+	// if (this->cgi == NULL) //  || this->cgi->done)
+	if (this->cgi && this->cgi->status(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
 
 		if (this->ostr.size()) // post 
 			return (1);
+// (ka) should have gotten turned OFF .. 
+
 		if (this->ka)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc send   (1)");
@@ -294,6 +321,7 @@ int		Connection::rsrc_send(int cnt)
 	}
 #endif
 	
+	// tlen : should be with .. conn/sess
 	if (cnt && this->cgi)
 	{
 		if (cnt < this->cgi->tlen)
@@ -372,6 +400,7 @@ ssize_t	Connection::pollout(void)
 
 // what is the REAL QUESTION I want to be asking here ... 
 	err = this->rsrc_send(0);
+	// err = this->have_data();
 	if (err <= 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
@@ -409,6 +438,8 @@ ssize_t	Connection::pollout(void)
 		if ((this->error != 408) && this->ka) 
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "err :  keep-alive ", this->req_cnt);
+
+			// (ka) CLEANUP (?)
 			this->reset(); // DELETE_CGI
 			return (0);
 		}
@@ -529,6 +560,8 @@ int	Connection::req_body_status(void)
 // rsrc::push_data - from cgi->op
 int	Connection::cgi_data(const char *buf, ssize_t siz)
 {
+	int	err;
+	
 	ResourceCgi *res = this->cgi;
 	
 	std::string & OSTR = this->ostr;
@@ -545,85 +578,15 @@ int	Connection::cgi_data(const char *buf, ssize_t siz)
 		return (0);
 	}
 
-	return (res->chk_rsp_hed(OSTR));
-#if 0
-	
-// OSTR : should be (head) or (resp)
-// which .. we send .. independently (?)
-// 
-// RESOURCE::push_data()
-	// request (ostr) from Resource (like the others)
-	// track how much of (clen) sent
-	// so we know -- WITHIN THE RESOURCE
-	// when we're done
-	// the problem (for keep-alive)
-		// "done" was detected by cgi closing
-
-	size_t	pos = OSTR.find("\r\n\r\n");
-	if (pos == std::string::npos)
-		return (0);
-		
-// rsrc::parse_head
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	res->hed = 1;
-	res->hlen = pos + 4;
-	
-// std::string stat;
-// std::string head;
-// std::string body; // (ostr)
-	std::string stat_val = hedval_str(OSTR, "Status");
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_val);
-	if (stat_val.size())
-	{
-		int http_stat = atoi(stat_val.c_str());
-		if (http_stat != 200)
-		{
-			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "STAT: ", http_stat);
-			res->error = http_stat;
-			return (0);
-		}		
-	}
-
-	std::string conn_close("Connection: close\r\n");
-	std::string conn_keep("Connection: keep-alive\r\n");
-	
-// PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
-	std::string conn_val = hedval_str(OSTR, "Content-Length");
-	if (conn_val.size())
-	{
-		res->clen = atoi(conn_val.c_str());
-		res->tlen = res->hlen + res->clen;
-		
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "hlen: ", res->hlen);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "clen: ", res->clen);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "tlen: ", res->tlen);
-		
-		if (this->ka)
-		{
-			OSTR.insert(0, conn_keep);
-			res->tlen += conn_keep.size();
-		}
-		else
-		{
-			OSTR.insert(0, conn_close);
-			res->tlen += conn_close.size();
-		}
-	}
+// exit.php + keep-alive ...
+// (ka) "de-activated" in chk_rsp_hed
+// BUT : should be re-inserted if EXIT ERROR ... 
+	err = res->chk_rsp_hed(OSTR);
+	if (res->error)
+		this->set_err(res->error);
 	else
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: error ", this->error);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : error ", res->error);
-		this->ka = 0;
-		OSTR.insert(0, conn_close);
-	}
-	
-	std::string stat_200("HTTP/1.0 200 OK\r\n");
-	OSTR.insert(0, stat_200);
-	res->tlen += stat_200.size();
-	
-	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", OSTR);	
-	return (0);
-#endif
+		this->ka = res->ka;
+	return (err);
 }
 
 // called on CgiPipe::hup() and ~CgiPipe .. fucky
@@ -663,8 +626,10 @@ void	Connection::cgi_rem(CgiPipe *epc)
 			// not as clean ... 
 		// this->cgi->done = 1; // need to check status more .. 
 
-		delete(this->cgi); // DELETE_CGI
-		this->cgi = NULL;
+// ip/op NULL .. is what should be tested .. 
+// status .. 
+		// delete(this->cgi); // DELETE_CGI
+		// this->cgi = NULL;
 		
 		this->mod_evt(EPOLLOUT);
 		break;
@@ -676,10 +641,6 @@ void	Connection::cgi_rem(CgiPipe *epc)
 int	Connection::exec_cgi(void)
 {
 	int			err;
-	cgi_pipes	pipes;
-
-	if (pipes.init() < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 
 	CgiEnv *cgienv = new CgiEnv;
 	err = cgienv->from_conn(*this);
@@ -690,6 +651,13 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 	
+	// need : ep, fd, env, this
+	// this->cgi = new ResourceFcgi(cgienv)
+
+	cgi_pipes	pipes;
+
+	if (pipes.init() < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 	pid_t pid = fork();
 	if (pid < 0)
 	{

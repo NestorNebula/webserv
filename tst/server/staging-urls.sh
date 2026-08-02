@@ -38,9 +38,9 @@ http://127.0.0.1:8081/suck.php
 http://127.0.0.1:8082/suck.php
 
 
-# http://127.0.0.1:8080/bigimage.php
-# http://127.0.0.1:8081/bigimage.php
-# http://127.0.0.1:8082/bigimage.php
+http://127.0.0.1:8080/bigimage.php
+http://127.0.0.1:8081/bigimage.php
+http://127.0.0.1:8082/bigimage.php
 
 
 # http://127.0.0.1:8080/bigaudio.php

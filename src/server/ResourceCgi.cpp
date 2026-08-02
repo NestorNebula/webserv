@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 19:33:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 19:04:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,11 @@ int	ResourceCgi::status(int opt)
 		WsLog::_(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
+	if (this->ip || this->op)
+		return (this->stat); // (-1)
 	
-	err = waitpid(this->pid, &this->stat, opt);
+	(void)opt;
+	err = waitpid(this->pid, &this->stat, 0); // opt);
 	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);

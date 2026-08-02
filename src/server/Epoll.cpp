@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/30 15:08:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/02 12:14:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 
 Epoll::~Epoll()
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
+	WsLog::_(LVL_DBG, TGT_EPOLL, " (~) Epoll");
 	this->cleanup();
 };
 

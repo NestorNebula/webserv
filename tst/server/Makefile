@@ -11,9 +11,13 @@ INC_DIR=$(GIT_DIR)/inc
 OBJ_DIR=.obj
 LIB_DIR=.
 
-CFLAGS+=-I . -I $(INC_DIR) -I $(INC_DIR)/server
+CFLAGS+=-I . -I $(INC_DIR) -I $(INC_DIR)/server 
 LFLAGS=
 LIBS =
+
+FCGI_INC=-I ./FCGI/include
+FCGI_LIB=-L ./FCGI/lib -Wl,-rpath,./FCGI/lib/ -lfcgi
+
 
 ifdef DBG
 DEFS += -DDBG_CANON="$(DBG)"
@@ -33,7 +37,7 @@ FILES = \
 	server/Connection.cpp \
 	server/CgiEnv.cpp \
 	server/CgiPipe.cpp \
-	server/ResourceCgi.cpp
+	server/ResourceCgi.cpp 
 
 TPP = 
 
@@ -52,6 +56,10 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(TPP)
 	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(LIBS) -o $@
+
+fcgi:
+	$(CC) $(FCGI_INC) $(DEFS) -DBUILD_MAIN_FCGI=1 $(CFLAGS) $(LFLAGS) FcgiMsg.cpp FcgiConn.cpp $(SRC_DIR)/utils/WsLog.cpp $(LIBS) $(FCGI_LIB) -o fcgi
+
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
@@ -75,6 +83,7 @@ clean:
 
 fclean: clean
 	@rm -f $(NAME)
+	@rm -f fcgi fcgi.d
 
 re: fclean $(NAME)
 

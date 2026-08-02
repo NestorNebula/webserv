@@ -1,7 +1,6 @@
 <?php
 
     header('Content-type: text/plain');
-
     // exit(66);
     // print("\r\n");
     // print_r($_GET);

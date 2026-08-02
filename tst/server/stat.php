@@ -1,4 +1,4 @@
 <?php
-header('Status: 303');
+header('Status: 404');
 ?>
 three-oh-three
