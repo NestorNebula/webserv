@@ -8,8 +8,8 @@
 
 
 
-
-int FcgiRequest::uid = 1;
+// move to FcgiConn
+int FcgiConn::uid = 1;
 
 int FcgiConn::make_sock(const char *sock_path)
 {
@@ -105,56 +105,24 @@ COMMON VARIABLES
 
 #endif
 
-
-// WEBSERV : FcgiRequest ... should be built .. 
-// directly (?) .. from CgiEnv
-// OR : directly from Request (?)
-int FcgiConn::request(FcgiRequest * req)
+int FcgiConn::request(CgiEnv * env)
 {
 	data.zero();
 
 	FcgiMsg		msg;
 
-	msg.new_params(req->id);
-
-// REQUIRED
+	msg.new_params(FcgiConn::uid++);
 	char proto[] = "HTTP/1.1";
 	msg.add_param(P_SERVER_PROTOCOL, proto);
-	msg.add_param(P_REQUEST_METHOD,  req->meth);
-	msg.add_param(P_SCRIPT_FILENAME, req->path); // full path
 
-	if (req->_uri)
-		msg.add_param(P_REQUEST_URI, req->_uri);
-	if (req->type)
-		msg.add_param(P_CONTENT_TYPE, req->type);
-	if (req->ssl)
-		msg.add_param(P_HTTPS, 1);
+	// validate
 
-	// msg.add_param(P_HTTP_ACCEPT, "text/javascript;");
-	// msg.add_param(P_MIME_TYPE, "text/javascript;");
+	// REQUEST_URI : how did HttpServer build it 
+	// DOCUMENT_ROOT
 
-	if (req->root)
-		msg.add_param(P_DOCUMENT_ROOT, req->root);
-
-	if (req->query)
-		msg.add_param(P_QUERY_STRING, req->query);
-	if (req->serv)
-		msg.add_param(P_SERVER_ADDR, req->serv);
-	if (req->port)
-		msg.add_param(P_SERVER_PORT, req->port);
-
-	if (req->radr)
-		msg.add_param(P_REMOTE_ADDR, req->radr);
-
-	if (req->host)
-		msg.add_param(P_HTTP_HOST, req->host);
-
-	if (req->cook)
+	std::map<std::string, std::string>::iterator kvit = env->kv.begin();
+	while (kvit != env->kv.end())
 	{
-// ATTN : the FULL cookie string
-// parsed from the (hdr_val) 'Cookie'
-// may be LONGER than the (uchar) which
-// FCGI_PARAMS accepts as key/val length
 
 		// char * tok = strtok(req->cook, "; ");
 		// while( tok != NULL )
@@ -163,19 +131,17 @@ int FcgiConn::request(FcgiRequest * req)
 		// 	msg.add_param(P_HTTP_COOKIE, tok);
 		// 	tok = strtok(NULL, "; ");
 		// }
-		msg.add_param(P_HTTP_COOKIE, req->cook);
+		// msg.add_param(P_HTTP_COOKIE, req->cook);
+
+		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
+		kvit++;
 	}
-	if (req->post)
-		msg.add_param(P_CONTENT_LENGTH, req->plen);
-	else
-		msg.add_param(P_CONTENT_LENGTH, 0);
 	msg.end_params();
 	
 	req_head.append(msg.buf.text(), msg.buf.size());
 
 	return (1);
 }
-
 void FcgiConn::push_body(char *buf, int siz)
 {
 	FcgiMsg		body;
@@ -295,8 +261,8 @@ int FcgiConn::parse(char * buf, int siz)
 int main(void)
 {
 
-	char sock_path[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/FCGI/.php-fpm/SOCK"; // DANGEROUS
-
+	char sock_path[] = ".//FCGI/.php-fpm/SOCK"; // DANGEROUS
+	// char sock_path[] = "/run/php/php-fpm.sock";
 	int fd = FcgiConn::make_sock(sock_path);
 	if (fd < 0)
 		return (1);
@@ -307,29 +273,24 @@ int main(void)
 	FcgiConn fcgi; // sock_path
 
 
-	FcgiRequest req; // from cgi env .. 
-
-
-	char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
-	req.path = p;
+	char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
 	char meth[] = "POST";
-	req.meth = meth;
-
-    // req.type = post_type; // pass multipart/form-data; boundary=
-	// char * post_type = this->hhmp->fetch_hdr_val("Content-Type");
 	char ptype[] = "application/x-www-form-urlencoded";
 	char pdata[] = "p1=FCGI-post-one&p2=FCGI-post-two";
-	req.post = pdata;
-	req.type = ptype;
-	req.plen = strlen(pdata);
+	int  plen = strlen(pdata);
 
 	char q[] = "g1=fcgi-ONE&g2=fcgi-TWO";
-	req.query = q;
 	
 
-	// from cgi env .. 
-
-	int err = fcgi.request(&req);
+	CgiEnv e;
+	e.add("REQUEST_METHOD", meth);
+	e.add("SCRIPT_FILENAME", p);
+	e.add("QUERY_STRING", q);
+	e.add("CONTENT_TYPE", ptype);
+	e.add("CONTENT_LENGTH", plen);
+	
+// POLLIN : head
+	int err = fcgi.request(&e); 	
 	if (err < 0)
 		return (1);
 
@@ -343,10 +304,8 @@ int main(void)
 
 
 
-	fcgi.push_body(pdata, req.plen);
-
-
-
+// POLLIN : body
+	fcgi.push_body(pdata, plen);
 	fcgi.push_body(NULL, 0);
 
 // perhaps : store as std::string in (msg)
@@ -359,9 +318,6 @@ int main(void)
 	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req_body.size());
 
 // POLLOUT
-
-	// fcgi.parse();
-
 	char buf[BUF_SIZ];
 	// recv in CHUNKS
 	while (1)

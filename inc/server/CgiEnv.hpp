@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/25 10:51:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/03 13:49:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,8 @@ public:
 	const char	    **gen(void);
 	
 	const char					*args[4];
-private:
 	std::map<std::string, std::string>	kv;
+private:
 	std::vector<std::string>			data;
 	const char							**res;
 	

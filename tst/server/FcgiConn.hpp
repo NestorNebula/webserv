@@ -4,13 +4,13 @@
 
 #include <sys/un.h>
 
-
-
 #include <iostream>
 #include <string>
 
 #include "MsgBuf.hpp"
 #include "FcgiMsg.hpp"
+
+#include "CgiEnv.hpp"
 
 #include "WsLog.hpp"
 
@@ -30,54 +30,6 @@ void find_pad(unsigned short len)
 }
 #endif
 
-class FcgiRequest
-{
-public:
-	char * path;
-	char * meth;
-	char * type;
-	char * _uri;
-	char * query;
-	char * post;
-	char * serv;
-	char * cook;
-	char * host;
-	char * root;
-	char * radr;
-	int    port;
-	int    plen;
-	int    id;
-	bool   ssl;
-
-	FcgiRequest()
-	{
-		path  = NULL;
-		meth  = NULL;
-		type  = NULL;
-		_uri  = NULL;
-		query = NULL;
-		post  = NULL;
-		serv  = NULL;
-		cook  = NULL;
-		host  = NULL;
-		root  = NULL;
-		radr  = NULL;
-		port  = 0;
-		plen  = 0;
-		id    = FcgiRequest::uid++;
-		ssl   = false;
-	}
-	~FcgiRequest()
-	{
-		if (serv)
-			free(serv);
-		if (radr)
-			free(radr);
-	}
-private:
-	static int uid;
-};
-
 
 class FcgiConn
 {
@@ -87,7 +39,7 @@ public:
 	FcgiConn() {}
 	~FcgiConn() {}
 
-	int		request(FcgiRequest * req);
+	int		request(CgiEnv *env);
 	void	push_body(char *buf, int siz);
 	int		parse(char * buf, int siz);
 
@@ -98,6 +50,7 @@ public:
 
 	static int	make_sock(const char * sock_path);
 private:
+	static int uid;
 	int		push_data(char * buf, int cnt);
 
 };

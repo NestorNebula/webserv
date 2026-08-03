@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 19:58:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/03 15:47:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,17 @@ const char * p_name[] =
 	"HTTPS",
 	"DOCUMENT_ROOT",
 	"REMOTE_ADDR"
+	// "SCRIPT_NAME",
+	// "REDIRECT_STATUS",
+	// "HTTP_REFERER",
+	// "HTTP_USER_AGENT"
+	// "HTTP_TRANSFER_ENCODING"
+	// "HTTP_ACCEPT_ENCODING"
+	// "HTTP_ACCEPT_LANGUAGE"
+	// "HTTP_CONNECTION"
+	// "SERVER_NAME"
+	// "SERVER_SOFTWARE"
+	// "GATEWAY_INTERFACE"  "CGI/1.0"
 };
 
 // buf.fcgi() : keylen, vallen, key, val
