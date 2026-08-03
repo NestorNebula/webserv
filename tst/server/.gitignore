@@ -10,6 +10,6 @@ HttpServer*
 bak*
 diff*
 fcgi*
-FCGI/
+FCGI
 !FCGI/src
 !FCGI/install.sh
