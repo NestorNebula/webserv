@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 20:36:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 11:27:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,22 +250,22 @@ conn  : -out:  reset
 
 int		Connection::have_data(void)
 {
-	ResourceCgi *res = this->cgi;
-	std::string & OSTR = this->ostr;
+	// ResourceCgi *res = this->cgi;
+	// std::string & OSTR = this->ostr;
 	
-	if (this->error)
-		return (1);
-	if (OSTR.size())
-		return (1);
-	if (res->status(WNOHANG) != -1)
-		return (-1);
-	// if (!res->hed)
-	// 	return (0);
+	// if (this->error)
+	// 	return (1);
+	// if (OSTR.size())
+	// 	return (1);
+	// if (res->status(WNOHANG) != -1)
+	// 	return (-1);
+	// // if (!res->hed)
+	// // 	return (0);
 		
-	if (res->op)
-		res->op->mod_evt(EPOLLIN);
-	if (res->ip)
-		res->ip->mod_evt(EPOLLOUT);
+	// if (res->op)
+	// 	res->op->mod_evt(EPOLLIN);
+	// if (res->ip)
+	// 	res->ip->mod_evt(EPOLLOUT);
 	return (0);
 }
 
@@ -299,6 +299,32 @@ int		Connection::rsrc_send(int cnt)
 	// status -- so .. how different from cgi_done
 	// DELETE_CGI
 	// if (this->cgi == NULL) //  || this->cgi->done)
+
+// conn  : send:  POLLOUT
+// conn  : rsnd:  cnt [0]
+// conn  : rsnd:  cgi (NULL) [0]
+// conn  : send
+// conn  : ostr: [2040582]
+// conn  : sent: [16384]
+// conn  : left: [2024198]
+// conn  : rsnd:  cnt [16384]
+// conn  : rsnd:  cgi (NULL) [16384]
+// ....
+	// how is that pollout triggered
+	// after browser pauses .. 
+	// 
+// conn  : send:  POLLOUT
+// conn  : rsnd:  cnt [0]
+// conn  : rsnd:  cgi (NULL) [0]
+// conn  : send
+// conn  : ostr: [2024198]
+// conn  : sent: [16384]
+// conn  : left: [2007814]
+// conn  : rsnd:  cnt [16384]
+// conn  : rsnd:  cgi (NULL) [16384]
+
+
+
 	if (this->cgi && this->cgi->status(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
@@ -557,13 +583,14 @@ int	Connection::req_body_status(void)
 }
 
 
-// rsrc::push_data - from cgi->op
 int	Connection::cgi_data(const char *buf, ssize_t siz)
 {
 	int	err;
 	
 	ResourceCgi *res = this->cgi;
 	
+// ostr : internal to Resource/Cgi
+// so Fcgi can parse directly to it 
 	std::string & OSTR = this->ostr;
 
 	OSTR.append(buf, siz);

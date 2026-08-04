@@ -44,9 +44,8 @@ TPP =
 SRCS = $(addprefix $(SRC_DIR)/, $(FILES))
 OBJS = $(addprefix $(OBJ_DIR)/, $(FILES:.cpp=.o))
 
-# BIN = $(OBJ_DIR)/test.o
+BIN = $(OBJ_DIR)/test.o
 # OBJS += $(BIN)
-
 
 OBJS += $(OBJ_DIR)/FcgiMsg.o
 
@@ -56,11 +55,11 @@ NULL :=
 
 all: $(NAME)
 
-$(NAME): $(OBJS) $(TPP)
-	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(LIBS) -o $@
+$(NAME): $(OBJS) $(TPP) $(BIN)
+	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(BIN) $(LIBS) -o $@
 
-fcgi: $(OBJS) 
-	$(CC) $(FCGI_INC) $(DEFS) -DBUILD_MAIN_FCGI=1 $(CFLAGS) $(LFLAGS) FcgiConn.cpp $(OBJS) $(LIBS) $(FCGI_LIB) -o fcgi
+fcgi: $(OBJS)
+	$(CC) $(FCGI_INC) $(DEFS) -DBUILD_MAIN_FCGI=1 $(CFLAGS) $(LFLAGS) $(OBJS) FcgiConn.cpp $(LIBS) $(FCGI_LIB) -o fcgi
 
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)

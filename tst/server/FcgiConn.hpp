@@ -1,3 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   FcgiConn.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
+/*   Updated: 2026/08/03 16:27:31 by kdonlon          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef FCGI_CONN_HPP
+# define FCGI_CONN_HPP
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +30,7 @@
 #include "WsLog.hpp"
 
 #ifndef BUILD_MAIN_FCGI
-#define BUILD_MAIN_FCGI 1
+#define BUILD_MAIN_FCGI 0
 #endif 
 
 #ifndef FCGI_DEBUG
@@ -55,4 +70,4 @@ private:
 
 };
 
-
+#endif

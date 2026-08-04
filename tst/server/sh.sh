@@ -25,13 +25,12 @@ if [ "$1" == "f" ]; then
 fi
 
 if [ "$1" == "x" ]; then
-	# siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	# UGLY - why
-	siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C -b
+	# siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C -b
 	echo
 	exit 0
 fi
-
 
 if [ "$1" == "a" ]; then
 	curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3

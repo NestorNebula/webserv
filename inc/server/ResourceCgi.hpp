@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 20:35:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 11:45:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,31 +24,52 @@ private:
 	ResourceCgi				 (const ResourceCgi & ) {}
 	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), stat(-1), hed(0), clen(0), hlen(0), tlen(0), slen(0), xit(-1), sig(-1), error(0), ka(0), done(0) {}
+	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), 
+	hed(0), 
+	hlen(0), 
+	clen(0), 
+	tlen(0),
+	ka(0), 
+	error(0),
+	stat(-1),
+	xit(-1), 
+	sig(-1)
+	{}
 	~ResourceCgi();
 
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
 	
 	void        push_body(void);
-	// void        push_data(const char *buf, ssize_t siz);
     
+	// shared
 	int			chk_rsp_hed(std::string & ostr);
+	
 	void		set_err(int e) { this->error = e; }
 	
+
+//
+	// FcgiConn
+	// CgiFast		*fcgi;
+	
+// CgiPipe
 	pid_t		pid;
 	CgiPipe		*ip;
 	CgiPipe		*op;
-	int			stat;
+	std::string	ostr;
+
+// some of these could be good for FCGI as well .. 
+
 	int			hed;
-	int			clen;
 	int			hlen;
+	int			clen;
 	int			tlen;
-	int			slen;
+	int			ka;
+	int			error;
+	
+// CgiPipe
+	int			stat;
 	int			xit;
 	int			sig;
-	int			error;
-	int			ka;
-	int			done; 
 
 	void		conn_closed(void);
 	int			status(int opt);

@@ -11,32 +11,40 @@ if [ "$1" == "clean" ]; then
 fi
 
 
+PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+# PHP_FPM_BIN=/usr/bin/php-fpm
+
+if [ "$1" == "run" ]; then
+
+systemctl --user daemon-reload 
+systemctl --user start php-fpm.service
+
+# why can't I ctrl-c out of this (?)
+# /usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /media/kdonlon/data/Documents/42/webserv/git/tst/server/FCGI/.php-fpm/php-fpm.conf
+    exit 0
+fi
 SRC_DIR=./src
 TGT_DIR=$(pwd)
 
 FPM_DIR=$TGT_DIR/.php-fpm
 
-PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-# PHP_FPM_BIN=/usr/bin/php-fpm
-# /usr/bin/php-fpm
-# sometthing in MY conf .. does not error as nicely
 if [ "$1" == "conf" ]; then
-    cat << EOF > ~/.config/systemd/user/php-fpm.service
-[Unit]
-Description=PHP FastCGI process manager
-After=local-fs.target network.target
-# nginx.service
+#     cat << EOF > ~/.config/systemd/user/php-fpm.service
+# [Unit]
+# Description=PHP FastCGI process manager
+# After=local-fs.target network.target
+# # nginx.service
 
-[Service]
-PIDFile=$FPM_DIR/PID
-ExecStart=$PHP_FPM_BIN --nodaemonize \
---fpm-config $FPM_DIR/php-fpm.conf
+# [Service]
+# PIDFile=$FPM_DIR/PID
+# ExecStart=$PHP_FPM_BIN --nodaemonize \
+# --fpm-config $FPM_DIR/php-fpm.conf
 
-Type=simple
+# Type=simple
 
-[Install]
-WantedBy=multi-user.target
-EOF
+# [Install]
+# WantedBy=multi-user.target
+# EOF
 
     mkdir -p $FPM_DIR
     mkdir -p $FPM_DIR/php-fpm.d
@@ -47,27 +55,27 @@ EOF
 fi
 
 
-
-
 cd $SRC_DIR
-echo "tar ..."
-tar xvf libfcgi_2.4.5.orig.tar.gz
-echo
-echo
+if ! test -d fcgi2-2.4.5; then
+    echo -n "decompressing tarball ... "
+    tar xf libfcgi_2.4.5.orig.tar.gz
+    echo "done"
+    echo
+fi
 
 cd fcgi2-2.4.5
-echo "autogen.sh"
-./autogen.sh > /dev/null
-./autogen.sh
-echo
-echo
+if ! test -f ltmain.sh; then
+    echo "run : autogen.sh (fail)"
+    ./autogen.sh > /dev/null
+    echo "run : autogen.sh (success)"
+    ./autogen.sh
+    echo
+    echo
+fi
 
 
+echo "config ; make ; make install"
 echo $TGT_DIR
-echo "configure"
+echo
 ./configure --prefix=$TGT_DIR && make && make install
-
-
-systemctl --user daemon-reload 
-systemctl --user start php-fpm.service
 

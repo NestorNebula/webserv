@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   FcgiConn.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
+/*   Updated: 2026/08/04 11:44:48 by kdonlon          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 #include "FcgiConn.hpp"
 #include <string>
@@ -142,6 +154,7 @@ int FcgiConn::request(CgiEnv * env)
 
 	return (1);
 }
+
 void FcgiConn::push_body(char *buf, int siz)
 {
 	FcgiMsg		body;
@@ -302,8 +315,6 @@ int main(void)
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
 	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req_head.size());
 
-
-
 // POLLIN : body
 	fcgi.push_body(pdata, plen);
 	fcgi.push_body(NULL, 0);
@@ -312,10 +323,11 @@ int main(void)
 	// std::string req_body;
 	// req_body.append(fcgi.body.buf.text(), fcgi.body.buf.size());
 
-	
 	bs = send(fd, fcgi.req_body.c_str(), fcgi.req_body.size(), 0);
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
 	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req_body.size());
+
+
 
 // POLLOUT
 	char buf[BUF_SIZ];
@@ -327,6 +339,8 @@ int main(void)
 			break;
 		if (fcgi.parse(buf, siz) < 0)
 			break;
+		// conn->cgi_data() .. post-parsed (?)
+		
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "ostr\n", fcgi.ostr);
 
