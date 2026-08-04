@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 11:44:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 15:39:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,7 +274,7 @@ int FcgiConn::parse(char * buf, int siz)
 int main(void)
 {
 
-	char sock_path[] = ".//FCGI/.php-fpm/SOCK"; // DANGEROUS
+	char sock_path[] = "./FCGI/.php-fpm/SOCK"; // DANGEROUS
 	// char sock_path[] = "/run/php/php-fpm.sock";
 	int fd = FcgiConn::make_sock(sock_path);
 	if (fd < 0)
@@ -285,8 +285,16 @@ int main(void)
 
 	FcgiConn fcgi; // sock_path
 
-
-	char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
+//      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+//      fastcgi_param SERVER_NAME $http_host;
+// +    fastcgi_param SCRIPT_NAME $request_uri;
+// fastcgi_param  PATH_INFO  $request_uri;
+        // fastcgi_param  SCRIPT_FILENAME /usr/share/nginx/www/$fastcgi_script_name;
+        // fastcgi_param  PATH_INFO       $fastcgi_path_info;
+        // fastcgi_param  PATH_TRANSLATED $document_root$fastcgi_script_name;
+        // fastcgi_pass   unix:/var/run/php/php7.0-fpm.sock;
+	char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
+	// char p[] = "./test.php";
 	char meth[] = "POST";
 	char ptype[] = "application/x-www-form-urlencoded";
 	char pdata[] = "p1=FCGI-post-one&p2=FCGI-post-two";
@@ -297,6 +305,7 @@ int main(void)
 
 	CgiEnv e;
 	e.add("REQUEST_METHOD", meth);
+	// e.add("DODCUMENT_ROOT", root);
 	e.add("SCRIPT_FILENAME", p);
 	e.add("QUERY_STRING", q);
 	e.add("CONTENT_TYPE", ptype);

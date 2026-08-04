@@ -11,8 +11,8 @@ if [ "$1" == "clean" ]; then
 fi
 
 
-PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-# PHP_FPM_BIN=/usr/bin/php-fpm
+# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+PHP_FPM_BIN=/usr/bin/php-fpm
 
 if [ "$1" == "run" ]; then
 
@@ -29,22 +29,22 @@ TGT_DIR=$(pwd)
 FPM_DIR=$TGT_DIR/.php-fpm
 
 if [ "$1" == "conf" ]; then
-#     cat << EOF > ~/.config/systemd/user/php-fpm.service
-# [Unit]
-# Description=PHP FastCGI process manager
-# After=local-fs.target network.target
-# # nginx.service
+    cat << EOF > ~/.config/systemd/user/php-fpm.service
+[Unit]
+Description=PHP FastCGI process manager
+After=local-fs.target network.target
+# nginx.service
 
-# [Service]
-# PIDFile=$FPM_DIR/PID
-# ExecStart=$PHP_FPM_BIN --nodaemonize \
-# --fpm-config $FPM_DIR/php-fpm.conf
+[Service]
+PIDFile=$FPM_DIR/PID
+ExecStart=$PHP_FPM_BIN --nodaemonize \
+--fpm-config $FPM_DIR/php-fpm.conf
 
-# Type=simple
+Type=simple
 
-# [Install]
-# WantedBy=multi-user.target
-# EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 
     mkdir -p $FPM_DIR
     mkdir -p $FPM_DIR/php-fpm.d
