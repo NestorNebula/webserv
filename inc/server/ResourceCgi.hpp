@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 11:49:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 18:45:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,15 @@
 # include "CgiPipe.hpp"
 # include "bridge.hpp"
 
+
+enum
+{
+	RSRC_RESP_INIT = 0,
+	RSRC_RESP_HEAD,
+	RSRC_RESP_BODY,
+	RSRC_RESP_DONE,
+	RSRC_RESP_ERR
+};
 
 class ResourceCgi : public Resource
 {
@@ -39,14 +48,14 @@ public:
 
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
 	
+	int			recv_data(char *buf, int siz);
 	void        push_body(void);
     
 	// shared
 	int			chk_rsp_hed(std::string & ostr);
 	
-	void		set_err(int e) { this->error = e; }
+	void		set_err(int e);
 	
-
 //
 	// FcgiConn
 	// CgiFast		*fcgi;
@@ -71,9 +80,13 @@ public:
 	int			xit;
 	int			sig;
 
+// both : over-ride
 	void		conn_closed(void);
 	int			status(int opt);
+
 	int			rem(CgiPipe *epc);
+private:
+	Connection	*conn;
 };
 
 

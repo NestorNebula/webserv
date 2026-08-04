@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 19:07:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 17:09:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 {
 	evt.events = 0;
 	evt.data.ptr = NULL;
+	lact = time(&lact);
 }
 
 EpollClient::~EpollClient()
@@ -58,8 +59,8 @@ int	EpollClient::mod_evt(int e)
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
 	
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
 	if (e == 0)
 		evt.events = e;
@@ -72,14 +73,14 @@ int	EpollClient::mod_evt(int e)
 	{
 		if (evt.events == (e | EPOLLRDHUP))
 		{
-			WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
+			// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
 			return (0);
 		}
 		evt.events |= e;
 	}
 	
 	evt.events |= EPOLLRDHUP;
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
 
 	return (this->ep->mod(this));
 }

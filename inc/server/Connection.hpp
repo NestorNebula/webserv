@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 11:49:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 18:40:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,10 @@ class Server;
 class CgiPipe;
 class ResourceCgi;
 
+# ifndef CONN_TIMEOUT
+#  define CONN_TIMEOUT 5
+# endif
+
 class Connection : public EpollClient
 {
 private:
@@ -50,6 +54,7 @@ public:
 	bool			timeo  (time_t now);
 	
 	void			set_err(int e);
+	
 	void			set_addr(struct sockaddr_in *a);
 	std::string		&get_addr(void);
 	
@@ -62,11 +67,12 @@ private:
 	void			reset(void);
 	int				have_data(void);
 	int				rsrc_send(int cnt);
+
+	int				send_error(void);
 	
 public:
 	int				req_body_status(void);
 	
-	int				cgi_data(const char *buf, ssize_t siz);
 	int				cgi_done(void);
 	void			cgi_rem(CgiPipe *epc);
 	
@@ -74,13 +80,14 @@ public:
 
 private:
 	int					exec_cgi(void);
-	std::string			ostr;
+	// std::string			ostr;
 	std::string			estr;
 	
 	struct sockaddr_in	addr;
 	std::string			astr;
 	
 	int					req_cnt;
+public:
 	int					ka;
 };
 

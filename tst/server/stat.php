@@ -1,4 +1,5 @@
 <?php
-header('Status: 404');
+header('Status: 201');
+header('Content-Type: text/plain');
 ?>
-three-oh-three
+two-oh-one

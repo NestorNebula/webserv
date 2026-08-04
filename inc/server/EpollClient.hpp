@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 16:24:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 16:53:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,6 @@
 
 // HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
 
-# ifndef EPC_TIMEOUT
-#  define EPC_TIMEOUT 10
-# endif
 
 # ifndef EPC_BUF_SIZ
 #  define EPC_BUF_SIZ (4096)

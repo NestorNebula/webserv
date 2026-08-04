@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 11:48:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 19:26:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,14 @@ void	ResourceCgi::conn_closed(void)
 		this->op->mod_evt(EPOLLIN);
 	}
 }
+
+void	ResourceCgi::set_err(int e)
+{
+	this->error = e;
+	if (this->conn)
+		this->conn->set_err(e);
+}
+
 int	ResourceCgi::status(int opt)
 {
 	int	err;
@@ -104,7 +112,10 @@ int	ResourceCgi::status(int opt)
 			// do not override .. 
 			// may be killing a successfully "finished" -- 
 			// but not timed out
-			this->set_err(504);
+			// php 
+			// does not (ka) nicely
+			// because .. it SENDS VALID DATA (!)
+			this->set_err(404);
 			break;
 		}
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
@@ -155,42 +166,28 @@ int	ResourceCgi::rem(CgiPipe *epc)
 	return (err);
 }
 
-
 int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 {
+	if (this->hed)
+	{
+		// conn->mod_evt(EPOLLOUT);
+		return (RSRC_RESP_BODY);
+	}	
 	size_t	pos = ostr.find("\r\n\r\n");
 	if (pos == std::string::npos)
-		return (0);
+		return (RSRC_RESP_INIT);
 		
-// rsrc::parse_head
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	this->hed = 1;
 	this->hlen = pos + 4;
 	
-// std::string stat;
-// std::string head;
-// std::string body; // (ostr)
-	std::string stat_val = hedval_str(ostr, "Status");
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_val);
-	if (stat_val.size())
-	{
-		int http_stat = atoi(stat_val.c_str());
-		if (http_stat != 200)
-		{
-			WsLog::_(LVL_DBG, TGT_CGI_HEAD, "STAT: ", http_stat);
-			this->error = http_stat;
-			return (0);
-		}		
-	}
-
 	std::string conn_close("Connection: close\r\n");
-	std::string conn_keep("Connection: keep-alive\r\n");
+	std::string conn_keep ("Connection: keep-alive\r\n");
 	
-// PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
-	std::string conn_val = hedval_str(ostr, "Content-Length");
-	if (conn_val.size())
+	std::string conn_str = hedval_str(ostr, "Content-Length");
+	if (conn_str.size())
 	{
-		this->clen = atoi(conn_val.c_str());
+		this->clen = atoi(conn_str.c_str());
 		this->tlen = this->hlen + this->clen;
 		
 		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "hlen: ", this->hlen);
@@ -210,18 +207,41 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	}
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: error ", this->error);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : error ", this->error);
-		this->ka = 0;
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : ka ", this->ka);
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: ka ", conn->ka);
+		// but .. not .. conn .. which could over-ride if error 
+		this->ka = 0; //  rsrc .. conn .. 
 		ostr.insert(0, conn_close);
 	}
+
+	std::string stat_head;
+	std::string stat_str = hedval_str(ostr, "Status");
+	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
+	if (stat_str.size())
+	{
+		// HTTP/1.1 STATUS [Status Messaage]
+		stat_head = std::string("HTTP/1.0 ") + stat_str + "\r\n";
+		// set error .. 
+	}
+	else
+	{
+		stat_head = std::string("HTTP/1.0 200 OK\r\n");
+	}
+	ostr.insert(0, stat_head);
+	this->tlen += stat_head.size();
+
+	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", this->ostr);	
+	return (RSRC_RESP_HEAD);
+}
+
+int		ResourceCgi::recv_data(char *buf, int siz)
+{
+	this->ostr.append(buf, siz);
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "ostr: ", ostr.size());
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "ostr");
+	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", ostr);
 	
-	std::string stat_200("HTTP/1.0 200 OK\r\n");
-	ostr.insert(0, stat_200);
-	this->tlen += stat_200.size();
-	
-	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", OSTR);	
-	return (0);
+	return (this->chk_rsp_hed(this->ostr));
 }
 
 void    ResourceCgi::push_body(void)
@@ -266,5 +286,6 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 		close(cgifd_op);
 		return (err);
 	}
+	this->conn = conn;
 	return (err);	
 }

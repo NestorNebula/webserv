@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 20:33:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 19:24:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg;
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
@@ -114,7 +113,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "[" << n << "]";
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j)
@@ -125,7 +123,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]";
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 }
 
 
@@ -137,7 +134,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string 
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << str;
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
@@ -148,7 +144,6 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << n;
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 }
 
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
@@ -159,13 +154,11 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);
     WsLog::op(stream);
-    // std::cerr << stream.str() << "\n";
 
     return (-1);
 }
 void WsLog::op(std::stringstream & stream)
 {
-    // std::cerr << stream.str() << "\n";
     std::cerr << WsLog::col << stream.str() << "\n" << std::string("\e[0m");
     WsLog::col.clear();
 }
@@ -310,7 +303,7 @@ void    WsLog::kd(void)
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
         | TGT_EPOLL_EVT
-        // | TGT_EPOLL_CTL
+        | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV
@@ -339,7 +332,7 @@ void    WsLog::kd(void)
     ;
     
     // WsLog::tgt = TGT_NONE;
-    WsLog::tgt = TGT_CGI_HEAD | TGT_CONN_SEND;
+    // WsLog::tgt = TGT_CGI_HEAD | TGT_CONN_SEND;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;

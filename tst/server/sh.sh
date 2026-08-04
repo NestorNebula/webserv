@@ -2,8 +2,8 @@
 
 tput reset
 
-C=255
-R=2
+C=10
+R=50
 if [ "$1" == "s" ]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -25,7 +25,7 @@ if [ "$1" == "f" ]; then
 fi
 
 if [ "$1" == "x" ]; then
-	siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	# UGLY - why
 	# siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C -b
 	echo
@@ -72,7 +72,7 @@ if [ "$1" == "u" ]; then
 	exit 0
 fi
 
-curl -X POST http://localhost:8081/test.php -i \
+curl -X POST http://localhost:8081/suck.php -i \
 	-H "Content-Type: application/x-www-form-urlencoded" \
 	-d "p1=post-one&p2=post-two"
 echo

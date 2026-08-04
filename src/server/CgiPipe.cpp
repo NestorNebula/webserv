@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 16:32:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/04 18:39:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,8 @@ CgiPipe::~CgiPipe()
 	WsLog::_(LVL_DBG, TGT_CGI, " (~) Cgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
+	// if (this->rsrc)
+	// 	this->rsrc->rem(this);
 }
 
 bool	CgiPipe::timeo(time_t now)
@@ -128,10 +130,12 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + EPC_TIMEOUT) < now)
+	if ((this->lact + CGI_TIMEOUT) < now)
 	{
 		if (this->rsrc)
-			this->rsrc->set_err(409); // CGI_ERR : TIMEOUT
+			this->rsrc->set_err(504);
+		else if (this->conn)
+			this->conn->set_err(504);
 		return (true);
 	}
 	return (false);
@@ -161,9 +165,23 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 	}
 	
-// RSRC
-	if (this->conn->cgi_data(this->ibuf, err) < 0)
-		return (-1);
+	switch (this->rsrc->recv_data(this->ibuf, err))
+	{
+	case RSRC_RESP_INIT:
+		break;
+	case RSRC_RESP_ERR:
+		conn->set_err(rsrc->error);
+		break;
+	case RSRC_RESP_HEAD:
+		// allows error to pass ..
+
+		// conn->ka = rsrc->ka;
+		break;
+	case RSRC_RESP_BODY:
+	default:
+		conn->mod_evt(EPOLLOUT);
+		break;
+	}
 	return (err);
 }
 
@@ -176,20 +194,17 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-		// BAD IDEA
+		
 	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
+	// (0)	: no body data is currently available
+	//		  BUT .. more needs to be received to complete the request		
 	// (1)	: body data has been received by the Connection
 	//		  and needs to be written to the (stdin) of the CGI
-	// (0)	: no body data is currently available
-	//		  BUT .. more needs to be received to complete the request
+	
 	// (-1) : there is no more body data to write to the CGI
 	
-// hasBody()
-// getBody()
-// isComplete()
-// SESS
 	// rsrc:: should have been filled from sess::write
 	err = this->conn->req_body_status();
 	if (err < 0)
@@ -203,18 +218,7 @@ ssize_t	CgiPipe::pollout(void)
 		this->mod_evt(0);
 		return (0);
 	}
-
-// SESSION / REQUEST
-// kd : Connection currently stores the request body in a std::string
-	// EpollClient::send() erases the sent bytes from the head of the string
 	
-	// sess::write
-	// should have pushed non-header data (body)
-	// to rsrc::idata ...
-	// rsrc::get_body
-	// which should have been properly filled
-	// by sess::write
-// SESS
 	std::string & body = this->conn->sess.req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
