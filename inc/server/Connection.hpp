@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 18:40:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:49:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ private:
 public:
 	int				req_body_status(void);
 	
-	int				cgi_done(void);
 	void			cgi_rem(CgiPipe *epc);
 	
 	Server			&serv;

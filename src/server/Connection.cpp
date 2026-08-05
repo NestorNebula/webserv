@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 19:34:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 11:04:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,125 +133,11 @@ ssize_t	Connection::pollin(void)
 	return (err);
 }
 
-
-// ResourceCgi (!)
-// sess::state
-	// pull_data (?)
-int		Connection::cgi_done(void)
-{
-	ResourceCgi *res = this->cgi;
-
-	std::string & OSTR = res->ostr;
-	
-	if (this->error)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  error");
-		return (1); // have (error) data to send
-	}
-	// DELETE_CGI
-	if (res == NULL)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (NULL)");
-		return (-1);
-	}
-	
-	// if (res->stat != -1)
-	// {
-
-	// }
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  res (stat) ", res->stat);
-	if (!res->hed)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (no head)");
-		return (0); // NEED_HEAD
-	}
-	
-	// resource state
-		// sent stat
-		// sent head
-		// sent body
-		// unknown (no content-length : wait for cgi-close)
-	
-// this evaluation should not be here 
-		// RESOURCE 
-	if (OSTR.size()) 
-		return (1); // HAVE_DATA
-
-// OSTR == EMPTY
-
-// attn : end of pollout (sent all)
-
-	if (res->status(WNOHANG) != -1)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (exited)");
-		if (res->error)
-		{
-			// where SHOULD this have happened (?)
-			this->set_err(res->error); 
-			return (1);
-		}	
-		// may still have data to read from cgi (!)
-		// return (-1); // DONE
-	}
-
-	// BODY FULLY SENT
-	if (this->ka && res->tlen == 0)
-	{
-		// working well 
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  cgi (tlen) ", res->tlen);
-		return (-1);
-	}
-
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "done:  wait for data");
-	
-	// this->mod_evt(EPOLLIN); // only if more body to send
-	if (res->op)
-		res->op->mod_evt(EPOLLIN);
-	if (res->ip)
-		res->ip->mod_evt(EPOLLOUT);
-	return (0); // NEED_DATA
-}
-
-
 // ∗ Just remember that, for chunked requests, your server needs to un-chunk them, 
 // the CGI will expect EOF as the end of the body.
 // ∗ The same applies to the output of the CGI. 
 // If no content_length is returned from the CGI, EOF will mark the end of the returned data.
 // ∗ The CGI should be run in the correct directory for relative path file access.
-
-
-#if 0
-
-
-epoll : evt tgt  : conn
-epoll : evt fd   : [144]
-epoll : evt typ  : out 
-conn  : send:  POLLOUT
-conn  : rsnd:  cnt [0]
-conn  : done:  res (stat) [-1]
-conn  : rsnd:  cgi  data  [1]
-conn  : send
-conn  : ostr: [8192]
-conn  : sent: [8192]
-conn  : sent:  all
-conn  : rsnd:  cnt [8192]
-conn  : rsnd:  cgi tlen [239]
-conn  : done:  res (stat) [-1]
-rsrc  : exit: [0]
-rsrc  : exit:  Success
-conn  : done:  cgi (exited)
-conn  : rsnd:  cgi  data  [-1]
-conn  : rsnd:  conn error [0]
-conn  : rsnd:  cgi  error [0]
-conn  : rsnd:  conn ka    [1]
-conn  : rsnd:  conn keep-alive [5]
-rsrc  : (~) ResourceCgi
-rsrc  : done: [0]
-conn  : -out:  reset
-
-
-#endif
-
 
 
 int		Connection::have_data(void)
@@ -278,41 +164,35 @@ int		Connection::have_data(void)
 int		Connection::rsrc_send(int cnt)
 {
 	int	err;
-// yeah -- need something different for BEFORE and AFTER send ... 
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cnt ", cnt);
 
-	if (this->error)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  error ", this->error);
-		return (1);
-	}
-	// if ((cnt == 0) && this->ostr.size())
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cnt ", cnt);
+	// if (this->error)
 	// {
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  ostr  ", this->ostr.size());
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  error ", this->error);
 	// 	return (1);
 	// }
 	
-	// exit(66) -- sometimes .. 200 (0) bytes .. 
-	// so .. ostr (?)
-	// or .. have head (?)
-	// nothing to send 
-	
-#if 1
 	ResourceCgi *res = this->cgi;
 	if (res == NULL)
+	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
 		return (-1);
+	}
+
 	if (res->error)
 	{
 		this->set_err(res->error);
 		return (1);
 	}
-	if (res && res->status(WNOHANG) != -1)
+#if 1
+	if (res->wait(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
 
+// MAY : still have have data to read from PIPE 
+
 		if (res->ostr.size()) // post 
 			return (1);
-
 // RES->KA (?)
 		if (this->ka)
 		{
@@ -328,35 +208,9 @@ int		Connection::rsrc_send(int cnt)
 	}
 #endif
 	
-	// tlen : should be with .. conn/sess
-	if (cnt && this->cgi)
-	{
-		if (cnt < this->cgi->tlen)
-			this->cgi->tlen -= cnt;
-		else
-			this->cgi->tlen = 0;
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi tlen ", this->cgi->tlen);
-	}
-	
-	err = this->cgi_done();
+	err = res->status(); // MAY SET ERROR
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
-	if (err <= 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn error ", this->error);
-		if (this->cgi)
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  error ", this->cgi->error);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn ka    ", this->ka);
-	}
-	if (err == 0)
-	{
-		// not ready -- need to wait for data from cgi
-		WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc send  (2)");
-		if (this->cgi->op)
-			this->cgi->op->mod_evt(EPOLLIN);
-		
-		return (0);
-	}
 	if (err < 0)
 	{
 // RES->KA (?)
@@ -365,6 +219,7 @@ int		Connection::rsrc_send(int cnt)
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn keep-alive");
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn req   ", this->req_cnt);
 			// did we already send an error on this (fd)
+			// should be in POLLOUT
 			if (cnt)
 			{
 				this->reset(); // DELETE_CGI
@@ -436,9 +291,11 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 	
-// what is the REAL QUESTION I want to be asking here ... 
+	if (this->error)
+		return (this->send_error());
+
+	
 	err = this->rsrc_send(0);
-	// err = this->have_data();
 	if (err <= 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
@@ -446,8 +303,9 @@ ssize_t	Connection::pollout(void)
 		return (err);
 	}	
 	
-	if (this->error)
-		return (this->send_error());
+
+	// MOVE rsrc_send to res->get_data()
+		
 	
 	// res->get_ostr .. 
 	ResourceCgi *res = this->cgi; // ASSUME non-NULL
@@ -473,6 +331,7 @@ ssize_t	Connection::pollout(void)
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
+	res->consumed(err);
 	this->rsrc_send(err);
 	return (err);
 }
@@ -483,7 +342,11 @@ int	Connection::rdhup(void)
 	this->mod_evt(EPOLLOUT);
 	
 	if (this->cgi)
-		this->cgi->conn_closed();
+	{
+		// this->cgi->conn_closed();
+		// delete (this->cgi);
+		// this->cgi = NULL;
+	}
 	if (this->ka)
 	{
 		this->ka = 0;

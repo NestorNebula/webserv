@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 18:45:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 10:12:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,11 @@ public:
 	int			xit;
 	int			sig;
 
-// both : over-ride
+// over-ride
+	int			consumed(int bytes);
+	int			status(void);
 	void		conn_closed(void);
-	int			status(int opt);
+	int			wait(int opt);
 
 	int			rem(CgiPipe *epc);
 private:

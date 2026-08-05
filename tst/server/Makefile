@@ -16,7 +16,8 @@ LFLAGS=
 LIBS =
 
 FCGI_INC=-I ./FCGI/include
-FCGI_LIB=-L ./FCGI/lib -Wl,-rpath,./FCGI/lib/ -lfcgi
+FCGI_LIB=
+# -L ./FCGI/lib -Wl,-rpath,./FCGI/lib/ -lfcgi
 
 CFLAGS += $(FCGI_INC)
 LIBS += $(FCGI_LIB)

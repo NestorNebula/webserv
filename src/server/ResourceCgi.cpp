@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 19:26:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 11:06:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,19 @@ ResourceCgi::~ResourceCgi()
 	
 	// not sure this is the place ...
 	// CgiPipe => hup => Epoll::rem => this
-	this->status(WNOHANG);
+	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC, "kill");
 		kill(this->pid, SIGKILL);
-		this->status(0); // dangerous (?)
+		this->wait(0); // dangerous (?)
 	}
 	this->conn_closed();
 }
 
 void	ResourceCgi::conn_closed(void)
 {
+// valgrind shit here with KEEP-ALIVE
 	if (this->ip)
 	{
 		this->ip->rsrc_closed();
@@ -66,7 +67,73 @@ void	ResourceCgi::set_err(int e)
 		this->conn->set_err(e);
 }
 
-int	ResourceCgi::status(int opt)
+// NEED HEAD	0
+// NEED_BODY	0
+// HAVE_OSTR	1
+// ERROR		2
+// DONE			-1
+
+int	ResourceCgi::consumed(int bytes)
+{
+	if (bytes < this->tlen)
+	{
+		this->tlen -= bytes;
+		return (1);
+	}
+	this->tlen = 0;
+	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "tlen:  (0)");
+	return (-1);
+}
+
+int	ResourceCgi::status(void)
+{
+	if (this->error)
+	{
+		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
+		return (2);
+	}
+	if (!this->hed)
+	{
+		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
+		if (this->op)
+			this->op->mod_evt(EPOLLIN);
+		return (0); // NEED_HEAD
+	}
+	if (this->ostr.size())
+		return (1);
+	
+	if (this->wait(WNOHANG) != -1)
+	{
+		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
+		if (this->error)
+			return (2);
+		// if (this->ip == NULL && this->op == NULL)
+		// {
+		// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (NULL i/o)");
+		// 	return (-1);
+		// }
+	}
+		
+	// BODY FULLY SENT
+	// trust : res->ka (?)
+	if (this->ka && this->tlen == 0)
+	{
+		// working well 
+		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (tlen == 0)");
+		return (-1);
+	}
+
+	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
+	
+	// this->mod_evt(EPOLLIN); // only if more body to send
+	if (this->op)
+		this->op->mod_evt(EPOLLIN);
+	if (this->ip)
+		this->ip->mod_evt(EPOLLOUT);
+	return (0); // NEED_DATA
+}
+
+int	ResourceCgi::wait(int opt)
 {
 	int	err;
 	
@@ -161,7 +228,7 @@ int	ResourceCgi::rem(CgiPipe *epc)
 	if (this->ip == NULL && this->op == NULL)
 	{
 		err = 3;
-		this->status(WNOHANG);
+		this->wait(WNOHANG);
 	}	
 	return (err);
 }

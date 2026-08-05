@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 15:39:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:18:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,6 @@
 #include <string>
 
 
-
-
-
-
-
-// move to FcgiConn
 int FcgiConn::uid = 1;
 
 int FcgiConn::make_sock(const char *sock_path)
@@ -125,7 +119,7 @@ int FcgiConn::request(CgiEnv * env)
 
 	msg.new_params(FcgiConn::uid++);
 	char proto[] = "HTTP/1.1";
-	msg.add_param(P_SERVER_PROTOCOL, proto);
+	msg.add_param("SERVER_PROTOCOL", proto);
 
 	// validate
 
@@ -140,10 +134,10 @@ int FcgiConn::request(CgiEnv * env)
 		// while( tok != NULL )
 		// {
 			// WsLog::_(LVL_DBG, TGT_FCGI, "cookie: ", tok);
-		// 	msg.add_param(P_HTTP_COOKIE, tok);
+		// 	msg.add_param("HTTP_COOKIE", tok);
 		// 	tok = strtok(NULL, "; ");
 		// }
-		// msg.add_param(P_HTTP_COOKIE, req->cook);
+		// msg.add_param("HTTP_COOKIE", req->cook);
 
 		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
 		kvit++;
@@ -158,6 +152,7 @@ int FcgiConn::request(CgiEnv * env)
 void FcgiConn::push_body(char *buf, int siz)
 {
 	FcgiMsg		body;
+	
 	if (buf)
 		body.add_stdin(buf, siz);
 	else
@@ -293,8 +288,10 @@ int main(void)
         // fastcgi_param  PATH_INFO       $fastcgi_path_info;
         // fastcgi_param  PATH_TRANSLATED $document_root$fastcgi_script_name;
         // fastcgi_pass   unix:/var/run/php/php7.0-fpm.sock;
-	char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
-	// char p[] = "./test.php";
+	// char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
+
+	char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
+	// char p[] = "./test.php";z
 	char meth[] = "POST";
 	char ptype[] = "application/x-www-form-urlencoded";
 	char pdata[] = "p1=FCGI-post-one&p2=FCGI-post-two";

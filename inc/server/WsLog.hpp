@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 19:52:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:39:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,14 +57,15 @@ typedef long unsigned int log_tgt;
 # define TGT_RSRC		(1UL << 13)
 # define TGT_RSRC_INFO	(1UL << 14)
 # define TGT_RSRC_WAIT	(1UL << 15)
+# define TGT_RSRC_STAT	(1UL << 16)
 
-# define TGT_SERV		(1UL << 16)
-# define TGT_MAIN		(1UL << 17)
+# define TGT_SERV		(1UL << 17)
+# define TGT_MAIN		(1UL << 18)
 
-# define TGT_HEAD		(1UL << 18)
-# define TGT_BODY		(1UL << 19)
+# define TGT_HEAD		(1UL << 19)
+# define TGT_BODY		(1UL << 20)
 
-# define TGT_FCGI		(1 << 20)
+# define TGT_FCGI		(1 << 21)
 
 
 # define TGT_MAX		(1UL << 63)

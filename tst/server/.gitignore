@@ -10,6 +10,4 @@ HttpServer*
 bak*
 diff*
 fcgi*
-FCGI
-!FCGI/src
-!FCGI/install.sh
+FCGI/.php-fpm

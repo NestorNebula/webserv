@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 15:38:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:17:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,10 +121,10 @@ void FcgiMsg::add_param(const char * key, int val)
 	buf.fcgi(key, vStr);
 }
 
-void FcgiMsg::add_param(int p_key, int val)
-{
-	add_param(p_name[p_key], val);
-}
+// void FcgiMsg::add_param(int p_key, int val)
+// {
+// 	add_param(p_name[p_key], val);
+// }
 
 void FcgiMsg::end_params(void)
 {

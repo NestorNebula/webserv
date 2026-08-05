@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 16:27:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:17:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ public:
 	void 	add_param(int  p_key, char * val);
 
 	void 	add_param(const char * key, int val);
-	void 	add_param(int  p_key, int val);
+	// void 	add_param(int  p_key, int val);
 	
 	void	add_stdin(char *buf, int siz);
 	void	end_stdin(void);

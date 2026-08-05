@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/29 11:50:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 08:49:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,6 @@ public:
 	int		pull_data(std::string & dst)
 	{
 		(void)dst;
-		// cgi_done
 		return (0);
 	}
 	void	reset(void)

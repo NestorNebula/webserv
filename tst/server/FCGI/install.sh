@@ -55,27 +55,29 @@ EOF
 fi
 
 
-cd $SRC_DIR
-if ! test -d fcgi2-2.4.5; then
-    echo -n "decompressing tarball ... "
-    tar xf libfcgi_2.4.5.orig.tar.gz
-    echo "done"
-    echo
-fi
+# ONLY NEED <fastcgi.h>
 
-cd fcgi2-2.4.5
-if ! test -f ltmain.sh; then
-    echo "run : autogen.sh (fail)"
-    ./autogen.sh > /dev/null
-    echo "run : autogen.sh (success)"
-    ./autogen.sh
-    echo
-    echo
-fi
+# cd $SRC_DIR
+# if ! test -d fcgi2-2.4.5; then
+#     echo -n "decompressing tarball ... "
+#     tar xf libfcgi_2.4.5.orig.tar.gz
+#     echo "done"
+#     echo
+# fi
+
+# cd fcgi2-2.4.5
+# if ! test -f ltmain.sh; then
+#     echo "run : autogen.sh (fail)"
+#     ./autogen.sh > /dev/null
+#     echo "run : autogen.sh (success)"
+#     ./autogen.sh
+#     echo
+#     echo
+# fi
 
 
-echo "config ; make ; make install"
-echo $TGT_DIR
-echo
-./configure --prefix=$TGT_DIR && make && make install
+# echo "config ; make ; make install"
+# echo $TGT_DIR
+# echo
+# ./configure --prefix=$TGT_DIR && make && make install
 

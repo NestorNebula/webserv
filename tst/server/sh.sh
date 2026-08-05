@@ -2,35 +2,37 @@
 
 tput reset
 
-C=10
-R=50
-if [ "$1" == "s" ]; then
+C=200
+R=5
+if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
-	exit 0
 fi
 
-if [ "$1" == "k" ]; then
+if [[ "$1" =~ "k" ]]; then
 	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
-	exit 0
 fi
 
 
-if [ "$1" == "f" ]; then
+if [[ "$1" =~ "f" ]]; then
 	siege -f fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	# siege -f fnf.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
-	exit 0
 fi
 
-if [ "$1" == "x" ]; then
-	siege -f stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
-	# UGLY - why
-	# siege -f exit.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C -b
+
+if [[ "$1" =~ "x" ]]; then
+	siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
-	exit 0
 fi
+
+if [[ "$1" =~ "t" ]]; then
+	siege -f stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
+exit 0
 
 if [ "$1" == "a" ]; then
 	curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3

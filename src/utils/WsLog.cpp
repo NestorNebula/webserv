@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 19:24:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 10:48:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[8]);
     if (tgt & TGT_BODY)
         return (tgt_str[9]);
-    if (tgt & (TGT_RSRC | TGT_RSRC_INFO | TGT_RSRC_WAIT))
+    if (tgt & (TGT_RSRC | TGT_RSRC_INFO | TGT_RSRC_WAIT | TGT_RSRC_STAT))
         return (tgt_str[10]);
     if (tgt & TGT_FCGI)
         return (tgt_str[11]);
@@ -328,11 +328,12 @@ void    WsLog::kd(void)
         // | TGT_BODY
         | TGT_RSRC
         | TGT_RSRC_INFO
+        | TGT_RSRC_STAT
         // | TGT_RSRC_WAIT
     ;
     
     // WsLog::tgt = TGT_NONE;
-    // WsLog::tgt = TGT_CGI_HEAD | TGT_CONN_SEND;
+    WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN_SEND | TGT_RSRC_STAT;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;
