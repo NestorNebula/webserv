@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 17:10:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 17:55:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 # include "WsLog.hpp"
 
 # ifndef EPOLL_MAX_EVT
-#  define EPOLL_MAX_EVT 256
+#  define EPOLL_MAX_EVT 1024
 # endif
 
 # ifndef SERV_TIMEOUT

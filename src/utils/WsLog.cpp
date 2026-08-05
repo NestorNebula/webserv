@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 10:48:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 17:30:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,23 +76,22 @@ static const std::string &tgt_prefix(log_tgt tgt)
 
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
-    bool log = true;
+    bool skip = true;
 
     switch (msg_lvl)
     {
     case LVL_ERR:
     case LVL_TMP:
-        log = false;
+        skip = false;
         break;
     default:
         if ((msg_lvl & WsLog::lvl) && (msg_tgt & WsLog::tgt))
-            log = false;
+            skip = false;
         break;
     }
-    if (log)
-        return (true);
-    WsLog::col.clear();
-    return (false);
+    if (skip)
+        WsLog::col.clear();
+    return (skip);
 }
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
@@ -167,15 +166,18 @@ void WsLog::color(int c)
 {
     switch(c)
     {
-    case 1:
+    case WSL_RED:
         WsLog::col = std::string("\e[1;31m");
         break;
-    case 2:
+    case WSL_GREEN:
         WsLog::col = std::string("\e[1;32m");
+        break;
+    case WSL_YELLOW:
+        WsLog::col = std::string("\e[1;33m");
         break;
     case 0:
     default:
-        WsLog::col = std::string("");
+        WsLog::col = std::string("SUCK");
     }
 }
 #if 0
@@ -333,7 +335,7 @@ void    WsLog::kd(void)
     ;
     
     // WsLog::tgt = TGT_NONE;
-    WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN_SEND | TGT_RSRC_STAT;
+    WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN_SEND | TGT_RSRC_STAT | TGT_RSRC_WAIT;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;

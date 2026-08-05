@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 12:00:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 18:03:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ ResourceCgi::~ResourceCgi()
 	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
+		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC, "kill");
 		kill(this->pid, SIGKILL);
 		this->wait(0); // dangerous (?)
@@ -50,11 +51,13 @@ void	ResourceCgi::conn_closed(void)
 // valgrind shit here with KEEP-ALIVE
 	if (this->ip)
 	{
+		WsLog::_(LVL_DBG, TGT_RSRC, "conn-closed : ip");
 		this->ip->rsrc_closed();
 		this->ip->mod_evt(EPOLLOUT);
 	}
 	if (this->op)
 	{
+		WsLog::_(LVL_DBG, TGT_RSRC, "conn-closed : op");
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
@@ -87,16 +90,45 @@ int	ResourceCgi::consumed(int bytes)
 
 int	ResourceCgi::status(void)
 {
+	// which we also FUCKING check in rsrc send
+
+	// FUCKING WORSE
+
+// so .. what
+// CLOSED (CgiPipe)
+// DONE 
+
+// PID done DOES NOT MEAN there is NOTHING LEFT TO READ ... 
+
+// suppose .. we only ever tested .. 
+// I/O
+
+	// if (this->wait(WNOHANG) != -1)
+	// {
+	// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
+	// 	if (this->error)
+	// 		return (2);
+	// 	// if (this->ip == NULL && this->op == NULL)
+	// 	// {
+	// 	// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (NULL i/o)");
+	// 	// 	return (-1);
+	// 	// }
+	// }
+	
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (2);
 	}
+	
 	if (!this->hed)
 	{
+// may NEVER have HEAD .. because we errored 
+		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
-		if (this->op)
-			this->op->mod_evt(EPOLLIN);
+			// this makes no sense .. 
+		// if (this->op)
+		// 	this->op->mod_evt(EPOLLIN);
 		return (0); // NEED_HEAD
 	}
 	if (this->ostr.size())
@@ -152,10 +184,13 @@ int	ResourceCgi::wait(int opt)
 		return (this->stat);
 	}
 	if (this->ip || this->op)
-		return (this->stat); // (-1)
+		return (this->stat); // (-1) : still active
+	// if (opt == WNOHANG)
+	// 	return (stat);
 	
-	(void)opt;
-	err = waitpid(this->pid, &this->stat, 0); // opt);
+	// (void)opt;
+	opt = 0; // kinda better : if BOTH are CLOSED .. force wait 
+	err = waitpid(this->pid, &this->stat, opt);
 	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);

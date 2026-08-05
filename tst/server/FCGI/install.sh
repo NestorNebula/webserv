@@ -20,7 +20,7 @@ systemctl --user daemon-reload
 systemctl --user start php-fpm.service
 
 # why can't I ctrl-c out of this (?)
-# /usr/sbin/php-fpm7.4 --nodaemonize --fpm-config /media/kdonlon/data/Documents/42/webserv/git/tst/server/FCGI/.php-fpm/php-fpm.conf
+# /usr/bin/php-fpm --nodaemonize --fpm-config /media/kdonlon/data/Documents/42/webserv/git/tst/server/FCGI/.php-fpm/php-fpm.conf
     exit 0
 fi
 SRC_DIR=./src

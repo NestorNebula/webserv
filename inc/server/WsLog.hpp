@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 08:39:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 17:12:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,12 @@ typedef long unsigned int log_tgt;
 # define TGT_MAX		(1UL << 63)
 # define TGT_ALL		(TGT_MAX - 1)
 
+enum
+{
+	WSL_RED = 1,
+	WSL_GREEN,
+	WSL_YELLOW
+};
 
 class WsLog
 {
