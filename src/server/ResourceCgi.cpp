@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 11:06:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/05 12:00:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,7 @@ int	ResourceCgi::wait(int opt)
 		case 0:
 			break;
 		case 2:
+			// (php) messes with (ka)
 			this->set_err(404);
 			break;
 		default:
