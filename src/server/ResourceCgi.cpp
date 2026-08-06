@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 18:03:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 11:40:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,10 @@ void	ResourceCgi::set_err(int e)
 
 int	ResourceCgi::consumed(int bytes)
 {
+// TLEN
+	// if (this->tlen == -1)
+	// 	return (1);
+		
 	if (bytes < this->tlen)
 	{
 		this->tlen -= bytes;
@@ -90,74 +94,39 @@ int	ResourceCgi::consumed(int bytes)
 
 int	ResourceCgi::status(void)
 {
-	// which we also FUCKING check in rsrc send
-
-	// FUCKING WORSE
-
-// so .. what
-// CLOSED (CgiPipe)
-// DONE 
-
-// PID done DOES NOT MEAN there is NOTHING LEFT TO READ ... 
-
-// suppose .. we only ever tested .. 
-// I/O
-
-	// if (this->wait(WNOHANG) != -1)
-	// {
-	// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
-	// 	if (this->error)
-	// 		return (2);
-	// 	// if (this->ip == NULL && this->op == NULL)
-	// 	// {
-	// 	// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (NULL i/o)");
-	// 	// 	return (-1);
-	// 	// }
-	// }
-	
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (2);
 	}
 	
-	if (!this->hed)
+	if (!this->hed && this->ip)
 	{
-// may NEVER have HEAD .. because we errored 
 		WsLog::color(WSL_RED);
-		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
-			// this makes no sense .. 
-		// if (this->op)
-		// 	this->op->mod_evt(EPOLLIN);
+		WsLog::_(LVL_TMP, TGT_RSRC_STAT, "stat:  (no head)");
 		return (0); // NEED_HEAD
 	}
 	if (this->ostr.size())
 		return (1);
-	
+#if 1
 	if (this->wait(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (2);
-		// if (this->ip == NULL && this->op == NULL)
-		// {
-		// 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (NULL i/o)");
-		// 	return (-1);
-		// }
 	}
-		
-	// BODY FULLY SENT
-	// trust : res->ka (?)
+#endif
+
+	// what if NOT SET (?)
+	// may have been exit.php problem
 	if (this->ka && this->tlen == 0)
 	{
-		// working well 
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (tlen == 0)");
 		return (-1);
 	}
 
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 	
-	// this->mod_evt(EPOLLIN); // only if more body to send
 	if (this->op)
 		this->op->mod_evt(EPOLLIN);
 	if (this->ip)
@@ -185,8 +154,6 @@ int	ResourceCgi::wait(int opt)
 	}
 	if (this->ip || this->op)
 		return (this->stat); // (-1) : still active
-	// if (opt == WNOHANG)
-	// 	return (stat);
 	
 	// (void)opt;
 	opt = 0; // kinda better : if BOTH are CLOSED .. force wait 
@@ -206,10 +173,15 @@ int	ResourceCgi::wait(int opt)
 		{
 		case 0:
 			break;
+#if 1
+// exit.php, suck.php ... confusing
+// because ..they DO return DATA
+// AND : set error .. 
 		case 2:
-			// (php) messes with (ka)
 			this->set_err(404);
+			// this->xit = 0;
 			break;
+#endif
 		default:
 			// (res)
 			// do not override .. 
@@ -331,7 +303,9 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 		stat_head = std::string("HTTP/1.0 200 OK\r\n");
 	}
 	ostr.insert(0, stat_head);
-	this->tlen += stat_head.size();
+// TLEN
+	// if (this->tlen != -1)
+		this->tlen += stat_head.size();
 
 	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", this->ostr);	
 	return (RSRC_RESP_HEAD);

@@ -22,24 +22,24 @@ http://127.0.0.1:8082/ka.pl
 
 
 
-# http://127.0.0.1:8080/suck.pl
-# http://127.0.0.1:8081/suck.pl
-# http://127.0.0.1:8082/suck.pl
+http://127.0.0.1:8080/suck.pl
+http://127.0.0.1:8081/suck.pl
+http://127.0.0.1:8082/suck.pl
 
-# http://127.0.0.1:8080/suck.py
-# http://127.0.0.1:8081/suck.py
-# http://127.0.0.1:8082/suck.py
+http://127.0.0.1:8080/suck.py
+http://127.0.0.1:8081/suck.py
+http://127.0.0.1:8082/suck.py
 
 
-
-# ATTN - HANG -- because .. error AND non-zero exit
 http://127.0.0.1:8080/suck.php
 http://127.0.0.1:8081/suck.php
 http://127.0.0.1:8082/suck.php
 
-http://127.0.0.1:8080/exit.php
-http://127.0.0.1:8081/exit.php
-http://127.0.0.1:8082/exit.php
+
+# ATTN : get "pause" -- when many others are active 
+# http://127.0.0.1:8080/exit.php
+# http://127.0.0.1:8081/exit.php
+# http://127.0.0.1:8082/exit.php
 
 http://127.0.0.1:8080/stat.php
 http://127.0.0.1:8081/stat.php

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 18:39:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 11:27:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,12 +209,12 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body:  complete");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
 		return (-1);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body:  waiting");
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
 		this->mod_evt(0);
 		return (0);
 	}

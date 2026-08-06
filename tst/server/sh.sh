@@ -2,15 +2,15 @@
 
 tput reset
 
-C=200
-R=5
+C=250
+R=4
 if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
 if [[ "$1" =~ "k" ]]; then
-	siege -f ka.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f ka.sh -R ./ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
@@ -31,8 +31,6 @@ if [[ "$1" =~ "t" ]]; then
 	siege -f stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
-
-exit 0
 
 if [ "$1" == "a" ]; then
 	curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
@@ -75,6 +73,7 @@ if [ "$1" == "u" ]; then
 fi
 
 curl -X POST http://localhost:8081/suck.php -i \
+	-H "Connection: keep-alive" \
 	-H "Content-Type: application/x-www-form-urlencoded" \
 	-d "p1=post-one&p2=post-two"
 echo
