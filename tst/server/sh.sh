@@ -72,17 +72,20 @@ if [ "$1" == "u" ]; then
 	exit 0
 fi
 
-curl -X POST http://localhost:8081/suck.php -i \
-	-H "Connection: keep-alive" \
+exit 0
+
+# -H "Connection: keep-alive" \
+
+curl -X POST http://localhost:8081/stat.php -i \
 	-H "Content-Type: application/x-www-form-urlencoded" \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
 
 
-curl -X GET http://localhost:8081/stat.php -i
-echo
-exit 0
+# curl -X GET http://localhost:8081/stat.php -i
+# echo
+# exit 0
 
 # curl -X GET http://localhost:8081/suck.py -i
 # echo

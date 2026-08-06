@@ -1,7 +1,7 @@
 NAME=test
 
 CC=c++
-CFLAGS=-std=c++98 -Wall -Wextra -Werror -MMD -MP -O2
+CFLAGS=-std=c++98 -Wall -Wextra -Werror -MMD -MP -O2 -g3
 # -Wno-unused
 # -Wshadow=local
 
@@ -51,6 +51,7 @@ BIN = $(OBJ_DIR)/test.o
 # OBJS += $(BIN)
 
 OBJS += $(OBJ_DIR)/FcgiMsg.o
+OBJS += $(OBJ_DIR)/FcgiConn.o
 
 NULL :=
 \t   := $(NULL)	$(NULL)

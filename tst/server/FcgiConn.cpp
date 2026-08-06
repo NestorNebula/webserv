@@ -6,12 +6,15 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 08:18:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:20:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "FcgiConn.hpp"
+
+#include "ResourceCgi.hpp"
+
 #include <string>
 
 
@@ -113,6 +116,8 @@ COMMON VARIABLES
 
 int FcgiConn::request(CgiEnv * env)
 {
+	// sock_path .. FROM cgienv .. 
+	
 	data.zero();
 
 	FcgiMsg		msg;
@@ -144,7 +149,7 @@ int FcgiConn::request(CgiEnv * env)
 	}
 	msg.end_params();
 	
-	req_head.append(msg.buf.text(), msg.buf.size());
+	req.append(msg.buf.text(), msg.buf.size());
 
 	return (1);
 }
@@ -158,7 +163,7 @@ void FcgiConn::push_body(char *buf, int siz)
 	else
 		body.end_stdin();
 	
-	req_body.append(body.buf.text(), body.buf.size());
+	req.append(body.buf.text(), body.buf.size());
 }
 
 
@@ -193,7 +198,7 @@ int FcgiConn::push_data(char * buf, int cnt)
 		// should have (8) bytes of FCGI_EndRequestBody
 		break;
 	case FCGI_STDOUT:
-		ostr.append(buf, cnt);
+		rsp.append(buf, cnt);
 		break;
 	default:
 		WsLog::_(LVL_DBG, TGT_FCGI, "push data : default ", data.typ);
@@ -290,8 +295,11 @@ int main(void)
         // fastcgi_pass   unix:/var/run/php/php7.0-fpm.sock;
 	// char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
 
-	char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
+	// char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
 	// char p[] = "./test.php";z
+
+	char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
+
 	char meth[] = "POST";
 	char ptype[] = "application/x-www-form-urlencoded";
 	char pdata[] = "p1=FCGI-post-one&p2=FCGI-post-two";
@@ -317,9 +325,9 @@ int main(void)
 
 	int bs;
 	
-	bs = send(fd, fcgi.req_head.c_str(), fcgi.req_head.size(), 0);
+	bs = send(fd, fcgi.req.c_str(), fcgi.req.size(), 0);
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
-	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req_head.size());
+	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req.size());
 
 // POLLIN : body
 	fcgi.push_body(pdata, plen);
@@ -329,9 +337,9 @@ int main(void)
 	// std::string req_body;
 	// req_body.append(fcgi.body.buf.text(), fcgi.body.buf.size());
 
-	bs = send(fd, fcgi.req_body.c_str(), fcgi.req_body.size(), 0);
+	bs = send(fd, fcgi.req.c_str(), fcgi.req.size(), 0);
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
-	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req_body.size());
+	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req.size());
 
 
 
@@ -354,3 +362,214 @@ int main(void)
 	return (0);
 }
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) : 
+	EpollClient(_ep, EPC_CGI, _fd), 
+	conn(_conn),
+	rsrc(_rsrc)
+{
+	sock_non_block(this->fd);
+}
+	
+FcgiPipe::~FcgiPipe()
+{
+	WsLog::_(LVL_DBG, TGT_CGI, " (~) Fcgi");
+	if (this->conn)
+		this->conn->cgi_rem(this);
+	// if (this->rsrc)
+	// 	this->rsrc->rem(this);
+}
+
+bool	FcgiPipe::timeo(time_t now)
+{
+	if (this->lact == 0)
+		return (false);
+	if (now < this->lact)
+		return (false);
+	if ((this->lact + CGI_TIMEOUT) < now)
+	{
+		if (this->rsrc)
+			this->rsrc->set_err(504);
+		else if (this->conn)
+			this->conn->set_err(504);
+		return (true);
+	}
+	return (false);
+}
+
+int		FcgiPipe::init(CgiEnv * cgienv)
+{
+	int err;
+
+	err = fcgi.request(cgienv);
+	if (err < 0)
+		return (err);
+
+	return (err);
+}
+ssize_t	FcgiPipe::pollin(void)
+{
+	if (this->conn == NULL)
+		return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
+
+	ssize_t	err = 0;
+	
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
+	err = this->recv();
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
+		this->rsrc->set_err(501); // CGI_ERR : read failed
+		return (err);
+	}
+	
+	if (err == 0)
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
+		return (-1);
+	}
+	
+// this feels backwards .. 
+// when the fd can be READ FROM - we are expecting stdout ... 
+// why is this backwards with cgi-pipe (?)
+
+	if (fcgi.parse(this->ibuf, err) < 0)
+	{
+		return (-1);
+	}
+		
+	switch (this->rsrc->recv_data((char*) fcgi.rsp.c_str(), fcgi.rsp.size()))
+	{
+	case RSRC_RESP_INIT:
+		break;
+	case RSRC_RESP_ERR:
+		conn->set_err(rsrc->error);
+		break;
+	case RSRC_RESP_HEAD:
+		// conn->ka = rsrc->ka;
+		// this->mod_evt(EPOLLIN);
+		break;
+	case RSRC_RESP_BODY:
+	default:
+		this->mod_evt(EPOLLIN);
+		conn->mod_evt(EPOLLOUT);
+		break;
+	}
+	fcgi.rsp.clear();
+	return (err);
+}
+
+// The server is in no way obligated to send end-of-file 
+// after the script reads CONTENT_LENGTH bytes. 
+ssize_t	FcgiPipe::pollout(void)
+{
+	ssize_t	err;
+	
+	if (this->conn == NULL)
+		return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
+		
+// SESSION / REQUEST
+// kd : CGI input may need to know :
+	// (0)	: no body data is currently available
+	//		  BUT .. more needs to be received to complete the request		
+	// (1)	: body data has been received by the Connection
+	//		  and needs to be written to the (stdin) of the CGI
+	
+	// (-1) : there is no more body data to write to the CGI
+	
+	// rsrc:: should have been filled from sess::write
+	if (this->fcgi.req.size())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "fcgi: head\n", fcgi.req);
+		err = this->send(fcgi.req);
+	}
+	// else if (this->fcgi.req_body.size())
+	// {
+	// 	err = this->send(fcgi.req_body);
+	// }
+	else
+	{
+		err = this->conn->req_body_status();
+		if (err < 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
+			fcgi.push_body(NULL, 0); // .. AND SEND
+			// return (-1); // NO !! 
+			this->mod_evt(-EPOLLOUT);
+		}
+		if (err == 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+			this->mod_evt(0);
+			return (0);
+		}
+		
+		std::string & body = this->conn->sess.req.get_body();
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
+
+		fcgi.push_body((char*) body.c_str(), body.size());
+		body.clear(); // 
+		// WsLog::_(LVL_DBG, TGT_CGI_SEND, "fcgi: body\n", fcgi.req_body);
+
+		err = this->send(fcgi.req);
+	}
+
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+		// this->rsrc->set_err(502); // CGI_ERR : write failed
+		
+		return (err);
+	}
+	if (err == 0)
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		return (0);
+	}
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+	this->mod_evt(EPOLLIN);
+	return (0);
+}
+
+int		FcgiPipe::rdhup(void)
+{
+	return (0);
+}
+
+int		FcgiPipe::hup(void)
+{
+	if (this->conn)
+	{
+		// this->conn->cgi_rem(this); 
+		// this->conn = NULL;
+		// if (this->rsrc)
+		// 	this->rsrc->rem(this);
+	}
+	return (-1);
+}
+
+void	FcgiPipe::rsrc_closed(void)
+{ 
+	this->conn = NULL;
+	this->rsrc = NULL;
+}
+
+
+

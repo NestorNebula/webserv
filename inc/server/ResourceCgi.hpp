@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 11:22:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:11:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "Connection.hpp"
 # include "CgiPipe.hpp"
+# include "FcgiConn.hpp"
 # include "bridge.hpp"
 
 
@@ -27,48 +28,43 @@ enum
 	RSRC_RESP_ERR
 };
 
+# ifndef RSRC_FCGI
+#  define RSRC_FCGI 1
+# endif
+
 class ResourceCgi : public Resource
 {
 private:
 	ResourceCgi				 (const ResourceCgi & ) {}
 	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
-	ResourceCgi(void) : pid(0), ip(NULL), op(NULL), 
-	hed(0), 
-	hlen(0), 
-	clen(0), 
-// TLEN
-	tlen(0),
-	ka(0), 
-	error(0),
-	stat(-1),
-	xit(-1), 
-	sig(-1)
+	ResourceCgi(void) :  
+		hed(0), 
+		hlen(0), 
+		clen(0), 
+		tlen(0),
+		ka(0), 
+		error(0),
+
+		pid(0), 
+		ip(NULL), 
+		op(NULL),
+		stat(-1),
+		xit(-1), 
+		sig(-1)
 	{}
 	~ResourceCgi();
 
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
+	int			init(Epoll *ep, CgiEnv *cgienv, Connection *conn);
 	
+// SHARED
 	int			recv_data(char *buf, int siz);
-	void        push_body(void);
-    
-	// shared
 	int			chk_rsp_hed(std::string & ostr);
-	
+	int			consumed(int bytes);
 	void		set_err(int e);
-	
-//
-	// FcgiConn
-	// CgiFast		*fcgi;
-	
-// CgiPipe
-	pid_t		pid;
-	CgiPipe		*ip;
-	CgiPipe		*op;
-	std::string	ostr;
 
-// some of these could be good for FCGI as well .. 
-
+	
 	int			hed;
 	int			hlen;
 	int			clen;
@@ -76,18 +72,25 @@ public:
 	int			ka;
 	int			error;
 	
+
 // CgiPipe
+	pid_t		pid;
+	CgiPipe		*ip;
+	CgiPipe		*op;
+	std::string	ostr;
+
 	int			stat;
 	int			xit;
 	int			sig;
-
-// over-ride
-	int			consumed(int bytes);
+	
+	FcgiPipe	*fcgi;
+// virtual
+	void        push_body(void);
 	int			status(void);
 	void		conn_closed(void);
 	int			wait(int opt);
 
-	int			rem(CgiPipe *epc);
+	int			rem(EpollClient *epc);
 private:
 	Connection	*conn;
 };

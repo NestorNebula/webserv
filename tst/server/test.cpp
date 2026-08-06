@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/28 23:29:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 20:49:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int main (int argc, char ** argv, char **envp)
            WsLog::tgt = TGT_NONE;
            break;
         case 'a':
-           WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
+           WsLog::tgt = TGT_ALL; //  & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
            break;
         }
     }
@@ -41,6 +41,7 @@ int main (int argc, char ** argv, char **envp)
     {
         ep = new Epoll(envp);
         
+// ATTN : catch failed Server construction individually (!)
         new Server(ep, 8080);
         new Server(ep, 8081);
         new Server(ep, 8082);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 11:36:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 22:24:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,6 +174,15 @@ void WsLog::color(int c)
         break;
     case WSL_YELLOW:
         WsLog::col = std::string("\e[1;33m");
+        break;
+    case WSL_BLUE:
+        WsLog::col = std::string("\e[1;34m");
+        break;
+    case WSL_PURPLE:
+        WsLog::col = std::string("\e[1;35m");
+        break;
+    case WSL_CYAN:
+        WsLog::col = std::string("\e[1;36m");
         break;
     case 0:
     default:

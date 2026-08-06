@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 11:40:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:19:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,26 +28,46 @@
 
 // EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
 
+// A defunct or "zombie" process in Linux occurs when a child process finishes running via fork(), but its parent process does not read its exit status using a wait() system call. The process remains in the table holding its PID until reaped.
 
 ResourceCgi::~ResourceCgi()
 {
-	WsLog::_(LVL_DBG, TGT_RSRC, " (~) ResourceCgi");
+#if RSRC_FCGI
+		// NO : it is an EpollClient
+	// if (this->fcgi)
+	// 	delete (this->fcgi);
+#else
+	// WsLog::_(LVL_DBG, TGT_RSRC, " (~) ResourceCgi");
+	WsLog::_(LVL_DBG, TGT_RSRC, "stat: " , this->stat);
+	WsLog::_(LVL_DBG, TGT_RSRC, "pid : " , this->pid);
 	
 	// not sure this is the place ...
 	// CgiPipe => hup => Epoll::rem => this
+	// how did we get here .. without (stat) being set ... 
 	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
 		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC, "kill");
-		kill(this->pid, SIGKILL);
+			// no error .. nothing in output
+		WsLog::_(LVL_DBG, TGT_RSRC, "err  : ", this->error);
+		WsLog::_(LVL_DBG, TGT_RSRC, "ostr\n", this->ostr);
+		// nothing here .. did it get reset (?)
+		WsLog::_(LVL_DBG, TGT_RSRC, "REQUEST\n", this->conn->sess.req.get_body());
+		// kill(this->pid, SIGKILL);
 		this->wait(0); // dangerous (?)
 	}
+#endif
 	this->conn_closed();
 }
 
 void	ResourceCgi::conn_closed(void)
 {
+#if RSRC_FCGI
+	if (this->fcgi)
+		this->fcgi->rsrc_closed();
+	return;
+#else
 // valgrind shit here with KEEP-ALIVE
 	if (this->ip)
 	{
@@ -61,6 +81,7 @@ void	ResourceCgi::conn_closed(void)
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
+#endif
 }
 
 void	ResourceCgi::set_err(int e)
@@ -103,19 +124,34 @@ int	ResourceCgi::status(void)
 	if (!this->hed && this->ip)
 	{
 		WsLog::color(WSL_RED);
-		WsLog::_(LVL_TMP, TGT_RSRC_STAT, "stat:  (no head)");
+		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		return (0); // NEED_HEAD
 	}
 	if (this->ostr.size())
 		return (1);
-#if 1
+	
+
+#if RSRC_FCGI
+	if (this->fcgi == NULL)
+	{
+#else
 	if (this->wait(WNOHANG) != -1)
 	{
+#endif
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (2);
+		// if (wait) returns ..
+		// (op) has closed ... 
+		// but that does not mean we have read from its output yet ..
+		if (this->ka && this->tlen)
+		{
+			WsLog::color(WSL_GREEN);
+			WsLog::_(LVL_DBG, TGT_RSRC_STAT, "wait: TLEN");
+			return (0);
+		}
+		return (-1);
 	}
-#endif
 
 	// what if NOT SET (?)
 	// may have been exit.php problem
@@ -126,16 +162,31 @@ int	ResourceCgi::status(void)
 	}
 
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
-	
+
+#if RSRC_FCGI
+	if (this->fcgi)
+		this->fcgi->mod_evt(EPOLLIN);
+#else
 	if (this->op)
 		this->op->mod_evt(EPOLLIN);
 	if (this->ip)
 		this->ip->mod_evt(EPOLLOUT);
+#endif
 	return (0); // NEED_DATA
 }
 
+
+// Header Safety: You must send HTTP headers (like Content-Type) before any body text. If an error occurs midway through generating output, buffering lets you discard the partial text and output a clean 500 Internal Server Error page instead of a broken, half-rendered HTML file.Content-Length: Holding the output lets you measure the exact byte size of your response so you can send an accurate Content-Length header.
+
 int	ResourceCgi::wait(int opt)
 {
+// FCGI
+#if RSRC_FCGI
+	(void)opt;
+	if (this->fcgi)
+		return (-1);
+	return (0);
+#else
 	int	err;
 	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "pid : ", this->pid);
@@ -149,6 +200,7 @@ int	ResourceCgi::wait(int opt)
 	}
 	if (this->pid == 0)
 	{
+		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
@@ -178,7 +230,7 @@ int	ResourceCgi::wait(int opt)
 // because ..they DO return DATA
 // AND : set error .. 
 		case 2:
-			this->set_err(404);
+this->set_err(404); // cool for python/perl .. but we should just CHECK BEFORE CALLING
 			// this->xit = 0;
 			break;
 #endif
@@ -190,7 +242,7 @@ int	ResourceCgi::wait(int opt)
 			// php 
 			// does not (ka) nicely
 			// because .. it SENDS VALID DATA (!)
-			this->set_err(404);
+// this->set_err(404);
 			break;
 		}
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
@@ -203,7 +255,7 @@ int	ResourceCgi::wait(int opt)
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-		this->set_err(505); 
+// this->set_err(505); 
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}
@@ -213,10 +265,10 @@ int	ResourceCgi::wait(int opt)
 	}
 	this->pid = 0;
 	return (this->stat);
+#endif
 }
 
-// ~CgiPipe - from Epoll (!)
-int	ResourceCgi::rem(CgiPipe *epc)
+int	ResourceCgi::rem(EpollClient *epc)
 {
 	int err = 0;
 
@@ -232,6 +284,11 @@ int	ResourceCgi::rem(CgiPipe *epc)
 		err = 2;
 		this->op = NULL;
 	}
+	else if (epc == this->fcgi)
+	{
+		this->fcgi = NULL;
+		return (3);
+	}
 	
 	if (this->ip == NULL && this->op == NULL)
 	{
@@ -245,7 +302,7 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 {
 	if (this->hed)
 	{
-		// conn->mod_evt(EPOLLOUT);
+		conn->mod_evt(EPOLLOUT);
 		return (RSRC_RESP_BODY);
 	}	
 	size_t	pos = ostr.find("\r\n\r\n");
@@ -256,6 +313,8 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	this->hed = 1;
 	this->hlen = pos + 4;
 	
+// require .. content-type (?)
+
 	std::string conn_close("Connection: close\r\n");
 	std::string conn_keep ("Connection: keep-alive\r\n");
 	
@@ -280,11 +339,18 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 			this->tlen += conn_close.size();
 		}
 	}
+// php - 404 -- very confusing for keep-alive 	
+// THE PROBLEM : when keep-alive is TURNED OFF .. because (CGI) does not provide content-length
 	else
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : ka ", this->ka);
 		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: ka ", conn->ka);
-		// but .. not .. conn .. which could over-ride if error 
+		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "ostr:\n", ostr);
+
+// OR : force buffering 
+
+
+		// and yet .. some get through .. 
 		this->ka = 0; //  rsrc .. conn .. 
 		ostr.insert(0, conn_close);
 	}
@@ -296,7 +362,11 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	{
 		// HTTP/1.1 STATUS [Status Messaage]
 		stat_head = std::string("HTTP/1.0 ") + stat_str + "\r\n";
-		// set error .. 
+// 1) script sets non-200 Status
+// 2) script exits with (error)
+// trust ... (PHP)
+		// this->set_err(atoi(stat_str.c_str()));
+		// return (RSRC_RESP_HEAD);
 	}
 	else
 	{
@@ -323,8 +393,13 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 
 void    ResourceCgi::push_body(void)
 {
+#if RSRC_FCGI
+	if (this->fcgi)
+		this->fcgi->mod_evt(EPOLLOUT);
+#else
     if (this->ip)
         this->ip->mod_evt(EPOLLOUT);
+#endif
 }
 
 int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
@@ -365,4 +440,31 @@ int	ResourceCgi::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 	}
 	this->conn = conn;
 	return (err);	
+}
+
+int	ResourceCgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
+{	
+	int err;
+
+	std::string sock_path("/home/kdonlon/Documents/Projects/webserv/git/tst/server/FCGI/.php-fpm/SOCK");
+	
+	int fd = FcgiConn::make_sock(sock_path.c_str());
+	if (fd < 0)
+		return (-1);
+
+	this->fcgi = new FcgiPipe(ep, fd, conn, this);
+	err = this->fcgi->init(cgienv);
+	if (err < 0)
+	{
+		delete (this->fcgi);
+		this->fcgi = NULL;
+		return (err);
+	}
+	this->fcgi->ini_evt(EPOLLOUT);
+
+	WsLog::color(WSL_YELLOW);
+	WsLog::_(LVL_TMP, TGT_CONN, "FCGI (!)");
+	this->conn = conn;
+
+	return (err);
 }

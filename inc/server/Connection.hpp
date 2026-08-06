@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 10:45:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:04:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class CgiPipe;
 class ResourceCgi;
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 3
+#  define CONN_TIMEOUT 10
 # endif
 
 class Connection : public EpollClient
@@ -72,7 +72,7 @@ private:
 public:
 	int				req_body_status(void);
 	
-	void			cgi_rem(CgiPipe *epc);
+	void			cgi_rem(EpollClient *epc);
 	
 	Server			&serv;
 

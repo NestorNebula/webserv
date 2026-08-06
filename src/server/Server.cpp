@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/31 18:57:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 16:33:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
 	this->addr.sin_port			= htons(this->port);
-// ATTN : catch failed Server construction individually (?)
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
 };

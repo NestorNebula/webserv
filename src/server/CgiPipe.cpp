@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 11:27:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 20:26:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,8 +173,6 @@ ssize_t	CgiPipe::pollin(void)
 		conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
-		// allows error to pass ..
-
 		// conn->ka = rsrc->ka;
 		break;
 	case RSRC_RESP_BODY:
@@ -185,7 +183,8 @@ ssize_t	CgiPipe::pollin(void)
 	return (err);
 }
 
-// The server is in no way obligated to send end-of-file after the script reads CONTENT_LENGTH bytes. 
+// The server is in no way obligated to send end-of-file 
+// after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
 	ssize_t	err;
@@ -195,7 +194,6 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 		
-	
 // SESSION / REQUEST
 // kd : CGI input may need to know :
 	// (0)	: no body data is currently available
@@ -246,10 +244,6 @@ int		CgiPipe::hup(void)
 {
 	if (this->conn)
 	{
-		// strangely important
-		// otherwise .. not set to (NULL) in rsrc .. 
-		// but will be deleted in epoll
-		// so .. kinda .. no longer exists (?)
 		// this->conn->cgi_rem(this); 
 		// this->conn = NULL;
 	}

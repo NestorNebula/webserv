@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 15:03:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 20:55:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,13 +97,17 @@ int     CgiEnv::from_conn(Connection & conn)
 	// php (./) would expect .. to write in the same folder as the script
 	// NOT .. the PWD -- where the application was launched 
 	// file = std::string("tst/server/") + file;
+	std::string serv_root("/home/kdonlon/Documents/Projects/webserv/git/tst/server/");
 	if (file.size())
 	{
 // SCRIPT_NAME
 // A virtual path to the script being executed, used for self-referencing URLs.
+		std::string path = serv_root + file;
 		this->add("SCRIPT_NAME", file.c_str());
 			// PHP CGI depends on non-standard SCRIPT_FILENAME
-		this->add("SCRIPT_FILENAME", file.c_str());	
+// cgi needs FULL PATH (!) and REQUEST LENGTH (?)
+
+		this->add("SCRIPT_FILENAME", path.c_str());	
 	}
 	else
 	{

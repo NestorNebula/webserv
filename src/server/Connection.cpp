@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 12:06:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:18:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,10 @@ Connection::~Connection()
 	WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (this->cgi)
-		delete (this->cgi);
+	{
+		// WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+		delete (this->cgi); // (~) Connection
+	}
 };
 
 bool	Connection::timeo(time_t now)
@@ -51,19 +54,6 @@ void	Connection::set_err(int e)
 {
 	if (e == 0)
 		return;
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [118]
-// epoll : evt typ  : out 
-// conn  : send:  POLLOUT
-// conn  : rsnd:  cnt [0]
-// conn  : send
-// conn  : ostr: [0]
-// conn  : send:  ZERO
-
-	// return; // major stalls .. no data to send 
-	// e = 200; // => cgi NULL (408 not caught);
-	// if (e != 408)
-	// 	e = 200;
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
@@ -80,14 +70,11 @@ void	Connection::set_err(int e)
 		WsLog::_(LVL_DBG, TGT_CONN, "ka  : (res)  ", this->cgi->ka);
 	
 	// ATTN : some errors (500) are not siege-friendly
-// SESSION - get_op_data .. 
 	std::string ebody("Error Data\r\n");
 	
 	this->error = e;
 	this->estr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n");
 
-// res : head .. may have turned it OFF .. 
-// but we don't care on ERROR 
 	if (this->ka) // error
 		this->estr += std::string("Connection: keep-alive\r\n");
 	else
@@ -124,10 +111,9 @@ ssize_t	Connection::pollin(void)
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
 
-	this->mod_evt(EPOLLOUT); 
+	// this->mod_evt(EPOLLOUT); 
 	if (this->cgi == NULL)
 	{
-		// this->cgi = new ResourceCgi;
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
@@ -173,6 +159,11 @@ int		Connection::rsrc_send(int cnt)
 // FUCKING STATES
 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
+		// if (this->ka)
+		// {
+		// 	this->mod_evt(EPOLLIN);
+		// 	return (0);
+		// }
 		return (-1);
 	}
 	
@@ -192,19 +183,29 @@ int		Connection::rsrc_send(int cnt)
 
 		if (res->ostr.size()) // post 
 			return (1);
-// RES->KA (?)
+// RES_DONE .. 
 		if (this->ka && res->ka)
 		{
 			// WsLog::color(WSL_GREEN);
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "keep-alive (1)");
 			WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc send   (1)");
-		
 // this does not seem right
 			if (cnt) // -- like below ..
+			{
+// MOSTLY HERE 
+				// WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (1) POST");
 				this->reset(); // DELETE_CGI
-// does not seem right	
+			}
+// (-1) does not seem right	for (ka)
 			else
-				return (-1);
+			{
+				WsLog::color(WSL_GREEN);
+				WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (1) PRE");
+				// try here .. if not below
+				this->reset();
+				return (0);
+				// return (-1);
+			}
 // we were getting a double-pollin on keep-alive (?)
 			// 	this->mod_evt(EPOLLIN);
 			return (0);
@@ -212,23 +213,39 @@ int		Connection::rsrc_send(int cnt)
 		return (-1);
 	}
 #endif
-	
+	// if (this->ka && !res->ka)
+	// {
+	// 	WsLog::color(WSL_CYAN);
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "(ka) : why (conn) and NOT (cgi)");
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "err  : ", this->error);
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "hed  : ", res->hed);
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr\n", res->ostr);
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "REQUEST\n", this->sess.req.get_body());
+	// }
 	err = res->status(); // MAY SET ERROR
+	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
 	if (err < 0)
 	{
-// RES->KA (?)
+		// does "reason" matter here (?)
 		if (this->ka && res->ka)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn keep-alive");
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn req   ", this->req_cnt);
 			// did we already send an error on this (fd)
 			// should be in POLLOUT
+// why are these different .. after .. 
 			if (cnt)
 			{
-				// WsLog::color(WSL_RED);
-				WsLog::_(LVL_DBG, TGT_CONN_SEND, "keep-alive (2)");
-				this->reset(); // DELETE_CGI
+				WsLog::color(WSL_RED);
+				WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (2) POST");
+				// this appears to trigger a (kill)
+				// this->reset(); // DELETE_CGI
+			}
+			else
+			{
+// MOSTLY HERE
+				// WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (2) PRE");
 			}
 			// WsLog::color(WSL_YELLOW);
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "keep-alive (3)");
@@ -280,6 +297,7 @@ ssize_t	Connection::pollout(void)
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr]\n" , OSTR);
 	err = this->send(OSTR);
 	if (err < 0)
 	{
@@ -363,7 +381,7 @@ int	Connection::rdhup(void)
 	{
 		this->cgi->ka = 0;
 		// this->cgi->conn_closed();
-		// delete (this->cgi);
+		// delete (this->cgi); // conn : rdhup
 		// this->cgi = NULL;
 	}
 	if (this->ka)
@@ -387,10 +405,11 @@ int	Connection::hup(void)
 
 void	Connection::reset(void)
 {
-	this->sess.reset();
 	if (this->cgi)
-		delete (this->cgi);
+		delete (this->cgi); // conn : reset 
 	this->cgi = NULL;
+	
+	this->sess.reset();
 	
 	this->estr.clear();
 	this->error = 0;
@@ -445,7 +464,7 @@ int	Connection::req_body_status(void)
 // called on ~CgiPipe()
 // which could .. directly .. 
 // except .. sometimes we set conn = NULL
-void	Connection::cgi_rem(CgiPipe *epc)
+void	Connection::cgi_rem(EpollClient *epc)
 {
 	switch (this->cgi->rem(epc))
 	{
@@ -463,7 +482,6 @@ void	Connection::cgi_rem(CgiPipe *epc)
 		break;
 	case 3: // (done)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->cgi->error);
 		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
@@ -485,6 +503,20 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
+
+#if RSRC_FCGI
+	this->cgi = new ResourceCgi;
+	err = this->cgi->init(this->ep, cgienv, this);
+	if (err < 0)
+	{
+		delete (this->cgi); // conn : cgi FAIL
+		this->cgi = NULL;
+		delete (cgienv);
+		return (-1);
+	}
+	delete (cgienv);
+	return (err);
+#endif
 
 
 	// need new EpollClient .. 
@@ -531,7 +563,7 @@ int	Connection::exec_cgi(void)
 	err = this->cgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
-		delete (this->cgi);
+		delete (this->cgi); // conn : cgi FAIL
 		this->cgi = NULL;
 	}
 	return (err);

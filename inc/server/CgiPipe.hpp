@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 08:38:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 22:59:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Connection;
 class ResourceCgi;
 
 # ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 5
+#  define CGI_TIMEOUT 10
 # endif
 
 class CgiPipe : public EpollClient
@@ -71,6 +71,8 @@ private:
 	ResourceCgi		*rsrc;
 	// Session		*sess;
 };
+
+
 
 
 #endif

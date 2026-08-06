@@ -6,36 +6,38 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 16:27:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/06 23:17:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FCGI_CONN_HPP
 # define FCGI_CONN_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
 
-#include <sys/un.h>
+# include <sys/un.h>
 
-#include <iostream>
-#include <string>
+# include <iostream>
+# include <string>
 
-#include "MsgBuf.hpp"
-#include "FcgiMsg.hpp"
+# include "MsgBuf.hpp"
+# include "FcgiMsg.hpp"
 
-#include "CgiEnv.hpp"
+# include "CgiEnv.hpp"
 
-#include "WsLog.hpp"
+# include "WsLog.hpp"
+# include "Socket.hpp"
+# include "EpollClient.hpp"
 
-#ifndef BUILD_MAIN_FCGI
-#define BUILD_MAIN_FCGI 0
-#endif 
+# ifndef BUILD_MAIN_FCGI
+#  define BUILD_MAIN_FCGI 0
+# endif 
 
-#ifndef FCGI_DEBUG
-#define FCGI_DEBUG 1
-#endif
+# ifndef FCGI_DEBUG
+#  define FCGI_DEBUG 1
+# endif
 
 #if 0
 void find_pad(unsigned short len)
@@ -58,10 +60,8 @@ public:
 	void	push_body(char *buf, int siz);
 	int		parse(char * buf, int siz);
 
-	std::string	req_head;
-	std::string	req_body;
-
-	std::string ostr;
+	std::string	req;
+	std::string rsp;
 
 	static int	make_sock(const char * sock_path);
 private:
@@ -69,5 +69,40 @@ private:
 	int		push_data(char * buf, int cnt);
 
 };
+
+class Connection;
+class ResourceCgi;
+
+class FcgiPipe : public EpollClient
+{
+private:
+	FcgiPipe				(const FcgiPipe & that) : EpollClient(that), 
+		conn(that.conn) {};
+	FcgiPipe & operator=	(const CgiPipe & ) { return (*this); }
+public:
+	FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc);
+	~FcgiPipe();
+	
+	ssize_t		pollin (void);
+	ssize_t		pollout(void);
+	int			rdhup  (void);
+	int			hup    (void);
+	bool		timeo  (time_t);
+
+	void		rsrc_closed(void);
+
+	int			init(CgiEnv *cgienv);
+private:
+	FcgiConn		fcgi;
+	Connection		*conn;
+	ResourceCgi		*rsrc;
+	// Session		*sess;
+};
+
+
+
+
+
+
 
 #endif
