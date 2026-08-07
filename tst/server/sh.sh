@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=8
 if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -72,11 +72,11 @@ if [ "$1" == "u" ]; then
 	exit 0
 fi
 
-exit 0
+# exit 0
 
 # -H "Connection: keep-alive" \
 
-curl -X POST http://localhost:8081/stat.php -i \
+curl -X POST http://localhost:8081/test.php -i \
 	-H "Content-Type: application/x-www-form-urlencoded" \
 	-d "p1=post-one&p2=post-two"
 echo

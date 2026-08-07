@@ -13,7 +13,6 @@ fi
 
 # PHP_FPM_BIN=/usr/sbin/php-fpm7.4
 PHP_FPM_BIN=/usr/bin/php-fpm
-
 if [ "$1" == "run" ]; then
 
 systemctl --user daemon-reload 
@@ -27,6 +26,9 @@ SRC_DIR=./src
 TGT_DIR=$(pwd)
 
 FPM_DIR=$TGT_DIR/.php-fpm
+
+
+
 
 if [ "$1" == "conf" ]; then
     cat << EOF > ~/.config/systemd/user/php-fpm.service
