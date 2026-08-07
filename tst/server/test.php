@@ -35,6 +35,33 @@
     if (isset($_FILES['file']))
     {
         print_r($_FILES['file']); // Array
+
+            // partial -- 
+            // can't close CONN until FCGI has flushed its body
+        // switch ($_FILES['file']['error']) {
+        //     case UPLOAD_ERR_OK:
+        //         break;
+        //     case UPLOAD_ERR_NO_FILE:
+        //         echo ('No file sent.');
+        //         break;
+        //     case UPLOAD_ERR_INI_SIZE:
+        //     case UPLOAD_ERR_FORM_SIZE:
+        //         echo ('Exceeded filesize limit.');
+        //         break;
+        //     default:
+        //         echo ('Unknown errors.');
+        //         break;
+        // }
         move_uploaded_file($_FILES['file']['tmp_name'], "./uploads/php-" . $_FILES['file']['name']);
+        // move_uploaded_file($_FILES['file']['tmp_name'], getcwd()."/uploads/php-" . $_FILES['file']['name']);
     }
+    echo getcwd();
+
+//     CWD/something.php
+
+// CWD is the working directory where php-fpm is started (or configured to change to).
+
+// In case of chroot CWD = "".
+
+// In any case the SCRIPT_NAME php script can be found with ./SCRIPT_NAME, from the CWD. So the undocumented not standardized SCRIPT_FILENAME should vanish! It breaks the CGI standard.
 ?>

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 16:33:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:22:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,13 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	this->addr.sin_port			= htons(this->port);
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
+
+	data_root = std::string("/home/kdonlon/Documents/Projects/webserv/git/tst/server/");
+	fcgi_sock = std::string("/home/kdonlon/Documents/Projects/webserv/git/tst/server/FCGI/.php-fpm/SOCK");
+	pycgi = std::string("/home/kdonlon/Documents/Projects/webserv/git/pycgi/");
+	bin_php = std::string("/usr/bin/php-cgi");
+	bin_py = std::string("/usr/bin/python");
+	bin_pl = std::string("/usr/bin/perl");
 };
 
 Server::~Server()

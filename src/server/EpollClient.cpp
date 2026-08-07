@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 18:06:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 16:21:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ int	EpollClient::event(struct epoll_event *e)
 		if (err < 0)
 			return (err);
 	}	
-	if (e->events & EPOLLRDHUP)
+	if (e->events & EPOLLRDHUP) // ugh
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
 		return (this->hup());
@@ -209,6 +209,7 @@ static const char *epc_str[] =
 	"serv",
 	"conn",
 	"cgi",
+	"fcgi",
 	NULL
 };
 

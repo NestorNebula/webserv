@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 10:38:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 12:54:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ public:
 	virtual void	push_body(void) = 0;
 };
 
-
-// Session:fill_i/o .. or .. Request::fill_io
 class Session
 {
 public:
@@ -91,28 +89,9 @@ public:
 	// fill_input
 	int write(const char *buf, size_t siz)
 	{
-		// if (have_head)
-		{
-			// if (rsrc == NULL)
-				// new Resource
-			// else
-				// push data to resource .. 
-			// tell resource body data is available
-		}
-
-		// Request : should hold ONLY HEADER
 		int err = this->req.push_data(buf, siz);
 		if (err < REQ_HAVE_HEAD)
 			return (err);
-
-		// BODY/POST -- the rest!
-		// needs to get pushed to (rsrc)
-
-		// if (this->cgi.pid == 0)
-		// if (res == NULL)
-		// new ResourceCgi
-
-		// rsrc::push_body
 		return (err);
 	}
 	int		pull_data(std::string & dst)

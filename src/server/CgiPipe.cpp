@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 11:19:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 13:28:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ void	cgi_pipes::shutdown(void)
 
 
 
-CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) : 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) : 
 	EpollClient(_ep, EPC_CGI, _fd), 
 	conn(_conn),
 	rsrc(_rsrc)
@@ -192,17 +192,7 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-		
-// SESSION / REQUEST
-// kd : CGI input may need to know :
-	// (0)	: no body data is currently available
-	//		  BUT .. more needs to be received to complete the request		
-	// (1)	: body data has been received by the Connection
-	//		  and needs to be written to the (stdin) of the CGI
-	
-	// (-1) : there is no more body data to write to the CGI
-	
-	// rsrc:: should have been filled from sess::write
+
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -241,11 +231,6 @@ int		CgiPipe::rdhup(void)
 
 int		CgiPipe::hup(void)
 {
-	if (this->conn)
-	{
-		// this->conn->cgi_rem(this); 
-		// this->conn = NULL;
-	}
 	return (-1);
 }
 

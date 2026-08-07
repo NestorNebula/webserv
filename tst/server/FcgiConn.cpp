@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 10:39:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:56:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ int FcgiConn::make_sock(const char *sock_path)
     int err = connect(fd, (struct sockaddr*) &fpm, sizeof(struct sockaddr_un));
     if (err < 0)
 	{
+		close(fd);
 		return (-1);
 	}
     return (fd);
@@ -151,7 +152,7 @@ int FcgiConn::request(CgiEnv * env)
 	
 	req.append(msg.buf.text(), msg.buf.size());
 
-	return (1);
+	return (0);
 }
 
 void FcgiConn::push_body(char *buf, int siz)
@@ -375,8 +376,8 @@ int main(void)
 
 
 
-FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc) : 
-	EpollClient(_ep, EPC_CGI, _fd), 
+FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) : 
+	EpollClient(_ep, EPC_FCGI, _fd), 
 	conn(_conn),
 	rsrc(_rsrc)
 {
@@ -385,7 +386,7 @@ FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc
 	
 FcgiPipe::~FcgiPipe()
 {
-	WsLog::_(LVL_DBG, TGT_CGI, " (~) Fcgi");
+	WsLog::_(LVL_DBG, TGT_FCGI, " (~) Fcgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
 	// if (this->rsrc)
@@ -416,9 +417,9 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 	err = fcgi.request(cgienv);
 	if (err < 0)
 		return (err);
-
 	return (err);
 }
+
 ssize_t	FcgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
@@ -428,28 +429,24 @@ ssize_t	FcgiPipe::pollin(void)
 
 	ssize_t	err = 0;
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
+	WsLog::_(LVL_DBG, TGT_FCGI, "recv");
 	err = this->recv();
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
+	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", err);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
+		WsLog::_(LVL_ERR, TGT_FCGI, "recv: err");
 		this->rsrc->set_err(501); // CGI_ERR : read failed
 		return (err);
 	}
-	
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
+		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		return (-1);
 	}
 	
-// this feels backwards .. 
-// when the fd can be READ FROM - we are expecting stdout ... 
-// why is this backwards with cgi-pipe (?)
-
 	if (fcgi.parse(this->ibuf, err) < 0)
 	{
+		WsLog::_(LVL_ERR, TGT_FCGI, "fcgi:  parse failed");
 		return (-1);
 	}
 		
@@ -461,11 +458,11 @@ ssize_t	FcgiPipe::pollin(void)
 		conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
-		// this->mod_evt(EPOLLIN);
+		// this->mod_evt(EPOLLOUT);
 		break;
 	case RSRC_RESP_BODY:
 	default:
-		this->mod_evt(EPOLLIN);
+		// this->mod_evt(EPOLLOUT);
 		conn->mod_evt(EPOLLOUT);
 		break;
 	}
@@ -483,84 +480,65 @@ ssize_t	FcgiPipe::pollout(void)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-		
-// SESSION / REQUEST
-// kd : CGI input may need to know :
-	// (0)	: no body data is currently available
-	//		  BUT .. more needs to be received to complete the request		
-	// (1)	: body data has been received by the Connection
-	//		  and needs to be written to the (stdin) of the CGI
 	
-	// (-1) : there is no more body data to write to the CGI
-	
-	// rsrc:: should have been filled from sess::write
-	if (this->fcgi.req.size())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "fcgi: head\n", fcgi.req);
-		err = this->send(fcgi.req);
-	}
-	// else if (this->fcgi.req_body.size())
-	// {
-	// 	err = this->send(fcgi.req_body);
-	// }
-	else
+	if (this->fcgi.req.size() == 0)
 	{
 		err = this->conn->req_body_status();
 		if (err < 0)
 		{
-			WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
-			fcgi.push_body(NULL, 0); // .. AND SEND
-			// return (-1); // NO !! 
+			WsLog::_(LVL_DBG, TGT_FCGI, "body     : complete");
+			fcgi.push_body(NULL, 0);
+			// IMPORTANT STATE INFO
 			this->mod_evt(-EPOLLOUT);
 		}
 		if (err == 0)
 		{
-			WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+			// Continue -- should FAIL
+			WsLog::_(LVL_DBG, TGT_FCGI, "body     : waiting");
 			this->mod_evt(0);
 			return (0);
 		}
 		
 		std::string & body = this->conn->sess.req.get_body();
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
+		WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
 
 		fcgi.push_body((char*) body.c_str(), body.size());
-		body.clear(); // 
-		// WsLog::_(LVL_DBG, TGT_CGI_SEND, "fcgi: body\n", fcgi.req_body);
-
-		err = this->send(fcgi.req);
+		body.clear();
+		// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
 	}
-
+	err = this->send(fcgi.req);
+// -pass-header Authorization
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
-		// this->rsrc->set_err(502); // CGI_ERR : write failed
-		
+		WsLog::_(LVL_ERR, TGT_FCGI, "send");
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
 		return (0);
 	}
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
 	this->mod_evt(EPOLLIN);
 	return (0);
 }
 
 int		FcgiPipe::rdhup(void)
 {
-	return (0);
+	// nothing more to "send back"
+	// but .. still may be receiving an upload
+	// this->mod_evt(-EPOLLIN); // BAD IDEA
+	// this->mod_evt(-EPOLLOUT);
+	if (this->rsrc->ostr.size())
+		return (0);
+	if (this->conn->req_body_status() >= 0)
+		return (0);
+		// UPLOAD (-1) => connection reset by peer .. 
+	return (-1);
 }
 
 int		FcgiPipe::hup(void)
 {
-	if (this->conn)
-	{
-		// this->conn->cgi_rem(this); 
-		// this->conn = NULL;
-		// if (this->rsrc)
-		// 	this->rsrc->rem(this);
-	}
 	return (-1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 22:59:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 13:22:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
 };
 
 class Connection;
-class ResourceCgi;
+class ResourcePiped;
 
 # ifndef CGI_TIMEOUT
 #  define CGI_TIMEOUT 10
@@ -55,7 +55,7 @@ private:
 		conn(that.conn) {};
 	CgiPipe & operator=	(const CgiPipe & ) { return (*this); }
 public:
-	CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceCgi * _rsrc);
+	CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc);
 	~CgiPipe();
 	
 	ssize_t		pollin (void);
@@ -68,7 +68,7 @@ public:
 
 private:
 	Connection		*conn;
-	ResourceCgi		*rsrc;
+	ResourcePiped	*rsrc;
 	// Session		*sess;
 };
 

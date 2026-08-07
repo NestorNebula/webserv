@@ -11,21 +11,26 @@ if [ "$1" == "clean" ]; then
 fi
 
 
-# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-PHP_FPM_BIN=/usr/bin/php-fpm
-if [ "$1" == "run" ]; then
-
-systemctl --user daemon-reload 
-systemctl --user start php-fpm.service
-
-# why can't I ctrl-c out of this (?)
-# /usr/bin/php-fpm --nodaemonize --fpm-config /media/kdonlon/data/Documents/42/webserv/git/tst/server/FCGI/.php-fpm/php-fpm.conf
-    exit 0
-fi
 SRC_DIR=./src
 TGT_DIR=$(pwd)
 
 FPM_DIR=$TGT_DIR/.php-fpm
+
+
+# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+PHP_FPM_BIN=/usr/bin/php-fpm
+
+
+if [ "$1" == "start" ]; then
+    # /usr/bin/php-fpm --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
+    systemctl --user daemon-reload 
+    systemctl --user start php-fpm.service
+    exit 0
+fi
+if [ "$1" == "stop" ]; then
+    systemctl --user stop php-fpm.service
+    exit 0
+fi
 
 
 

@@ -59,20 +59,22 @@ if [ "$1" == "u" ]; then
 		-F p2=dash-f-two \
 		-F file=@files/$FILE
 	echo
-	curl -X POST http://localhost:8081/test.pl -i \
-		-F p1=dash-f-one \
-		-F p2=dash-f-two \
-		-F file=@files/$FILE
-	echo
-	curl -X POST http://localhost:8081/test.py -i \
-		-F p1=dash-f-one \
-		-F p2=dash-f-two \
-		-F file=@files/$FILE
-	echo
+	# curl -X POST http://localhost:8081/test.pl -i \
+	# 	-F p1=dash-f-one \
+	# 	-F p2=dash-f-two \
+	# 	-F file=@files/$FILE
+	# echo
+	# curl -X POST http://localhost:8081/test.py -i \
+	# 	-F p1=dash-f-one \
+	# 	-F p2=dash-f-two \
+	# 	-F file=@files/$FILE
+	# echo
 	exit 0
 fi
 
-exit 0
+if [ "$1" ]; then
+	exit 0
+fi
 
 # -H "Connection: keep-alive" \
 

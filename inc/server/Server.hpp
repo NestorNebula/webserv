@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 17:10:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:20:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SERVER_HPP
 
 # include <iostream>
+# include <string>
 # include <unistd.h>
 # include <arpa/inet.h>	
 # include <fcntl.h>
@@ -51,6 +52,13 @@ public:
 	bool				timeo  (time_t);
 	
 	unsigned short		get_port(void)	const;
+	
+	std::string			data_root;
+	std::string			fcgi_sock;
+	std::string			pycgi;
+	std::string			bin_php;
+	std::string			bin_py;
+	std::string			bin_pl;
 	
 private:
 	struct sockaddr_in	addr;

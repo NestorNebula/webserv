@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/04 16:53:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 15:43:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ typedef enum
 	EPC_SERV,
 	EPC_CONN,
 	EPC_CGI,
+	EPC_FCGI,
 	EPC_MAX
 }	epc_typ;
 // ATTN : typ_str
@@ -79,8 +80,8 @@ public:
 	struct epoll_event	*get_evt(void);
     std::string 		typ_str(void);
 	
-protected:
 	Epoll				*ep;
+protected:
 	epc_typ				typ;
 	int					fd;
 	struct epoll_event	evt;

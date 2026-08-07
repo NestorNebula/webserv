@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/03 13:49:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 13:32:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,19 @@ std::string num_2_str(T value)
 
 class Connection;
 
+enum
+{
+	CGI_PHP = 1,
+	CGI_PYTHON,
+	CGI_PERL
+};
+
 class CgiEnv
 {
 private:
 	CgiEnv				(const CgiEnv & );
 	CgiEnv & operator = (const CgiEnv & ) { return (*this); }
+	
 public:
 	CgiEnv (void);
 	~CgiEnv();
@@ -45,8 +53,9 @@ public:
 	void		    add(const char *key, int n);
 	const char	    **gen(void);
 	
-	const char					*args[4];
+	const char							*args[4];
 	std::map<std::string, std::string>	kv;
+	int									lang;
 private:
 	std::vector<std::string>			data;
 	const char							**res;

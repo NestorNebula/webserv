@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 11:11:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:04:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Connection::~Connection()
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (this->cgi)
 	{
-		// WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+		this->cgi->conn_closed();
 		delete (this->cgi); // (~) Connection
 	}
 };
@@ -99,12 +99,10 @@ ssize_t	Connection::pollin(void)
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-// SESSION
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
 
-	// this->mod_evt(EPOLLOUT); 
 	if (this->cgi == NULL)
 	{
 		if (this->exec_cgi() < 0)
@@ -128,67 +126,6 @@ ssize_t	Connection::pollin(void)
 // If no content_length is returned from the CGI, EOF will mark the end of the returned data.
 // ∗ The CGI should be run in the correct directory for relative path file access.
 
-int		Connection::rsrc_send(int cnt)
-{
-	int	err;
-
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cnt ", cnt);
-	// if (this->error)
-	// {
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  error ", this->error);
-	// 	return (1);
-	// }
-	
-	ResourceCgi *res = this->cgi;
-	if (res == NULL)
-	{
-		// WsLog::color(WSL_GREEN);
-
-// still have have data/something to do (!)
-
-// FUCKING STATES
-
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
-		return (-1);
-	}
-	
-	if (res->error)
-	{
-		this->set_err(res->error);
-		return (1);
-	}
-
-#if 1
-	if (res->wait(WNOHANG) != -1)
-	{
-		// DONE (1)
-		// WsLog::color(WSL_RED);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (wait) ", cnt );
-
-		if (res->ostr.size()) // post 
-			return (1);
-		return (-1);
-	}
-#endif
-
-	err = res->status(); // MAY SET ERROR
-	
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
-	if (err < 0)
-		return (-1);
-	return (err);
-}
-
-
-// need to be real careful .. about when (cgi) is deleted / done
-
-// THE ANSWER : 
-	// a VERY clear idea .. of what we need to know when
-	// cgi->state
-	// check_state()
-// cgi .. might be "done" .. but .. it's when the .. pipes are closed (?) that matters
-// (Q) : when do we DELETE the resource 
-
 ssize_t	Connection::pollout(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
@@ -198,25 +135,27 @@ ssize_t	Connection::pollout(void)
 	if (this->error)
 		return (this->send_error());
 
-	err = this->rsrc_send(0);
-	if (err <= 0)
+	ResourceCgi *res = this->cgi;
+	if (res == NULL)
 	{
-		// what if we detect an error in here (?)
+		return (-1);
+	}
+	err = res->status();
+	if (err < 0)
+	{
+		if (res->ostr.size() == 0)
+			return (-1);
+	}	
+	if (this->error)
+		return (this->send_error());
+	if (err == 0)
+	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
 		this->mod_evt(-EPOLLOUT);
 		return (err);
 	}	
-	// if (this->error)
-	// 	return (this->send_error());
 	
-
-	// MOVE rsrc_send to res->get_data()
-		
-	
-	// res->get_ostr .. 
-	ResourceCgi *res = this->cgi; // ASSUME non-NULL
-	// err = this->sess.pull_data();
-	std::string & OSTR = res->ostr;
+	std::string & OSTR = res->get_ostr();
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
@@ -238,8 +177,6 @@ ssize_t	Connection::pollout(void)
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
-	res->consumed(err);
-	this->rsrc_send(err);
 	return (err);
 }
 
@@ -280,7 +217,10 @@ int	Connection::hup(void)
 void	Connection::reset(void)
 {
 	if (this->cgi)
+	{
+		this->cgi->conn_closed();
 		delete (this->cgi); // conn : reset 
+	}
 	this->cgi = NULL;
 	
 	this->sess.reset();
@@ -357,6 +297,8 @@ void	Connection::cgi_rem(EpollClient *epc)
 	case 3: // (done)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
 		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
+// called .. as it's getting destroyed .. when it deletes is resource .. ugly
+
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
@@ -378,19 +320,35 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 
-#if RSRC_FCGI
-	this->cgi = new ResourceCgi;
-	err = this->cgi->init(this->ep, cgienv, this);
-	if (err < 0)
+	if (cgienv->lang == CGI_PHP)
 	{
-		delete (this->cgi); // conn : cgi FAIL
-		this->cgi = NULL;
-		delete (cgienv);
-		return (-1);
+		ResourceFcgi * fcgi = new ResourceFcgi;
+		err = fcgi->init(this->ep, cgienv, this);
+
+		
+		// if (err < 0)
+		// {
+		// 	delete (fcgi); // conn : cgi FAIL
+		// 	delete (cgienv);
+		// 	return (-1);
+		// }
+		// delete (cgienv);
+		// this->cgi = fcgi;
+		// return (err);
+
+		WsLog::_(LVL_TMP, TGT_CONN, "php : ", err);
+		if (err == 0)
+		{
+			WsLog::color(WSL_GREEN);
+			WsLog::_(LVL_TMP, TGT_CONN, "php : fcgi");			
+			delete (cgienv);
+			this->cgi = fcgi;
+			return (err);
+		}
+		delete (fcgi);
+		WsLog::color(WSL_YELLOW);
+		WsLog::_(LVL_TMP, TGT_CONN, "php : pipe");
 	}
-	delete (cgienv);
-	return (err);
-#endif
 
 
 	// need new EpollClient .. 
@@ -433,12 +391,13 @@ int	Connection::exec_cgi(void)
 	}		
 	delete (cgienv);
 	
-	this->cgi = new ResourceCgi;
-	err = this->cgi->init(this->ep, pid, &pipes, this);
+	ResourcePiped * pcgi = new ResourcePiped;
+	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
-		delete (this->cgi); // conn : cgi FAIL
-		this->cgi = NULL;
+		delete (pcgi); // conn : cgi FAIL
+		return (err);
 	}
+	this->cgi = pcgi;
 	return (err);
 }

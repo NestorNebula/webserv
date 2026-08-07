@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 11:15:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 14:53:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # include "FcgiConn.hpp"
 # include "bridge.hpp"
 
-
 enum
 {
 	RSRC_RESP_INIT = 0,
@@ -28,55 +27,48 @@ enum
 	RSRC_RESP_ERR
 };
 
-# ifndef RSRC_FCGI
-#  define RSRC_FCGI 0
-# endif
-
-class ResourceCgi : public Resource
+class ResourceCgi
 {
-private:
-	ResourceCgi				 (const ResourceCgi & ) {}
-	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
 	ResourceCgi(void) :  
 		hed(0),
 		error(0),
-
-		pid(0), 
-		ip(NULL), 
-		op(NULL),
-		stat(-1),
-		xit(-1), 
-		sig(-1)
+		conn(NULL)
 	{}
-	~ResourceCgi();
+	virtual ~ResourceCgi() {};
 
-	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
+	int				recv_data(char *buf, int siz);
+	int				chk_rsp_hed(std::string & ostr);
+	void			set_err(int e);
+	std::string &	get_ostr(void) { return (this->ostr); }
+	
+	int				hed;
+	int				error;
+	std::string		ostr;
+	
+	virtual void	push_body(void) = 0;
+	virtual int		status(void) = 0;
+	virtual void	conn_closed(void) = 0;
+	virtual int		wait(int opt) = 0;
+
+	virtual int			rem(EpollClient *epc) = 0;
+protected:
+	Connection	*conn;
+};
+
+
+class ResourceFcgi : public ResourceCgi
+{
+private:
+	ResourceFcgi			  (const ResourceFcgi & that ) : ResourceCgi(that) {}
+	ResourceFcgi & operator = (const ResourceFcgi & ) { return (*this); }
+public:
+	ResourceFcgi(void) : ResourceCgi(), fcgi(NULL) {}
+	~ResourceFcgi();
+
 	int			init(Epoll *ep, CgiEnv *cgienv, Connection *conn);
-	
-// SHARED
-	int			recv_data(char *buf, int siz);
-	int			chk_rsp_hed(std::string & ostr);
-	int			consumed(int bytes);
-	void		set_err(int e);
 
-	
-	int			hed;
-	int			error;
-	
 
-// CgiPipe
-	pid_t		pid;
-	CgiPipe		*ip;
-	CgiPipe		*op;
-	std::string	ostr;
-
-	int			stat;
-	int			xit;
-	int			sig;
-	
-	FcgiPipe	*fcgi;
-// virtual
 	void        push_body(void);
 	int			status(void);
 	void		conn_closed(void);
@@ -84,8 +76,44 @@ public:
 
 	int			rem(EpollClient *epc);
 private:
-	Connection	*conn;
+	FcgiPipe	*fcgi;
 };
 
+
+class ResourcePiped : public ResourceCgi
+{
+private:
+	ResourcePiped				 (const ResourcePiped & that ) : ResourceCgi(that) {}
+	ResourcePiped & operator = (const ResourcePiped & ) { return (*this); }
+public:
+	ResourcePiped(void) : ResourceCgi(),
+		pid(0), 
+		ip(NULL), 
+		op(NULL),
+		stat(-1),
+		xit(-1), 
+		sig(-1)
+	{}
+	~ResourcePiped();
+	
+	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
+	
+	void        push_body(void);
+	int			status(void);
+	void		conn_closed(void);
+	int			wait(int opt);
+
+	int			rem(EpollClient *epc);
+
+private:
+	pid_t		pid;
+	CgiPipe		*ip;
+	CgiPipe		*op;
+
+	int			stat;
+	int			xit;
+	int			sig;
+
+};
 
 #endif

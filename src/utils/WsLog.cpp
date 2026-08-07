@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 11:19:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 16:18:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,7 +344,7 @@ void    WsLog::kd(void)
     ;
     
     // WsLog::tgt = TGT_NONE;
-    WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN_SEND | TGT_CGI | TGT_RSRC_STAT | TGT_RSRC_WAIT;
+    WsLog::tgt = TGT_EPOLL_EVT | TGT_FCGI | TGT_CONN | TGT_CGI | TGT_RSRC_STAT | TGT_RSRC_WAIT;
 
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;
