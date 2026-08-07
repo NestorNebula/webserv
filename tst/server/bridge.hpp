@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 08:49:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 10:38:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ std::string hedval_str(std::string & str, const char *key);
 class Request
 {
 public:
-	Request(void) : ka(0), state(REQ_INIT), blen(0), clen(0), chnk(0) {}
+	Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
 	~Request() {}
 
 	int         push_data(const char *buf, size_t siz);
@@ -47,8 +47,6 @@ public:
 	
 	void		reset(void);
 
-	int			ka;
-	
 // private:
 	int			state;
 	

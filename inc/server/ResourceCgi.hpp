@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:11:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 11:15:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ enum
 };
 
 # ifndef RSRC_FCGI
-#  define RSRC_FCGI 1
+#  define RSRC_FCGI 0
 # endif
 
 class ResourceCgi : public Resource
@@ -39,11 +39,7 @@ private:
 	ResourceCgi & operator = (const ResourceCgi & ) { return (*this); }
 public:
 	ResourceCgi(void) :  
-		hed(0), 
-		hlen(0), 
-		clen(0), 
-		tlen(0),
-		ka(0), 
+		hed(0),
 		error(0),
 
 		pid(0), 
@@ -66,10 +62,6 @@ public:
 
 	
 	int			hed;
-	int			hlen;
-	int			clen;
-	int			tlen;
-	int			ka;
 	int			error;
 	
 

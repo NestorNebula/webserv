@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:18:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 11:11:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	EpollClient(_ep, EPC_CONN, _fd), 
 	cgi(NULL),
 	serv(_serv), 
-	req_cnt(0),
-	ka(0)
+	req_cnt(0)
 {
 };
 
@@ -65,9 +64,6 @@ void	Connection::set_err(int e)
 
 	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
 	WsLog::_(LVL_DBG, TGT_CONN, "fd  : (conn) ", this->fd);
-	WsLog::_(LVL_DBG, TGT_CONN, "ka  : (conn) ", this->ka);
-	if (this->cgi)
-		WsLog::_(LVL_DBG, TGT_CONN, "ka  : (res)  ", this->cgi->ka);
 	
 	// ATTN : some errors (500) are not siege-friendly
 	std::string ebody("Error Data\r\n");
@@ -75,10 +71,7 @@ void	Connection::set_err(int e)
 	this->error = e;
 	this->estr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n");
 
-	if (this->ka) // error
-		this->estr += std::string("Connection: keep-alive\r\n");
-	else
-		this->estr += std::string("Connection: close\r\n");
+	this->estr += std::string("Connection: close\r\n");
 	this->estr += std::string("Content-Length: ") + num_2_str(ebody.size()) + std::string("\r\n");
 	this->estr += std::string("\r\n");
 	this->estr += ebody;
@@ -121,9 +114,6 @@ ssize_t	Connection::pollin(void)
 			this->set_err(404); // siege-friendly
 			return (0); // send error
 		}
-// (ka) : from REQUEST
-		this->ka = sess.req.ka;
-		this->cgi->ka = sess.req.ka;
 		this->req_cnt++;
 	}
 	
@@ -159,11 +149,6 @@ int		Connection::rsrc_send(int cnt)
 // FUCKING STATES
 
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi (NULL) ", cnt );
-		// if (this->ka)
-		// {
-		// 	this->mod_evt(EPOLLIN);
-		// 	return (0);
-		// }
 		return (-1);
 	}
 	
@@ -173,8 +158,7 @@ int		Connection::rsrc_send(int cnt)
 		return (1);
 	}
 
-#if 1 // why not just (status)
-	// without : can STALL 
+#if 1
 	if (res->wait(WNOHANG) != -1)
 	{
 		// DONE (1)
@@ -183,76 +167,15 @@ int		Connection::rsrc_send(int cnt)
 
 		if (res->ostr.size()) // post 
 			return (1);
-// RES_DONE .. 
-		if (this->ka && res->ka)
-		{
-			// WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "keep-alive (1)");
-			WsLog::_(LVL_DBG, TGT_CONN, "-out:  rsrc send   (1)");
-// this does not seem right
-			if (cnt) // -- like below ..
-			{
-// MOSTLY HERE 
-				// WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (1) POST");
-				this->reset(); // DELETE_CGI
-			}
-// (-1) does not seem right	for (ka)
-			else
-			{
-				WsLog::color(WSL_GREEN);
-				WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (1) PRE");
-				// try here .. if not below
-				this->reset();
-				return (0);
-				// return (-1);
-			}
-// we were getting a double-pollin on keep-alive (?)
-			// 	this->mod_evt(EPOLLIN);
-			return (0);
-		}
 		return (-1);
 	}
 #endif
-	// if (this->ka && !res->ka)
-	// {
-	// 	WsLog::color(WSL_CYAN);
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "(ka) : why (conn) and NOT (cgi)");
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "err  : ", this->error);
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "hed  : ", res->hed);
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr\n", res->ostr);
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "REQUEST\n", this->sess.req.get_body());
-	// }
+
 	err = res->status(); // MAY SET ERROR
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  cgi  data  ", err);
 	if (err < 0)
-	{
-		// does "reason" matter here (?)
-		if (this->ka && res->ka)
-		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn keep-alive");
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd:  conn req   ", this->req_cnt);
-			// did we already send an error on this (fd)
-			// should be in POLLOUT
-// why are these different .. after .. 
-			if (cnt)
-			{
-				WsLog::color(WSL_RED);
-				WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (2) POST");
-				// this appears to trigger a (kill)
-				// this->reset(); // DELETE_CGI
-			}
-			else
-			{
-// MOSTLY HERE
-				// WsLog::_(LVL_DBG, TGT_CONN_SEND, "rsnd : (2) PRE");
-			}
-			// WsLog::color(WSL_YELLOW);
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "keep-alive (3)");
-			return (0);
-		}
 		return (-1);
-	}
 	return (err);
 }
 
@@ -325,50 +248,13 @@ int		Connection::send_error(void)
 	int	err;
 	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
-#if 1
-	if (this->error == 408 && this->ka)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  t/o (ka)");
-		this->error = 0;
-		this->mod_evt(EPOLLIN); // so .. this not set .. 
-		if (this->cgi)
-		{
-			// this->cgi->conn_closed(); // BAD!
-			if (this->cgi->op)
-				this->cgi->op->mod_evt(EPOLLIN);
-			if (this->cgi->ip)
-				this->cgi->ip->mod_evt(EPOLLOUT);
-			return (0);
-		}
-		return (0);
-		// return (-1);
-	}
-#endif
+
 	err = this->send(this->estr); 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 	if (err < 0)
 		return (-1);
 	if (this->estr.size())
 		return (err);
-		
-	if ((this->error != 408) && this->ka) 
-	{
-		// WsLog::color(WSL_GREEN);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "err :  keep-alive");
-		// WsLog::color(WSL_GREEN);
-
-
-		// this->mod_evt(EPOLLIN);
-		if (this->cgi)
-		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "err :  cgi != NULL");
-		}
-		else
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "err :  cgi == NULL");
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "req : ", this->req_cnt); 
-		this->reset(); // DELETE_CGI
-		return (0);
-	}
 	return (-1);
 }
 
@@ -377,18 +263,6 @@ int	Connection::rdhup(void)
 	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
 	
-	if (this->cgi)
-	{
-		this->cgi->ka = 0;
-		// this->cgi->conn_closed();
-		// delete (this->cgi); // conn : rdhup
-		// this->cgi = NULL;
-	}
-	if (this->ka)
-	{
-		this->ka = 0;
-		return (0);
-	}
 	// return (-1); // (this feels dangerous)
 	return (0);
 }

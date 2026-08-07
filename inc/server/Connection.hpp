@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:04:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 10:33:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class Connection : public EpollClient
 {
 private:
 	Connection				(const Connection & that) : EpollClient(that), 
-		serv(that.serv), req_cnt(0), ka(0) {}
+		serv(that.serv), req_cnt(0) {}
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
 		
@@ -84,8 +84,6 @@ private:
 	std::string			astr;
 	
 	int					req_cnt;
-public:
-	int					ka;
 };
 
 #endif

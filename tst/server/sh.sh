@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=4
 if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -72,7 +72,7 @@ if [ "$1" == "u" ]; then
 	exit 0
 fi
 
-# exit 0
+exit 0
 
 # -H "Connection: keep-alive" \
 

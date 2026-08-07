@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:20:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 10:39:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -461,7 +461,6 @@ ssize_t	FcgiPipe::pollin(void)
 		conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
-		// conn->ka = rsrc->ka;
 		// this->mod_evt(EPOLLIN);
 		break;
 	case RSRC_RESP_BODY:

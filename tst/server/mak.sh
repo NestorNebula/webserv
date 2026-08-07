@@ -8,7 +8,7 @@ fi
 make -j12 || exit 1
 tput reset
 if [[ "$1" =~ "v" ]]; then
-	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test
+	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test 0
 else
 	./test "$1"
 fi

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:19:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 11:45:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,10 @@ ResourceCgi::~ResourceCgi()
 		WsLog::_(LVL_DBG, TGT_RSRC, "err  : ", this->error);
 		WsLog::_(LVL_DBG, TGT_RSRC, "ostr\n", this->ostr);
 		// nothing here .. did it get reset (?)
-		WsLog::_(LVL_DBG, TGT_RSRC, "REQUEST\n", this->conn->sess.req.get_body());
-		// kill(this->pid, SIGKILL);
-		this->wait(0); // dangerous (?)
+		// WsLog::_(LVL_DBG, TGT_RSRC, "REQUEST\n", this->conn->sess.req.get_body());
+		// kill(this->pid, SIGKILL); // => defunct => 
+		// valgrind : connection reset by peer
+		this->wait(0);
 	}
 #endif
 	this->conn_closed();
@@ -99,18 +100,9 @@ void	ResourceCgi::set_err(int e)
 
 int	ResourceCgi::consumed(int bytes)
 {
-// TLEN
-	// if (this->tlen == -1)
-	// 	return (1);
-		
-	if (bytes < this->tlen)
-	{
-		this->tlen -= bytes;
-		return (1);
-	}
-	this->tlen = 0;
-	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "tlen:  (0)");
-	return (-1);
+	(void)bytes;
+
+	return (0);
 }
 
 int	ResourceCgi::status(void)
@@ -141,26 +133,8 @@ int	ResourceCgi::status(void)
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (2);
-		// if (wait) returns ..
-		// (op) has closed ... 
-		// but that does not mean we have read from its output yet ..
-		if (this->ka && this->tlen)
-		{
-			WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_DBG, TGT_RSRC_STAT, "wait: TLEN");
-			return (0);
-		}
 		return (-1);
 	}
-
-	// what if NOT SET (?)
-	// may have been exit.php problem
-	if (this->ka && this->tlen == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (tlen == 0)");
-		return (-1);
-	}
-
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 #if RSRC_FCGI
@@ -180,9 +154,9 @@ int	ResourceCgi::status(void)
 
 int	ResourceCgi::wait(int opt)
 {
+	(void)opt;
 // FCGI
 #if RSRC_FCGI
-	(void)opt;
 	if (this->fcgi)
 		return (-1);
 	return (0);
@@ -207,9 +181,7 @@ int	ResourceCgi::wait(int opt)
 	if (this->ip || this->op)
 		return (this->stat); // (-1) : still active
 	
-	// (void)opt;
-	opt = 0; // kinda better : if BOTH are CLOSED .. force wait 
-	err = waitpid(this->pid, &this->stat, opt);
+	err = waitpid(this->pid, &this->stat, 0);
 	
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WsLog::_(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);
@@ -221,30 +193,6 @@ int	ResourceCgi::wait(int opt)
 	if (WIFEXITED(stat))
 	{
 		this->xit = WEXITSTATUS(stat);
-		switch (this->xit)
-		{
-		case 0:
-			break;
-#if 1
-// exit.php, suck.php ... confusing
-// because ..they DO return DATA
-// AND : set error .. 
-		case 2:
-this->set_err(404); // cool for python/perl .. but we should just CHECK BEFORE CALLING
-			// this->xit = 0;
-			break;
-#endif
-		default:
-			// (res)
-			// do not override .. 
-			// may be killing a successfully "finished" -- 
-			// but not timed out
-			// php 
-			// does not (ka) nicely
-			// because .. it SENDS VALID DATA (!)
-// this->set_err(404);
-			break;
-		}
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
 		// valgrind : "Unknown error 255" is malloc'ed (!)
 		if (xit < 255)
@@ -255,7 +203,6 @@ this->set_err(404); // cool for python/perl .. but we should just CHECK BEFORE C
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
-// this->set_err(505); 
 		WsLog::_(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WsLog::_(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 	}
@@ -311,72 +258,26 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 		
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	this->hed = 1;
-	this->hlen = pos + 4;
 	
 // require .. content-type (?)
 
 	std::string conn_close("Connection: close\r\n");
-	std::string conn_keep ("Connection: keep-alive\r\n");
+	ostr.insert(0, conn_close);
 	
-	std::string conn_str = hedval_str(ostr, "Content-Length");
-	if (conn_str.size())
-	{
-		this->clen = atoi(conn_str.c_str());
-		this->tlen = this->hlen + this->clen;
-		
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "hlen: ", this->hlen);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "clen: ", this->clen);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "tlen: ", this->tlen);
-		
-		if (this->ka)
-		{
-			ostr.insert(0, conn_keep);
-			this->tlen += conn_keep.size();
-		}
-		else
-		{
-			ostr.insert(0, conn_close);
-			this->tlen += conn_close.size();
-		}
-	}
-// php - 404 -- very confusing for keep-alive 	
-// THE PROBLEM : when keep-alive is TURNED OFF .. because (CGI) does not provide content-length
-	else
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "cgi : ka ", this->ka);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "conn: ka ", conn->ka);
-		WsLog::_(LVL_DBG, TGT_CGI_HEAD, "ostr:\n", ostr);
-
-// OR : force buffering 
-
-
-		// and yet .. some get through .. 
-		this->ka = 0; //  rsrc .. conn .. 
-		ostr.insert(0, conn_close);
-	}
 
 	std::string stat_head;
 	std::string stat_str = hedval_str(ostr, "Status");
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
 	if (stat_str.size())
 	{
-		// HTTP/1.1 STATUS [Status Messaage]
+		// HTTP/1.1 STATUS [Status Message]
 		stat_head = std::string("HTTP/1.0 ") + stat_str + "\r\n";
-// 1) script sets non-200 Status
-// 2) script exits with (error)
-// trust ... (PHP)
-		// this->set_err(atoi(stat_str.c_str()));
-		// return (RSRC_RESP_HEAD);
 	}
 	else
 	{
 		stat_head = std::string("HTTP/1.0 200 OK\r\n");
 	}
 	ostr.insert(0, stat_head);
-// TLEN
-	// if (this->tlen != -1)
-		this->tlen += stat_head.size();
-
 	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", this->ostr);	
 	return (RSRC_RESP_HEAD);
 }

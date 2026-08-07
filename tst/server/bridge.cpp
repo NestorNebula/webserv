@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/02 20:33:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 10:38:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,15 +117,7 @@ int Request::init(void)
             chnk = 1;
     }
 	WsLog::_(LVL_DBG, TGT_HEAD, "chnk: ", chnk);
-
-    val = header("Connection");
-    if (val.size())
-    {
-        std::transform(val.begin(), val.end(), val.begin(), ::tolower);
-        if (val == std::string ("keep-alive"))
-            this->ka = 1;
-    }
-    
+        
     return (0);
 }
 
