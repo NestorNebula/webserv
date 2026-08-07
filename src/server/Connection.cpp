@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 17:04:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/07 18:12:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ int	Connection::req_body_status(void)
 	if (err == 0) // not done
 		return (0); 
 		
-	this->mod_evt(EPOLLOUT);		
+	this->mod_evt(EPOLLOUT); // seems wrong 		
 	return (-1);
 }
 
