@@ -52,14 +52,32 @@ fi
 
 
 if [ "$1" == "u" ]; then
-	# FILE="Kanan.mp3"
-	FILE="earth.jpg"
-	# FILE="tiny.jpg"
+	
+	FILE="mid.jpg"
 	curl -X POST http://localhost:8081/test.php -i \
 		-F p1=dash-f-one \
 		-F p2=dash-f-two \
 		-F file=@files/$FILE
 	echo
+# FWIW : fails AFTER Kanana
+	FILE="tiny.jpg"
+	curl -X POST http://localhost:8081/test.php -i \
+		-F file=@files/$FILE
+	echo
+	FILE="earth.jpg"
+	curl -X POST http://localhost:8081/test.php -i \
+		-F p1=dash-f-one \
+		-F p2=dash-f-two \
+		-F file=@files/$FILE
+	echo
+
+	# FILE="Kanan.mp3"
+	# curl -X POST http://localhost:8081/test.php -i \
+	# 	-F p1=dash-f-one \
+	# 	-F p2=dash-f-two \
+	# 	-F file=@files/$FILE
+	# echo
+
 	# curl -X POST http://localhost:8081/test.pl -i \
 	# 	-F p1=dash-f-one \
 	# 	-F p2=dash-f-two \

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 16:13:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 19:35:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -482,7 +482,7 @@ ssize_t	FcgiPipe::pollin(void)
 // The server is in no way obligated to send end-of-file 
 // after the script reads CONTENT_LENGTH bytes. 
 
-static int body_push = 0;
+// static int body_push = 0;
 
 ssize_t	FcgiPipe::pollout(void)
 {
@@ -502,7 +502,13 @@ ssize_t	FcgiPipe::pollout(void)
 		
 		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
 
-body_push += body.size();
+// body_push += body.size();
+if (body.size() == 0)
+{
+	WsLog::color(WSL_RED);
+
+	WsLog::_(LVL_DBG, TGT_FCGI, "body: ZERO");
+}
 		fcgi.push_body((char*) body.c_str(), body.size());
 		body.clear(); 
 	}
@@ -538,7 +544,7 @@ body_push += body.size();
 			
 			WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
 
-	body_push += body.size();
+	// body_push += body.size();
 			fcgi.push_body((char*) body.c_str(), body.size());
 			body.clear(); // from sess.req
 			// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
@@ -585,9 +591,7 @@ body_push += body.size();
 // epoll : 
 // ecnt  : [2]
 
-
-
-	WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
+// WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
 	err = this->send(fcgi.req);
 // -pass-header Authorization
 	if (err < 0)
@@ -601,6 +605,7 @@ body_push += body.size();
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
+	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
 	// if (fcgi.req.size() == 0)
 	this->mod_evt(EPOLLIN);
@@ -618,7 +623,7 @@ int		FcgiPipe::rdhup(void)
 	// but .. still may be receiving an upload
 	// this->mod_evt(-EPOLLIN); // BAD IDEA
 	// this->mod_evt(-EPOLLOUT);
-	WsLog::_(LVL_TMP, TGT_FCGI, "RDHUP");
+	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
 	if (this->fcgi.req.size())
 		return (0);
 	if (have_body == 0)

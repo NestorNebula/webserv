@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 17:20:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 18:50:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ public:
 	
 	unsigned short		get_port(void)	const;
 	
+	std::string			proj_root;
 	std::string			data_root;
 	std::string			fcgi_sock;
 	std::string			pycgi;

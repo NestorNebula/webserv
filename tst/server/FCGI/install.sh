@@ -17,8 +17,9 @@ TGT_DIR=$(pwd)
 FPM_DIR=$TGT_DIR/.php-fpm
 
 
-# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-PHP_FPM_BIN=/usr/bin/php-fpm
+# HOME
+PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+# PHP_FPM_BIN=/usr/bin/php-fpm
 
 if [ "$1" == "start" ]; then
     systemctl --user daemon-reload 
@@ -31,7 +32,7 @@ if [ "$1" == "stop" ]; then
 fi
 
 if [ "$1" == "run" ]; then
-    /usr/bin/php-fpm --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
+    $PHP_FPM_BIN --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     exit 0
 fi
 

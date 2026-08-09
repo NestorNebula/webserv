@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 14:12:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 19:47:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@
 #if USE_AP
 #include "AlignedPtr.hpp"
 #endif
+
+
+#include "WsLog.hpp"
 
 #if 0
 class MsgPtr
@@ -488,6 +491,8 @@ php-fpm fastcgi.c
 
         if (k >= 128)
         {
+            WsLog::color(WSL_RED);
+            WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: keylen ", k);
             // fprintf(stderr, "fcgi : key (%i)\n", k);
             k |= 1 << 31;
             k  = htonl(k);
@@ -502,6 +507,9 @@ php-fpm fastcgi.c
         }
         if (v >= 128)
         {
+
+            WsLog::color(WSL_RED);
+            WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: vallen ", k);
             // fprintf(stderr, "fcgi : val (%i)\n", v);
             v |= 1 << 31;
             v  = htonl(v);
