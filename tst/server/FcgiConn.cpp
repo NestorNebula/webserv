@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 18:06:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 16:13:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,6 @@ COMMON VARIABLES
 
 int FcgiConn::request(CgiEnv * env)
 {
-	// sock_path .. FROM cgienv .. 
-	
 	data.zero();
 
 	FcgiMsg		msg;
@@ -145,6 +143,8 @@ int FcgiConn::request(CgiEnv * env)
 		// }
 		// msg.add_param("HTTP_COOKIE", req->cook);
 
+		// WsLog::_(LVL_DBG, TGT_FCGI, "pkey:  ", (kvit->first).c_str());
+		// WsLog::_(LVL_DBG, TGT_FCGI, "pval:  ", (kvit->second).c_str());
 		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
 		kvit++;
 	}
@@ -180,12 +180,6 @@ The start line of an HTTP response, called the status line, contains the followi
     A status text. A brief, purely informational, textual description of the status code to help a human understand the HTTP message.
 */
 
-// should be up in header, yes ?
-// #define FCGI_DEBUG 1
-// BODY (?)
-
-// WEBSERV : looks like data RECEIVED from (fpm) ... 
-// which wants to get sent back out the Connection
 int FcgiConn::push_data(char * buf, int cnt)
 {
 	switch(data.typ)
@@ -379,7 +373,8 @@ int main(void)
 FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) : 
 	EpollClient(_ep, EPC_FCGI, _fd), 
 	conn(_conn),
-	rsrc(_rsrc)
+	rsrc(_rsrc),
+	have_body(0)
 {
 	sock_non_block(this->fd);
 }
@@ -432,6 +427,8 @@ ssize_t	FcgiPipe::pollin(void)
 	WsLog::_(LVL_DBG, TGT_FCGI, "recv");
 	err = this->recv();
 	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", err);
+
+	// hm : data returned from CGI .. BEFORE "upload" is complete ... 
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_FCGI, "recv: err");
@@ -441,7 +438,16 @@ ssize_t	FcgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
-		return (-1);
+		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
+		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
+
+		// wtf : recev
+		if ((this->fcgi.req.size() > 0) || (this->conn->req_body_status() >= 0))
+		{
+			// this->mod_evt(-EPOLLIN);
+			return (0);
+		}
+		return (0);
 	}
 	
 	if (fcgi.parse(this->ibuf, err) < 0)
@@ -450,6 +456,9 @@ ssize_t	FcgiPipe::pollin(void)
 		return (-1);
 	}
 		
+	// why are we getting output from the CGI ... 
+	// when we have not yet finished writing the upload data ... 
+	
 	switch (this->rsrc->recv_data((char*) fcgi.rsp.c_str(), fcgi.rsp.size()))
 	{
 	case RSRC_RESP_INIT:
@@ -472,6 +481,9 @@ ssize_t	FcgiPipe::pollin(void)
 
 // The server is in no way obligated to send end-of-file 
 // after the script reads CONTENT_LENGTH bytes. 
+
+static int body_push = 0;
+
 ssize_t	FcgiPipe::pollout(void)
 {
 	ssize_t	err;
@@ -481,31 +493,101 @@ ssize_t	FcgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 	
-	if (this->fcgi.req.size() == 0)
+
+	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
+	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
+	if (this->conn->req_body_status() > 0)
+	{
+		std::string & body = this->conn->sess.req.get_body();
+		
+		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
+
+body_push += body.size();
+		fcgi.push_body((char*) body.c_str(), body.size());
+		body.clear(); 
+	}
+	if (!have_body && this->fcgi.req.size() == 0)
 	{
 		err = this->conn->req_body_status();
 		if (err < 0)
 		{
 			WsLog::_(LVL_DBG, TGT_FCGI, "body     : complete");
 			fcgi.push_body(NULL, 0);
-			// IMPORTANT STATE INFO
 			this->mod_evt(-EPOLLOUT);
+			have_body = 1;
 		}
-		if (err == 0)
+		else if (err == 0)
 		{
 			// Continue -- should FAIL
 			WsLog::_(LVL_DBG, TGT_FCGI, "body     : waiting");
 			this->mod_evt(0);
 			return (0);
 		}
-		
-		std::string & body = this->conn->sess.req.get_body();
-		WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
+		else
+		{
+	// UPLOAD
+	// conn read all data from client => req.body
+	// conn returned data to   client
+	// req.body .. has not been fully pushed to fcgi ...
+	// 
 
-		fcgi.push_body((char*) body.c_str(), body.size());
-		body.clear();
-		// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
+// should we not be TRYING to read .. until all data is sent (?)
+
+	// may : always want to get body .. 
+			std::string & body = this->conn->sess.req.get_body();
+			
+			WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
+
+	body_push += body.size();
+			fcgi.push_body((char*) body.c_str(), body.size());
+			body.clear(); // from sess.req
+			// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
+		}
 	}
+// epoll : evt tgt  : conn
+// epoll : evt fd   : [7]
+// epoll : evt typ  : in 
+// conn  : recv
+// epc   : read: [4096]
+// conn  : recv: [4096]
+// body  : blen: [32565]
+// body  : clen: [463500]
+// epoll : cli mod  : fcgi
+// epoll : 
+// epoll : evt tgt  : fcgi
+// epoll : evt fd   : [8]
+// epoll : evt typ  : out 
+// epc   : send: [4104]
+// epc   : sent: [4096]
+// fcgi  : sent: [4096]
+// epoll : cli mod  : fcgi
+// epoll : 
+// ecnt  : [2]
+// epoll : 
+// epoll : evt tgt  : conn
+// epoll : evt fd   : [7]
+// epoll : evt typ  : in 
+// conn  : recv
+// epc   : read: [4096]
+// conn  : recv: [4096]
+// body  : blen: [36661]
+// body  : clen: [463500]
+// epoll : cli mod  : fcgi
+// epoll : 
+// epoll : evt tgt  : fcgi
+// epoll : evt fd   : [8]
+// epoll : evt typ  : out 
+	// strange .. 
+// epc   : send: [8]
+// epc   : sent: [8]
+// fcgi  : sent: [8]
+// epoll : cli mod  : fcgi
+// epoll : 
+// ecnt  : [2]
+
+
+
+	WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
 	err = this->send(fcgi.req);
 // -pass-header Authorization
 	if (err < 0)
@@ -519,7 +601,14 @@ ssize_t	FcgiPipe::pollout(void)
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
+
+	// if (fcgi.req.size() == 0)
 	this->mod_evt(EPOLLIN);
+	// if (have_body)
+	// 	return (-1); // did we need to close here (?)
+
+// are we done ?
+
 	return (0);
 }
 
@@ -529,11 +618,17 @@ int		FcgiPipe::rdhup(void)
 	// but .. still may be receiving an upload
 	// this->mod_evt(-EPOLLIN); // BAD IDEA
 	// this->mod_evt(-EPOLLOUT);
+	WsLog::_(LVL_TMP, TGT_FCGI, "RDHUP");
+	if (this->fcgi.req.size())
+		return (0);
+	if (have_body == 0)
+		return (0);
+	// still need to send BODY_DONE 
 	if (this->rsrc->ostr.size())
 		return (0);
 	if (this->conn->req_body_status() >= 0)
 		return (0);
-		// UPLOAD (-1) => connection reset by peer .. 
+		
 	return (-1);
 }
 

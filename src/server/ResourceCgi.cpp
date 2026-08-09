@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 18:06:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 14:09:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,8 +351,8 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 {
 	this->ostr.append(buf, siz);
 	WsLog::_(LVL_DBG, TGT_RSRC, "ostr: ", ostr.size());
-	// WsLog::_(LVL_DBG, TGT_RSRC, "ostr");
-	// WsLog::_(LVL_DBG, TGT_RSRC, "****\n", ostr);
+	WsLog::_(LVL_DBG, TGT_RSRC, "ostr");
+	WsLog::_(LVL_DBG, TGT_RSRC, "****\n", ostr);
 	
 	return (this->chk_rsp_hed(this->ostr));
 }

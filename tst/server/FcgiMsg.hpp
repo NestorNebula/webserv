@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 08:17:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 16:11:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,10 @@
 # include <iostream>
 // libfcgi0ldbl
 // libfcgi-dev
-#include <fastcgi.h>
+# include <fastcgi.h>
 
 # include "MsgBuf.hpp"
+# include "WsLog.hpp"
 
 class FcgiMsgData
 {

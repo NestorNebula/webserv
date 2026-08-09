@@ -54,6 +54,7 @@ fi
 if [ "$1" == "u" ]; then
 	# FILE="Kanan.mp3"
 	FILE="earth.jpg"
+	# FILE="tiny.jpg"
 	curl -X POST http://localhost:8081/test.php -i \
 		-F p1=dash-f-one \
 		-F p2=dash-f-two \
@@ -72,6 +73,7 @@ if [ "$1" == "u" ]; then
 	exit 0
 fi
 
+
 if [ "$1" ]; then
 	exit 0
 fi
@@ -79,11 +81,11 @@ fi
 # -H "Connection: keep-alive" \
 
 curl -X POST http://localhost:8081/test.php -i \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "p1=post-one&p2=post-two"
+	-d "p1=post-one&p2=post-two" \
+	-H "Content-Type: application/x-www-form-urlencoded"
 echo
 exit 0
-
+#  \
 
 # curl -X GET http://localhost:8081/stat.php -i
 # echo

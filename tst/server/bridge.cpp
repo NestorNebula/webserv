@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 18:07:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 15:10:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int Request::push_data(const char *buf, size_t siz)
         head.erase(crlf + 4);
         this->init();
         blen = body.size();
-        WsLog::_(LVL_DBG, TGT_BODY, "BODY\n", body);
+        // WsLog::_(LVL_DBG, TGT_BODY, "BODY\n", body);
         return (this->state);
     }
 
@@ -45,7 +45,6 @@ int Request::push_data(const char *buf, size_t siz)
     WsLog::_(LVL_DBG, TGT_BODY, "blen: ", blen);
     if (!chnk)
         WsLog::_(LVL_DBG, TGT_BODY, "clen: ", clen);
-    // WsLog::_(LVL_DBG, TGT_BODY, "BODY\n", body);
     return (this->state);
 }
 
@@ -132,6 +131,8 @@ int Request::body_stat(void)
         return (0);
     }
     // uncertain 
+    // WsLog::_(LVL_TMP, TGT_CONN, "blen: ", blen);
+    // WsLog::_(LVL_TMP, TGT_CONN, "clen: ", clen);
     if (clen && blen < clen)
         return (0);
     return (-1);

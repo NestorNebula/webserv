@@ -20,15 +20,18 @@ FPM_DIR=$TGT_DIR/.php-fpm
 # PHP_FPM_BIN=/usr/sbin/php-fpm7.4
 PHP_FPM_BIN=/usr/bin/php-fpm
 
-
 if [ "$1" == "start" ]; then
-    # /usr/bin/php-fpm --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     systemctl --user daemon-reload 
     systemctl --user start php-fpm.service
     exit 0
 fi
 if [ "$1" == "stop" ]; then
     systemctl --user stop php-fpm.service
+    exit 0
+fi
+
+if [ "$1" == "run" ]; then
+    /usr/bin/php-fpm --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     exit 0
 fi
 

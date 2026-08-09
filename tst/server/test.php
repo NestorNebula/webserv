@@ -52,6 +52,21 @@
         //         echo ('Unknown errors.');
         //         break;
         // }
+//  UPLOAD_ERROR_OK, value 0, means no error occurred.
+//  UPLOAD_ERR_INI_SIZE, value 1, means that the size of the uploaded file exceeds the
+// maximum value specified in your php.ini file with the upload_max_filesize directive.
+//  UPLOAD_ERR_FORM_SIZE, value 2, means that the size of the uploaded file exceeds the
+// maximum value specified in the HTML form in the MAX_FILE_SIZE element.
+//  UPLOAD_ERR_PARTIAL, value 3, means that the file was only partially uploaded.
+//  UPLOAD_ERR_NO_FILE, value 4, means that no file was uploaded.
+//  UPLOAD_ERR_NO_TMP_DIR, value 6, means that no temporary directory is specified in the
+// php.ini.
+//  UPLOAD_ERR_CANT_WRITE, value 7, means that writing the file to disk failed.
+//  UPLOAD_ERR_EXTENSION, value 8, means that a PHP extension stopped the file upload
+// process.
+
+// UPLOAD_ERR_PARTIAL is given when the mime boundary is not found after the file data. A possibly cause for this is that the upload was cancelled by the user (pressed ESC, etc).
+
         move_uploaded_file($_FILES['file']['tmp_name'], "./uploads/php-" . $_FILES['file']['name']);
         // move_uploaded_file($_FILES['file']['tmp_name'], getcwd()."/uploads/php-" . $_FILES['file']['name']);
     }

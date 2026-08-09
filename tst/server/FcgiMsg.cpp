@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/05 08:17:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/09 16:17:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ void FcgiMsg::end_params(void)
 
 void FcgiMsg::add_stdin(char * data, int dSiz)
 {
-	const int dMax = 64000; // 65535 - yes -
+	const int dMax = 4096; // 
 	while (dSiz > dMax)
 	{
 		this->make_head(FCGI_STDIN, dMax);
@@ -160,6 +160,8 @@ void FcgiMsg::add_stdin(char * data, int dSiz)
 
 void FcgiMsg::end_stdin(void)
 {
+	WsLog::color(WSL_RED);
+	WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: END STDIN");
 	this->make_head(FCGI_STDIN, 0);
 	buf.push(this, 8);
 }
