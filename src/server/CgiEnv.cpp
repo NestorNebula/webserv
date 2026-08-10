@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 22:22:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 12:02:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,11 @@ void	CgiEnv::add(const char *key, int n)
 	this->kv[ std::string (key) ] = num_2_str(n);
 }
 
+std::string & CgiEnv::get(const char *key)
+{
+	return (this->kv[ std::string (key) ]);
+}
+
 
 int     CgiEnv::from_conn(Connection & conn)
 {
@@ -53,23 +58,38 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 
-	val = req.header("PATH");
-	if (val.size())
-		this->add("_PATH", val.c_str());
+	// val = req.header("PATH");
+	// if (val.size())
+	// 	this->add("_PATH", val.c_str());
 	
-	file = req.header("FILE");
-	if (file.size())
+	// file = req.header("FILE");
+	file = req.header("PATH");
+	if (!file.size())
 	{
-		this->add("SCRIPT_NAME", file.c_str());
-		std::string path = conn.serv.data_root + file;
-		this->add("SCRIPT_FILENAME", path.c_str());	
-	}
-	else
-	{
-		WsLog::_(LVL_ERR, TGT_CGI_ENV, "FILE not set");
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "FILE : not set");
 		return (-1);
 	}
 	
+	path = conn.serv.data_root + file;
+	
+	this->add("SCRIPT_NAME", path.c_str());
+	
+	if (access(path.c_str(), F_OK))
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE : does not exist");
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "PATH\n", path);
+		return (-1);
+	}
+
+	size_t pos = path.find_last_of("/");
+	std::string cwd = path.substr(0, pos);
+	this->add("CWD", cwd.c_str());	
+
+	// WsLog::color(WSL_GREEN);
+	// WsLog::_(LVL_DBG, TGT_CGI_ENV, "cwd : ", cwd);
+	
+	this->add("SCRIPT_FILENAME", path.c_str());	
+
 	std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
 	{
@@ -98,7 +118,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	this->args[0] = this->exec.c_str();
-	this->args[1] = file.c_str();
+	this->args[1] = path.c_str();
 	this->args[2] = NULL;	
 	
 	

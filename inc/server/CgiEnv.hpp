@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 13:32:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 11:38:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ public:
     int             from_conn(Connection & conn);
 	void		    add(const char *key, const char *val);
 	void		    add(const char *key, int n);
+	std::string &	get(const char *key);
 	const char	    **gen(void);
 	
 	const char							*args[4];
@@ -62,6 +63,7 @@ private:
 	
 	std::string							exec;
 	std::string							file;
+	std::string							path;
 };
 
 #endif

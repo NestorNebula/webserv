@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=8
 if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -53,41 +53,42 @@ fi
 
 if [ "$1" == "u" ]; then
 	
-	FILE="mid.jpg"
-	curl -X POST http://localhost:8081/test.php -i \
-		-F p1=dash-f-one \
-		-F p2=dash-f-two \
-		-F file=@files/$FILE
-	echo
-# FWIW : fails AFTER Kanana
-	FILE="tiny.jpg"
-	curl -X POST http://localhost:8081/test.php -i \
-		-F file=@files/$FILE
-	echo
+	# FILE="mid.jpg"
+	# curl -X POST http://localhost:8081/test.php -i \
+	# 	-F p1=dash-f-one \
+	# 	-F p2=dash-f-two \
+	# 	-F file=@files/$FILE
+	# echo
+	
+	# FILE="tiny.jpg"
+	# curl -X POST http://localhost:8081/test.php -i \
+	# 	-F file=@files/$FILE
+	# echo
+
+	# FILE="Kanan.mp3"
+	# curl -X POST http://localhost:8081/test.php -i \
+	# 	-F p1=dash-f-one \
+	# 	-F p2=dash-f-two \
+	# 	-F file=@files/$FILE
+	# echo
+
 	FILE="earth.jpg"
-	curl -X POST http://localhost:8081/test.php -i \
+
+	curl -X POST http://localhost:8081/php/ul.php -i \
 		-F p1=dash-f-one \
 		-F p2=dash-f-two \
 		-F file=@files/$FILE
 	echo
 
-	FILE="Kanan.mp3"
-	curl -X POST http://localhost:8081/test.php -i \
+
+	curl -X POST http://localhost:8081/pl/ul.pl -i \
+		-F file=@files/$FILE
+	echo
+	curl -X POST http://localhost:8081/py/ul.py -i \
 		-F p1=dash-f-one \
 		-F p2=dash-f-two \
 		-F file=@files/$FILE
 	echo
-
-	# curl -X POST http://localhost:8081/test.pl -i \
-	# 	-F p1=dash-f-one \
-	# 	-F p2=dash-f-two \
-	# 	-F file=@files/$FILE
-	# echo
-	# curl -X POST http://localhost:8081/test.py -i \
-	# 	-F p1=dash-f-one \
-	# 	-F p2=dash-f-two \
-	# 	-F file=@files/$FILE
-	# echo
 	exit 0
 fi
 
@@ -98,8 +99,8 @@ fi
 
 # -H "Connection: keep-alive" \
 
+	# -d "p1=post-one&p2=post-two" \
 curl -X POST http://localhost:8081/test.php -i \
-	-d "p1=post-one&p2=post-two" \
 	-H "Content-Type: application/x-www-form-urlencoded"
 echo
 exit 0

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 14:09:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 10:28:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,7 +383,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 		return (-1);
 	
 	this->fcgi = new FcgiPipe(ep, fd, conn, this);
-	err = this->fcgi->init(cgienv);
+	err = this->fcgi->init(cgienv); // fcgi.request()
 	if (err < 0)
 	{
 		delete (this->fcgi);
@@ -394,7 +394,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 	this->fcgi->ini_evt(EPOLLOUT);
 
 	WsLog::color(WSL_YELLOW);
-	WsLog::_(LVL_DBG, TGT_CONN, "FCGI (!)");
+	WsLog::_(LVL_DBG, TGT_FCGI, "FCGI (!)");
 	this->conn = conn;
 
 	return (err);

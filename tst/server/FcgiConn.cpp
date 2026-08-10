@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 19:35:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 11:22:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,13 @@ int FcgiConn::make_sock(const char *sock_path)
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
-	{
-		return (-1);
-	}
+		return (WsLog::_errno(LVL_ERR, TGT_FCGI, "socket"));
 	
     int err = connect(fd, (struct sockaddr*) &fpm, sizeof(struct sockaddr_un));
     if (err < 0)
 	{
 		close(fd);
-		return (-1);
+		return (WsLog::_errno(LVL_DBG, TGT_FCGI, "connect"));
 	}
     return (fd);
 }

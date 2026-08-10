@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 13:20:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 12:02:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,14 +105,14 @@ ssize_t	Connection::pollin(void)
 
 	if (this->cgi == NULL)
 	{
+		this->req_cnt++;
 		if (this->exec_cgi() < 0)
 		{
-			WsLog::_(LVL_ERR, TGT_CONN, "exec: cgi");
+			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
 			// this->set_err(503);
 			this->set_err(404); // siege-friendly
 			return (0); // send error
 		}
-		this->req_cnt++;
 	}
 	
 // SESSION
@@ -195,6 +195,7 @@ int		Connection::send_error(void)
 	return (-1);
 }
 
+// upload : user cancel .. 
 int	Connection::rdhup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
@@ -315,7 +316,7 @@ int	Connection::exec_cgi(void)
 	err = cgienv->from_conn(*this);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI, "cgienv: FAIL");
+		WsLog::_(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
 		return (-1);
 	}
@@ -324,30 +325,19 @@ int	Connection::exec_cgi(void)
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
-
 		
-		// if (err < 0)
-		// {
-		// 	delete (fcgi); // conn : cgi FAIL
-		// 	delete (cgienv);
-		// 	return (-1);
-		// }
-		// delete (cgienv);
-		// this->cgi = fcgi;
-		// return (err);
-
-		WsLog::_(LVL_TMP, TGT_CONN, "php : ", err);
+		WsLog::_(LVL_DBG, TGT_CONN, "php : ", err);
 		if (err == 0)
 		{
 			WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_TMP, TGT_CONN, "php : fcgi");			
+			WsLog::_(LVL_DBG, TGT_CONN, "php : fcgi");			
 			delete (cgienv);
 			this->cgi = fcgi;
 			return (err);
 		}
 		delete (fcgi);
 		WsLog::color(WSL_YELLOW);
-		WsLog::_(LVL_TMP, TGT_CONN, "php : pipe");
+		WsLog::_(LVL_DBG, TGT_CONN, "php : pipe");
 	}
 
 
@@ -377,10 +367,18 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		pipes.dup_err();
+		// pipes.dup_err();
 
 		const char **envp = cgienv->gen();
 
+		std::string & cwd = cgienv->get("CWD");
+		if (cwd.size())
+		{
+			// WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
+			err = chdir(cwd.c_str());
+			if (err < 0)
+				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));
+		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();
@@ -396,6 +394,7 @@ int	Connection::exec_cgi(void)
 	if (err < 0)
 	{
 		delete (pcgi); // conn : cgi FAIL
+		this->set_err(503);
 		return (err);
 	}
 	this->cgi = pcgi;
