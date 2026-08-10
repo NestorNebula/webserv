@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:03:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 12:13:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,6 +332,8 @@ void    WsLog::kd(void)
         // | TGT_CGI_DATA
         // | TGT_CGI_HEAD
 
+        | TGT_FCGI
+        
         | TGT_SERV
         // | TGT_MAIN
 

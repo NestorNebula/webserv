@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:02:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 12:21:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,8 @@ ssize_t	Connection::pollout(void)
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr]\n" , OSTR);
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
 	err = this->send(OSTR);
 	if (err < 0)
 	{
@@ -320,7 +321,7 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
-
+#if 1
 	if (cgienv->lang == CGI_PHP)
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -339,7 +340,7 @@ int	Connection::exec_cgi(void)
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_CONN, "php : pipe");
 	}
-
+#endif
 
 	// need new EpollClient .. 
 	// which is constructed with an EXISTING (fd)
@@ -367,7 +368,7 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		// pipes.dup_err();
+		pipes.dup_err();
 
 		const char **envp = cgienv->gen();
 

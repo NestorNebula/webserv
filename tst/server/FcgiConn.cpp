@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 11:22:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/10 12:25:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ int FcgiConn::make_sock(const char *sock_path)
     if (err < 0)
 	{
 		close(fd);
-		return (WsLog::_errno(LVL_DBG, TGT_FCGI, "connect"));
+		// return (WsLog::_errno(LVL_DBG, TGT_FCGI, "connect"));
+		WsLog::_(LVL_DBG, TGT_FCGI, "connect");
+		return (err);
 	}
     return (fd);
 }
@@ -183,7 +185,9 @@ int FcgiConn::push_data(char * buf, int cnt)
 	switch(data.typ)
 	{
 	case FCGI_STDERR:
-		WsLog::_(LVL_DBG, TGT_FCGI, "push data : error\n", buf);
+		WsLog::color(WSL_YELLOW);
+		WsLog::_(LVL_DBG, TGT_FCGI, "push data : error");
+		WsLog::_(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
 		break;
 	case FCGI_END_REQUEST:
 		WsLog::_(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
