@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:21:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:19:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,13 +196,10 @@ int		Connection::send_error(void)
 	return (-1);
 }
 
-// upload : user cancel .. 
 int	Connection::rdhup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
-	
-	// return (-1); // (this feels dangerous)
 	return (0);
 }
 
@@ -278,8 +275,6 @@ int	Connection::req_body_status(void)
 }
 
 // called on ~CgiPipe()
-// which could .. directly .. 
-// except .. sometimes we set conn = NULL
 void	Connection::cgi_rem(EpollClient *epc)
 {
 	switch (this->cgi->rem(epc))
@@ -321,8 +316,8 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
-#if 1
-	if (cgienv->lang == CGI_PHP)
+	
+	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
@@ -340,7 +335,6 @@ int	Connection::exec_cgi(void)
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_CONN, "php : pipe");
 	}
-#endif
 
 	// need new EpollClient .. 
 	// which is constructed with an EXISTING (fd)

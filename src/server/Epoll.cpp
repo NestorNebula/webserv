@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 23:09:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:10:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,31 +320,7 @@ int	Epoll::loop(void)
 				// epc->set_rem(1);
 			}
         }
-		this->check_timeo();
-#if 0 // does not help STDERR problem
-		for (int k=0; k < e; k++)
-        {
-			evt = this->get_evt(k);
-			if (evt == NULL)
-			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
-				continue;
-			}
-			epc = this->get_epc(evt->data.ptr);
-			if (epc == NULL)
-			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
-				continue;
-			}
-			if (epc->get_rem())
-				this->rem(epc);
-		}
-		std::set<EpollClient*>::iterator it = this->clients.begin();
-		while (it != this->clients.end())
-		{
-			this->mod(*it++);
-		}		
-#endif		
+		this->check_timeo();	
     }
 	return (0);
 }

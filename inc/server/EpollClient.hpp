@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 16:18:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:16:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,9 @@ class Epoll;
 
 class EpollClient
 {
+protected:
+    char	ibuf[EPC_BUF_SIZ];
+	
 private:
 	EpollClient & operator = (const EpollClient & ) 
 		{ return (*this); }
@@ -70,13 +73,11 @@ public:
 	virtual int		hup    (void)   = 0;
 	virtual bool	timeo  (time_t) = 0;
 
-	int				ini_evt(int e);
-	int				mod_evt(int e);
-	int				event(struct epoll_event *e);
+	int					ini_evt(int e);
+	int					mod_evt(int e);
+	int					event(struct epoll_event *e);
 
 	int					get_fd  (void) const;
-	void				set_rem (int r);
-	int					get_rem (void) const;
 	struct epoll_event	*get_evt(void);
     std::string 		typ_str(void);
 	
@@ -87,8 +88,6 @@ protected:
 	struct epoll_event	evt;
 	time_t				lact;
 	int					error;
-    char            	ibuf[EPC_BUF_SIZ];
-	int					REM;
 };
 
 #endif

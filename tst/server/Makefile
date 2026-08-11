@@ -40,7 +40,9 @@ FILES = \
 	server/Connection.cpp \
 	server/CgiEnv.cpp \
 	server/CgiPipe.cpp \
-	server/ResourceCgi.cpp 
+	server/ResourceCgi.cpp \
+	server/FcgiMsg.cpp \
+	server/FcgiConn.cpp 
 
 TPP = 
 
@@ -49,9 +51,6 @@ OBJS = $(addprefix $(OBJ_DIR)/, $(FILES:.cpp=.o))
 
 BIN = $(OBJ_DIR)/test.o
 # OBJS += $(BIN)
-
-OBJS += $(OBJ_DIR)/FcgiMsg.o
-OBJS += $(OBJ_DIR)/FcgiConn.o
 
 NULL :=
 \t   := $(NULL)	$(NULL)
@@ -62,9 +61,17 @@ all: $(NAME)
 $(NAME): $(OBJS) $(TPP) $(BIN)
 	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(BIN) $(LIBS) -o $@
 
-fcgi: $(OBJS)
-	$(CC) $(FCGI_INC) $(DEFS) -DBUILD_MAIN_FCGI=1 $(CFLAGS) $(LFLAGS) $(OBJS) FcgiConn.cpp $(LIBS) $(FCGI_LIB) -o fcgi
+fpm-conf:
+	cd FCGI && ./install.sh conf
 
+fpm-start: fpm-conf
+	cd FCGI && ./install.sh start
+
+fpm-stop:
+	cd FCGI && ./install.sh stop
+
+fpm-run: fpm-conf
+	cd FCGI && ./install.sh run
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"

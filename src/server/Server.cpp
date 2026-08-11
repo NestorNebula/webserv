@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:01:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 11:45:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	data_root = proj_root + std::string("tst/server/");
 	fcgi_sock = data_root + std::string("FCGI/.php-fpm/SOCK");
 	pycgi = proj_root + std::string("pycgi");
-	// WsLog::_(LVL_TMP, TGT_SERV, "pyroot: ", pycgi);
 	bin_php = std::string("/usr/bin/php-cgi");
 	bin_py = std::string("/usr/bin/python");
 	bin_pl = std::string("/usr/bin/perl");

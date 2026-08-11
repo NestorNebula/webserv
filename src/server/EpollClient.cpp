@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 13:52:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:16:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@ EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 	typ(_typ), 
 	fd(_fd), 
 	lact(0),
-	error(0),
-	REM(0)
+	error(0)
 {
 	evt.events = 0;
 	evt.data.ptr = NULL;
@@ -187,16 +186,6 @@ ssize_t	EpollClient::send(std::string & str, ssize_t cnt)
 int	EpollClient::get_fd  (void) const
 {
 	return (this->fd);
-}
-
-void	EpollClient::set_rem (int r)
-{
-	this->REM = r;
-}
-
-int	EpollClient::get_rem (void) const
-{
-	return (this->REM);
 }
 
 struct epoll_event	*EpollClient::get_evt(void)
