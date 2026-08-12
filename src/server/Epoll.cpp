@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:10:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:34:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,13 +247,12 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	// why would this fail in (gdb) with "Interrupted system call"
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
 	if (this->ecnt == 0)
 		return (this->ecnt);
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\necnt  : ", this->ecnt);
+	WsLog::_(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
 	return (this->ecnt);
 }
 
@@ -288,13 +287,6 @@ int	Epoll::loop(void)
         e = this->exec();
         if (e < 0)
 			return (1);
-// SET STATE
-// conn : ip
-	// writes to  Cgi .. if it can
-// conn : op
-	// reads from Cgi .. if it can
-// or : edge-trigger .. sets state .. until we flush it (?)
-// and then .. add again .. if necssary
 		for (int k=0; k < e; k++)
         {
 			evt = this->get_evt(k);

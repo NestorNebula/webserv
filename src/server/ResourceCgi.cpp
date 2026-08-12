@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:06:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:46:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,6 @@ int	ResourceFcgi::status(void)
 		
 	if (!this->hed && this->fcgi)
 	{
-		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		return (0); // NEED_HEAD
 	}
@@ -177,7 +176,6 @@ int	ResourcePiped::status(void)
 	}
 	if (!this->hed && this->ip)
 	{
-		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		return (0); // NEED_HEAD
 	}
@@ -376,14 +374,12 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 {	
 	int err;
 
-	// std::string sock_path("/home/kdonlon/Documents/Projects/webserv/git/tst/server/FCGI/.php-fpm/SOCK");
-	
 	int fd = FcgiConn::make_sock(conn->serv.fcgi_sock.c_str());
 	if (fd < 0)
 		return (-1);
 	
 	this->fcgi = new FcgiPipe(ep, fd, conn, this);
-	err = this->fcgi->init(cgienv); // fcgi.request()
+	err = this->fcgi->init(cgienv);
 	if (err < 0)
 	{
 		delete (this->fcgi);
@@ -392,11 +388,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 		return (err);
 	}
 	this->fcgi->ini_evt(EPOLLOUT);
-
-	WsLog::color(WSL_YELLOW);
-	WsLog::_(LVL_DBG, TGT_FCGI, "FCGI (!)");
 	this->conn = conn;
-
 	return (err);
 }
 

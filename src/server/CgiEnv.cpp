@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 11:45:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:38:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ std::string & CgiEnv::get(const char *key)
 
 int     CgiEnv::from_conn(Connection & conn)
 {
+// WEBSERV : SESSION
 	Request &req = conn.sess.req;
 
 	this->kv.clear();

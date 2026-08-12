@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 17:14:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:36:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ public:
 	
 // Session/Resource
 private:
-	ResourceCgi		*cgi; // generic .. fcgi
+	ResourceCgi		*res_cgi;
 	
 	void			reset(void);
 	int				send_error(void);

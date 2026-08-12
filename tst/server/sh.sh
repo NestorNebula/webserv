@@ -100,13 +100,12 @@ fi
 # -H "Connection: keep-alive" \
 
 	# -d "p1=post-one&p2=post-two" \
-curl -X POST http://localhost:8081/test.php -i \
-	-H "Content-Type: application/x-www-form-urlencoded"
-echo
-exit 0
-#  \
+# curl -X POST http://localhost:8081/test.php -i \
+# 	-H "Content-Type: application/x-www-form-urlencoded"
+# echo
+# exit 0
 
-# curl -X GET http://localhost:8081/stat.php -i
+# curl -X GET http://localhost:8081/py/ul.py -i
 # echo
 # exit 0
 
@@ -121,10 +120,10 @@ exit 0
 # echo
 # exit 0
 
-# curl -X POST http://localhost:8082/tst.pl \
-# 	 -d "p1=post-one&p2=post-two"
-# echo
-# exit 0
+curl -X POST http://localhost:8082/test.pl -i \
+	 -d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 
 # curl -X POST http://localhost:8081/test.pl -i \

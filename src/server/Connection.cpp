@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:19:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:40:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
-	cgi(NULL),
+	res_cgi(NULL),
 	serv(_serv), 
 	req_cnt(0)
 {
@@ -27,10 +27,10 @@ Connection::~Connection()
 {
 	WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-	if (this->cgi)
+	if (this->res_cgi)
 	{
-		this->cgi->conn_closed();
-		delete (this->cgi); // (~) Connection
+		this->res_cgi->conn_closed();
+		delete (this->res_cgi); // (~) Connection
 	}
 };
 
@@ -99,11 +99,12 @@ ssize_t	Connection::pollin(void)
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
+// WEBSERV : SESSION
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
 
-	if (this->cgi == NULL)
+	if (this->res_cgi == NULL)
 	{
 		this->req_cnt++;
 		if (this->exec_cgi() < 0)
@@ -116,7 +117,7 @@ ssize_t	Connection::pollin(void)
 	}
 	
 // SESSION
-	this->cgi->push_body();
+	this->res_cgi->push_body();
 	return (err);
 }
 
@@ -135,7 +136,7 @@ ssize_t	Connection::pollout(void)
 	if (this->error)
 		return (this->send_error());
 
-	ResourceCgi *res = this->cgi;
+	ResourceCgi *res = this->res_cgi;
 	if (res == NULL)
 	{
 		return (-1);
@@ -206,22 +207,23 @@ int	Connection::rdhup(void)
 int	Connection::hup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
-	if (this->cgi == NULL)
+	if (this->res_cgi == NULL)
 		return (-1);
-	this->cgi->conn_closed();
+	this->res_cgi->conn_closed();
 	return (-1);
 }
 
 
 void	Connection::reset(void)
 {
-	if (this->cgi)
+	if (this->res_cgi)
 	{
-		this->cgi->conn_closed();
-		delete (this->cgi); // conn : reset 
+		this->res_cgi->conn_closed();
+		delete (this->res_cgi); // conn : reset 
 	}
-	this->cgi = NULL;
+	this->res_cgi = NULL;
 	
+// WEBSERV : SESSION
 	this->sess.reset();
 	
 	this->estr.clear();
@@ -259,11 +261,10 @@ std::string		&Connection::get_addr(void)
 	//		  BUT .. more needs to be received to complete the request
 	// (-1) : there is no more body data to write to the CGI
 
-// Sesssion : should have pushed data to resource 
-// ResourceCgi (!)
 int	Connection::req_body_status(void)
 {
-	int	err = this->sess.req.body_stat(); // SESSION / REQUEST
+// WEBSERV : SESSION
+	int	err = this->sess.req.body_stat();
 
 	if (err == 1) // body.size()
 		return (1);
@@ -277,7 +278,7 @@ int	Connection::req_body_status(void)
 // called on ~CgiPipe()
 void	Connection::cgi_rem(EpollClient *epc)
 {
-	switch (this->cgi->rem(epc))
+	switch (this->res_cgi->rem(epc))
 	{
 	case 1: // (ip)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
@@ -286,7 +287,7 @@ void	Connection::cgi_rem(EpollClient *epc)
 		break;
 	case 2: // (op)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
 		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
@@ -328,18 +329,13 @@ int	Connection::exec_cgi(void)
 			WsLog::color(WSL_GREEN);
 			WsLog::_(LVL_DBG, TGT_CONN, "php : fcgi");			
 			delete (cgienv);
-			this->cgi = fcgi;
+			this->res_cgi = fcgi;
 			return (err);
 		}
 		delete (fcgi);
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_CONN, "php : pipe");
 	}
-
-	// need new EpollClient .. 
-	// which is constructed with an EXISTING (fd)
-	// so .. resource .. would create the sock 
-	// this->cgi = new ResourceFastCgi(ep, fd, cgienv, this)
 
 	cgi_pipes	pipes;
 
@@ -392,6 +388,6 @@ int	Connection::exec_cgi(void)
 		this->set_err(503);
 		return (err);
 	}
-	this->cgi = pcgi;
+	this->res_cgi = pcgi;
 	return (err);
 }

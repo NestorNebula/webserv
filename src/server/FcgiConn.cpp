@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:25:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:39:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -498,6 +498,7 @@ ssize_t	FcgiPipe::pollout(void)
 
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
+// WEBSERV : SESSION
 	if (this->conn->req_body_status() > 0)
 	{
 		std::string & body = this->conn->sess.req.get_body();
@@ -542,13 +543,14 @@ if (body.size() == 0)
 // should we not be TRYING to read .. until all data is sent (?)
 
 	// may : always want to get body .. 
+// WEBSERV : SESSION
 			std::string & body = this->conn->sess.req.get_body();
 			
 			WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
 
 	// body_push += body.size();
 			fcgi.push_body((char*) body.c_str(), body.size());
-			body.clear(); // from sess.req
+			body.clear();
 			// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
 		}
 	}

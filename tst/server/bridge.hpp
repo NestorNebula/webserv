@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 12:54:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/11 12:40:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,22 +48,22 @@ public:
 	void		reset(void);
 
 // private:
-	int			state;
+	int				state;
 	
-	std::string	head;
-	std::string body; // sess.ip_data
-	std::string exec;
+	std::string		head;
+	std::string 	body;
+	std::string 	exec;
 
 private:
-	size_t		blen;
-	size_t		clen;
-	int			chnk;
+	size_t			blen;
+	size_t			clen;
+	int				chnk;
 
-	std::string meth;
-	std::string path;
-	std::string file;
-	std::string fext;
-	std::string vars;
+	std::string 	meth;
+	std::string 	path;
+	std::string 	file;
+	std::string 	fext;
+	std::string 	vars;
 
 };
 
