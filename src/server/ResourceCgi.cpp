@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:46:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/12 12:00:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,7 +262,7 @@ int	ResourcePiped::wait(int opt)
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	if (stat > 0)
-		this->set_err(505);
+		this->set_err(505); // CGI_ERR
 	this->pid = 0;
 	return (this->stat);
 }
@@ -374,6 +374,8 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 {	
 	int err;
 
+	WsLog::_(LVL_DBG, TGT_RSRC, "init:  FCGI");
+
 	int fd = FcgiConn::make_sock(conn->serv.fcgi_sock.c_str());
 	if (fd < 0)
 		return (-1);
@@ -395,10 +397,10 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
+	WsLog::_(LVL_DBG, TGT_RSRC, "init:  PIPE");
 	
 	this->pid = _pid;
 	
-	WsLog::_(LVL_DBG, TGT_RSRC, "init cgi");
 
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)

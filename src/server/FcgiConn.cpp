@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:39:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/12 11:56:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -399,9 +399,9 @@ bool	FcgiPipe::timeo(time_t now)
 	if ((this->lact + CGI_TIMEOUT) < now)
 	{
 		if (this->rsrc)
-			this->rsrc->set_err(504);
+			this->rsrc->set_err(504); // CGI_ERR
 		else if (this->conn)
-			this->conn->set_err(504);
+			this->conn->set_err(504); // CGI_ERR
 		return (true);
 	}
 	return (false);
@@ -554,46 +554,6 @@ if (body.size() == 0)
 			// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
 		}
 	}
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : in 
-// conn  : recv
-// epc   : read: [4096]
-// conn  : recv: [4096]
-// body  : blen: [32565]
-// body  : clen: [463500]
-// epoll : cli mod  : fcgi
-// epoll : 
-// epoll : evt tgt  : fcgi
-// epoll : evt fd   : [8]
-// epoll : evt typ  : out 
-// epc   : send: [4104]
-// epc   : sent: [4096]
-// fcgi  : sent: [4096]
-// epoll : cli mod  : fcgi
-// epoll : 
-// ecnt  : [2]
-// epoll : 
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : in 
-// conn  : recv
-// epc   : read: [4096]
-// conn  : recv: [4096]
-// body  : blen: [36661]
-// body  : clen: [463500]
-// epoll : cli mod  : fcgi
-// epoll : 
-// epoll : evt tgt  : fcgi
-// epoll : evt fd   : [8]
-// epoll : evt typ  : out 
-	// strange .. 
-// epc   : send: [8]
-// epc   : sent: [8]
-// fcgi  : sent: [8]
-// epoll : cli mod  : fcgi
-// epoll : 
-// ecnt  : [2]
 
 // WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
 	err = this->send(fcgi.req);

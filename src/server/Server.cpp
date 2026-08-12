@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 11:45:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/12 11:51:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	proj_root = std::string("/media/kdonlon/data/Documents/42/webserv/git/");
 	data_root = proj_root + std::string("tst/server/");
 	fcgi_sock = data_root + std::string("FCGI/.php-fpm/SOCK");
-	pycgi = proj_root + std::string("pycgi");
+	pycgi = proj_root + std::string("pycgi/");
 	bin_php = std::string("/usr/bin/php-cgi");
-	bin_py = std::string("/usr/bin/python");
+	bin_py = std::string("/usr/bin/python3"); // WEBSERV
 	bin_pl = std::string("/usr/bin/perl");
 };
 
@@ -114,7 +114,6 @@ ssize_t	Server::pollout(void)
 {
 	return (0);
 }
-
 
 int	Server::rdhup(void) 
 {

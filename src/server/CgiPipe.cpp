@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:38:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/12 11:56:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,9 +133,9 @@ bool	CgiPipe::timeo(time_t now)
 	if ((this->lact + CGI_TIMEOUT) < now)
 	{
 		if (this->rsrc)
-			this->rsrc->set_err(504);
+			this->rsrc->set_err(504); // CGI_ERR
 		else if (this->conn)
-			this->conn->set_err(504);
+			this->conn->set_err(504); // CGI_ERR
 		return (true);
 	}
 	return (false);

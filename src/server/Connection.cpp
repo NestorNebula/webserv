@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:40:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/12 11:56:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,11 +48,11 @@ bool	Connection::timeo(time_t now)
 	return (false);
 }
 
-// SESSION
 void	Connection::set_err(int e)
 {
 	if (e == 0)
 		return;
+		
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
@@ -65,7 +65,6 @@ void	Connection::set_err(int e)
 	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
 	WsLog::_(LVL_DBG, TGT_CONN, "fd  : (conn) ", this->fd);
 	
-	// ATTN : some errors (500) are not siege-friendly
 	std::string ebody("Error Data\r\n");
 	
 	this->error = e;
@@ -110,7 +109,7 @@ ssize_t	Connection::pollin(void)
 		if (this->exec_cgi() < 0)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-			// this->set_err(503);
+			// this->set_err(503); // CGI_ERR
 			this->set_err(404); // siege-friendly
 			return (0); // send error
 		}
@@ -385,7 +384,7 @@ int	Connection::exec_cgi(void)
 	if (err < 0)
 	{
 		delete (pcgi); // conn : cgi FAIL
-		this->set_err(503);
+		this->set_err(503); // CGI_ERR
 		return (err);
 	}
 	this->res_cgi = pcgi;
