@@ -14,6 +14,11 @@ if [[ "$1" =~ "k" ]]; then
 	echo
 fi
 
+if [[ "$1" =~ "p" ]]; then
+	siege -f php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
 
 if [[ "$1" =~ "f" ]]; then
 	siege -f fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
