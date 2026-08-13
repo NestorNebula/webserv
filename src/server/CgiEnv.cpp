@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:23:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,10 @@ std::string & CgiEnv::get(const char *key)
 
 int     CgiEnv::from_conn(Connection & conn)
 {
-// WEBSERV : SESSION
+// WEBSERV : REQUEST
 	const br_Request &req  = conn.sess.getRequest();
+
+// WEBSERV : SERVER
 	br_Server	&serv = conn.serv;
 
 	this->kv.clear();
@@ -67,6 +69,8 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
+// WEBSERV : SERVER
+	// should not have to check this here 
 	path = serv.data_root + file;
 	if (access(path.c_str(), F_OK))
 	{
@@ -76,6 +80,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	this->add("SCRIPT_NAME", path.c_str());
 
+// WEBSERV : SERVER
+	// (cwd)
 	size_t pos = path.find_last_of("/");
 	std::string cwd = path.substr(0, pos);
 	this->add("CWD", cwd.c_str());	
@@ -85,6 +91,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	this->add("SCRIPT_FILENAME", path.c_str());	
 
+// WEBSERV : SERVER
+	// cgi_exec_path
 	const std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
 	{
@@ -112,6 +120,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		std::cerr << req.head;
 		return (-1);
 	}
+	
 	this->args[0] = this->exec.c_str();
 	this->args[1] = path.c_str();
 	this->args[2] = NULL;	
@@ -172,6 +181,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 // SERVER
 	this->add("SERVER_NAME", "webserv");
+// WEBSERV : SERVER
 	this->add("SERVER_PORT", serv.get_port());
 	this->add("SERVER_PROTOCOL", "HTTP/1.1");
 	this->add("SERVER_SOFTWARE", "webserv");

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:21:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:53:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ public:
 	
 	br_Request     req;
   
-// WEBSERV::SESSION
+// WEBSERV : REQUEST (body)
   	const br_Request &getRequest() const
 		{ return (this->req); }
 	int write(const char *buf, size_t siz)
@@ -84,11 +84,6 @@ public:
 		if (err < REQ_HAVE_HEAD)
 			return (err);
 		return (err);
-	}
-	int		pull_data(std::string & dst)
-	{
-		(void)dst;
-		return (0);
 	}
 	void	reset(void)
 	{

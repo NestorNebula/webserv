@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:33:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:27:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,25 +58,20 @@ public:
 	void			set_addr(struct sockaddr_in *a);
 	std::string		&get_addr(void);
 	
-	br_Session			sess;
-	
-// Session/Resource
-private:
-	ResourceCgi		*res_cgi;
-	
-	void			reset(void);
-	int				send_error(void);
-	
-public:
 // WEBSERV / SESSION
+	br_Session		sess;
+	br_Server		&serv;
 	int				req_body_status(void);
 	
 	void			cgi_rem(EpollClient *epc);
 	
-	br_Server			&serv;
-
 private:
+	void			reset(void);
+	
+	ResourceCgi			*res_cgi;
 	int					exec_cgi(void);
+	
+	int					send_error(void);
 	std::string			estr;
 	
 	struct sockaddr_in	addr;

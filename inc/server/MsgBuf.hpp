@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:29:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:39:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ php-fpm fastcgi.c
             *tgt++ = v;
             z     += sizeof(char);
         }
-// WEBSERV : ATTN
+// WEBSERV : ATTN illegal function
         sprintf(tgt, "%s%s", key, val);
 
         this->end += z;

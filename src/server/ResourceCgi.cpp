@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:22:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:20:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,51 +88,9 @@ void	ResourceCgi::set_err(int e)
 
 // NEED HEAD	0
 // NEED_BODY	0
-// HAVE_OSTR	1
+// HAVE_RESP	1
 // ERROR		2
 // DONE			-1
-
-
-// ecnt  : [2]
-// epoll : 
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : in 
-// conn  : recv
-// conn  : recv: [4096]
-// epoll : 
-// epoll : evt tgt  : fcgi
-// epoll : evt fd   : [8]
-// epoll : evt typ  : in out rdhup 
-// cgi   : recv
-// cgi   : recv: [1112]
-// cgi   : ostr: [1083]
-// cgi   : sent: [4096]
-	// why is this getting deleted (!) rdhup
-// cgi   :  (~) Fcgi
-// conn  : rem cgi  : (DONE) [7]
-// conn  : rem err  : (conn) [0]
-// epoll : 
-// ecnt  : [1]
-// epoll : 
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : out 
-// conn  : send:  POLLOUT
-// conn  : send
-// conn  : ostr: [1119]
-// conn  : sent: [1119]
-// conn  : sent:  all
-// epoll : 
-// ecnt  : [1]
-// epoll : 
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : out 
-// conn  : send:  POLLOUT
-// rsrc  : stat:  (exited)
-// conn  :  (~) Connection [7]
-// conn  : req cnt: [1]
 
 int	ResourceFcgi::status(void)
 {
@@ -141,8 +99,6 @@ int	ResourceFcgi::status(void)
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (2);
 	}
-	// if (this->fcgi)
-	// 	return (0);
 		
 	if (!this->hed && this->fcgi)
 	{
@@ -318,9 +274,6 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
 		
-// Q: split head/body 
-// for HEAD requests
-
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	this->hed = 1;
 	
@@ -376,6 +329,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 
 	WsLog::_(LVL_DBG, TGT_RSRC, "init:  FCGI");
 
+// WEBSERV : SERVER
 	int fd = FcgiConn::make_sock(conn->serv.fcgi_sock.c_str());
 	if (fd < 0)
 		return (-1);

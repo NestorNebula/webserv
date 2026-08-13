@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:22:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:43:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ public:
 	~ResourceFcgi();
 
 	int			init(Epoll *ep, CgiEnv *cgienv, Connection *conn);
-
 
 	void        push_body(void);
 	int			status(void);
