@@ -11,7 +11,7 @@ INC_DIR=$(GIT_DIR)/inc
 OBJ_DIR=.obj
 LIB_DIR=.
 
-CFLAGS+=-I . -I $(INC_DIR) -I $(INC_DIR)/server 
+CFLAGS+=-I . -I $(INC_DIR) -I $(INC_DIR)/server -I $(INC_DIR)/utils
 LFLAGS=
 LIBS =
 
