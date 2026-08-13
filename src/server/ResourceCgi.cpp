@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:32:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 12:08:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,8 +306,6 @@ int	ResourcePiped::rem(EpollClient *epc)
 }
 
 
-
-
 int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 {
 	if (this->hed)
@@ -315,10 +313,14 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 		conn->mod_evt(EPOLLOUT);
 		return (RSRC_RESP_BODY);
 	}	
+	
 	size_t	pos = ostr.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
 		
+// Q: split head/body 
+// for HEAD requests
+
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	this->hed = 1;
 	
@@ -327,20 +329,19 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	std::string conn_close("Connection: close\r\n");
 	ostr.insert(0, conn_close);
 	
-
-	std::string stat_head;
+	std::string stat_hed;
 	std::string stat_str = hedval_str(ostr, "Status");
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
 	if (stat_str.size())
 	{
 		// HTTP/1.1 STATUS [Status Message]
-		stat_head = std::string("HTTP/1.0 ") + stat_str + "\r\n";
+		stat_hed = std::string("HTTP/1.0 ") + stat_str + "\r\n";
 	}
 	else
 	{
-		stat_head = std::string("HTTP/1.0 200 OK\r\n");
+		stat_hed = std::string("HTTP/1.0 200 OK\r\n");
 	}
-	ostr.insert(0, stat_head);
+	ostr.insert(0, stat_hed);
 	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", this->ostr);	
 	return (RSRC_RESP_HEAD);
 }
@@ -349,8 +350,6 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 {
 	this->ostr.append(buf, siz);
 	WsLog::_(LVL_DBG, TGT_RSRC, "ostr: ", ostr.size());
-
-// some state-setting here ..
 
 	// WsLog::_(LVL_DBG, TGT_RSRC, "ostr");
 	// WsLog::_(LVL_DBG, TGT_RSRC, "****\n", ostr);

@@ -2,7 +2,7 @@
 
 tput reset
 
-C=250
+C=100
 R=4
 if [[ "$1" =~ "s" ]]; then
 	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
@@ -77,23 +77,24 @@ if [ "$1" == "u" ]; then
 	# 	-F file=@files/$FILE
 	# echo
 
-	FILE="earth.jpg"
+	rm php/upload*
+	rm pl/upload*
+	rm py/upload*
 
-	curl -X POST http://localhost:8081/php/ul.php -i \
-		-F p1=dash-f-one \
-		-F p2=dash-f-two \
-		-F file=@files/$FILE
-	echo
+	FILES="earth.jpg tiny.jpg mid.jpg Kanan.mp3"
 
+	for FILE in $FILES; do
+		curl -X POST http://localhost:8081/php/ul.php -i \
+			-F file=@files/$FILE
+		echo
+		curl -X POST http://localhost:8081/pl/ul.pl -i \
+			-F file=@files/$FILE
+		echo
+		curl -X POST http://localhost:8081/py/ul.py -i \
+			-F file=@files/$FILE
+		echo
+	done
 
-	curl -X POST http://localhost:8081/pl/ul.pl -i \
-		-F file=@files/$FILE
-	echo
-	curl -X POST http://localhost:8081/py/ul.py -i \
-		-F p1=dash-f-one \
-		-F p2=dash-f-two \
-		-F file=@files/$FILE
-	echo
 	exit 0
 fi
 

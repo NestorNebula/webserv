@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:49:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:34:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@
 FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) : 
 	EpollClient(_ep, EPC_FCGI, _fd), 
 	conn(_conn),
-	rsrc(_rsrc),
-	have_body(0)
+	rsrc(_rsrc)
 {
 	sock_non_block(this->fd);
 }
@@ -29,8 +28,6 @@ FcgiPipe::~FcgiPipe()
 	WsLog::_(LVL_DBG, TGT_FCGI, " (~) Fcgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
-	// if (this->rsrc)
-	// 	this->rsrc->rem(this);
 }
 
 bool	FcgiPipe::timeo(time_t now)
@@ -56,7 +53,9 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 
 	err = fcgi.req_init(cgienv);
 	if (err < 0)
+	{
 		return (err);
+	}
 	return (err);
 }
 
@@ -70,10 +69,10 @@ ssize_t	FcgiPipe::pollin(void)
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_FCGI, "recv");
+	
 	err = this->recv();
 	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", err);
 
-	// hm : data returned from CGI .. BEFORE "upload" is complete ... 
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_FCGI, "recv: err");
@@ -85,12 +84,6 @@ ssize_t	FcgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
-
-		if ((this->fcgi.req.size() > 0) || (this->conn->req_body_status() >= 0))
-		{
-			// this->mod_evt(-EPOLLIN);
-			return (0);
-		}
 		return (0);
 	}
 	
@@ -100,7 +93,6 @@ ssize_t	FcgiPipe::pollin(void)
 		return (-1);
 	}
 		
-
 	switch (this->rsrc->recv_data((char*) fcgi.rsp.c_str(), fcgi.rsp.size()))
 	{
 	case RSRC_RESP_INIT:
@@ -115,14 +107,13 @@ ssize_t	FcgiPipe::pollin(void)
 		conn->mod_evt(EPOLLOUT);
 		break;
 	}
+	
 	fcgi.rsp.clear();
 	return (err);
 }
 
 // The server is in no way obligated to send end-of-file 
 // after the script reads CONTENT_LENGTH bytes. 
-
-// static int body_push = 0;
 
 ssize_t	FcgiPipe::pollout(void)
 {
@@ -137,79 +128,34 @@ ssize_t	FcgiPipe::pollout(void)
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
 // WEBSERV : SESSION
-	if (this->conn->req_body_status() > 0)
+	err = this->conn->req_body_status();
+	if (err > 0)
 	{
 		std::string & body = this->conn->sess.req.get_body();
 		
 		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
 
-		// body_push += body.size();
-		if (body.size() == 0)
-		{
-			WsLog::color(WSL_RED);
-
-			WsLog::_(LVL_DBG, TGT_FCGI, "body: ZERO");
-		}
-
 		fcgi.req_body((char*) body.c_str(), body.size());
 		body.clear(); 
 	}
 
-#if 0 // HAVE_BODY
-	if (!have_body && this->fcgi.req.size() == 0)
-	{
-		err = this->conn->req_body_status();
-		if (err < 0)
-		{
-			WsLog::_(LVL_DBG, TGT_FCGI, "body     : complete");
-			fcgi.req_body(NULL, 0);
-			this->mod_evt(-EPOLLOUT);
-			have_body = 1;
-		}
-		else if (err == 0)
-		{
-			// Continue -- should FAIL
-			WsLog::_(LVL_DBG, TGT_FCGI, "body     : waiting");
-			this->mod_evt(0);
-			return (0);
-		}
-		else
-		{
-// WEBSERV : SESSION
-			std::string & body = this->conn->sess.req.get_body();
-			
-			WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
-
-			// body_push += body.size();
-			fcgi.req_body((char*) body.c_str(), body.size());
-			body.clear();
-			// WsLog::_(LVL_DBG, TGT_FCGI, "body\n", fcgi.req_body);
-		}
-	}
-#endif
-	
-// WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
 	err = this->send(fcgi.req);
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_FCGI, "send");
+		this->rsrc->set_err(502); // CGI_ERR : write failed
 		return (err);
 	}
 	if (err == 0)
 	{
+		WsLog::color(WSL_GREEN);
 		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
 	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
-	// if (fcgi.req.size() == 0)
-	this->mod_evt(EPOLLIN);
-	// if (have_body)
-	// 	return (-1); // did we need to close here (?)
-
-// are we done ?
-
+	this->mod_evt(EPOLLIN); 
 	return (0);
 }
 
@@ -223,22 +169,34 @@ int		FcgiPipe::rdhup(void)
 	
 // THE QUESTION : when to die 
 	// return (0); // UGLY 
-
+#if 1
 	if (this->fcgi.req.size())
+	{
+		WsLog::color(WSL_RED);
+		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: req.size()");
 		return (0);
-
+	}
+#endif
 // we may (rdhup) 
 // but can't CLOSE until BOTH SIDES ARE DONE 
 // STATE CHECK
 // find TEST CASES
-	// if (have_body == 0)
-	// 	return (0);
 	// still need to send BODY_DONE 
 	if (this->rsrc->ostr.size())
+	{
+		WsLog::color(WSL_YELLOW);
+		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: ostr.size()");
 		return (0);
+	}
+#if 1
 	if (this->conn->req_body_status() >= 0)
-		return (0);
+	{
 		
+		WsLog::color(WSL_GREEN);
+		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: body status");
+		return (0);
+	}
+#endif
 	return (-1);
 }
 

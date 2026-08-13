@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/12 11:56:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:36:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,7 @@ ssize_t	Connection::pollout(void)
 	if (this->error)
 		return (this->send_error());
 
+// WEBSERV : SESSION
 	ResourceCgi *res = this->res_cgi;
 	if (res == NULL)
 	{
@@ -155,6 +156,7 @@ ssize_t	Connection::pollout(void)
 		return (err);
 	}	
 	
+// WEBSERV : SESSION
 	std::string & OSTR = res->get_ostr();
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
@@ -294,8 +296,6 @@ void	Connection::cgi_rem(EpollClient *epc)
 	case 3: // (done)
 		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
 		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
-// called .. as it's getting destroyed .. when it deletes is resource .. ugly
-
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;

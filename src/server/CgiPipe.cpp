@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:32:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:34:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,6 +194,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
+// WEBSERV : SESSION
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{

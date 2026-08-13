@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:17:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:21:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ public:
 	virtual void	conn_closed(void) = 0;
 	virtual int		wait(int opt) = 0;
 
-	virtual int			rem(EpollClient *epc) = 0;
+	virtual int		rem(EpollClient *epc) = 0;
 protected:
 	Connection	*conn;
 };

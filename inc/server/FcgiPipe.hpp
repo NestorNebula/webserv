@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:13:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:32:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ private:
 	FcgiConn		fcgi;
 	Connection		*conn;
 	ResourceFcgi	*rsrc;
-	int				have_body;
 };
 
 
