@@ -1,0 +1,45 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   http_utils.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
+/*   Updated: 2026/07/12 11:26:48 by nhoussie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
+
+#include "Response.hpp"
+#include "ServerConfig.hpp" // Maxime's header
+#include "unistd.h"
+
+bool isAllowedMethod(HttpMethod method, RouteConfig &config);
+
+bool isValidVersion(const std::string &version);
+
+RouteConfig *findBestRoute(const std::string &url, ServerConfig &config);
+
+std::string resolvePath(const std::string &url, RouteConfig &config);
+
+std::string joinPaths(const std::string &prefix, const std::string &suffix);
+
+bool isExistingFile(const std::string &path);
+
+bool isDirectory(const std::string &path);
+
+bool isCgi(const std::string &path, RouteConfig &config);
+
+bool isAccessibleFile(const std::string &path, int accessMode = F_OK);
+
+std::string getStatusReason(Response::StatusCode code);
+
+std::string getMimeType(const std::string &path);
+
+std::string decodeURI(const std::string &uri);
+
+std::string encodeURI(const std::string &uri);
+
+std::string normalizeURI(const std::string &uri);
