@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/06 08:38:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 17:47:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # endif
 
 # ifndef SERV_TIMEOUT
-#  define SERV_TIMEOUT 5
+#  define SERV_TIMEOUT 1
 # endif
 std::string evt_type(int evt);
 
