@@ -6,13 +6,10 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-<<<<<<< HEAD:inc/server/WsLog.hpp
-/*   Updated: 2026/08/13 11:17:48 by kdonlon          ###   ########.fr       */
-=======
-/*   Updated: 2026/07/12 14:56:07 by nhoussie         ###   ########.fr       */
->>>>>>> main:inc/utils/WsLog.hpp
+/*   Updated: 2026/08/13 13:58:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef WS_LOG_HPP
 # define WS_LOG_HPP
@@ -73,6 +70,8 @@ typedef long unsigned int log_tgt;
 # define TGT_FCGI		(1UL << 22)
 
 
+
+
 // HTTP TGTs using 1L << 21 to 1L << 40
 # define TGT_REQ		(1L << 21)
 
@@ -91,6 +90,12 @@ typedef long unsigned int log_tgt;
 # define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1L << 30))
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
+
+
+
+
+
+
 
 
 # define TGT_MAX		(1L << 63)
@@ -134,7 +139,3 @@ private:
 };
 
 #endif
-<<<<<<< HEAD:inc/server/WsLog.hpp
-
-=======
->>>>>>> main:inc/utils/WsLog.hpp

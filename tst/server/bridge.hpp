@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:40:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:06:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ public:
 
 	int         get_state(void) const { return this->state; }
 	std::string &get_body(void) { return this->body; }
-	std::string &get_fext(void) { return this->fext; }
+	const std::string &get_fext(void) const { return this->fext; }
 	
 	void		reset(void);
 
@@ -86,7 +86,10 @@ public:
 	Request     req;
 	Resource    *res;
   
-	// fill_input
+// WEBSERV::SESSION
+
+  	const Request &getRequest() const
+		{ return (this->req); }
 	int write(const char *buf, size_t siz)
 	{
 		int err = this->req.push_data(buf, siz);

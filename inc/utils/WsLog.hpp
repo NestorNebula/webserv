@@ -6,13 +6,10 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-<<<<<<< HEAD:inc/server/WsLog.hpp
-/*   Updated: 2026/08/13 11:17:48 by kdonlon          ###   ########.fr       */
-=======
-/*   Updated: 2026/07/12 14:56:07 by nhoussie         ###   ########.fr       */
->>>>>>> main:inc/utils/WsLog.hpp
+/*   Updated: 2026/08/13 13:58:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef WS_LOG_HPP
 # define WS_LOG_HPP
@@ -67,34 +64,37 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1UL << 18)
 # define TGT_MAIN		(1UL << 19)
 
-# define TGT_HEAD		(1UL << 20)
-# define TGT_BODY		(1UL << 21)
+# define TGT_HEAD		(1UL << 39)
+# define TGT_BODY		(1UL << 38)
 
-# define TGT_FCGI		(1UL << 22)
+# define TGT_FCGI		(1UL << 37)
 
 
-// HTTP TGTs using 1L << 21 to 1L << 40
-# define TGT_REQ		(1L << 21)
+// HTTP TGTs using 1UL << 21 to 1UL << 40
+# define TGT_REQ		(1UL << 21)
 
-# define TGT_STAT_RES	(1L << 22)
-# define TGT_DIR_RES	(1L << 23)
-# define TGT_BUI_RES	(1L << 24)
+# define TGT_STAT_RES	(1UL << 22)
+# define TGT_DIR_RES	(1UL << 23)
+# define TGT_BUI_RES	(1UL << 24)
 # define TGT_RES		(TGT_STAT_RES | TGT_DIR_RES | TGT_BUI_RES)
 
-# define TGT_RESP		(1L << 25)
+# define TGT_RESP		(1UL << 25)
 
-# define TGT_TMP_STRM	(1L << 26)
-# define TGT_STRM		(TGT_TMP_STRM | (1L << 27))
+# define TGT_TMP_STRM	(1UL << 26)
+# define TGT_STRM		(TGT_TMP_STRM | (1UL << 27))
 
-# define TGT_SESS_WR	(1L << 28)
-# define TGT_SESS_RD	(1L << 29)
-# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1L << 30))
+# define TGT_SESS_WR	(1UL << 28)
+# define TGT_SESS_RD	(1UL << 29)
+# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1UL << 30))
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
 
-# define TGT_MAX		(1L << 63)
-# define TGT_ALL		(TGT_MAX - 1)
+
+
+
+# define TGT_MAX		(1UL << 63)
+# define TGT_ALL		(TGT_MAX - 1UL)
 
 enum
 {
@@ -134,7 +134,3 @@ private:
 };
 
 #endif
-<<<<<<< HEAD:inc/server/WsLog.hpp
-
-=======
->>>>>>> main:inc/utils/WsLog.hpp

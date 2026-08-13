@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 10:59:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:10:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ std::string & CgiEnv::get(const char *key)
 int     CgiEnv::from_conn(Connection & conn)
 {
 // WEBSERV : SESSION
-	Request &req  = conn.sess.req;
+	const Request &req  = conn.sess.getRequest();
 	Server	&serv = conn.serv;
 
 	this->kv.clear();
@@ -85,7 +85,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	this->add("SCRIPT_FILENAME", path.c_str());	
 
-	std::string &fext = req.get_fext();
+	const std::string &fext = req.get_fext();
 	if (fext == std::string("php"))
 	{
 		lang = CGI_PHP;

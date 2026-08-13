@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 13:34:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:09:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,7 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 
 // WEBSERV : SESSION
+// Request::hasBody()
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -209,6 +210,7 @@ ssize_t	CgiPipe::pollout(void)
 	}
 	
 // WEBSERV : SESSION
+// Request::getBody() -- fucking stream
 	std::string & body = this->conn->sess.req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
