@@ -3,37 +3,37 @@
 tput reset
 
 C=250
-R=40
+R=4
 if [[ "$1" =~ "s" ]]; then
-	siege -f staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
 # if [[ "$1" =~ "k" ]]; then
-# 	siege -f ka.sh -R ./ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+# 	siege -f urls/ka.sh -R ./urls/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 # 	echo
 # fi
 
 if [[ "$1" =~ "p" ]]; then
-	siege -f php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
 
 if [[ "$1" =~ "f" ]]; then
-	siege -f fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	# siege -f fnf.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
 
 if [[ "$1" =~ "x" ]]; then
-	siege -f exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
 if [[ "$1" =~ "t" ]]; then
-	siege -f stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
