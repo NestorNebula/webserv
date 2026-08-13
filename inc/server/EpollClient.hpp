@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:30:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:53:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,11 @@
 // MUST BE : > (8) for FCGI	
 
 # ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ (2048)
+#  define EPC_BUF_SIZ (4096)
 # endif
 
 # ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ (2048)
+#  define EPC_OUT_SIZ (4096)
 # endif
 
 typedef enum
