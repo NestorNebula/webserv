@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:43:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 20:21:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ int	EpollClient::event(struct epoll_event *e)
 {
 	int err;
 
-	this->lact = time(&this->lact);
+	// this->lact = time(&this->lact);
 	if (e->events & EPOLLERR)
 	{
 		this->hup();
@@ -100,7 +100,9 @@ int	EpollClient::event(struct epoll_event *e)
 		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
 			
 		err = this->pollin();
-		if (err < 0)
+		if (err > 0)
+			this->lact = time(&this->lact);
+		else if (err < 0)
 			return (err);
 	}
 	if (e->events & EPOLLOUT)
@@ -108,7 +110,9 @@ int	EpollClient::event(struct epoll_event *e)
 		// if (fcntl(this->fd, F_GETFD) < 0)
 		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
 		err = this->pollout();
-		if (err < 0)
+		if (err > 0)
+			this->lact = time(&this->lact);
+		else if (err < 0)
 			return (err);
 	}	
 	if (e->events & EPOLLRDHUP) // ugh

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:57:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 20:19:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,7 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);
+    // WsLog::color(WSL_RED);
     WsLog::op(stream);
 
     return (-1);
@@ -314,7 +315,7 @@ void    WsLog::kd(void)
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
         | TGT_EPOLL_EVT
-        // | TGT_EPOLL_CTL
+        | TGT_EPOLL_CTL
         
         // | TGT_EPC
         // | TGT_EPC_RECV
@@ -345,7 +346,8 @@ void    WsLog::kd(void)
         // | TGT_RSRC_WAIT
     ;
     
-    // WsLog::tgt = TGT_FCGI;
+    // WsLog::tgt = TGT_EPOLL_EVT;
+    // TGT_FCGI;
     // WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN;
     //  | TGT_RSRC_STAT | TGT_RSRC_WAIT;
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:20:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 19:52:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ ResourcePiped::~ResourcePiped()
 		// WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_RSRC, "kill");
 		kill(this->pid, SIGKILL);
-		this->wait(0);
+		this->wait(0); // do not set error
 	}
 }
 
