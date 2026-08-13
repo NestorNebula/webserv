@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:16:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 13:42:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
 #include "Epoll.hpp"
 
-EpollClient::EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
+EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
 	ep(_ep),
 	typ(_typ), 
 	fd(_fd), 
