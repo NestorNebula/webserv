@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:17:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:32:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,15 +35,15 @@
 
 class Connection;
 
-class Server : public EpollClient
+class br_Server : public EpollClient
 {
 private:
-	Server				(const Server & that) : EpollClient(that) {}
-	Server & operator =	(const Server & ) { return (*this); }
+	br_Server				(const br_Server & that) : EpollClient(that) {}
+	br_Server & operator =	(const br_Server & ) { return (*this); }
 
 public:
-	Server (Epoll *_ep, unsigned short p);
-	~Server();
+	br_Server (Epoll *_ep, unsigned short p);
+	~br_Server();
 
 	ssize_t				pollin (void);
 	ssize_t				pollout(void);

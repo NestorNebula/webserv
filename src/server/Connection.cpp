@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:11:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "CgiPipe.hpp"
 #include "ResourceCgi.hpp"
 
-Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
+Connection::Connection (Epoll *_ep, int _fd, br_Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
 	res_cgi(NULL),
 	serv(_serv), 
@@ -144,7 +144,7 @@ ssize_t	Connection::pollout(void)
 	err = res->status();
 	if (err < 0)
 	{
-		if (res->ostr.size() == 0)
+		if (res->resp.size() == 0)
 			return (-1);
 	}	
 	if (this->error)
@@ -157,7 +157,7 @@ ssize_t	Connection::pollout(void)
 	}	
 	
 // WEBSERV : SESSION
-	std::string & OSTR = res->get_ostr();
+	std::string & OSTR = res->get_resp();
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());

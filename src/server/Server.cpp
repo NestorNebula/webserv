@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/12 11:51:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll *_ep, unsigned short p) : 
+br_Server::br_Server (Epoll *_ep, unsigned short p) : 
 	EpollClient(_ep, EPC_SERV, -1), 
 	port(p),
 	acc_cnt(0)
@@ -35,13 +35,13 @@ Server::Server (Epoll *_ep, unsigned short p) :
 	bin_pl = std::string("/usr/bin/perl");
 };
 
-Server::~Server()
+br_Server::~br_Server()
 {
 	WsLog::_(LVL_DBG, TGT_SERV, " (~) Server");
 	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 
-int Server::init(void)
+int br_Server::init(void)
 {
 	int	err;
 
@@ -78,7 +78,7 @@ int Server::init(void)
 	return (err);
 }
 
-ssize_t	Server::pollin(void)
+ssize_t	br_Server::pollin(void)
 {
 	ssize_t				err;
 	struct sockaddr_in	conn_addr;
@@ -110,27 +110,27 @@ ssize_t	Server::pollin(void)
 	return (0);
 }
 
-ssize_t	Server::pollout(void)
+ssize_t	br_Server::pollout(void)
 {
 	return (0);
 }
 
-int	Server::rdhup(void) 
+int	br_Server::rdhup(void) 
 {
 	return (0);
 }
 
-int	Server::hup(void) 
+int	br_Server::hup(void) 
 {
 	return (0);
 }
 
-bool	Server::timeo  (time_t)
+bool	br_Server::timeo  (time_t)
 {
 	return (false);
 }
 
-unsigned short	Server::get_port(void)	const
+unsigned short	br_Server::get_port(void)	const
 {
 	return (this->port);
 }

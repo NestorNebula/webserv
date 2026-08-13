@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:11:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:15:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 // Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
-int Request::push_data(const char *buf, size_t siz)
+int br_Request::push_data(const char *buf, size_t siz)
 {
     if (this->state < REQ_HAVE_HEAD)
     {
@@ -49,7 +49,7 @@ int Request::push_data(const char *buf, size_t siz)
 }
 
 
-void Request::reset(void)
+void br_Request::reset(void)
 {
     head.clear();
     body.clear();
@@ -67,7 +67,7 @@ void Request::reset(void)
     state = REQ_INIT;
 }
 
-int Request::init(void)
+int br_Request::init(void)
 {
     meth.clear();
     path.clear();
@@ -121,7 +121,7 @@ int Request::init(void)
 }
 
 // INCOMING BODY
-int Request::body_stat(void)
+int br_Request::body_stat(void)
 {
     // WsLog::_(LVL_DBG, TGT_CONN_RECV, "body:  size ", this->body.size());
     if (this->body.size())
@@ -165,7 +165,7 @@ std::string hedval_str(std::string & str, const char *key)
     return (val);
 }
 
-std::string Request::header(const char *key) const
+std::string br_Request::header(const char *key) const
 {
 	std::string	kstr(key);
 	std::string	val("");
