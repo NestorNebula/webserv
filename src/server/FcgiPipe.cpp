@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:32:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:49:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ ssize_t	FcgiPipe::pollout(void)
 		body.clear(); 
 	}
 
-
+#if 0 // HAVE_BODY
 	if (!have_body && this->fcgi.req.size() == 0)
 	{
 		err = this->conn->req_body_status();
@@ -186,7 +186,7 @@ ssize_t	FcgiPipe::pollout(void)
 			// WsLog::_(LVL_DBG, TGT_FCGI, "body\n", fcgi.req_body);
 		}
 	}
-
+#endif
 	
 // WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
 	err = this->send(fcgi.req);
@@ -220,6 +220,10 @@ int		FcgiPipe::rdhup(void)
 	// this->mod_evt(-EPOLLIN); // BAD IDEA
 	// this->mod_evt(-EPOLLOUT);
 	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
+	
+// THE QUESTION : when to die 
+	// return (0); // UGLY 
+
 	if (this->fcgi.req.size())
 		return (0);
 
@@ -227,8 +231,8 @@ int		FcgiPipe::rdhup(void)
 // but can't CLOSE until BOTH SIDES ARE DONE 
 // STATE CHECK
 // find TEST CASES
-	if (have_body == 0)
-		return (0);
+	// if (have_body == 0)
+	// 	return (0);
 	// still need to send BODY_DONE 
 	if (this->rsrc->ostr.size())
 		return (0);
