@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:08:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:29:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ php-fpm fastcgi.c
         if (k >= 128)
         {
             WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: keylen ", k);
+            WsLog::_(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
             memcpy(tgt, &k, sizeof(int));
@@ -128,7 +128,7 @@ php-fpm fastcgi.c
         {
 
             WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: vallen ", k);
+            WsLog::_(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
             memcpy(tgt, &v, sizeof(int));

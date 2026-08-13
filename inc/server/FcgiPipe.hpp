@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   FcgiConn.hpp                                       :+:      :+:    :+:   */
+/*   FcgiPipe.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:27:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:13:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FCGI_CONN_HPP
-# define FCGI_CONN_HPP
+#ifndef FCGI_PIPE_HPP
+# define FCGI_PIPE_HPP
 
 # include <stdio.h>
 # include <stdlib.h>
@@ -31,36 +31,42 @@
 # include "Socket.hpp"
 # include "EpollClient.hpp"
 
-#if 0
-void find_pad(unsigned short len)
-{
-	unsigned short up8 = (len + 7) & ~(7);
-	fprintf(stderr, "%i + (%i / %i) = %i\n", len, (up8 - len), 8 - (len & 0x7), up8);
-}
-#endif
+# include "FcgiConn.hpp"
 
+class Connection;
+class ResourceFcgi;
 
-class FcgiConn
+class FcgiPipe : public EpollClient
 {
+private:
+	FcgiPipe				(const FcgiPipe & that) : EpollClient(that), 
+		conn(that.conn) {};
+	FcgiPipe & operator=	(const CgiPipe & ) { return (*this); }
 public:
-	static int		make_sock(const char * sock_path);
+	FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc);
+	~FcgiPipe();
 	
-	FcgiMsgData		data; 
-	std::string		req;
-	std::string		rsp;
-
-	FcgiConn() {}
-	~FcgiConn() {}
-
-	int				req_init(CgiEnv *env);
-	void			req_body(char *buf, int siz);
+	int			init(CgiEnv *cgienv);
 	
-	int				rsp_recv(char * buf, int siz);
+	ssize_t		pollin (void);
+	ssize_t		pollout(void);
+	int			rdhup  (void);
+	int			hup    (void);
+	bool		timeo  (time_t);
+
+	void		rsrc_closed(void);
 
 private:
-	static int		uid;
-	int				rsp_data(char * buf, int cnt);
-
+	FcgiConn		fcgi;
+	Connection		*conn;
+	ResourceFcgi	*rsrc;
+	int				have_body;
 };
+
+
+
+
+
+
 
 #endif

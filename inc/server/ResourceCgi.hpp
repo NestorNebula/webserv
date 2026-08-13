@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/07 14:53:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:17:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include "Connection.hpp"
 # include "CgiPipe.hpp"
-# include "FcgiConn.hpp"
+# include "FcgiPipe.hpp"
 # include "bridge.hpp"
 
 enum
@@ -42,9 +42,9 @@ public:
 	void			set_err(int e);
 	std::string &	get_ostr(void) { return (this->ostr); }
 	
-	int				hed;
+	int				hed; // state
 	int				error;
-	std::string		ostr;
+	std::string		ostr; // resp
 	
 	virtual void	push_body(void) = 0;
 	virtual int		status(void) = 0;

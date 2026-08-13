@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/09 19:11:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:02:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,18 @@
 class FcgiMsgData
 {
 public:
-	int siz;  // full_size
-	int len;  // msg_len
+	int				siz;  // full_size
+	int				len;  // msg_len
 
-	int req;  // req_id
-	int role; // not sure when
+	int				req;  // req_id
+	int				role; // not sure when
 
-	unsigned char typ;
-	unsigned char pad;
+	unsigned char	typ;
+	unsigned char	pad;
 
 	FcgiMsgData();
 	~FcgiMsgData() {};
+	
 	void zero();
 };
 

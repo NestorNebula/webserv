@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/12 11:56:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 11:28:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ int FcgiConn::make_sock(const char *sock_path)
     if (err < 0)
 	{
 		close(fd);
-		// return (WsLog::_errno(LVL_DBG, TGT_FCGI, "connect"));
 		WsLog::_(LVL_DBG, TGT_FCGI, "connect");
 		return (err);
 	}
@@ -89,8 +88,6 @@ int FcgiConn::make_sock(const char *sock_path)
 
 COMMON VARIABLES
 
-
-
     $query_string or $args: The arguments given in the original client request.
 
     $is_args: Will equal (?) if there are arguments in the request and will be set to an empty string otherwise. This is useful when constructing parameters that may or may not have arguments.
@@ -115,7 +112,7 @@ COMMON VARIABLES
 
 #endif
 
-int FcgiConn::request(CgiEnv * env)
+int FcgiConn::req_init(CgiEnv * env)
 {
 	data.zero();
 
@@ -155,7 +152,7 @@ int FcgiConn::request(CgiEnv * env)
 	return (0);
 }
 
-void FcgiConn::push_body(char *buf, int siz)
+void FcgiConn::req_body(char *buf, int siz)
 {
 	FcgiMsg		body;
 	
@@ -180,7 +177,7 @@ The start line of an HTTP response, called the status line, contains the followi
     A status text. A brief, purely informational, textual description of the status code to help a human understand the HTTP message.
 */
 
-int FcgiConn::push_data(char * buf, int cnt)
+int FcgiConn::rsp_data(char * buf, int cnt)
 {
 	switch(data.typ)
 	{
@@ -206,21 +203,21 @@ int FcgiConn::push_data(char * buf, int cnt)
 }
 
 
-int FcgiConn::parse(char * buf, int siz)
+int FcgiConn::rsp_recv(char * buf, int siz)
 {
 	char * chk = buf;
 	char * end = buf + siz;
 
-	WsLog::_(LVL_DBG, TGT_FCGI, "parse: ", siz);
+	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", siz);
 	if (data.len)
 	{
 		if (data.len > siz)
 		{
-    		push_data(chk, siz);
+    		rsp_data(chk, siz);
     		return (1);
 		}
 		WsLog::_(LVL_DBG, TGT_FCGI, "parse: done");
-		chk += push_data(chk, data.len);
+		chk += rsp_data(chk, data.len);
 		chk += data.pad; // not 100% CERTAIN we have enough for this
 	}
 
@@ -233,7 +230,6 @@ int FcgiConn::parse(char * buf, int siz)
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
 
-		// hed->info();
 		hed->data(&data);
 
 		if (hed->head.type == FCGI_END_REQUEST)
@@ -250,367 +246,14 @@ int FcgiConn::parse(char * buf, int siz)
 		{
 			WsLog::_(LVL_DBG, TGT_FCGI, "parse: full");
 			chk += 8;
-    		chk += push_data(chk, data.len);
+    		chk += rsp_data(chk, data.len);
     		chk += hed->head.paddingLength;
     		continue;
 		}
 		WsLog::_(LVL_DBG, TGT_FCGI, "parse: partial");
 		chk += 8; // ATTN : 
-		chk += push_data(chk, (end - chk)); // negative (?)
+		chk += rsp_data(chk, (end - chk)); // negative (?)
     }
 	WsLog::_(LVL_DBG, TGT_FCGI, "parse: complete");
     return 0;
 }
-
-
-
-
-
-#if BUILD_MAIN_FCGI
-
-int main(void)
-{
-
-	char sock_path[] = "./FCGI/.php-fpm/SOCK"; // DANGEROUS
-	// char sock_path[] = "/run/php/php-fpm.sock";
-	int fd = FcgiConn::make_sock(sock_path);
-	if (fd < 0)
-		return (1);
-
-	WsLog::lvl = LVL_ALL;
-	WsLog::tgt = TGT_FCGI;
-
-	FcgiConn fcgi; // sock_path
-
-//      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-//      fastcgi_param SERVER_NAME $http_host;
-// +    fastcgi_param SCRIPT_NAME $request_uri;
-// fastcgi_param  PATH_INFO  $request_uri;
-        // fastcgi_param  SCRIPT_FILENAME /usr/share/nginx/www/$fastcgi_script_name;
-        // fastcgi_param  PATH_INFO       $fastcgi_path_info;
-        // fastcgi_param  PATH_TRANSLATED $document_root$fastcgi_script_name;
-        // fastcgi_pass   unix:/var/run/php/php7.0-fpm.sock;
-	// char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
-
-	// char p[] = "/media/kdonlon/data/Documents/42/webserv/git/tst/server/test.php";
-	// char p[] = "./test.php";z
-
-	char p[] = "/home/kdonlon/Documents/Projects/webserv/git/tst/server/test.php";
-
-	char meth[] = "POST";
-	char ptype[] = "application/x-www-form-urlencoded";
-	char pdata[] = "p1=FCGI-post-one&p2=FCGI-post-two";
-	int  plen = strlen(pdata);
-
-	char q[] = "g1=fcgi-ONE&g2=fcgi-TWO";
-	
-
-	CgiEnv e;
-	e.add("REQUEST_METHOD", meth);
-	// e.add("DODCUMENT_ROOT", root);
-	e.add("SCRIPT_FILENAME", p);
-	e.add("QUERY_STRING", q);
-	e.add("CONTENT_TYPE", ptype);
-	e.add("CONTENT_LENGTH", plen);
-	
-// POLLIN : head
-	int err = fcgi.request(&e); 	
-	if (err < 0)
-		return (1);
-
-#define BUF_SIZ (1024)
-
-	int bs;
-	
-	bs = send(fd, fcgi.req.c_str(), fcgi.req.size(), 0);
-	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
-	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req.size());
-
-// POLLIN : body
-	fcgi.push_body(pdata, plen);
-	fcgi.push_body(NULL, 0);
-
-// perhaps : store as std::string in (msg)
-	// std::string req_body;
-	// req_body.append(fcgi.body.buf.text(), fcgi.body.buf.size());
-
-	bs = send(fd, fcgi.req.c_str(), fcgi.req.size(), 0);
-	WsLog::_(LVL_DBG, TGT_FCGI, "sent ", bs);
-	WsLog::_(LVL_DBG, TGT_FCGI, " of  ", (int) fcgi.req.size());
-
-
-
-// POLLOUT
-	char buf[BUF_SIZ];
-	// recv in CHUNKS
-	while (1)
-	{
-		int siz = recv(fd, buf, BUF_SIZ, 0);
-		if (siz <= 0)
-			break;
-		if (fcgi.parse(buf, siz) < 0)
-			break;
-		// conn->cgi_data() .. post-parsed (?)
-		
-	}
-	WsLog::_(LVL_DBG, TGT_FCGI, "ostr\n", fcgi.ostr);
-
-	close(fd);
-	return (0);
-}
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) : 
-	EpollClient(_ep, EPC_FCGI, _fd), 
-	conn(_conn),
-	rsrc(_rsrc),
-	have_body(0)
-{
-	sock_non_block(this->fd);
-}
-	
-FcgiPipe::~FcgiPipe()
-{
-	WsLog::_(LVL_DBG, TGT_FCGI, " (~) Fcgi");
-	if (this->conn)
-		this->conn->cgi_rem(this);
-	// if (this->rsrc)
-	// 	this->rsrc->rem(this);
-}
-
-bool	FcgiPipe::timeo(time_t now)
-{
-	if (this->lact == 0)
-		return (false);
-	if (now < this->lact)
-		return (false);
-	if ((this->lact + CGI_TIMEOUT) < now)
-	{
-		if (this->rsrc)
-			this->rsrc->set_err(504); // CGI_ERR
-		else if (this->conn)
-			this->conn->set_err(504); // CGI_ERR
-		return (true);
-	}
-	return (false);
-}
-
-int		FcgiPipe::init(CgiEnv * cgienv)
-{
-	int err;
-
-	err = fcgi.request(cgienv);
-	if (err < 0)
-		return (err);
-	return (err);
-}
-
-ssize_t	FcgiPipe::pollin(void)
-{
-	if (this->conn == NULL)
-		return (-1);
-	if (this->rsrc == NULL)
-		return (-1);
-
-	ssize_t	err = 0;
-	
-	WsLog::_(LVL_DBG, TGT_FCGI, "recv");
-	err = this->recv();
-	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", err);
-
-	// hm : data returned from CGI .. BEFORE "upload" is complete ... 
-	if (err < 0)
-	{
-		WsLog::_(LVL_ERR, TGT_FCGI, "recv: err");
-		this->rsrc->set_err(501); // CGI_ERR : read failed
-		return (err);
-	}
-	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
-		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
-		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
-
-		// wtf : recev
-		if ((this->fcgi.req.size() > 0) || (this->conn->req_body_status() >= 0))
-		{
-			// this->mod_evt(-EPOLLIN);
-			return (0);
-		}
-		return (0);
-	}
-	
-	if (fcgi.parse(this->ibuf, err) < 0)
-	{
-		WsLog::_(LVL_ERR, TGT_FCGI, "fcgi:  parse failed");
-		return (-1);
-	}
-		
-	// why are we getting output from the CGI ... 
-	// when we have not yet finished writing the upload data ... 
-	
-	switch (this->rsrc->recv_data((char*) fcgi.rsp.c_str(), fcgi.rsp.size()))
-	{
-	case RSRC_RESP_INIT:
-		break;
-	case RSRC_RESP_ERR:
-		conn->set_err(rsrc->error);
-		break;
-	case RSRC_RESP_HEAD:
-		// this->mod_evt(EPOLLOUT);
-		break;
-	case RSRC_RESP_BODY:
-	default:
-		// this->mod_evt(EPOLLOUT);
-		conn->mod_evt(EPOLLOUT);
-		break;
-	}
-	fcgi.rsp.clear();
-	return (err);
-}
-
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
-
-// static int body_push = 0;
-
-ssize_t	FcgiPipe::pollout(void)
-{
-	ssize_t	err;
-	
-	if (this->conn == NULL)
-		return (-1);
-	if (this->rsrc == NULL)
-		return (-1);
-	
-
-	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
-	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
-// WEBSERV : SESSION
-	if (this->conn->req_body_status() > 0)
-	{
-		std::string & body = this->conn->sess.req.get_body();
-		
-		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
-
-// body_push += body.size();
-if (body.size() == 0)
-{
-	WsLog::color(WSL_RED);
-
-	WsLog::_(LVL_DBG, TGT_FCGI, "body: ZERO");
-}
-		fcgi.push_body((char*) body.c_str(), body.size());
-		body.clear(); 
-	}
-	if (!have_body && this->fcgi.req.size() == 0)
-	{
-		err = this->conn->req_body_status();
-		if (err < 0)
-		{
-			WsLog::_(LVL_DBG, TGT_FCGI, "body     : complete");
-			fcgi.push_body(NULL, 0);
-			this->mod_evt(-EPOLLOUT);
-			have_body = 1;
-		}
-		else if (err == 0)
-		{
-			// Continue -- should FAIL
-			WsLog::_(LVL_DBG, TGT_FCGI, "body     : waiting");
-			this->mod_evt(0);
-			return (0);
-		}
-		else
-		{
-	// UPLOAD
-	// conn read all data from client => req.body
-	// conn returned data to   client
-	// req.body .. has not been fully pushed to fcgi ...
-	// 
-
-// should we not be TRYING to read .. until all data is sent (?)
-
-	// may : always want to get body .. 
-// WEBSERV : SESSION
-			std::string & body = this->conn->sess.req.get_body();
-			
-			WsLog::_(LVL_DBG, TGT_FCGI, "send: ", body.size());
-
-	// body_push += body.size();
-			fcgi.push_body((char*) body.c_str(), body.size());
-			body.clear();
-			// WsLog::_(LVL_DBG, TGT_FCGI, "fcgi: body\n", fcgi.req_body);
-		}
-	}
-
-// WsLog::_(LVL_DBG, TGT_FCGI, "body:  pushed ", body_push);
-	err = this->send(fcgi.req);
-// -pass-header Authorization
-	if (err < 0)
-	{
-		WsLog::_(LVL_ERR, TGT_FCGI, "send");
-		return (err);
-	}
-	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
-		return (0);
-	}
-	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
-	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
-
-	// if (fcgi.req.size() == 0)
-	this->mod_evt(EPOLLIN);
-	// if (have_body)
-	// 	return (-1); // did we need to close here (?)
-
-// are we done ?
-
-	return (0);
-}
-
-int		FcgiPipe::rdhup(void)
-{
-	// nothing more to "send back"
-	// but .. still may be receiving an upload
-	// this->mod_evt(-EPOLLIN); // BAD IDEA
-	// this->mod_evt(-EPOLLOUT);
-	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
-	if (this->fcgi.req.size())
-		return (0);
-	if (have_body == 0)
-		return (0);
-	// still need to send BODY_DONE 
-	if (this->rsrc->ostr.size())
-		return (0);
-	if (this->conn->req_body_status() >= 0)
-		return (0);
-		
-	return (-1);
-}
-
-int		FcgiPipe::hup(void)
-{
-	return (-1);
-}
-
-void	FcgiPipe::rsrc_closed(void)
-{ 
-	this->conn = NULL;
-	this->rsrc = NULL;
-}
-
-
-

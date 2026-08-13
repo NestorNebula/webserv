@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/12 11:43:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 10:59:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ std::string & CgiEnv::get(const char *key)
 int     CgiEnv::from_conn(Connection & conn)
 {
 // WEBSERV : SESSION
-	Request &req = conn.sess.req;
+	Request &req  = conn.sess.req;
+	Server	&serv = conn.serv;
 
 	this->kv.clear();
 	
@@ -66,8 +67,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
-	path = conn.serv.data_root + file;
-	
+	path = serv.data_root + file;
 	if (access(path.c_str(), F_OK))
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE : does not exist");
@@ -89,7 +89,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (fext == std::string("php"))
 	{
 		lang = CGI_PHP;
-		exec = conn.serv.bin_php;
+		exec = serv.bin_php;
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
@@ -98,13 +98,13 @@ int     CgiEnv::from_conn(Connection & conn)
 	else if (fext == std::string("py"))
 	{
 		lang = CGI_PYTHON;
-		exec = conn.serv.bin_py;
-		this->add("PYTHONPATH", conn.serv.pycgi.c_str());
+		exec = serv.bin_py;
+		this->add("PYTHONPATH", serv.pycgi.c_str());
 	}
 	else if (fext == std::string("pl"))
 	{
 		lang = CGI_PERL;
-		exec = conn.serv.bin_pl;
+		exec = serv.bin_pl;
 	}
 	else
 	{
@@ -172,7 +172,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 // SERVER
 	this->add("SERVER_NAME", "webserv");
-	this->add("SERVER_PORT", conn.serv.get_port());
+	this->add("SERVER_PORT", serv.get_port());
 	this->add("SERVER_PROTOCOL", "HTTP/1.1");
 	this->add("SERVER_SOFTWARE", "webserv");
 	

@@ -9,10 +9,10 @@ if [[ "$1" =~ "s" ]]; then
 	echo
 fi
 
-if [[ "$1" =~ "k" ]]; then
-	siege -f ka.sh -R ./ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
-	echo
-fi
+# if [[ "$1" =~ "k" ]]; then
+# 	siege -f ka.sh -R ./ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+# 	echo
+# fi
 
 if [[ "$1" =~ "p" ]]; then
 	siege -f php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b

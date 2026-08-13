@@ -42,7 +42,8 @@ FILES = \
 	server/CgiPipe.cpp \
 	server/ResourceCgi.cpp \
 	server/FcgiMsg.cpp \
-	server/FcgiConn.cpp 
+	server/FcgiConn.cpp \
+	server/FcgiPipe.cpp 
 
 TPP = 
 
