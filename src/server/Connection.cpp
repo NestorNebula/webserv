@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:27:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 
 Connection::Connection (Epoll *_ep, int _fd, br_Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
-	res_cgi(NULL),
 	serv(_serv), 
+	res_cgi(NULL),
 	req_cnt(0)
 {
 };
@@ -48,6 +48,7 @@ bool	Connection::timeo(time_t now)
 	return (false);
 }
 
+// WEBSERV : ERROR
 void	Connection::set_err(int e)
 {
 	if (e == 0)
@@ -98,7 +99,7 @@ ssize_t	Connection::pollin(void)
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-// WEBSERV : SESSION
+// WEBSERV : SESSION (write)
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
@@ -132,10 +133,11 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 
+// WEBSERV : ERROR
 	if (this->error)
 		return (this->send_error());
 
-// WEBSERV : SESSION
+// WEBSERV : RESOURCE (cgi)
 	ResourceCgi *res = this->res_cgi;
 	if (res == NULL)
 	{
@@ -147,8 +149,10 @@ ssize_t	Connection::pollout(void)
 		if (res->resp.size() == 0)
 			return (-1);
 	}	
+// WEBSERV : ERROR
 	if (this->error)
 		return (this->send_error());
+		
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
@@ -156,7 +160,7 @@ ssize_t	Connection::pollout(void)
 		return (err);
 	}	
 	
-// WEBSERV : SESSION
+// WEBSERV : RESOURCE (response)
 	std::string & OSTR = res->get_resp();
 
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
@@ -183,6 +187,7 @@ ssize_t	Connection::pollout(void)
 	return (err);
 }
 
+// WEBSERV : ERROR 
 int		Connection::send_error(void)
 {
 	int	err;
@@ -224,7 +229,7 @@ void	Connection::reset(void)
 	}
 	this->res_cgi = NULL;
 	
-// WEBSERV : SESSION
+// WEBSERV : SESSION (keep-alive)
 	this->sess.reset();
 	
 	this->estr.clear();
@@ -264,7 +269,7 @@ std::string		&Connection::get_addr(void)
 
 int	Connection::req_body_status(void)
 {
-// WEBSERV : SESSION
+// WEBSERV : REQUEST (body)
 	int	err = this->sess.req.body_stat();
 
 	if (err == 1) // body.size()

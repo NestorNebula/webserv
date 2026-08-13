@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:42:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ br_Server::br_Server (Epoll *_ep, unsigned short p) :
 	fcgi_sock = data_root + std::string("FCGI/.php-fpm/SOCK");
 	pycgi = proj_root + std::string("pycgi/");
 	bin_php = std::string("/usr/bin/php-cgi");
-	bin_py = std::string("/usr/bin/python3"); // WEBSERV
+	bin_py = std::string("/usr/bin/python3");
 	bin_pl = std::string("/usr/bin/perl");
 };
 

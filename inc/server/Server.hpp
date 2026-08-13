@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:32:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:23:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,8 @@ public:
 	
 	unsigned short		get_port(void)	const;
 	
-// WEBSERV
+// WEBSERV / SERVER / ROUTES
+	// need to provide access to ...
 	std::string			proj_root;
 	std::string			data_root;
 	std::string			fcgi_sock;
@@ -68,8 +69,6 @@ private:
 	
 	int					init(void);
 	int					acc_cnt;
-// WEBSERV
-	// std::vector<Route> route;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:32:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 15:15:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,8 +120,6 @@ CgiPipe::~CgiPipe()
 	WsLog::_(LVL_DBG, TGT_CGI, " (~) Cgi");
 	if (this->conn)
 		this->conn->cgi_rem(this);
-	// if (this->rsrc)
-	// 	this->rsrc->rem(this);
 }
 
 bool	CgiPipe::timeo(time_t now)
@@ -150,7 +148,8 @@ ssize_t	CgiPipe::pollin(void)
 
 	ssize_t	err = 0;
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv");
+	WsLog::_(LVL_DBG, TGT_CGI_RECV, "conn: ", this->conn->get_fd());
+	
 	err = this->recv();
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
@@ -164,7 +163,6 @@ ssize_t	CgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		return (-1);
 	}
-	
 	
 	switch (this->rsrc->recv_data(this->ibuf, err))
 	{
@@ -194,8 +192,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-// WEBSERV : SESSION
-// Request::hasBody()
+// WEBSERV : REQUEST (body)
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -209,8 +206,7 @@ ssize_t	CgiPipe::pollout(void)
 		return (0);
 	}
 	
-// WEBSERV : SESSION
-// Request::getBody() -- fucking stream
+// WEBSERV : REQUEST (body)
 	std::string & body = this->conn->sess.req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
