@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 17:43:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 17:53:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,8 +226,8 @@ void	Connection::reset(void)
 	{
 		this->res_cgi->conn_closed();
 		delete (this->res_cgi); // conn : reset 
+		this->res_cgi = NULL;
 	}
-	this->res_cgi = NULL;
 	
 // WEBSERV : SESSION (keep-alive)
 	this->sess.reset();
