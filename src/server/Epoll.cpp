@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/11 12:34:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 20:20:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,8 @@ int	Epoll::mod(EpollClient *cli)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
-		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod");	
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
+		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
 	}
 	return (err);
 }
@@ -301,16 +302,14 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
+			
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "");
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
+			
 			if (epc->event(evt) < 0)
-			{
-				// flag for removal (?)
 				this->rem(epc);
-				// epc->set_rem(1);
-			}
         }
 		this->check_timeo();	
     }

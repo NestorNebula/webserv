@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 17:53:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 20:15:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ void	Connection::set_err(int e)
 		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
 		WsLog::_(LVL_DBG, TGT_CONN, "cur:  ", this->error);
 		WsLog::_(LVL_DBG, TGT_CONN, "new:  ", e);
+		// not when (err) is set .. on delete => status / wait 
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
@@ -206,7 +207,9 @@ int		Connection::send_error(void)
 int	Connection::rdhup(void)
 {
 	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
+	// check res status (?)
 	this->mod_evt(EPOLLOUT);
+	return (-1); // may need error (?)
 	return (0);
 }
 
