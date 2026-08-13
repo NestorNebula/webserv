@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:06:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:21:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@
 
 std::string hedval_str(std::string & str, const char *key);
 
-class Request
+class br_Request
 {
 public:
-	Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
-	~Request() {}
+	br_Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
+	~br_Request() {}
 
 	int         push_data(const char *buf, size_t siz);
 	int			body_stat(void);
@@ -67,28 +67,16 @@ private:
 
 };
 
-class Resource
+class br_Session
 {
 public:
-	virtual ~Resource() {}
-	virtual void	push_body(void) = 0;
-};
-
-class Session
-{
-public:
-	Session(void) : res(NULL) {}
-	~Session()
-	{
-		if (this->res)
-			delete (this->res);
-	}
-	Request     req;
-	Resource    *res;
+	br_Session(void) {}
+	~br_Session() {}
+	
+	br_Request     req;
   
 // WEBSERV::SESSION
-
-  	const Request &getRequest() const
+  	const br_Request &getRequest() const
 		{ return (this->req); }
 	int write(const char *buf, size_t siz)
 	{

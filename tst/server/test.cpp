@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/10 12:09:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,9 @@ int main (int argc, char ** argv, char **envp)
         ep = new Epoll(envp);
         
 // ATTN : catch failed Server construction individually (!)
-        new Server(ep, 8080);
-        new Server(ep, 8081);
-        new Server(ep, 8082);
+        new br_Server(ep, 8080);
+        new br_Server(ep, 8081);
+        new br_Server(ep, 8082);
         
         err = ep->loop();
         WsLog::_(LVL_INFO, TGT_MAIN, "exit: ", err);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 12:08:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:22:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ int	ResourceFcgi::status(void)
 		return (0); // NEED_HEAD
 	}
 
-	if (this->ostr.size())
+	if (this->resp.size())
 		return (1); // HAVE_DATA
 	
 	if (this->fcgi == NULL)
@@ -180,7 +180,7 @@ int	ResourcePiped::status(void)
 		return (0); // NEED_HEAD
 	}
 
-	if (this->ostr.size())
+	if (this->resp.size())
 		return (1); // HAVE_DATA
 	
 	if (this->wait(WNOHANG) != -1)
@@ -348,16 +348,14 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
-	this->ostr.append(buf, siz);
-	WsLog::_(LVL_DBG, TGT_RSRC, "ostr: ", ostr.size());
+	this->resp.append(buf, siz);
+	WsLog::_(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
 
 	// WsLog::_(LVL_DBG, TGT_RSRC, "ostr");
 	// WsLog::_(LVL_DBG, TGT_RSRC, "****\n", ostr);
 	
-	return (this->chk_rsp_hed(this->ostr));
+	return (this->chk_rsp_hed(this->resp));
 }
-
-
 
 
 void    ResourceFcgi::push_body(void)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:08:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:20:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,7 @@ int		FcgiPipe::rdhup(void)
 // STATE CHECK
 // find TEST CASES
 	// still need to send BODY_DONE 
-	if (this->rsrc->ostr.size())
+	if (this->rsrc->resp.size())
 	{
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: ostr.size()");

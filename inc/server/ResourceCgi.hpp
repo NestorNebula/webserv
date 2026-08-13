@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 13:21:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:22:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ public:
 	int				recv_data(char *buf, int siz);
 	int				chk_rsp_hed(std::string & ostr);
 	void			set_err(int e);
-	std::string &	get_ostr(void) { return (this->ostr); }
+	std::string &	get_resp(void) { return (this->resp); }
 	
 	int				hed; // state
 	int				error;
-	std::string		ostr; // resp
+	std::string		resp;
 	
 	virtual void	push_body(void) = 0;
 	virtual int		status(void) = 0;
@@ -53,7 +53,7 @@ public:
 
 	virtual int		rem(EpollClient *epc) = 0;
 protected:
-	Connection	*conn;
+	Connection		*conn;
 };
 
 

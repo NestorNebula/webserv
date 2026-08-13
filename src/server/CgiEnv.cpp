@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:10:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/13 14:31:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ std::string & CgiEnv::get(const char *key)
 int     CgiEnv::from_conn(Connection & conn)
 {
 // WEBSERV : SESSION
-	const Request &req  = conn.sess.getRequest();
-	Server	&serv = conn.serv;
+	const br_Request &req  = conn.sess.getRequest();
+	br_Server	&serv = conn.serv;
 
 	this->kv.clear();
 	
