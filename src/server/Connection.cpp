@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:14:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 12:19:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,26 +101,7 @@ ssize_t	Connection::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 // WEBSERV : SESSION (write)
-#if 0 // CGI
-	int req_state = sess.write(this->ibuf, err);
-	if (req_state < REQ_HAVE_HEAD)
-		return (err);
-
-	if (this->res_cgi == NULL)
-	{
-		this->req_cnt++;
-		if (this->exec_cgi() < 0)
-		{
-			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-			// this->set_err(503); // CGI_ERR
-			this->set_err(404); // siege-friendly
-			return (0); // send error
-		}
-	}
-	
-// SESSION
-	this->res_cgi->push_body();
-#else
+#if BUILD_DEMO
 	if (sess.nextAction() == Session::RDSOCK)
 		sess.write(this->ibuf, err);
 	switch (sess.nextAction()) {
@@ -142,6 +123,25 @@ ssize_t	Connection::pollin(void)
 		case Session::CLOSE:
 			break;
 	}
+#else
+	int req_state = sess.write(this->ibuf, err);
+	if (req_state < REQ_HAVE_HEAD)
+		return (err);
+
+	if (this->res_cgi == NULL)
+	{
+		this->req_cnt++;
+		if (this->exec_cgi() < 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+			// this->set_err(503); // CGI_ERR
+			this->set_err(404); // siege-friendly
+			return (0); // send error
+		}
+	}
+	
+// SESSION
+	this->res_cgi->push_body();
 #endif
 	return (err);
 }
@@ -158,7 +158,27 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 
-#if 0 // (!) DEMO
+#if BUILD_DEMO
+	if (sess.nextAction() != Session::WRSOCK)
+		return 0;
+
+	// rsrc.complete
+	char buf[4096];
+	// Stream::streamsize r 
+	err = sess.read(buf, 4096);
+	std::string OSTR(buf);
+
+	if (err > 0)
+	{
+		// if (r > 0)
+		// 	err = this->send(buf, r);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
+		err = this->send(OSTR);
+	}
+#else
 // WEBSERV : ERROR
 	if (this->error)
 		return (this->send_error());
@@ -193,26 +213,6 @@ ssize_t	Connection::pollout(void)
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
 	err = this->send(OSTR);
-#else
-	if (sess.nextAction() != Session::WRSOCK)
-		return 0;
-
-	// rsrc.complete
-	char buf[4096];
-	// Stream::streamsize r 
-	err = sess.read(buf, 4096);
-	std::string OSTR(buf);
-
-	if (err > 0)
-	{
-		// if (r > 0)
-		// 	err = this->send(buf, r);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
-		err = this->send(OSTR);
-	}
 #endif
 	if (err < 0)
 	{
@@ -230,7 +230,7 @@ ssize_t	Connection::pollout(void)
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
-#if 1 // !CGI
+#if BUILD_DEMO
 	if (sess.nextAction() != Session::WRSOCK) // rsrc/state seems like a better check
 	{
 		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 

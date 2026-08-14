@@ -11,7 +11,13 @@ INC_DIR=$(GIT_DIR)/inc
 OBJ_DIR=.obj
 LIB_DIR=.
 
-CFLAGS+=-I . -I $(INC_DIR) -I $(INC_DIR)/server -I $(INC_DIR)/utils
+CFLAGS+=-I . \
+	-I $(INC_DIR) \
+	-I $(INC_DIR)/server \
+	-I $(INC_DIR)/utils \
+	-I $(INC_DIR)/http \
+	-I $(INC_DIR)/streams \
+	-I $(INC_DIR)/resources
 LFLAGS=
 LIBS =
 
@@ -31,7 +37,7 @@ DEFS += -DTEST="$(TEST)"
 endif
 
 FILES = \
-	bridge.cpp \
+	server/bridge.cpp \
 	utils/WsLog.cpp \
 	server/EpollClient.cpp \
 	server/Epoll.cpp \
