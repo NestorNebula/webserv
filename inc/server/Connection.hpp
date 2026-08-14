@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 20:07:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 12:14:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 
 # include "bridge.hpp"
 
+# include "Session.hpp"
+
 class br_Server;
 class CgiPipe;
 class ResourceCgi;
@@ -38,10 +40,11 @@ class ResourceCgi;
 class Connection : public EpollClient
 {
 private:
-	Connection				(const Connection & that) : EpollClient(that), 
-		serv(that.serv), req_cnt(0) {}
-	Connection & operator = (const Connection & ) 
-		{ return (*this); }
+// DEMO
+	// Connection				(const Connection & that) : EpollClient(that), 
+	// 	sess(that.sess), serv(that.serv), req_cnt(0) {}
+	// Connection & operator = (const Connection & ) 
+	// 	{ return (*this); }
 		
 public:
 	Connection (Epoll *_ep, int _fd, br_Server &_serv);
@@ -59,7 +62,7 @@ public:
 	std::string		&get_addr(void);
 	
 // WEBSERV / SESSION
-	br_Session		sess;
+	Session			sess;
 	br_Server		&serv;
 	int				req_body_status(void);
 	
