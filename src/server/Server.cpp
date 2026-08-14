@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 11:42:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 15:44:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-br_Server::br_Server (Epoll *_ep, unsigned short p) : 
+Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) : 
 	EpollClient(_ep, EPC_SERV, -1), 
+	conf(_conf),
 	port(p),
 	acc_cnt(0)
 {
@@ -31,18 +32,15 @@ br_Server::br_Server (Epoll *_ep, unsigned short p) :
 	data_root = proj_root + std::string("tst/server/www");
 	fcgi_sock = proj_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
 	pycgi = proj_root + std::string("pycgi/");
-	bin_php = std::string("/usr/bin/php-cgi");
-	bin_py = std::string("/usr/bin/python3");
-	bin_pl = std::string("/usr/bin/perl");
 };
 
-br_Server::~br_Server()
+Server::~Server()
 {
 	WsLog::_(LVL_DBG, TGT_SERV, " (~) Server");
 	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 
-int br_Server::init(void)
+int Server::init(void)
 {
 	int	err;
 
@@ -79,7 +77,7 @@ int br_Server::init(void)
 	return (err);
 }
 
-ssize_t	br_Server::pollin(void)
+ssize_t	Server::pollin(void)
 {
 	ssize_t				err;
 	struct sockaddr_in	conn_addr;
@@ -111,27 +109,27 @@ ssize_t	br_Server::pollin(void)
 	return (0);
 }
 
-ssize_t	br_Server::pollout(void)
+ssize_t	Server::pollout(void)
 {
 	return (0);
 }
 
-int	br_Server::rdhup(void) 
+int	Server::rdhup(void) 
 {
 	return (0);
 }
 
-int	br_Server::hup(void) 
+int	Server::hup(void) 
 {
 	return (0);
 }
 
-bool	br_Server::timeo  (time_t)
+bool	Server::timeo  (time_t)
 {
 	return (false);
 }
 
-unsigned short	br_Server::get_port(void)	const
+unsigned short	Server::get_port(void)	const
 {
 	return (this->port);
 }

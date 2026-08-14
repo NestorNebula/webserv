@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 12:14:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 15:58:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,9 @@ public:
 
   // Reset session state and clears all its data
   void reset();
+// #kd
+  std::string _resourcePath;
+  std::string _cgi_exec;
 
 private:
   Session(const Session &);
@@ -65,9 +68,9 @@ private:
   Action _next;
 
   ServerConfig &_server;
+public: // #kd
   RouteConfig *_route;
-  std::string _resourcePath;
-
+private:
   Request _request;
   Resource *_resource;
   Response _response;

@@ -22,7 +22,8 @@ OBJ_DIR = .obj
 
 SRC_DIR = ../src
 
-FILES = http/Headers.cpp \
+FILES = \
+	http/Headers.cpp \
 	  utils/helpers.cpp \
 	  http/Request.cpp \
 	  http/Response.cpp \

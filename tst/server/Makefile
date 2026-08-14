@@ -1,7 +1,8 @@
 NAME=test
 
 CC=c++
-CFLAGS=-std=c++98 -Wall -Wextra -Werror -MMD -MP -O2 -g3
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP \
+	-DBUILD_DEMO="1" 
 # -Wno-unused
 # -Wshadow=local
 
@@ -39,6 +40,17 @@ endif
 FILES = \
 	server/bridge.cpp \
 	utils/WsLog.cpp \
+	utils/helpers.cpp \
+	utils/http_utils.cpp \
+	http/Headers.cpp \
+	http/Request.cpp \
+	http/Response.cpp \
+	http/Session.cpp \
+	resources/StaticResource.cpp \
+	resources/DirectoryResource.cpp \
+	resources/BuiltinResource.cpp \
+	streams/Stream.cpp \
+	streams/TemporaryFileStream.cpp \
 	server/EpollClient.cpp \
 	server/Epoll.cpp \
 	server/Server.cpp \
@@ -49,7 +61,12 @@ FILES = \
 	server/ResourceCgi.cpp \
 	server/FcgiMsg.cpp \
 	server/FcgiConn.cpp \
-	server/FcgiPipe.cpp 
+	server/FcgiPipe.cpp \
+	parsing/ConfigParser.cpp \
+	parsing/ParseBlocks.cpp \
+	parsing/ParserTools.cpp \
+	parsing/Tokenizer.cpp \
+	parsing/Validation.cpp 
 
 TPP = 
 
@@ -95,6 +112,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp | $(OBJ_DIR)
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/utils
+	@mkdir -p $(OBJ_DIR)/http
+	@mkdir -p $(OBJ_DIR)/resources
+	@mkdir -p $(OBJ_DIR)/streams
+	@mkdir -p $(OBJ_DIR)/parsing
 	@mkdir -p $(OBJ_DIR)/server
 
 clean:

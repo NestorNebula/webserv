@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   http_utils.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 11:54:20 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 15:38:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,21 +80,35 @@ bool isDirectory(const std::string &path) {
   return S_ISDIR(statbuf.st_mode);
 }
 
-bool isCgi(const std::string &path, RouteConfig &config) {
+// #kd
+std::string path_ext(const std::string & path)
+{
+  std::string nstr;
   std::string::size_type extIndex = path.find_last_of(".");
   if (extIndex == std::string::npos || extIndex == 0 ||
       path[extIndex - 1] == '/')
-    return false;
+    return (nstr);
+  return (path.substr(extIndex));
+}
+
+std::string isCgi(const std::string &path, RouteConfig &config) {
+  std::string nstr;
+
+  std::string::size_type extIndex = path.find_last_of(".");
+  if (extIndex == std::string::npos || extIndex == 0 ||
+      path[extIndex - 1] == '/')
+    return nstr;
   std::string extension = path.substr(extIndex);
-  bool cgi = false;
+  // bool cgi = false;
   for (std::map<std::string, std::string>::const_iterator
            it = config.cgi.begin(),
            ite = config.cgi.end();
-       !cgi && it != ite; it++) {
+            it != ite; it++) 
+  {
     if (extension == it->first)
-      cgi = true;
+      return (it->second);
   }
-  return cgi;
+  return (nstr);
 }
 
 bool isAccessibleFile(const std::string &path, int accessMode) {

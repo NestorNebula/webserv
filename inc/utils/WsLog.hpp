@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 13:58:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 13:47:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,15 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1UL << 18)
 # define TGT_MAIN		(1UL << 19)
 
+# define TGT_KD			((1UL << 20) - 1)
+
+// ATTN : poaching ..
 # define TGT_HEAD		(1UL << 39)
 # define TGT_BODY		(1UL << 38)
 
 # define TGT_FCGI		(1UL << 37)
+
+
 
 
 // HTTP TGTs using 1UL << 21 to 1UL << 40
@@ -127,7 +132,7 @@ public:
 
 	static void	kd(void);
 	static void mm(void) {}
-	static void	nh(void) {}
+	static void	nh(void);
 private:
 	static bool nolog(log_lvl msg_lvl, log_tgt msg_tgt);
 	static void op(std::stringstream & stream);

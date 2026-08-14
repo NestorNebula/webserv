@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 19:30:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 12:38:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,8 +130,9 @@ ssize_t	FcgiPipe::pollout(void)
 	err = this->conn->req_body_status();
 	if (err > 0)
 	{
-		std::string & body = this->conn->sess.req.get_body();
-		
+		// std::string & body = this->conn->sess.req.get_body();
+// BUIDL_DEMO
+		std::string body;
 		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
 
 		fcgi.req_body((char*) body.c_str(), body.size());

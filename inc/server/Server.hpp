@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:23:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 15:43:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
 
+# include "ServerConfig.hpp"
+
 	// The backlog argument defines the maximum length to which the queue
 	// of pending connections for sockfd may grow.  If a connection
 	// request arrives when the queue is full, the client may receive an
@@ -33,17 +35,17 @@
 #  define SERV_BACKLOG 256
 # endif
 
-class Connection;
+// class Connection;
 
-class br_Server : public EpollClient
+class Server : public EpollClient
 {
 private:
-	br_Server				(const br_Server & that) : EpollClient(that) {}
-	br_Server & operator =	(const br_Server & ) { return (*this); }
+	Server				(const Server & that) : EpollClient(that) {}
+	Server & operator =	(const Server & ) { return (*this); }
 
 public:
-	br_Server (Epoll *_ep, unsigned short p);
-	~br_Server();
+	Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf);
+	~Server();
 
 	ssize_t				pollin (void);
 	ssize_t				pollout(void);
@@ -52,6 +54,7 @@ public:
 	bool				timeo  (time_t);
 	
 	unsigned short		get_port(void)	const;
+	ServerConfig		&get_conf() { return (this->conf); }
 	
 // WEBSERV / SERVER / ROUTES
 	// need to provide access to ...
@@ -59,11 +62,9 @@ public:
 	std::string			data_root;
 	std::string			fcgi_sock;
 	std::string			pycgi;
-	std::string			bin_php;
-	std::string			bin_py;
-	std::string			bin_pl;
 	
 private:
+	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;
 	

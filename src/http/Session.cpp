@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 15:24:58 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 15:29:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,9 +182,14 @@ void Session::resolveResource() {
   if (!isAllowedMethod(_request.getMethod(), *_route))
     return setResponseStatus(405);
 
+// #kd : absolute (?)
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  if (isCgi(_resourcePath, *_route)) {
+  _cgi_exec = isCgi(_resourcePath, *_route);
+  if (_cgi_exec.size()) 
+  {
+// #kd
+    std::cerr << "resourcePath " << _resourcePath << std::endl;
     _next = DOCGI;
     return;
   }
@@ -194,7 +199,7 @@ void Session::validateOperation() {
   if (_response.getCode())
     return;
   if (_next == DOCGI) {
-    if (!isAccessibleFile(_resourcePath, X_OK))
+    if (!isAccessibleFile(_resourcePath, F_OK)) // #kd
       return setResponseStatus(403);
     return;
   }

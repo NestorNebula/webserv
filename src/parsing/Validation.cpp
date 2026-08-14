@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Validation.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 13:40:58 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/14 14:00:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
-		if (access(it->second.c_str(), X_OK) != 0)
+		if (access(it->second.c_str(), F_OK) != 0) // #kd
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");
 	}
