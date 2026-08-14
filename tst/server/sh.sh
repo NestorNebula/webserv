@@ -127,8 +127,8 @@ fi
 # curl -X GET http://localhost:8081/to.php -i
 # echo
 # exit 0
-
-curl -X POST 'http://localhost:8082/test.php?g1=gee-one&g2=gee-two' -i \
+# test.php?g1=gee-one&g2=gee-two' -i \
+curl -X POST 'http://localhost:8082/test.py' -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

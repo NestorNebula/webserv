@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Stream.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:40:42 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 18:39:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,12 @@ Stream &Stream::read(char *s, streamsize n) {
   throwIfNull();
   _stream->read(s, n);
   return *this;
+}
+
+std::streamsize Stream::readsome(char *s, streamsize n) {
+  throwIfNull();
+  return _stream->readsome(s, n);
+  // return *this;
 }
 
 Stream::streampos Stream::tellg() {

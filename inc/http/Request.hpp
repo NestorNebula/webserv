@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 12:36:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:40:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,12 +48,28 @@ public:
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
   const Headers &getHeaders() const { return _headers; }
   bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
-  Stream *getBody() {
+
+  Stream *getBody() const {
     if (_body == NULL)
       throw std::logic_error("accessing null body Stream");
     return _body;
   }
   void clear();
+
+  std::string &get_body(void)
+  {
+    if (_ostr.size())
+      return (_ostr);
+    char buf[4096];
+    // but we don't know how many ..
+    
+    int err = getBody()->readsome(buf, 4096);
+    if (err)
+      _ostr.append(buf, err);
+    return (_ostr);
+  }
+private:
+  std::string _ostr;
 
 private:
   Request(const Request &);

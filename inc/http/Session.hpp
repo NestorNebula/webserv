@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:58:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:41:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,36 @@ public:
   } Action;
 
   Action nextAction() const { return _next; }
+// #kd
+  void  log_next(void)
+  {
+    WsLog::color(WSL_YELLOW);
+    switch(this->nextAction())
+    {
+    case Session::RDSOCK:
+      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
+      break;
+    case Session::DOCGI:
+      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
+      break;
+    case Session::WRSOCK:
+      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
+      break;
+    case Session::CLOSE:
+      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
+      break;
+    case Session::KPALIVE:
+      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
+      break;
+    }
+  }
 
   // Write data to the Session Request. Corresponds to RDSOCK Action.
   Stream::streamsize write(const char *buf, Stream::streamsize count);
 
   // Give access to the Session Request. Should only be called on DOCGI action.
-  const Request &getRequest() const;
+  // const 
+  Request &getRequest();
 
   // Give access to the data of an executed CGI script. Corresponds to DOCGI
   // Action.
@@ -60,6 +84,19 @@ public:
 // #kd
   std::string _resourcePath;
   std::string _cgi_exec;
+
+  std::string &get_resp(void)
+  {
+    if (_ostr.size())
+      return (_ostr);
+    char buf[4096];
+    int err = this->read(buf, 4096);
+    if (err)
+      _ostr.append(buf, err);
+    return (_ostr);
+  }
+private:
+  std::string _ostr;
 
 private:
   Session(const Session &);

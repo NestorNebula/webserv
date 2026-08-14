@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 13:47:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:24:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,37 +64,34 @@ typedef long unsigned int log_tgt;
 # define TGT_SERV		(1UL << 18)
 # define TGT_MAIN		(1UL << 19)
 
-# define TGT_KD			((1UL << 20) - 1)
+// ATTN : poaching .. (sorry, noah)
+# define TGT_HEAD		(1UL << 20)
+# define TGT_BODY		(1UL << 21)
+# define TGT_FCGI		(1UL << 22)
 
-// ATTN : poaching ..
-# define TGT_HEAD		(1UL << 39)
-# define TGT_BODY		(1UL << 38)
-
-# define TGT_FCGI		(1UL << 37)
-
+# define TGT_KD			((1UL << 23) - 1)
 
 
 
-// HTTP TGTs using 1UL << 21 to 1UL << 40
-# define TGT_REQ		(1UL << 21)
 
-# define TGT_STAT_RES	(1UL << 22)
-# define TGT_DIR_RES	(1UL << 23)
-# define TGT_BUI_RES	(1UL << 24)
+// HTTP TGTs using 1UL << 31 to 1UL << 40
+# define TGT_REQ		(1UL << 31)
+
+# define TGT_STAT_RES	(1UL << 32)
+# define TGT_DIR_RES	(1UL << 33)
+# define TGT_BUI_RES	(1UL << 34)
 # define TGT_RES		(TGT_STAT_RES | TGT_DIR_RES | TGT_BUI_RES)
 
-# define TGT_RESP		(1UL << 25)
+# define TGT_RESP		(1UL << 35)
 
-# define TGT_TMP_STRM	(1UL << 26)
-# define TGT_STRM		(TGT_TMP_STRM | (1UL << 27))
+# define TGT_TMP_STRM	(1UL << 36)
+# define TGT_STRM		(TGT_TMP_STRM | (1UL << 37))
 
-# define TGT_SESS_WR	(1UL << 28)
-# define TGT_SESS_RD	(1UL << 29)
-# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1UL << 30))
+# define TGT_SESS_WR	(1UL << 38)
+# define TGT_SESS_RD	(1UL << 39)
+# define TGT_SESS		(TGT_SESS_WR | TGT_SESS_RD | (1UL << 40))
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
-
-
 
 
 
@@ -130,6 +127,12 @@ public:
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 
+	static void pwd(void)
+	{
+		char buf[256];
+		char *pwd = getcwd(buf, 256); // WEBSERV : illegal function
+		std::cerr << "PWD   : " << pwd << std::endl;
+	}
 	static void	kd(void);
 	static void mm(void) {}
 	static void	nh(void);

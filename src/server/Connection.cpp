@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 16:07:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:26:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,8 @@ void	Connection::set_err(int e)
 
 ssize_t	Connection::pollin(void)
 {
+	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
+	
 	ssize_t	err;
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
@@ -116,10 +118,14 @@ ssize_t	Connection::pollin(void)
 
 // WEBSERV : SESSION (write)
 #if 1 // BUILD_DEMO
+	sess.log_next();
 	if (sess.nextAction() == Session::RDSOCK)
 		sess.write(this->ibuf, err);
+		
+	sess.log_next();
 	switch (sess.nextAction()) {
 		case Session::DOCGI:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: docgi");
 			if (this->exec_cgi() < 0)
 			{
 				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
@@ -128,15 +134,19 @@ ssize_t	Connection::pollin(void)
 				return (0); // send error
 			}
 			this->res_cgi->push_body();
-				break;
+			break;
 		case Session::WRSOCK:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: write");
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: read");
 			break;
 		case Session::KPALIVE:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: (ka)");
 			break;
 		case Session::CLOSE:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: close");
 			return (-1);
 	}
 #else
@@ -176,6 +186,8 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 
+
+	sess.log_next();
 #if 0 // BUILD_DEMO
 	if (sess.nextAction() != Session::WRSOCK)
 		return 0;
@@ -202,36 +214,90 @@ ssize_t	Connection::pollout(void)
 		return (this->send_error());
 
 // WEBSERV : RESOURCE (cgi)
+
+// if (res)
+	//check the stats
+// else
+	// check ostr
 	ResourceCgi *res = this->res_cgi;
+	// std::string & OSTR = res->get_resp();
+#if 1
+	// or (DOCGI)
+		// which could check (NULL)
+	if (res)
+	{
+		err = res->status();
+		if (err < 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+			if (res->resp.size() == 0)
+				return (-1);
+		}	
+		if (this->error)
+			return (this->send_error());
+		if (err == 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
+			this->mod_evt(-EPOLLOUT);
+			return (err);
+		}
+		std::string & OSTR = res->get_resp();	
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
+		err = this->send(OSTR);
+	}
+	else
+	{
+		if (sess.nextAction() != Session::WRSOCK)
+		{
+
+		}
+		std::string & OSTR = sess.get_resp();
+		if (OSTR.size())
+		{
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);			
+			err = this->send(OSTR);
+		}
+		else
+		{
+			// done (?)
+		}
+	}
+#else
 	if (res == NULL)
 	{
+		// base
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
 		return (-1);
 	}
 	err = res->status();
 	if (err < 0)
 	{
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
 		if (res->resp.size() == 0)
 			return (-1);
 	}	
+#endif
+
+
 // WEBSERV : ERROR
-	if (this->error)
-		return (this->send_error());
-		
-	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
-		this->mod_evt(-EPOLLOUT);
-		return (err);
-	}	
+
 	
 // WEBSERV : RESOURCE (response)
-	std::string & OSTR = res->get_resp();
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+	// std::string & OSTR = res->get_resp();
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
-	err = this->send(OSTR);
+	// err = this->send(OSTR);
 #endif
+
+
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
@@ -243,10 +309,10 @@ ssize_t	Connection::pollout(void)
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	if (OSTR.size())
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
-	else
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
+	// if (OSTR.size())
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
+	// else
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
 #if BUILD_DEMO
 	if (sess.nextAction() != Session::WRSOCK) // rsrc/state seems like a better check
@@ -384,6 +450,9 @@ void	Connection::cgi_rem(EpollClient *epc)
 
 int	Connection::exec_cgi(void)
 {
+	if (this->res_cgi)
+		return (0);
+		
 	int			err;
 
 	CgiEnv *cgienv = new CgiEnv;
@@ -419,6 +488,7 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 
+	WsLog::pwd();
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -435,7 +505,7 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-
+// char cwd[PATH_MAX];
 		const char **envp = cgienv->gen();
 
 		// pipes.dup_err();
@@ -443,6 +513,7 @@ int	Connection::exec_cgi(void)
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
 		{
+			WsLog::color(WSL_GREEN);
 			WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)

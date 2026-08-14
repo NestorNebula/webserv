@@ -6,9 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 20:20:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 17:34:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <vector>
 
 #include "Epoll.hpp"
 #include "EpollClient.hpp"
@@ -316,3 +318,22 @@ int	Epoll::loop(void)
 	return (0);
 }
 
+int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
+{
+	int	err = 0;
+	std::vector<ServerConfig>::const_iterator it = serv_list.begin();
+	std::vector<ServerConfig>::const_iterator ite = serv_list.end();
+	for ( ;it != ite; it++)
+	{
+		try
+		{
+			new Server(this, it->port, *it);
+			err = 1;
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+		}
+	}
+	return (err);
+}
