@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=6
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
