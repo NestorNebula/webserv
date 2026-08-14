@@ -10,9 +10,10 @@ if [[ "$1" =~ "x" ]]; then
 	exit 0
 fi
 
+CONF=../../demo/config.conf
 tput reset
 if [[ "$1" =~ "v" ]]; then
-	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test 0
+	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test "$CONF" 0
 else
-	./test ../../demo/config.conf "$1"
+	./test "$CONF" "$1"
 fi
