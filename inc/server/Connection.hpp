@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:14:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 12:20:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,10 @@ class ResourceCgi;
 #  define CONN_TIMEOUT 10
 # endif
 
+# ifndef BUILD_DEMO
+#  define BUILD_DEMO 0
+# endif
+
 class Connection : public EpollClient
 {
 private:
@@ -62,7 +66,11 @@ public:
 	std::string		&get_addr(void);
 	
 // WEBSERV / SESSION
+#if BUILD_DEMO
 	Session			sess;
+#else
+	br_Session		sess;
+#endif
 	br_Server		&serv;
 	int				req_body_status(void);
 	

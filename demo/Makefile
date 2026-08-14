@@ -5,6 +5,7 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP \
+	-DBUILD_DEMO="1" \
 	-I../inc \
 	-I../inc/http \
 	-I../inc/resources \
