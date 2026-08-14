@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:19:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 16:07:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,22 @@
 #include "CgiPipe.hpp"
 #include "ResourceCgi.hpp"
 
-Connection::Connection (Epoll *_ep, int _fd, br_Server &_serv) : 
+Connection::Connection	(const Connection & that) : 
+	EpollClient(that), 
+#if BUILD_DEMO
+	sess(that.serv.get_conf()), 
+#endif
+	serv(that.serv), 
+	req_cnt(0)
+{
+
+}
+
+Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
+#if BUILD_DEMO
+	sess(_serv.get_conf()),
+#endif
 	serv(_serv), 
 	res_cgi(NULL),
 	req_cnt(0)
@@ -101,32 +115,36 @@ ssize_t	Connection::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 // WEBSERV : SESSION (write)
-#if BUILD_DEMO
+#if 1 // BUILD_DEMO
 	if (sess.nextAction() == Session::RDSOCK)
 		sess.write(this->ibuf, err);
 	switch (sess.nextAction()) {
 		case Session::DOCGI:
-				if (this->exec_cgi() < 0)
-				{
-					WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-					// this->set_err(503); // CGI_ERR
-					this->set_err(404); // siege-friendly
-					return (0); // send error
-				}
-				this->res_cgi->push_body();
+			if (this->exec_cgi() < 0)
+			{
+				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+				// this->set_err(503); // CGI_ERR
+				this->set_err(404); // siege-friendly
+				return (0); // send error
+			}
+			this->res_cgi->push_body();
 				break;
 		case Session::WRSOCK:
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
-		case Session::KPALIVE:
-		case Session::CLOSE:
 			break;
+		case Session::KPALIVE:
+			break;
+		case Session::CLOSE:
+			return (-1);
 	}
 #else
-	int req_state = sess.write(this->ibuf, err);
-	if (req_state < REQ_HAVE_HEAD)
-		return (err);
+	// int req_state = 
+	sess.write(this->ibuf, err);
+	return (-1);
+	// if (req_state < REQ_HAVE_HEAD)
+	// 	return (err);
 
 	if (this->res_cgi == NULL)
 	{
@@ -158,7 +176,7 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 
-#if BUILD_DEMO
+#if 0 // BUILD_DEMO
 	if (sess.nextAction() != Session::WRSOCK)
 		return 0;
 
@@ -386,14 +404,14 @@ int	Connection::exec_cgi(void)
 		if (err == 0)
 		{
 			WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_DBG, TGT_CONN, "php : fcgi");			
+			WsLog::_(LVL_DBG, TGT_CONN, "php :  fcgi");			
 			delete (cgienv);
 			this->res_cgi = fcgi;
 			return (err);
 		}
 		delete (fcgi);
 		WsLog::color(WSL_YELLOW);
-		WsLog::_(LVL_DBG, TGT_CONN, "php : pipe");
+		WsLog::_(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
 
 	cgi_pipes	pipes;
@@ -417,14 +435,15 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		pipes.dup_err();
 
 		const char **envp = cgienv->gen();
+
+		// pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
 		{
-			// WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
+			WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)
 				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   helpers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 14:32:45 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 15:53:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,17 @@ std::string trim(std::string s, std::string set, bool beg, bool end) {
   if (startIndex == std::string::npos || endIndex == std::string::npos)
     return std::string();
   return std::string(s, startIndex, endIndex - startIndex + 1);
+}
+
+// #kd
+void header_key(std::string &s) {
+  for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
+  {
+      if (*it == '-')
+        (*it = '_');
+      else
+        *it = std::toupper(static_cast<unsigned char>(*it));
+  }
 }
 
 void capitalize(std::string &s) {

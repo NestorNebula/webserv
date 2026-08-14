@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 20:19:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 13:47:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,6 +303,11 @@ bakwht='\e[47m'   # White
 txtrst='\e[0m'    # Text Reset
 
 #endif
+void    WsLog::nh(void)
+{
+    WsLog::lvl = LVL_ALL;
+    WsLog::tgt = TGT_REQ;
+}
 
 void    WsLog::kd(void)
 {

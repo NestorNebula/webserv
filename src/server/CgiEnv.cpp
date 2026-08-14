@@ -6,13 +6,15 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:23:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 16:06:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiEnv.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
+#include "helpers.hpp"
+#include "http_utils.hpp"
 
 CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {
@@ -41,94 +43,138 @@ std::string & CgiEnv::get(const char *key)
 }
 
 
+// BUILD_DEMO (!)
+
 int     CgiEnv::from_conn(Connection & conn)
 {
+	this->kv.clear();
+
 // WEBSERV : REQUEST
-	const br_Request &req  = conn.sess.getRequest();
+	const Session &sess = conn.sess;
+	const Request &req  = sess.getRequest();
+	const Headers &headers = req.getHeaders();
 
 // WEBSERV : SERVER
-	br_Server	&serv = conn.serv;
-
-	this->kv.clear();
 	
+	std::cerr << "CgiEnv " << sess._cgi_exec << std::endl;
 	std::string val;
 
-	val = req.header("METH");
-	if (val.size())
-		this->add("REQUEST_METHOD", val.c_str());
-	else
+	// val = req.header("METH");
+	if (!req.hasMethod())
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
 		return (-1);
 	}
-
-	file = req.header("PATH");
-	if (!file.size())
+	if (!req.hasURL())
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_ENV, "FILE : not set");
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "URL not set");
 		return (-1);
 	}
 	
-// WEBSERV : SERVER
-	// should not have to check this here 
-	path = serv.data_root + file;
-	if (access(path.c_str(), F_OK))
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE : does not exist");
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "PATH\n", path);
-		return (-1);
-	}
+	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
+	std::cerr << "METH : " << val << std::endl;
+	
+	// file = req.header("PATH");
+	file = sess._resourcePath; // from server root 
+	std::cerr << " URL : " << file << std::endl;
+
+	std::cerr << "SERV  root : " << conn.serv.get_conf().root << std::endl;
+	std::cerr << "ROUTE root : " << sess._route->root << std::endl;
+	std::cerr << "ROUTE path : " << sess._route->path << std::endl;
+#if 1
+	path = conn.serv.get_conf().root + file;
+	// if (access(path.c_str(), F_OK))
+	// {
+	// 	WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE : does not exist");
+	// 	WsLog::_(LVL_DBG, TGT_CGI_ENV, "PATH\n", path);
+	// 	return (-1);
+	// }
 	this->add("SCRIPT_NAME", path.c_str());
 
 // WEBSERV : SERVER
 	// (cwd)
+	// relative to WHAT !
 	size_t pos = path.find_last_of("/");
 	std::string cwd = path.substr(0, pos);
 	this->add("CWD", cwd.c_str());	
 
-	// WsLog::color(WSL_GREEN);
-	// WsLog::_(LVL_DBG, TGT_CGI_ENV, "cwd : ", cwd);
+	WsLog::color(WSL_GREEN);
+	WsLog::_(LVL_DBG, TGT_CGI_ENV, "cwd : ", cwd);
 	
 	this->add("SCRIPT_FILENAME", path.c_str());	
+#endif
 
-// WEBSERV : SERVER
-	// cgi_exec_path
-	const std::string &fext = req.get_fext();
-	if (fext == std::string("php"))
+	
+
+	const std::string &fext = path_ext(file);
+	if (fext == std::string(".php"))
 	{
 		lang = CGI_PHP;
-		exec = serv.bin_php;
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
 		this->add("REDIRECT_STATUS", "1");		
 	}
-	else if (fext == std::string("py"))
+	else if (fext == std::string(".py"))
 	{
 		lang = CGI_PYTHON;
-		exec = serv.bin_py;
-		this->add("PYTHONPATH", serv.pycgi.c_str());
+		// this->add("PYTHONPATH", serv.pycgi.c_str());
 	}
-	else if (fext == std::string("pl"))
+	else if (fext == std::string(".pl"))
 	{
 		lang = CGI_PERL;
-		exec = serv.bin_pl;
 	}
 	else
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
-		std::cerr << req.head;
 		return (-1);
 	}
 	
-	this->args[0] = this->exec.c_str();
+	this->args[0] = sess._cgi_exec.c_str();
 	this->args[1] = path.c_str();
 	this->args[2] = NULL;	
+
 	
+	if (req.hasHeader("Content-type"))
+		this->add("CONTENT_TYPE", headers.find("Content-type")->second.c_str());
+	if (req.hasHeader("Content-length"))
+		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
 	
-	val = req.header("VARS");
-	if (val.size())
-		this->add("QUERY_STRING", val.c_str());
+
+	if (req.hasQuery())
+	{
+		this->add("QUERY_STRING", req.getQuery().c_str());
+		std::cerr << "QRY  : " << val << std::endl;
+	}
+
+
+	Headers::const_iterator hit = headers.begin();
+	while (hit != headers.end())
+	{
+		std::string hk = hit->first;
+		std::string hv = hit->second;
+		hk.insert(0, "http_");
+		header_key(hk);
+		this->add(hk.c_str(), hv.c_str());
+		hit++;
+	}
+	
+	this->add("REMOTE_ADDR", conn.get_addr().c_str());
+	// this->add("REMOTE_HOST", "remote host");
+	// this->add("REMOTE_USER", "remote user");
+	
+	this->add("SERVER_NAME", "webserv");
+	this->add("SERVER_PORT", conn.serv.get_port());
+	this->add("SERVER_PROTOCOL", "HTTP/1.0");
+	this->add("SERVER_SOFTWARE", "webserv");
+	
+	this->add("GATEWAY_INTERFACE", "CGI/1.0");
+
+// WEBSERV : SERVER
+	// should not have to check this here 
+#if 0
+
+
 		
 // If the output of a form is being processed, check that CONTENT_TYPE
 // is "application/x-www-form-urlencoded"
@@ -137,12 +183,7 @@ int     CgiEnv::from_conn(Connection & conn)
 // with a 415 'Unsupported Media Type' error, where supported by the
 // protocol.
 
-	val = req.header("Content-type");
-	if (val.size())
-		this->add("CONTENT_TYPE", val.c_str());
-	val = req.header("Content-length");
-	if (val.size())
-		this->add("CONTENT_LENGTH", val.c_str());
+
 		
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
 
@@ -155,11 +196,9 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("User-Agent");
 	if (val.size())
 		this->add("HTTP_USER_AGENT", val.c_str());
-
 	val = req.header("Transfer-Encoding");
 	if (val.size())
 		this->add("HTTP_TRANSFER_ENCODING", val.c_str());
-
 	val = req.header("Accept");
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());
@@ -172,23 +211,12 @@ int     CgiEnv::from_conn(Connection & conn)
 	val = req.header("Connection");
 	if (val.size())
 		this->add("HTTP_CONNECTION", val.c_str());
-// SERVER		
 	this->add("HTTP_COOKIE", "chocolate chip");
 	
-	this->add("REMOTE_ADDR", conn.get_addr().c_str());
-	// this->add("REMOTE_HOST", "remote host");
-	// this->add("REMOTE_USER", "remote user");
-	
-// SERVER
-	this->add("SERVER_NAME", "webserv");
-// WEBSERV : SERVER
-	this->add("SERVER_PORT", serv.get_port());
-	this->add("SERVER_PROTOCOL", "HTTP/1.1");
-	this->add("SERVER_SOFTWARE", "webserv");
-	
-	this->add("GATEWAY_INTERFACE", "CGI/1.0");
 
+#endif
     return (0);
+
 }
 
 const char	**CgiEnv::gen(void)
@@ -212,6 +240,8 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
+		// WsLog::color(WSL_GREEN);
+		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}

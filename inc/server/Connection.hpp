@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:20:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 16:00:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 
 # include "Session.hpp"
 
-class br_Server;
+class Server;
 class CgiPipe;
 class ResourceCgi;
 
@@ -45,13 +45,13 @@ class Connection : public EpollClient
 {
 private:
 // DEMO
-	// Connection				(const Connection & that) : EpollClient(that), 
-	// 	sess(that.sess), serv(that.serv), req_cnt(0) {}
-	// Connection & operator = (const Connection & ) 
-	// 	{ return (*this); }
+	Connection				(const Connection & that); // : EpollClient(that), 
+		// sess(that.serv.get_conf()), serv(that.serv), req_cnt(0) {}
+	Connection & operator = (const Connection & ) 
+		{ return (*this); }
 		
 public:
-	Connection (Epoll *_ep, int _fd, br_Server &_serv);
+	Connection (Epoll *_ep, int _fd, Server &_serv);
 	~Connection();
 	
 	ssize_t			pollin (void);
@@ -66,12 +66,12 @@ public:
 	std::string		&get_addr(void);
 	
 // WEBSERV / SESSION
-#if BUILD_DEMO
+#if 1 // BUILD_DEMO
 	Session			sess;
 #else
 	br_Session		sess;
 #endif
-	br_Server		&serv;
+	Server			&serv;
 	int				req_body_status(void);
 	
 	void			cgi_rem(EpollClient *epc);

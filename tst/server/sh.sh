@@ -128,7 +128,7 @@ fi
 # echo
 # exit 0
 
-curl -X POST http://localhost:8082/test.pl -i \
+curl -X POST 'http://localhost:8082/test.php?g1=gee-one&g2=gee-two' -i \
 	 -d "p1=post-one&p2=post-two"
 echo
 exit 0

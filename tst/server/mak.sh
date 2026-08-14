@@ -14,5 +14,5 @@ tput reset
 if [[ "$1" =~ "v" ]]; then
 	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test 0
 else
-	./test "$1"
+	./test ../../demo/config.conf "$1"
 fi

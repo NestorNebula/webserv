@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   helpers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:25:26 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/21 11:41:09 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 15:52:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 std::string trim(std::string s, std::string set, bool beg = true,
                  bool end = true);
 
+// #kd
+void header_key(std::string &s);
 void capitalize(std::string &s);
 std::string capitalize(const std::string &s);
 
