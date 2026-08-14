@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:29:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:42:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   return count;
 }
 
-const Request &Session::getRequest() const {
+// const 
+Request &Session::getRequest() {
   throwIfNotAction(DOCGI);
   return _request;
 }
@@ -188,8 +189,6 @@ void Session::resolveResource() {
   _cgi_exec = isCgi(_resourcePath, *_route);
   if (_cgi_exec.size()) 
   {
-// #kd
-    std::cerr << "resourcePath " << _resourcePath << std::endl;
     _next = DOCGI;
     return;
   }
@@ -303,6 +302,9 @@ void Session::prepareDirectoryResource() {
     prepareErrorResource();
   }
 }
+
+// #kd
+// POST data -- is not necessarily UPLOAD data
 
 void Session::handleUpload() {
   WsLog::_(LVL_INFO, TGT_SESS, "Processing upload Request");

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 15:43:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 17:16:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ public:
 // WEBSERV / SERVER / ROUTES
 	// need to provide access to ...
 	std::string			proj_root;
-	std::string			data_root;
 	std::string			fcgi_sock;
 	std::string			pycgi;
 	

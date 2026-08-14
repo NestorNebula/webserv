@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 17:47:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 17:37:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <set>
 
 # include "WsLog.hpp"
+# include "ServerConfig.hpp"
 
 # ifndef EPOLL_MAX_EVT
 #  define EPOLL_MAX_EVT 1024
@@ -29,6 +30,7 @@
 # ifndef SERV_TIMEOUT
 #  define SERV_TIMEOUT 1
 # endif
+
 std::string evt_type(int evt);
 
 class EpollClient;
@@ -53,6 +55,8 @@ public:
 	// void	dupx(void);
 	
 	void	cleanup(void);
+	
+	int		serve(const std::vector<ServerConfig> &serv_list);
 	
 private:
 	int						epfd;

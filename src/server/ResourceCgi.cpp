@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 15:47:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:17:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,7 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 		return (RSRC_RESP_INIT);
 		
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
 	this->hed = 1;
 	
 // REQUIRE .. content-type (?)

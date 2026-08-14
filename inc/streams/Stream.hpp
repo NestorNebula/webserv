@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Stream.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:33:17 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/14 18:39:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ public:
   streamsize gcount() const;
   Stream &getline(char *s, streamsize n, char delim = '\n');
   Stream &read(char *s, streamsize n);
+// #kd
+  std::streamsize readsome(char *s, streamsize n);
   streampos tellg();
   Stream &seekg(streampos pos);
   Stream &seekg(streamoff off, SeekDir way);

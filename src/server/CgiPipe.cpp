@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:38:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:42:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "ResourceCgi.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
+#include "Request.hpp"
 
 
 static	void fd_close(int *fd)
@@ -193,6 +194,23 @@ ssize_t	CgiPipe::pollout(void)
 		return (-1);
 
 // WEBSERV : REQUEST (body)
+	Session &sess = conn->sess;
+	Request &req  = sess.getRequest();
+	
+#if 1
+	if (!req.hasHeaders())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
+		this->mod_evt(0);
+		return (0);
+	}
+	if (!req.hasBody())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+		return (0);
+	}
+	
+#else
 	err = this->conn->req_body_status();
 	if (err < 0)
 	{
@@ -205,7 +223,8 @@ ssize_t	CgiPipe::pollout(void)
 		this->mod_evt(0);
 		return (0);
 	}
-	
+#endif
+
 // WEBSERV : REQUEST (body)
 //   Stream *getBody() {
 //     if (_body == NULL)
@@ -214,7 +233,9 @@ ssize_t	CgiPipe::pollout(void)
 //   }
 // BUILD_DEMO
 	// std::string & body = this->conn->sess.req.get_body();
-	std::string body;
+	// Stream * body_stream = req.getBody();
+	
+	std::string & body = req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
 	if (err < 0)
@@ -226,6 +247,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		return (-1);
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);

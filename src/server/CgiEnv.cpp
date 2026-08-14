@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 16:06:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:44:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,11 @@ int     CgiEnv::from_conn(Connection & conn)
 	this->kv.clear();
 
 // WEBSERV : REQUEST
-	const Session &sess = conn.sess;
-	const Request &req  = sess.getRequest();
+	Session &sess = conn.sess;
+	Request &req  = sess.getRequest();
 	const Headers &headers = req.getHeaders();
 
 // WEBSERV : SERVER
-	
-	std::cerr << "CgiEnv " << sess._cgi_exec << std::endl;
-	std::string val;
-
-	// val = req.header("METH");
 	if (!req.hasMethod())
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
@@ -72,34 +67,26 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
-	std::cerr << "METH : " << val << std::endl;
+	std::cerr << "METH  : " << methodToString(req.getMethod()) << std::endl;
 	
-	// file = req.header("PATH");
 	file = sess._resourcePath; // from server root 
-	std::cerr << " URL : " << file << std::endl;
+	std::cerr << " URL  : " << file << std::endl;
 
-	std::cerr << "SERV  root : " << conn.serv.get_conf().root << std::endl;
-	std::cerr << "ROUTE root : " << sess._route->root << std::endl;
-	std::cerr << "ROUTE path : " << sess._route->path << std::endl;
+	std::cerr << "SERV  : root : " << conn.serv.get_conf().root << std::endl;
+	std::cerr << "ROUTE : root : " << sess._route->root << std::endl;
+	std::cerr << "ROUTE : path : " << sess._route->path << std::endl;
 #if 1
 	path = conn.serv.get_conf().root + file;
-	// if (access(path.c_str(), F_OK))
-	// {
-	// 	WsLog::_(LVL_DBG, TGT_CGI_ENV, "FILE : does not exist");
-	// 	WsLog::_(LVL_DBG, TGT_CGI_ENV, "PATH\n", path);
-	// 	return (-1);
-	// }
+	std::cerr << "(env) : path : " << path << std::endl;
 	this->add("SCRIPT_NAME", path.c_str());
 
 // WEBSERV : SERVER
-	// (cwd)
-	// relative to WHAT !
 	size_t pos = path.find_last_of("/");
 	std::string cwd = path.substr(0, pos);
 	this->add("CWD", cwd.c_str());	
 
 	WsLog::color(WSL_GREEN);
-	WsLog::_(LVL_DBG, TGT_CGI_ENV, "cwd : ", cwd);
+	WsLog::_(LVL_DBG, TGT_CGI_ENV, "pdir : ", cwd);
 	
 	this->add("SCRIPT_FILENAME", path.c_str());	
 #endif
@@ -144,7 +131,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (req.hasQuery())
 	{
 		this->add("QUERY_STRING", req.getQuery().c_str());
-		std::cerr << "QRY  : " << val << std::endl;
+		std::cerr << "QRY   : " << req.getQuery() << std::endl;
 	}
 
 
