@@ -33,7 +33,9 @@ int main(int argc, char *argv[], char **envp) {
   for (std::vector<ServerConfig>::const_iterator it = servers.begin(),
                                                  ite = servers.end();
        it != ite; it++)
-    new Server(&epoll, it->port, *it);
+       {
+      new br_Server(&epoll, it->port); // , *it);
+       }
   epoll.loop();
 
   return 0;

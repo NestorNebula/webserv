@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 20:15:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 12:14:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ ssize_t	Connection::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 // WEBSERV : SESSION (write)
+#if 0 // CGI
 	int req_state = sess.write(this->ibuf, err);
 	if (req_state < REQ_HAVE_HEAD)
 		return (err);
@@ -119,6 +120,29 @@ ssize_t	Connection::pollin(void)
 	
 // SESSION
 	this->res_cgi->push_body();
+#else
+	if (sess.nextAction() == Session::RDSOCK)
+		sess.write(this->ibuf, err);
+	switch (sess.nextAction()) {
+		case Session::DOCGI:
+				if (this->exec_cgi() < 0)
+				{
+					WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+					// this->set_err(503); // CGI_ERR
+					this->set_err(404); // siege-friendly
+					return (0); // send error
+				}
+				this->res_cgi->push_body();
+				break;
+		case Session::WRSOCK:
+			this->mod_evt(EPOLLOUT);
+			break;
+		case Session::RDSOCK:
+		case Session::KPALIVE:
+		case Session::CLOSE:
+			break;
+	}
+#endif
 	return (err);
 }
 
@@ -134,6 +158,7 @@ ssize_t	Connection::pollout(void)
 	
 	ssize_t	err = 0;
 
+#if 0 // (!) DEMO
 // WEBSERV : ERROR
 	if (this->error)
 		return (this->send_error());
@@ -163,12 +188,32 @@ ssize_t	Connection::pollout(void)
 	
 // WEBSERV : RESOURCE (response)
 	std::string & OSTR = res->get_resp();
-
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
 	err = this->send(OSTR);
+#else
+	if (sess.nextAction() != Session::WRSOCK)
+		return 0;
+
+	// rsrc.complete
+	char buf[4096];
+	// Stream::streamsize r 
+	err = sess.read(buf, 4096);
+	std::string OSTR(buf);
+
+	if (err > 0)
+	{
+		// if (r > 0)
+		// 	err = this->send(buf, r);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
+		err = this->send(OSTR);
+	}
+#endif
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
@@ -185,6 +230,13 @@ ssize_t	Connection::pollout(void)
 	else
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
+#if 1 // !CGI
+	if (sess.nextAction() != Session::WRSOCK) // rsrc/state seems like a better check
+	{
+		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
+		return (-1);
+	}
+#endif
 	return (err);
 }
 
@@ -270,10 +322,10 @@ std::string		&Connection::get_addr(void)
 	//		  BUT .. more needs to be received to complete the request
 	// (-1) : there is no more body data to write to the CGI
 
+// WEBSERV : REQUEST (body)
 int	Connection::req_body_status(void)
 {
-// WEBSERV : REQUEST (body)
-	int	err = this->sess.req.body_stat();
+	int	err = -1; // DEMO (!) this->sess.req.body_stat();
 
 	if (err == 1) // body.size()
 		return (1);
