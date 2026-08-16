@@ -1,11 +1,17 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import os
+
 
 # what is CWD .. when scripts are called (!)
 
 import cgi
 import cgitb
+
+
+print("Content-Type: text/plain", end="\r\n\r\n");
 
 form = cgi.FieldStorage()
 
@@ -35,6 +41,6 @@ if "file" in form:
     if file_item.filename:
         print("file name", file_item.filename)
         file_name = file_item.filename
-        file_path = './' + file_name
+        file_path = './uploads/py-' + file_name
         with open(file_path, 'wb') as file:
             file.write(file_item.file.read())

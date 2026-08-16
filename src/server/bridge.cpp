@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/14 19:53:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 15:34:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 // Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
-int Request::push_data(const char *buf, size_t siz)
+int br_Request::push_data(const char *buf, size_t siz)
 {
     if (this->state < REQ_HAVE_HEAD)
     {
@@ -34,14 +34,40 @@ int Request::push_data(const char *buf, size_t siz)
         body = head.substr(crlf + 4);
         head.erase(crlf + 4);
         this->init();
+        blen = body.size();
+        // WsLog::_(LVL_DBG, TGT_BODY, "BODY\n", body);
         return (this->state);
     }
-    
+
     this->body.append(buf, siz);
+    blen += siz;
+
+    WsLog::_(LVL_DBG, TGT_BODY, "blen: ", blen);
+    if (!chnk)
+        WsLog::_(LVL_DBG, TGT_BODY, "clen: ", clen);
     return (this->state);
 }
 
-int Request::init(void)
+
+void br_Request::reset(void)
+{
+    head.clear();
+    body.clear();
+    exec.clear();
+
+    meth.clear();
+    path.clear();
+    file.clear();
+    fext.clear();
+    vars.clear();
+
+    blen = 0;
+    clen = 0;
+    chnk = 0;
+    state = REQ_INIT;
+}
+
+int br_Request::init(void)
 {
     meth.clear();
     path.clear();
@@ -70,13 +96,47 @@ int Request::init(void)
         fext = file.substr(pos + 1);
     }
     
+	WsLog::_(LVL_DBG, TGT_HEAD, "\n", head);
 	WsLog::_(LVL_DBG, TGT_HEAD, "meth: ", meth);
 	WsLog::_(LVL_DBG, TGT_HEAD, "path: ", path);
 	WsLog::_(LVL_DBG, TGT_HEAD, "file: ", file);
 	WsLog::_(LVL_DBG, TGT_HEAD, "fext: ", fext);
 	WsLog::_(LVL_DBG, TGT_HEAD, "vars: ", vars);
     
+    std::string val = header("content-length");
+    if (val.size())
+        clen = atoi(val.c_str());
+    WsLog::_(LVL_DBG, TGT_HEAD, "clen: ", clen);
+
+    val = header("transfer-encoding");
+    if (val.size())
+    {
+        pos = val.find("chunked"); // case (!)
+        if (pos != std::string::npos)
+            chnk = 1;
+    }
+	WsLog::_(LVL_DBG, TGT_HEAD, "chnk: ", chnk);
+        
     return (0);
+}
+
+// INCOMING BODY
+int br_Request::body_stat(void)
+{
+    // WsLog::_(LVL_DBG, TGT_CONN_RECV, "body:  size ", this->body.size());
+    if (this->body.size())
+        return (1);
+    if (this->chnk)
+    {
+        // check something here 
+        return (0);
+    }
+    // uncertain 
+    // WsLog::_(LVL_TMP, TGT_CONN, "blen: ", blen);
+    // WsLog::_(LVL_TMP, TGT_CONN, "clen: ", clen);
+    if (clen && blen < clen)
+        return (0);
+    return (-1);
 }
 
 static bool	icmp(char a, char b)
@@ -85,7 +145,27 @@ static bool	icmp(char a, char b)
 		std::tolower(static_cast<unsigned char>(b));		
 }
 
-std::string Request::header(const char *key) const
+std::string hedval_str(std::string & str, const char *key)
+{
+	// std::string	kstr = std::string("\n") + std::string(key);
+	std::string	kstr = std::string(key);
+	std::string	val("");
+
+	std::string::const_iterator it = std::search(
+		str.begin(), str.end(),
+		kstr.begin(), kstr.end(),
+		icmp);
+	if (it == str.end())
+        return (val);
+    if (it != str.begin() && *(it-1) != '\n')
+        return (val);
+        
+    std::stringstream	line(str.substr(it - str.begin()));
+    line >> kstr >> val;
+    return (val);
+}
+
+std::string br_Request::header(const char *key) const
 {
 	std::string	kstr(key);
 	std::string	val("");
@@ -98,7 +178,7 @@ std::string Request::header(const char *key) const
         return (this->file);
 	if (kstr == std::string("FEXT"))
         return (this->fext);
-	if (kstr == std::string("QUERY"))
+	if (kstr == std::string("VARS"))
         return (this->vars);
 	
 	std::string::const_iterator it = std::search(

@@ -6,9 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/15 12:18:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 21:00:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <vector>
 
 #include "Epoll.hpp"
 #include "EpollClient.hpp"
@@ -22,33 +24,18 @@ static void sigint_handler(int signo)
 {
     (void)signo;
 	
-	WsLog::_(LVL_ERR, TGT_EPOLL, "");
+	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
 
-	// *** CGI CLEANUP ***
     stop = 1;
 }
-
-#if 0
-https://man7.org/linux/man-pages/man7/epoll.7.html
-https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
-#endif
-
-
-// https://copyconstruct.medium.com/the-method-to-epolls-madness-d9d2d6378642
-
-// The epoll_create system call returns a file descriptor to the newly created epoll kernel data structure. 
-
-// When the EPOLL_CLOEXEC flag is set, any child process forked by the current process will close the epoll descriptor before it execs, so the child process won’t have access to the epoll instance anymore.
-
-// ***
-// Avoid forking, and if you must: close all epoll-registered file descriptors before calling execve. Explicitly deregister affected file descriptors from epoll set before calling dup/dup2/dup3 or close.
-
-// https://idea.popcount.org/2017-03-20-epoll-is-fundamentally-broken-22/
-
-// epoll_ctl(EPOLL_CTL_ADD) doesn't actually register a file descriptor. Instead it registers a tuple of a file descriptor and a pointer to underlying kernel object. Most confusingly the lifetime of an epoll subscription is not tied to the lifetime of a file descriptor. It's tied to the life of the kernel object.
-
-// If the close call removes the last pointer to kernel object and causes the object to be freed, then it will cause epoll subscription cleanup. But if there are more pointers to kernel object, more file descriptors, in any process on the system, then close will not cause the epoll subscription cleanup. It is totally possible to receive events on previously closed file descriptors.
+// static void sigpipe_handler(int signo)
+// {
+//     (void)signo;
+	
+// 	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+// 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGPIPE");
+// }
 
 static const char *evt_name[] =
 {
@@ -61,51 +48,30 @@ static const char *evt_name[] =
 	NULL
 };
 
-static std::string evt_type(struct epoll_event *evt)
+std::string evt_type(int evt)
 {
 	std::string typ("");
 
-	if (evt == NULL)
-		return (typ);
+	if (evt < 0)
+	{
+		typ += "(-) ";
+		evt = -evt;
+	}
 	
-	if (evt->events & EPOLLIN)
+	if (evt & EPOLLIN)
 		typ += (evt_name[0]);
-	if (evt->events & EPOLLOUT)
+	if (evt & EPOLLOUT)
 		typ += (evt_name[1]);
-	if (evt->events & EPOLLRDHUP)
+	if (evt & EPOLLRDHUP)
 		typ += (evt_name[2]);
-	if (evt->events & EPOLLPRI)
+	if (evt & EPOLLPRI)
 		typ += (evt_name[3]);
-	if (evt->events & EPOLLERR)
+	if (evt & EPOLLERR)
 		typ += (evt_name[4]);
-	if (evt->events & EPOLLHUP)
+	if (evt & EPOLLHUP)
 		typ += (evt_name[5]);
 	return (typ);
 }
-
-/*
-	epoll_pwait()
-
-setup
-		// use this with wait_mask
-		// wait_mask .. will REPLACE the current sigset
-		// for the duration of the epoll_pwait() call
-    sigset_t block_mask;
-    sigemptyset(&block_mask);
-    sigaddset(&block_mask, SIGINT);
-    sigprocmask(SIG_BLOCK, &block_mask, NULL);
-
-execute
-
-// epoll_pwait() allows an application to safely wait until either a file descriptor becomes ready or until a signal is caught.
-
-	sigset_t wait_mask;
-    sigemptyset(&wait_mask); // mask for DURING epoll_pwait
-// pthread_sigmask(SIG_SETMASK, &sigmask, &origmask);
-// ready = epoll_wait(epfd, &events, n, timeout);
-// pthread_sigmask(SIG_SETMASK, &origmask, NULL);
-	this->ecnt = epoll_pwait(this->epfd, this->evts, EPOLL_MAX_EVT, 1000, &wait_mask);
-*/
 
 Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 {
@@ -113,19 +79,40 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 	if (this->epfd < 0)
 		throw (std::runtime_error("Epoll : bad create"));
 	signal(SIGINT, sigint_handler);
+	// signal(SIGPIPE, sigpipe_handler);
 };
 
 Epoll::~Epoll()
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL, "(~) Epoll");
+	WsLog::_(LVL_DBG, TGT_EPOLL, " (~) Epoll");
 	this->cleanup();
 };
 
+#if 0
+void	Epoll::dupx(void)
+{
+	std::set<EpollClient*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		int cfd = (*it)->get_fd();
+		// close(cfd);
+		// // int d = 
+		dup(cfd);
+		// close(cfd);
+		this->del(*it); // necessary (?)
+		it++;
+
+	}
+}
+#endif
 void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
+	{
+		// this->del(*it); // necessary (?)
 		delete (*it++);
+	}
 	this->clients.clear();
 	
 	if (this->epfd != -1)
@@ -141,15 +128,21 @@ void	Epoll::cleanup()
 
 int	Epoll::add(EpollClient *cli)
 {
-	// check : cli->get_evt().data.ptr
+	if (cli->get_evt()->data.ptr == NULL)
+	{
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
+		return (-1);
+	}
+	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add cli  : already exists");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
 		// return (this->mod(cli));
+		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
@@ -166,20 +159,27 @@ int	Epoll::add(EpollClient *cli)
 
 int	Epoll::mod(EpollClient *cli)
 {
-	// check : cli->get_evt().data.ptr
+	if (cli->get_evt()->data.ptr == NULL)
+	{
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
+		return (-1);
+	}
+	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
 		// return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
-		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod");	
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
+		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
 	}
 	return (err);
 }
@@ -188,11 +188,11 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
 	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -206,7 +206,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : ", cli->typ_str());
+	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->clients.find(cli);
 	if (it != this->clients.end())
 	{
@@ -216,9 +216,9 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "rem cli  : does not exist");
+		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
 	}
-
+	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
 	return (0);
 }
 
@@ -235,8 +235,8 @@ EpollClient	*Epoll::get_epc(void *cli)
 	epc = reinterpret_cast<EpollClient*>(cli);
 	if (epc == NULL)
 		return (NULL);
-	// if (!this->has_client(epc))
-	// 	return (NULL);
+	if (!this->has_client(epc))
+		return (NULL);
 	return (epc);
 }
 
@@ -250,14 +250,12 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::exec(void)
 {
-	// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "wait ...");
-	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
-		return WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
+		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
 	if (this->ecnt == 0)
 		return (this->ecnt);
-	WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "\necnt  : ", this->ecnt);
+	WsLog::_(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
 	return (this->ecnt);
 }
 
@@ -268,15 +266,14 @@ void	Epoll::check_timeo(void)
 	
 	n = time(&n);
 	
-	std::set<EpollClient*>::iterator it = this->clients.begin();
+	std::set<EpollClient*>::iterator it;
+	
+	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
 		if ((*it)->timeo(n))
 		{
-			WsLog::_(LVL_ERR, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
-			// cgi  timeout (?)
-			// conn timeout 
-			// 408 Request Timeout 
+			WsLog::_(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
 		}
 		it++;
 	}
@@ -293,7 +290,7 @@ int	Epoll::loop(void)
         e = this->exec();
         if (e < 0)
 			return (1);
-		for (int k=0; k < e; k++) 
+		for (int k=0; k < e; k++)
         {
 			evt = this->get_evt(k);
 			if (evt == NULL)
@@ -307,54 +304,43 @@ int	Epoll::loop(void)
 				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
+			
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "");
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt));
-			// WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-			if (epc->event(evt) < 0)
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
+			
+			try
 			{
-				// set DONE .. do not remove right away
-				// in case conn <=> cgi are pointing to each other
-				// -- which might have been a bad idea
-				this->rem(epc);
+				if (epc->event(evt) < 0)
+					this->rem(epc);
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << e.what() << '\n';
 			}
         }
-		this->check_timeo();
+		this->check_timeo();	
     }
 	return (0);
 }
 
-
-// int epoll_ctl(int epfd, int op, int fd,
-// struct epoll_event *_Nullable event); // is (event) .. "copied" -- I think so
-
-// EPOLL_CTL_ADD
-// EPOLL_CTL_MOD - changed .. existing (test?)
-// EPOLL_CTL_DEL	
-
-// edge-triggered mode delivers events only
-// when changes occur on the monitored file descriptor, that is, an
-// event will be generated upon each receipt of a chunk of data.
-
-// Since the read operation done in 4
-// does not consume the whole buffer data, the call to epoll_wait(2)
-// done in step 5 might block indefinitely.
-
-// Edge-triggered
-// non-blocking
-// waiting for an event only after read(2) or write(2) return EAGAIN.
-// hm .. read-all-data .. not if we're getting sent chunks at a time (?)
-
-// EPOLLIN		: can read
-// EPOLLOUT		: can write
-// EPOLLRDHUP	: peer closed OR shut down WRITE
-	// detect close -- when using edge-tiggered
-// EPOLLPRI		: exceptional condition (There is out-of-band data on a TCP socket)
-// EPOLLERR		: always reported -- write end of pipe when read end is closed
-// EPOLLHUP		: always reported -- hangup ;; peer closed its end -- may still have data to read
-
-// Input Flags
-// EPOLLET		: edge-triggered
-// EPOLLONESHOT	:
-// EPOLLWAKEUP	:
-// EXPOLLECLUSIVE
-
+int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
+{
+	int	err = 0;
+	std::vector<ServerConfig>::const_iterator it = serv_list.begin();
+	std::vector<ServerConfig>::const_iterator ite = serv_list.end();
+	for ( ;it != ite; it++)
+	{
+		try
+		{
+			new Server(this, it->port, *it);
+			err = 1;
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+		}
+	}
+	return (err);
+}
