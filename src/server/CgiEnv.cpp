@@ -6,15 +6,17 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 18:03:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 18:44:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiEnv.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
+#include "helpers.hpp"
+#include "http_utils.hpp"
 
-CgiEnv::CgiEnv(void) : res(NULL)
+CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {
 
 }
@@ -25,99 +27,142 @@ CgiEnv::~CgiEnv()
 		delete[] res;
 }
 
-// like this .. we store the backing data for envp
 void	CgiEnv::add(const char *key, const char *val)
 {
-	// <map> first [keky]
-	data.push_back(std::string(key) + std::string("=") + std::string(val));
+	this->kv[ std::string(key) ] = std::string(val);
 }
 
 void	CgiEnv::add(const char *key, int n)
 {
-	data.push_back(std::string(key) + std::string("=") + num_2_str(n));
+	this->kv[ std::string (key) ] = num_2_str(n);
 }
 
-// From the meta-variables thus generated, a URI, the 'Script-URI', can
-//    be constructed.  This MUST have the property that if the client had
-//    accessed this URI instead, then the script would have been executed
-//    with the same values for the SCRIPT_NAME, PATH_INFO and QUERY_STRING
-//    meta-variables.
+std::string & CgiEnv::get(const char *key)
+{
+	return (this->kv[ std::string (key) ]);
+}
 
-// script-URI = <scheme> "://" <server-name> ":" <server-port>
-//                    <script-path> <extra-path> "?" <query-string>
-		// PATH_TRANSLATED
-// Maps the script's virtual path to the physical path used to call the script. 
-// This is done by taking any PATH_INFO component of the request URI and performing any virtual-to-physical translation appropriate.
-// SCRIPT_NAME
-// Returns the part of the URL from the protocol name up to the query string in the first line of the HTTP request.
+
+// BUILD_DEMO (!)
 
 int     CgiEnv::from_conn(Connection & conn)
 {
-	std::string val;
-	
-	Request &req = conn.sess.req;
+	this->kv.clear();
 
-	val = req.header("METH");
-	if (val.size())
-		this->add("REQUEST_METHOD", val.c_str());
-	else
-		this->add("REQUEST_METHOD", "GET");
+// WEBSERV : REQUEST
+	Session &sess = conn.sess;
+	Request &req  = sess.getRequest();
+	const Headers &headers = req.getHeaders();
 
-
-	// (chdir)
-	val = req.header("PATH");
-	if (val.size())
+// WEBSERV : SERVER
+	if (!req.hasMethod())
 	{
-		// relative (!)
-		this->add("_PATH", val.c_str());
-		this->add("PATH_INFO", val.c_str());
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
+		return (-1);
 	}
-	file = req.header("FILE");
-	if (file.size())
+	if (!req.hasURL())
 	{
-		this->add("SCRIPT_NAME", file.c_str());
-			// PHP CGI depends on non-standard SCRIPT_FILENAME
-		this->add("SCRIPT_FILENAME", file.c_str());	
-	}
-	else
-	{
-		// WOW : fucks up SERVER .. 
-		// ERROR
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "URL not set");
 		return (-1);
 	}
 	
-	std::string &fext = req.get_fext();
-	if (fext == std::string("php"))
-		exec = std::string("/usr/bin/php"); // -cgi"); 
-	else if (fext == std::string("py"))
-		exec = std::string("/usr/bin/python"); 
-	else if (fext == std::string("pl"))
-		exec = std::string("/usr/bin/perl"); 
-	else
-	{
-		// ERROR
-		return (-1);
-	}
-	this->args[0] = this->exec.c_str();
-	this->args[1] = file.c_str();
-	this->args[2] = NULL;
+	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
+	std::cerr << "METH  : " << methodToString(req.getMethod()) << std::endl;
 	
-	
-	val = req.header("VARS");
-	if (val.size())
-		this->add("QUERY_STRING", val.c_str());
-	else
-		this->add("QUERY_STRING", "g1=get-one&g2=get-two");
+	file = sess._resourcePath; // from server root 
+	std::cerr << " URL  : " << file << std::endl;
 
-		
+	std::cerr << "SERV  : root : " << conn.serv.get_conf().root << std::endl;
+	std::cerr << "ROUTE : root : " << sess._route->root << std::endl;
+	std::cerr << "ROUTE : path : " << sess._route->path << std::endl;
+#if 1
+	path = conn.serv.get_conf().root + file;
+	std::cerr << "(env) : path : " << path << std::endl;
+	this->add("SCRIPT_NAME", path.c_str());
+
+// WEBSERV : SERVER
+	size_t pos = path.find_last_of("/");
+	std::string cwd = path.substr(0, pos);
+	this->add("CWD", cwd.c_str());	
+
+	WsLog::color(WSL_GREEN);
+	WsLog::_(LVL_DBG, TGT_CGI_ENV, "pdir : ", cwd);
+	
+	this->add("SCRIPT_FILENAME", path.c_str());	
+#endif
+
+	
+
+	const std::string &fext = path_ext(file);
+	if (fext == std::string(".php"))
+	{
+		lang = CGI_PHP;
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
 // This means that a page will only be served up 
 // if the REDIRECT_STATUS CGI variable is set
-	this->add("REDIRECT_STATUS", "1");
-	this->add("PYTHONPATH", 
-		"/home/kdonlon/Documents/Projects/webserv/legacy-cgi-main/");
+		this->add("REDIRECT_STATUS", "1");		
+	}
+	else if (fext == std::string(".py"))
+	{
+		lang = CGI_PYTHON;
+		// this->add("PYTHONPATH", serv.pycgi.c_str());
+	}
+	else if (fext == std::string(".pl"))
+	{
+		lang = CGI_PERL;
+	}
+	else
+	{
+		WsLog::_(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
+		return (-1);
+	}
+	
+	this->args[0] = sess._cgi_exec.c_str();
+	this->args[1] = path.c_str();
+	this->args[2] = NULL;	
+
+	
+	if (req.hasHeader("Content-type"))
+		this->add("CONTENT_TYPE", headers.find("Content-type")->second.c_str());
+	if (req.hasHeader("Content-length"))
+		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
+	
+
+	if (req.hasQuery())
+	{
+		this->add("QUERY_STRING", req.getQuery().c_str());
+		std::cerr << "QRY   : " << req.getQuery() << std::endl;
+	}
 
 
+	Headers::const_iterator hit = headers.begin();
+	while (hit != headers.end())
+	{
+		std::string hk = hit->first;
+		std::string hv = hit->second;
+		hk.insert(0, "http_");
+		header_key(hk);
+		this->add(hk.c_str(), hv.c_str());
+		hit++;
+	}
+	
+	this->add("REMOTE_ADDR", conn.get_addr().c_str());
+	// this->add("REMOTE_HOST", "remote host");
+	// this->add("REMOTE_USER", "remote user");
+	
+	this->add("SERVER_NAME", "webserv");
+	this->add("SERVER_PORT", conn.serv.get_port());
+	this->add("SERVER_PROTOCOL", "HTTP/1.0");
+	this->add("SERVER_SOFTWARE", "webserv");
+	
+	this->add("GATEWAY_INTERFACE", "CGI/1.0");
+
+// WEBSERV : SERVER
+	// should not have to check this here 
+#if 0
+
+
+		
 // If the output of a form is being processed, check that CONTENT_TYPE
 // is "application/x-www-form-urlencoded"
 // or "multipart/form-data".
@@ -125,52 +170,55 @@ int     CgiEnv::from_conn(Connection & conn)
 // with a 415 'Unsupported Media Type' error, where supported by the
 // protocol.
 
-	val = req.header("Content-type");
-	if (val.size())
-		this->add("CONTENT_TYPE", val.c_str());
-	val = req.header("Content-length");
-	if (val.size())
-		this->add("CONTENT_LENGTH", val.c_str());
+
 		
 // In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits. 
+
 	val = req.header("Host");
 	if (val.size())
 		this->add("HTTP_HOST", val.c_str());
+	val = req.header("Referer");
+	if (val.size())
+		this->add("HTTP_REFERER", val.c_str());
 	val = req.header("User-Agent");
 	if (val.size())
 		this->add("HTTP_USER_AGENT", val.c_str());
+	val = req.header("Transfer-Encoding");
+	if (val.size())
+		this->add("HTTP_TRANSFER_ENCODING", val.c_str());
 	val = req.header("Accept");
 	if (val.size())
 		this->add("HTTP_ACCEPT", val.c_str());
-	val = req.header("Accept-Language");
-	if (val.size())
-		this->add("HTTP_ACCEPT_LANGUAGE", val.c_str());
 	val = req.header("Accept-Encoding");
 	if (val.size())
 		this->add("HTTP_ACCEPT_ENCODING", val.c_str());
+	val = req.header("Accept-Language");
+	if (val.size())
+		this->add("HTTP_ACCEPT_LANGUAGE", val.c_str());
 	val = req.header("Connection");
 	if (val.size())
 		this->add("HTTP_CONNECTION", val.c_str());
-		// Upgrade-Insecure-Requesets
-		// Sec-Fetch
 	this->add("HTTP_COOKIE", "chocolate chip");
 	
-	this->add("REMOTE_ADDR", addr_2_str(&conn.addr).c_str());
-	// this->add("REMOTE_HOST", "remote host");
-	// this->add("REMOTE_USER", "remote user");
-	
-	this->add("SERVER_NAME", "webserv"); // virtual
-	this->add("SERVER_PORT", conn.serv.get_port());
-	this->add("SERVER_PROTOCOL", "HTTP/1.1");
-	this->add("SERVER_SOFTWARE", "webserv");
 
+#endif
     return (0);
+
 }
 
 const char	**CgiEnv::gen(void)
 {
+	this->data.clear();
 	if (res)
 		delete[] res;
+
+	std::map<std::string, std::string>::iterator kvit = kv.begin();
+	while (kvit != kv.end())
+	{
+		data.push_back(std::string(kvit->first) + std::string("=") + std::string(kvit->second));
+		kvit++;
+	}
+	
 	size_t	cnt	= data.size();
 
 	res = new const char*[cnt + 1];
@@ -179,6 +227,8 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
+		// WsLog::color(WSL_GREEN);
+		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}
@@ -186,107 +236,4 @@ const char	**CgiEnv::gen(void)
 	return (res);
 }
 
-
-#if 0
-
-AUTH_PASSWORD AUTH_TYPE AUTH_USER CERT_COOKIE CERT_FLAGS CERT_ISSUER CERT_KEYSIZE CERT_SECRETKEYSIZE CERT_SERIALNUMBER CERT_SERVER_ISSUER CERT_SERVER_SUBJECT CERT_SUBJECT CF_TEMPLATE_PATH CONTENT_LENGTH CONTENT_TYPE CONTEXT_PATH GATEWAY_INTERFACE HTTPS HTTPS_KEYSIZE HTTPS_SECRETKEYSIZE HTTPS_SERVER_ISSUER HTTPS_SERVER_SUBJECT HTTP_ACCEPT HTTP_ACCEPT_ENCODING HTTP_ACCEPT_LANGUAGE HTTP_CONNECTION HTTP_COOKIE HTTP_HOST HTTP_REFERER HTTP_USER_AGENT QUERY_STRING REMOTE_ADDR REMOTE_HOST REMOTE_USER REQUEST_METHOD SCRIPT_NAME SERVER_NAME SERVER_PORT SERVER_PORT_SECURE SERVER_PROTOCOL SERVER_SOFTWARE WEB_SERVER_API (This value is always blank; retained for compatibility.)
-
-https://www6.uniovi.es/~antonio/ncsa_httpd/cgi/env.html
-
-
-Specification
-
-The following environment variables are not request-specific and are set for all requests:
-
-    SERVER_SOFTWARE
-
-    The name and version of the information server software answering the request (and running the gateway). Format: name/version
-
-    SERVER_NAME
-
-    The server`s hostname, DNS alias, or IP address as it would appear in self-referencing URLs.
-
-    GATEWAY_INTERFACE
-
-    The revision of the CGI specification to which this server complies. Format: CGI/revision
-
-The following environment variables are specific to the request being fulfilled by the gateway program:
-
-    SERVER_PROTOCOL
-
-    The name and revision of the information protcol this request came in with. Format: protocol/revision
-
-    SERVER_PORT
-
-    The port number to which the request was sent.
-
-    REQUEST_METHOD
-
-    The method with which the request was made. For HTTP, this is "GET", "HEAD", "POST", etc.
-
-    PATH_INFO
-
-    The extra path information, as given by the client. In other words, scripts can be accessed by their virtual pathname, followed by extra information at the end of this path. The extra information is sent as PATH_INFO. This information should be decoded by the server if it comes from a URL before it is passed to the CGI script.
-
-    PATH_TRANSLATED
-
-    The server provides a translated version of PATH_INFO, which takes the path and does any virtual-to-physical mapping to it.
-
-    SCRIPT_NAME
-
-    A virtual path to the script being executed, used for self-referencing URLs.
-
-    QUERY_STRING
-
-    The information which follows the ? in the URL which referenced this script. This is the query information. It should not be decoded in any fashion. This variable should always be set when there is query information, regardless of command line decoding.
-
-    REMOTE_HOST
-
-    The hostname making the request. If the server does not have this information, it should set REMOTE_ADDR and leave this unset.
-
-    REMOTE_ADDR
-
-    The IP address of the remote host making the request.
-
-    AUTH_TYPE
-
-    If the server supports user authentication, and the script is protects, this is the protocol-specific authentication method used to validate the user.
-
-    REMOTE_USER
-
-    If the server supports user authentication, and the script is protected, this is the username they have authenticated as.
-
-    REMOTE_IDENT
-
-    If the HTTP server supports RFC 931 identification, then this variable will be set to the remote user name retrieved from the server. Usage of this variable should be limited to logging only.
-
-    CONTENT_TYPE
-
-    For queries which have attached information, such as HTTP POST and PUT, this is the content type of the data.
-
-    CONTENT_LENGTH
-
-    The length of the said content as given by the client.
-
-In addition to these, the header lines recieved from the client, if any, are placed into the environment with the prefix HTTP_ followed by the header name. Any - characters in the header name are changed to _ characters. The server may exclude any headers which it has already processed, such as Authorization, Content-type, and Content-length. If necessary, the server may choose to exclude any or all of these headers if including them would exceed any system environment limits.
-
-An example of this is the HTTP_ACCEPT variable which was defined in CGI/1.0. Another example is the header User-Agent.
-
-    HTTP_ACCEPT
-
-    The MIME types which the client will accept, as given by HTTP headers. Other protocols may need to get this information from elsewhere. Each item in this list should be separated by commas as per the HTTP spec.
-
-    Format: type/subtype, type/subtype
-
-    HTTP_USER_AGENT
-
-    The browser the client is using to send the request. General format: software/version library/version.
-	
-
-https://www.ibm.com/docs/en/netcoolomnibus/8.1.0?topic=scripts-environment-variables-in-cgi-script
-
-
-
-#endif
-
-
+// FCGI

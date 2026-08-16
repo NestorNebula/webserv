@@ -6,161 +6,174 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 23:45:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 20:57:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Connection.hpp"
 #include "Server.hpp"
 #include "CgiPipe.hpp"
+#include "ResourceCgi.hpp"
+
+Connection::Connection	(const Connection & that) : 
+	EpollClient(that), 
+#if BUILD_DEMO
+	sess(that.serv.get_conf()), 
+#endif
+	serv(that.serv), 
+	req_cnt(0)
+{
+
+}
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
-	cgi_pid(0),
-	cgi_ip(NULL),
-	cgi_op(NULL),
+#if BUILD_DEMO
+	sess(_serv.get_conf()),
+#endif
 	serv(_serv), 
-	req_cnt(0),
-	state(0)
+	res_cgi(NULL),
+	req_cnt(0)
 {
 };
 
 Connection::~Connection()
 {
-	WsLog::_(LVL_DBG, TGT_CONN, "(~) Connection");
+	WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
 	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-
-	// Resource .. Session
-	// sess->close()
-	// rsrc.active()
-
-	// delete (ResourceCgi) ? 
-	if (this->cgi_ip || this->cgi_op)
+	if (this->res_cgi)
 	{
-		kill(cgi_pid, SIGKILL);
-		
-		int stat = -1;
-		int err = waitpid(cgi_pid, &stat, 0);
-		WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
-		WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
-		if (err < 0)
-			WsLog::_errno(LVL_ERR, TGT_CONN, "waitpid");
-		if (WIFEXITED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN, "exit: ", WEXITSTATUS(stat));
-		if (WIFSIGNALED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN, "sig : ", WTERMSIG(stat));
-		// what is the point of capturing exit status here ..
-		// connection is dying
-	}
-	
-	if (this->cgi_ip)
-	{
-		this->cgi_ip->conn_closed();
-		this->cgi_ip->mod_evt(EPOLLIN);
-	}
-	if (this->cgi_op)
-	{
-		this->cgi_op->conn_closed();
-		this->cgi_op->mod_evt(EPOLLOUT);
+		this->res_cgi->conn_closed();
+		delete (this->res_cgi); // (~) Connection
 	}
 };
 
-
-// session::status()
-// resource::status()
-int	Connection::cgi_status(void)
-{
-	// if (cgi_stat >= 0)
-		// DONE
-	if (cgi_pid == 0)
-		return (0);
-	if (cgi_ip == NULL && cgi_op == NULL)
-		return (0); // hm : assume done (?) don't think so
-	int stat = -1;
-	int err = waitpid(cgi_pid, &stat, WNOHANG);
-	WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
-	WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
-	if (err == 0)
-		return (0);
-	if (err < 0)
-		WsLog::_errno(LVL_ERR, TGT_CONN, "waitpid");
-	if (WIFEXITED(stat))
-	{
-		WsLog::_(LVL_DBG, TGT_CONN, "exit: ", WEXITSTATUS(stat));
-		return (1);
-	}
-	if (WIFSIGNALED(stat))
-	{
-		WsLog::_(LVL_DBG, TGT_CONN, "sig : ", WTERMSIG(stat));
-		return (1);
-	}
-	return (0);
-}
-
-#define CONN_TIMEO 5
-
-
-bool	Connection::timeo(time_t now) const
+bool	Connection::timeo(time_t now)
 {
 	if (this->lact == 0)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + CONN_TIMEO) < now)
+	if ((this->lact + CONN_TIMEOUT) < now) // server (?)
 	{
-		// 408 Request Timeout -- set error code 
+		this->set_err(408);
 		return (true);
 	}
 	return (false);
 }
 
+// WEBSERV : ERROR
+void	Connection::set_err(int e)
+{
+	if (e == 0)
+		return;
+		
+	if (this->error)
+	{
+		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
+		WsLog::_(LVL_DBG, TGT_CONN, "cur:  ", this->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "new:  ", e);
+		// not when (err) is set .. on delete => status / wait 
+		this->mod_evt(EPOLLOUT);
+		return;
+	}
+
+	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
+	WsLog::_(LVL_DBG, TGT_CONN, "fd  : (conn) ", this->fd);
+	
+	std::string ebody("Error Data\r\n");
+	
+	this->error = e;
+	this->estr = std::string("HTTP/1.1 ") + num_2_str(this->error) + std::string(" err description\r\n");
+
+	this->estr += std::string("Connection: close\r\n");
+	this->estr += std::string("Content-Length: ") + num_2_str(ebody.size()) + std::string("\r\n");
+	this->estr += std::string("\r\n");
+	this->estr += ebody;
+
+	// WsLog::_(LVL_DBG, TGT_CONN, "err:\n", this->estr);
+	this->mod_evt(EPOLLOUT);
+}
+
 ssize_t	Connection::pollin(void)
 {
+	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
+	
 	ssize_t	err;
-
-	// sess.status()
 
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
 	err = this->recv();
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
+		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv", err);
 		return (err);
 	}
-	if (err == 0) // often with evt typ : in rdhup
+	if (err == 0) 
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ZERO");
-		return (-1);
+		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
+		this->mod_evt(EPOLLOUT); 
+		return (0);
 	}
-
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-	// sess.write_data()
-	// set some 
-	int req_state = sess.push_data(this->ibuf, err);
-	if (req_state < REQ_HAVE_HEAD)
-		return (err);
+// WEBSERV : SESSION (write)
+#if 1 // BUILD_DEMO
+	sess.log_next();
+	if (sess.nextAction() == Session::RDSOCK)
+		sess.write(this->ibuf, err);
 		
-	if (this->state < CONN_HAS_RSRC)
+	sess.log_next();
+	switch (sess.nextAction()) {
+		case Session::DOCGI:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: docgi");
+			if (this->exec_cgi() < 0)
+			{
+				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+				// this->set_err(503); // CGI_ERR
+				this->set_err(404); // siege-friendly
+				return (0); // send error
+			}
+			// req_cnt
+			this->res_cgi->push_body();
+			break;
+		case Session::WRSOCK:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: write");
+			this->mod_evt(EPOLLOUT);
+			break;
+		case Session::RDSOCK:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: read");
+			break;
+		case Session::KPALIVE:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: (ka)");
+			break;
+		case Session::CLOSE:
+			WsLog::_(LVL_DBG, TGT_CONN, "next: close");
+			return (-1);
+	}
+#else
+	// int req_state = 
+	sess.write(this->ibuf, err);
+	return (-1);
+	// if (req_state < REQ_HAVE_HEAD)
+	// 	return (err);
+
+	if (this->res_cgi == NULL)
 	{
+		this->req_cnt++;
 		if (this->exec_cgi() < 0)
 		{
-			WsLog::_(LVL_ERR, TGT_CONN, "exec_cgi");
-			this->error = 501; // session (?)
-			this->mod_evt(-EPOLLIN);
-			this->mod_evt(EPOLLOUT);
-			return (0);
+			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+			// this->set_err(503); // CGI_ERR
+			this->set_err(404); // siege-friendly
+			return (0); // send error
 		}
-		this->state = CONN_HAS_RSRC; // but body might not be done 
 	}
-	// rsrc.input_data_available
-	// in sess.push_data()
-	// sess .. knows about rsrcCgi .. 
-	if (this->cgi_ip)
-		this->cgi_ip->mod_evt(EPOLLOUT);
+	
+// SESSION
+	this->res_cgi->push_body();
+#endif
 	return (err);
 }
-
 
 // ∗ Just remember that, for chunked requests, your server needs to un-chunk them, 
 // the CGI will expect EOF as the end of the body.
@@ -170,164 +183,215 @@ ssize_t	Connection::pollin(void)
 
 ssize_t	Connection::pollout(void)
 {
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
+	
 	ssize_t	err = 0;
 
-	// check_state
-	// sess.get_state()
-	// rsrc.get_state()
-	if (this->error)
-	{
-		// set (resp)
-		// or .. rsrc .. prepares this (?)
-		this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\nError");
 
-		// which may be an error .. page 
-		err = this->send(this->resp); 
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
-		if (this->resp.size())
-			return (err);
-		this->state = CONN_SENT_RESP;
-		return (-1);
-		
-		// and SEND NOW 
-	}
-
-	// rsrc died by errror .. and we need to send it 
-	if (this->state < CONN_HAS_RSRC)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no rsrc");
-		return (0);
-	}
-
-	// rsrc.state / error 
-	// error
-	// osiz
-	// osiz == 0 .. but inProgress
-	// rsrc.done -- not BODY done 
-	
-	// which we could have gotten .. 
-	// when the second got (rem_cgi)
-	// or .. EPOLLERR
-
-	// rsrc.state()
-	
-	// sess.check_state() -- could have tested (cgi) for errors
-	if (!this->cgi_ip && !this->cgi_op)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: cgi DONE");
-
-// BUT : we may have some data to send
-// AND : we may not yet have sent RESP
-// track cgi_status .. so we only do this once 
-		int stat = 0;
-		err = waitpid(cgi_pid, &stat, 0);
-		
-
-		WsLog::_(LVL_DBG, TGT_CONN, "wait: ", err);
-		WsLog::_(LVL_DBG, TGT_CONN, "stat: ", stat);
-		if (WIFEXITED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "EXIT: ", WEXITSTATUS(stat));
-		if (WIFSIGNALED(stat))
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "SIG : ", WTERMSIG(stat));
-		// what .. we were sending .. but then there was an error (?)
-		if (!WIFEXITED(stat) || WEXITSTATUS(stat))
-		{
-			this->state = RSRC_ERROR;
-			this->error = 501;
-			// ugh -- we'll check this .. AGAIN
-			return (0);
-			// something to send 
-			this->resp = std::string("HTTP/1.1 501 Not Implemented\r\n\r\nError");
-			this->state = RSRC_HAS_RESP; // UGLY
-		}
-	}
-	
-	if (this->state < RSRC_HAS_RESP) // or ERROR
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: no resp");
-		this->mod_evt(-EPOLLOUT);
-		return (0);
-	}
-	
-	if (this->state < CONN_SENT_RESP) 
-	{
-		// which may be an error .. page 
-		// resp : is built -- and sent bit-by-bit
-		err = this->send(this->resp); 
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: ", err);
-		if (this->resp.size())
-			return (err);
-		this->state = CONN_SENT_RESP;
-		return (0);
-	}
-	
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-
+	sess.log_next();
+#if 0 // BUILD_DEMO
+	if (sess.nextAction() != Session::WRSOCK)
+		return 0;
 
 	// rsrc.complete
-	std::string & odata = sess.read_data();
-	if (odata.size() == 0) // rsrc/state seems like a better check
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: odata.size() == 0");
+	char buf[4096];
+	// Stream::streamsize r 
+	err = sess.read(buf, 4096);
+	std::string OSTR(buf);
 
-// UGLY
-		if (this->cgi_op == NULL) // complete
+	if (err > 0)
+	{
+		// if (r > 0)
+		// 	err = this->send(buf, r);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
+		err = this->send(OSTR);
+	}
+#else
+// WEBSERV : ERROR
+	if (this->error)
+		return (this->send_error());
+
+// WEBSERV : RESOURCE (cgi)
+
+// if (res)
+	//check the stats
+// else
+	// check ostr
+	ResourceCgi *res = this->res_cgi;
+	// std::string & OSTR = res->get_resp();
+#if 1
+	// or (DOCGI)
+		// which could check (NULL)
+	if (res)
+	{
+		err = res->status();
+		if (err < 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+			if (res->resp.size() == 0)
+				return (-1);
+		}	
+		if (this->error)
+			return (this->send_error());
+		if (err == 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
+			this->mod_evt(-EPOLLOUT);
+			return (err);
+		}
+		std::string & OSTR = res->get_resp();	
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
+		err = this->send(OSTR);
+	}
+	else
+	{
+		if (sess.nextAction() != Session::WRSOCK)
 		{
 
-// Keepalive : with chunked transfer encoding
-// Keepalive makes it difficult for the client to determine where one response ends and the next response begins, particularly during pipelined HTTP operation.[11] This is a serious problem when Content-Length cannot be used due to streaming.[12] To solve this problem, HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
-#if KEEP_ALIVE // -- would REQUIRE CONTENT-LENGTH from (cgi)
-
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: keep-alive");
-			// hm : did this only work when we sent back Content-Length
-			// see more HUP => read [0] with THIS .. AND NOT siege.conf
-			this->istr.clear();
-			this->state = 0;
-			this->mod_evt(-EPOLLOUT); // no rsrc
-			this->mod_evt(EPOLLIN);
-			return (0);
-#else
-			// TEST : content-length header .. longer than what we send
-			return (-1);		
-#endif			
 		}
-		// LUCKY .. send has probably already happened 
-		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
-		return (0);
+		std::string & OSTR = sess.get_resp();
+		if (OSTR.size())
+		{
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);			
+			err = this->send(OSTR);
+		}
+		else
+		{
+			// done (?)
+		}
 	}
-	
-
-
-	
-	err = this->send(odata);
+#else
+	if (res == NULL)
+	{
+		// base
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
+		return (-1);
+	}
+	err = res->status();
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CONN_SEND, "send");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+		if (res->resp.size() == 0)
+			return (-1);
+	}	
+#endif
+
+
+// WEBSERV : ERROR
+
+	
+// WEBSERV : RESOURCE (response)
+	// std::string & OSTR = res->get_resp();
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
+	// err = this->send(OSTR);
+// #endif
+#endif
+
+	if (err < 0)
+	{
+		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send: ZERO");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
 		return (0);
 	}
-	
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	if (odata.size())
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", odata.size());
-	else
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: all");
+	// if (OSTR.size())
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
+	// else
+	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
+	
+	sess.log_next();
+	// MAY BE KEEP-ALIVE
+	
+	if (sess.nextAction() == Session::KPALIVE)
+	{
+		this->reset();
+	}
+	// {
+	// 	this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
+	// 	return (-1);
+	// }
+	return (err);
+}
 
-	return (err); // (!) bytes written
+// WEBSERV : ERROR 
+int		Connection::send_error(void)
+{
+	int	err;
+	
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
+
+	err = this->send(this->estr); 
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
+	if (err < 0)
+		return (-1);
+	if (this->estr.size())
+		return (err);
+	return (-1);
+}
+
+int	Connection::rdhup(void)
+{
+	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
+	// check res status (?)
+	this->mod_evt(EPOLLOUT);
+	return (-1); // may need error (?)
+	return (0);
+}
+
+int	Connection::hup(void)
+{
+	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
+	if (this->res_cgi == NULL)
+		return (-1);
+	this->res_cgi->conn_closed();
+	return (-1);
 }
 
 
+void	Connection::reset(void)
+{
+	if (this->res_cgi)
+	{
+		this->res_cgi->conn_closed();
+		delete (this->res_cgi); // conn : reset 
+		this->res_cgi = NULL;
+	}
+	
+// WEBSERV : SESSION (keep-alive)
+	this->sess.reset();
+	
+	this->estr.clear();
+	this->error = 0;
+	this->mod_evt(EPOLLIN);
+	this->mod_evt(-EPOLLOUT);
+}
 
+void	Connection::set_addr(struct sockaddr_in *a)
+{
+	this->addr = *a; 
+	this->astr = addr_2_str(a);
+}
 
-
-
-
-
-
+std::string		&Connection::get_addr(void)
+{
+	return (this->astr);
+}
 
 // multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
 	// write rest of BODY to cgi->ifd;
@@ -337,95 +401,106 @@ ssize_t	Connection::pollout(void)
 // The script MUST check the value of the CONTENT_LENGTH variable before
 //    reading the attached message-body, and SHOULD check the CONTENT_TYPE
 //    value before processing it
-	
 
-// Resource .. built from Request
-// CgiEnv   .. built from Request .. add to current ENV (?)
 
-// sess.rsrc_cgi
+// SESSION / REQUEST (CgiPipe::pollout)
+// kd : CGI input may need to know :
+	// (1)	: body data has been received by the Connection
+	//		  and needs to be written to the (stdin) of the CGI
+	// (0)	: no body data is currently available
+	//		  BUT .. more needs to be received to complete the request
+	// (-1) : there is no more body data to write to the CGI
 
-// sess.has_input
-int	Connection::cgi_inp(void)
+// WEBSERV : REQUEST (body)
+int	Connection::req_body_status(void)
 {
-	// cgi_valid (?)
-	if (this->sess.req.get_body().size())
+	int	err = -1; // DEMO (!) this->sess.req.body_stat();
+
+	if (err == 1) // body.size()
 		return (1);
-	// if (req) has NOT received full body
-	this->mod_evt(EPOLLOUT);
-	return (0);
-	// else
-	// body.size() == 0 AND there is nothing more to receive
-	// return (-1);
+	if (err == 0) // not done
+		return (0); 
+		
+	this->mod_evt(EPOLLOUT); // seems wrong 		
+	return (-1);
 }
 
-// rsrc.odata()
-// sess
-// resource .. fills some output_buffer in session
-int	Connection::cgi_out(const char *buf, ssize_t siz)
+// called on ~CgiPipe()
+void	Connection::cgi_rem(EpollClient *epc)
 {
-	if (this->state < RSRC_HAS_RESP)
+	switch (this->res_cgi->rem(epc))
 	{
-		// assume success if we get here (?)
-		// Python and Perl need to add "\r\n" manually
-		// PHP - may have added it's own error header, though
-		this->resp = std::string("HTTP/1.1 200 OK\r\n");
-		this->state = RSRC_HAS_RESP;
-	}
-	std::string & odata = this->sess.read_data();
-	odata.append(buf, siz);
-	this->mod_evt(EPOLLOUT);
-	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "odata: ", odata.size());
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "odata");
-	WsLog::_(LVL_DBG, TGT_CGI_DATA, "****\n", odata);
-	return (0);
-}
-
-// check epc->error (?)
-void	Connection::rem_cgi(CgiPipe *epc)
-{
-	if (epc == this->cgi_ip)
-	{
-		this->cgi_ip = NULL;
-	}
-	else if (epc == this->cgi_op)
-	{
-		this->cgi_op = NULL;
+	case 1: // (ip)
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
+		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
+		break;
+	case 2: // (op)
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
+		this->mod_evt(-EPOLLIN);
+		this->mod_evt(EPOLLOUT);
+		break;
+	case 3: // (done)
+		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
+		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
+		this->mod_evt(-EPOLLIN);
+		this->mod_evt(EPOLLOUT);
+		break;
+	default:
+		break;
 	}
-	// if both null -- check status
 }
 
-
-// this->sess.rsrsc = new ResourceCgi(this);
 int	Connection::exec_cgi(void)
 {
+	if (this->res_cgi)
+		return (0);
+		
 	int			err;
-	cgi_pipes	pipes;
 
-	if (pipes.init() < 0)
-		// this->set_err()
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
-
-	// or : post-fork .. and .. error is detected .. elsewhere (?)
 	CgiEnv *cgienv = new CgiEnv;
 	err = cgienv->from_conn(*this);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI, "cgienv: FAIL");
-		// pipes.shutdown();
+		WsLog::_(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
 		return (-1);
 	}
-		
-	this->cgi_pid = fork();
-	if (cgi_pid < 0)
+	
+	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
 	{
-		// pipes.shutdown();
+		ResourceFcgi * fcgi = new ResourceFcgi;
+		err = fcgi->init(this->ep, cgienv, this);
+		
+		WsLog::_(LVL_DBG, TGT_CONN, "php : ", err);
+		if (err == 0)
+		{
+			WsLog::color(WSL_GREEN);
+			WsLog::_(LVL_DBG, TGT_CONN, "php :  fcgi");			
+			delete (cgienv);
+			this->res_cgi = fcgi;
+			return (err);
+		}
+		delete (fcgi);
+		WsLog::color(WSL_YELLOW);
+		WsLog::_(LVL_DBG, TGT_CONN, "php :  pipe");
+	}
+
+	cgi_pipes	pipes;
+
+	if (pipes.init() < 0)
+		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
+
+	WsLog::pwd();
+	pid_t pid = fork();
+	if (pid < 0)
+	{
 		delete (cgienv);
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 	}	
-	if (cgi_pid == 0)
+	if (pid == 0)
 	{
 		err = pipes.dup_io();
 		if (err < 0)
@@ -435,11 +510,20 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-
+// char cwd[PATH_MAX];
 		const char **envp = cgienv->gen();
 
-		signal(SIGINT, SIG_DFL);
 		// pipes.dup_err();
+
+		std::string & cwd = cgienv->get("CWD");
+		if (cwd.size())
+		{
+			WsLog::color(WSL_GREEN);
+			WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
+			err = chdir(cwd.c_str());
+			if (err < 0)
+				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));
+		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
 		pipes.shutdown();
@@ -450,36 +534,14 @@ int	Connection::exec_cgi(void)
 	}		
 	delete (cgienv);
 	
-// fcntl .. F_SETFD .. O_CLOEXEC
-	WsLog::_(LVL_DBG, TGT_CONN, "exec cgi");
-
-	// ResourceCgi::init(conn, pipes, ep)
-	int cgifd_ip = dup(pipes.p1[1]);
-	if (cgifd_ip < 0)
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
-	int cgifd_op = dup(pipes.p2[0]);
-	if (cgifd_op < 0)
-	{
-		close(cgifd_ip);
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "dup (pipes)");
-	}	
-
-	this->cgi_ip = new CgiPipe(this->ep, cgifd_ip, this);
-	err = this->cgi_ip->ini_evt(EPOLLOUT);
+	ResourcePiped * pcgi = new ResourcePiped;
+	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
-		close(cgifd_ip);
-		close(cgifd_op);
+		delete (pcgi); // conn : cgi FAIL
+		this->set_err(503); // CGI_ERR
 		return (err);
 	}
-
-	this->cgi_op = new CgiPipe(this->ep, cgifd_op, this);
-	err = this->cgi_op->ini_evt(EPOLLIN);
-	if (err < 0)
-	{
-		close(cgifd_ip);
-		close(cgifd_op);
-		return (err);
-	}
+	this->res_cgi = pcgi;
 	return (err);
 }

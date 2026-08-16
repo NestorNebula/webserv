@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/07/16 23:29:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 17:15:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <sstream>
 # include <algorithm>
+# include <cctype>
 # include <CgiPipe.hpp>
 # include <WsLog.hpp>
 
@@ -26,69 +27,68 @@
 # define REQ_HAVE_BODY 4
 # define REQ_DONE 5
 
-class Request
+
+std::string hedval_str(std::string & str, const char *key);
+
+class br_Request
 {
 public:
-	Request(void) : state(REQ_INIT) {}
+	br_Request(void) : state(REQ_INIT), blen(0), clen(0), chnk(0) {}
+	~br_Request() {}
 
 	int         push_data(const char *buf, size_t siz);
+	int			body_stat(void);
 	int         init(void);
 	std::string header(const char *key) const;
 
 	int         get_state(void) const { return this->state; }
 	std::string &get_body(void) { return this->body; }
-	std::string &get_fext(void) { return this->fext; }
+	const std::string &get_fext(void) const { return this->fext; }
 	
+	void		reset(void);
+
+// private:
+	int				state;
+	
+	std::string		head;
+	std::string 	body;
+	std::string 	exec;
+
 private:
-	int			state;
+	size_t			blen;
+	size_t			clen;
+	int				chnk;
+
+	std::string 	meth;
+	std::string 	path;
+	std::string 	file;
+	std::string 	fext;
+	std::string 	vars;
+
+};
+
+class br_Session
+{
+public:
+	br_Session(void) {}
+	~br_Session() {}
 	
-	std::string	head;
-	std::string body; // sess.ip_data
-	std::string exec;
-
-	std::string meth;
-	std::string path;
-	std::string file;
-	std::string fext;
-	std::string vars;
-};
-
-class Resource
-{
-public:
-
-};
-
-
-// Session:fill_i/o .. or .. Request::fill_io
-class Session
-{
-public:
-	Session(void) : res(NULL) {}
-	~Session()
-	{
-		if (this->res)
-			delete (this->res);
-	}
-	Request     req;
-	Resource    *res;
-	std::string	ostr;
+	br_Request     req;
   
-	// fill_input
-	int push_data(const char *buf, size_t siz)
+// WEBSERV : REQUEST (body)
+  	const br_Request &getRequest() const
+		{ return (this->req); }
+	int write(const char *buf, size_t siz)
 	{
 		int err = this->req.push_data(buf, siz);
 		if (err < REQ_HAVE_HEAD)
 			return (err);
-		// res.push_data(body)
-		// have head : make rsrc
-		// conn->exec_cgi()
-		// tell (res) data is available
-		
 		return (err);
 	}
-	
-	std::string & read_data(void) { return (this->ostr); }
+	void	reset(void)
+	{
+		this->req.reset();	
+	}
 	int req_state(void) { return this->req.get_state(); }
 };
 
