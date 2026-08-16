@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=6
+R=4
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -44,7 +44,7 @@ if [ "$1" == "a" ]; then
 fi
 
 if [ "$1" == "j" ]; then
-	curl -X GET http://127.0.0.1:8081/bigimage.php --output data.jpg
+	curl -X GET http://127.0.0.1:8082/bigimage.php --output data.jpg
 	echo
 	exit 0
 fi
@@ -81,7 +81,7 @@ if [ "$1" == "u" ]; then
 	rm -f www/pl/upload*
 	rm -f www/py/upload*
 
-	FILES="Kanan.mp3 earth.jpg tiny.jpg mid.jpg Kanan.mp3"
+	FILES="tiny.jpg" # Kanan.mp3 earth.jpg tiny.jpg mid.jpg Kanan.mp3"
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -89,12 +89,12 @@ if [ "$1" == "u" ]; then
 			-F file=@files/$FILE
 		echo ; echo ; echo
 
-		curl -X POST http://localhost:8081/pl/ul.pl -i \
-			-F file=@files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8081/py/ul.py -i \
-			-F file=@files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8081/pl/ul.pl -i \
+		# 	-F file=@files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8081/py/ul.py -i \
+		# 	-F file=@files/$FILE
+		# echo ; echo ; echo
 	done
 
 	exit 0
@@ -133,17 +133,19 @@ fi
 # echo
 # exit 0
 
-curl -X GET 'http://localhost:8082/test.php' -i \
-	 -d "p1=post-one&p2=post-two"
+	#  -d "p1=post-one&p2=post-two"
+curl -X GET 'http://localhost:8082/test.pl' -i
 echo
 exit 0
 
+curl -X POST http://localhost:8082/test.pl -i \
+	-d "p1=post-one&p2=post-two"
+echo
 
-# curl -X POST http://localhost:8081/test.pl -i \
-# 	-H "Content-Type: application/x-www-form-urlencoded" \
-# 	-d "p1=post-one&p2=post-two"
-# echo
-# exit 0
+curl -X POST http://localhost:8082/test.py -i \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
 
 
 

@@ -8,6 +8,11 @@
     // print_r($_SERVER); // ENV shows up here
 
     print("PHP : hello, world!\n");  
+    echo getcwd();
+
+
+// WRITE_FILE
+    // file_put_contents("./whereami.php.txt", "php wrote this");
 
     $g1 = $_GET['g1'] ?? 'g1-default';
     $g2 = $_GET['g2'] ?? 'g2-default';
@@ -77,4 +82,5 @@
 // In case of chroot CWD = "".
 
 // In any case the SCRIPT_NAME php script can be found with ./SCRIPT_NAME, from the CWD. So the undocumented not standardized SCRIPT_FILENAME should vanish! It breaks the CGI standard.
+
 ?>

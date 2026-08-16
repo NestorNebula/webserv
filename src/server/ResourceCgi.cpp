@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:47:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 20:23:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ int	ResourcePiped::wait(int opt)
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	if (stat > 0)
-		this->set_err(505); // CGI_ERR
+		this->set_err(616); // CGI_ERR
 	this->pid = 0;
 	return (this->stat);
 }
@@ -261,7 +261,32 @@ int	ResourcePiped::rem(EpollClient *epc)
 	return (err);
 }
 
+static bool	icmp(char a, char b)
+{
+	return std::tolower(static_cast<unsigned char>(a)) ==
+		std::tolower(static_cast<unsigned char>(b));		
+}
 
+static std::string hedval_str(std::string & str, const char *key)
+{
+	// std::string	kstr = std::string("\n") + std::string(key);
+	std::string	kstr = std::string(key);
+	std::string	val("");
+
+	std::string::const_iterator it = std::search(
+		str.begin(), str.end(),
+		kstr.begin(), kstr.end(),
+		icmp);
+	if (it == str.end())
+        return (val);
+    if (it != str.begin() && *(it-1) != '\n')
+        return (val);
+        
+    std::stringstream	line(str.substr(it - str.begin()));
+    line >> kstr >> val;
+    return (val);
+
+}
 int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 {
 	if (this->hed)
