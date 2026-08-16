@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 13:26:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 18:50:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <sstream>
 
 # include "bridge.hpp"
+# include "FilePath.hpp"
 
 // Utils.hpp
 template <typename T>
@@ -63,8 +64,8 @@ private:
 	const char							**res;
 	
 	std::string							exec;
-	std::string							file;
-	std::string							path;
+
+	FilePath							script;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/14 17:08:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 14:33:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,8 @@ void	ConfigParser::parseServer()
 	if (directives.count("max_body_size"))
 		server.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("root"))
+		// server.root = directives["root"];
+// #kd
 		server.root = this->_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);

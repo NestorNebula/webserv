@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 13:46:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 20:10:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,17 +120,26 @@ ssize_t	Connection::pollin(void)
 #if 1 // BUILD_DEMO
 	sess.log_next();
 	if (sess.nextAction() == Session::RDSOCK)
+	switch(sess.nextAction())
+	{
+	case Session::RDSOCK:
+	case Session::DOCGI:
 		sess.write(this->ibuf, err);
+		break;
+	default:
+		break;
+	}
 		
 	sess.log_next();
-	switch (sess.nextAction()) {
+	switch (sess.nextAction()) 
+	{
 		case Session::DOCGI:
 			WsLog::_(LVL_DBG, TGT_CONN, "next: docgi");
 			if (this->exec_cgi() < 0)
 			{
 				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-				// this->set_err(503); // CGI_ERR
-				this->set_err(404); // siege-friendly
+				this->set_err(666); // CGI_ERR
+				// this->set_err(404); // siege-friendly
 				return (0); // send error
 			}
 			// req_cnt
@@ -145,6 +154,7 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::KPALIVE:
 			WsLog::_(LVL_DBG, TGT_CONN, "next: (ka)");
+			return (-1);
 			break;
 		case Session::CLOSE:
 			WsLog::_(LVL_DBG, TGT_CONN, "next: close");
@@ -251,10 +261,14 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	}
 	else
 	{
-		if (sess.nextAction() != Session::WRSOCK)
+		if (sess.nextAction() == Session::CLOSE)
 		{
-
+			return (-1);
 		}
+		// if (sess.nextAction() != Session::WRSOCK)
+		// {
+
+		// }
 		std::string & OSTR = sess.get_resp();
 		if (OSTR.size())
 		{
@@ -317,11 +331,13 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	
 	sess.log_next();
 	// MAY BE KEEP-ALIVE
-	
+#if 1
 	if (sess.nextAction() == Session::KPALIVE)
 	{
 		this->reset();
+		return (-1);
 	}
+#endif
 	// {
 	// 	this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
 	// 	return (-1);
@@ -469,8 +485,6 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 	
-		// const char **envp = cgienv->gen();
-		// (void)envp;
 	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -495,7 +509,7 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 
-	WsLog::pwd();
+	// WsLog::pwd();
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -520,9 +534,10 @@ int	Connection::exec_cgi(void)
 		// WsLog::color(WSL_RED);
 		// WsLog::_(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
-		// pipes.dup_err();
+		pipes.dup_err();
 
-		std::string & cwd = cgienv->get("CGI_DIR");
+		std::string & cwd = cgienv->get("CWD");
+		// REQUIRE (!)
 		if (cwd.size())
 		{
 			// WsLog::color(WSL_GREEN);
@@ -530,7 +545,6 @@ int	Connection::exec_cgi(void)
 			err = chdir(cwd.c_str());
 			if (err < 0)
 				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));
-			// WsLog::pwd();
 		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		

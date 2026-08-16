@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/16 13:52:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 20:38:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ Request &Session::getRequest() {
   return _request;
 }
 
+// #kd
 Session::CgiInfo & Session::getCgiInfo() {
   throwIfNotAction(DOCGI);
   
@@ -54,8 +55,6 @@ Session::CgiInfo & Session::getCgiInfo() {
   std::string ext = _resourcePath.substr(_resourcePath.find_last_of("."));
   std::map<std::string, std::string>::const_iterator it = _route->cgi.find(ext);
   info.executablePath = it->second;
-  std::cerr << "CGI_INFO " << info.executablePath << std::endl;
-  std::cerr << "CGI_INFO " << info.scriptPath << std::endl;
   return info;
 }
 
@@ -112,6 +111,7 @@ void Session::reset() {
   _next = RDSOCK;
 }
 
+// #kd : need to catch this 
 void Session::throwIfNotAction(Action action) const {
   if (action != _next)
     throw std::logic_error("Wrong action on Session");

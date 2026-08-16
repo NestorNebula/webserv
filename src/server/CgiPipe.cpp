@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:42:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 20:06:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,18 +198,23 @@ ssize_t	CgiPipe::pollout(void)
 	Request &req  = sess.getRequest();
 	
 #if 1
+	if (req.isComplete())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
+		return (-1);
+	}
 	if (!req.hasHeaders())
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
 		this->mod_evt(0);
 		return (0);
 	}
+	// ATTN : UPLOADS
 	if (!req.hasBody())
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
 		return (0);
 	}
-	
 #else
 	err = this->conn->req_body_status();
 	if (err < 0)

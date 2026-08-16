@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:29 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 17:15:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 19:47:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # define REQ_HAVE_BODY 4
 # define REQ_DONE 5
 
-
+#if 0
 std::string hedval_str(std::string & str, const char *key);
 
 class br_Request
@@ -91,5 +91,5 @@ public:
 	}
 	int req_state(void) { return this->req.get_state(); }
 };
-
+#endif
 #endif

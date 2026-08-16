@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 15:47:24 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 15:34:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 19:47:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 
 // Decoding: The script must parse the string and decode the URL-encoded characters to retrieve the original form values. 
 
+#if 0
 int br_Request::push_data(const char *buf, size_t siz)
 {
     if (this->state < REQ_HAVE_HEAD)
@@ -214,3 +215,4 @@ std::string br_Request::header(const char *key) const
 	WsLog::_(LVL_DBG, TGT_HEAD, kv);
 	return (val);
 }
+#endif

@@ -12,8 +12,8 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP \
 	-I../inc/streams \
 	-I../inc/utils  \
 	-I../inc/server \
-	-I../tst/server \
-	-I ../tst/server/FCGI/include
+	-I../tst/server 
+# 	-I ../tst/server/FCGI/include
 
 RM = rm -rf
 MKDIR = mkdir -p

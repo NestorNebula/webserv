@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 13:24:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 18:48:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "ConfigParser.hpp"
+#include "FilePath.hpp"
+
+#include <deque>
 
 static bool         setWorkingDirectory(const std::string &path, std::string &cwd);
 static std::string  getConfigFileName(const std::string &path);
@@ -24,6 +27,13 @@ static int          env_pwd(char **envp, std::string &str);
 
 int main (int argc, char ** argv, char **envp)
 {   
+
+    // std::string p("/media/kdonlon/data/Documents/42/webserv/git/tst/server/../../demo/./../tst/server/www/test.php");
+
+    // FilePath chk(p);
+    
+    // return (0);
+
     WsLog::kd();
     // WsLog::nh();
 

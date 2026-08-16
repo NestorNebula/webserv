@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 13:46:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 19:46:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,7 @@ public:
 	void			set_addr(struct sockaddr_in *a);
 	std::string		&get_addr(void);
 	
-// WEBSERV / SESSION
-#if 1 // BUILD_DEMO
 	Session			sess;
-#else
-	br_Session		sess;
-#endif
 	Server			&serv;
 	int				req_body_status(void);
 	

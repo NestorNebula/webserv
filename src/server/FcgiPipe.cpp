@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 12:38:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 20:11:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,41 @@ ssize_t	FcgiPipe::pollout(void)
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
 	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
 // WEBSERV : REQUEST (body)
+	Session &sess = conn->sess;
+	Request &req  = sess.getRequest();
+
+#if 1
+	if (!req.hasHeaders())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
+		this->mod_evt(-EPOLLOUT);
+		return (0);
+	}
+	// ATTN : UPLOADS
+	if (req.hasBody())
+	{
+		std::string & body = req.get_body();
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
+		fcgi.req_body((char*) body.c_str(), body.size());
+	}
+	else if (req.isComplete())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
+		fcgi.req_body(NULL, 0);
+	}
+	else
+	{
+		return (0);
+	}
+
+	// std::string & body = req.get_body();
+	// WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
+	// fcgi.req_body((char*) body.c_str(), body.size());
+	
+#else
 	err = this->conn->req_body_status();
+
+
 	if (err > 0)
 	{
 		// std::string & body = this->conn->sess.req.get_body();
@@ -138,6 +172,9 @@ ssize_t	FcgiPipe::pollout(void)
 		fcgi.req_body((char*) body.c_str(), body.size());
 		body.clear(); 
 	}
+#endif
+
+
 
 	err = this->send(fcgi.req);
 	if (err < 0)
@@ -156,6 +193,14 @@ ssize_t	FcgiPipe::pollout(void)
 	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
 	this->mod_evt(EPOLLIN); 
+
+	if (req.isComplete())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
+		this->mod_evt(-EPOLLOUT);
+		// this->mod_evt(EPOLLIN);
+		return (0);
+	}
 	return (0);
 }
 

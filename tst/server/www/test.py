@@ -8,7 +8,7 @@ import cgi
 import cgitb
 
 
-print("Content-Type: text/plain", end="\r\n\r\n");
+# print("Content-Type: text/plain", end="\r\n\r\n");
 
 form = cgi.FieldStorage()
 
@@ -33,6 +33,10 @@ print ("\nENV\n")
 for key, val in os.environ.items():
     print(key, "=", val)
 
+# WRITE_FILE
+# with open("whereami.py.txt", "a") as f:
+#     f.write("Now the file has more content!");
+          
 if "file" in form:
     file_item = form["file"]
     if file_item.filename:
