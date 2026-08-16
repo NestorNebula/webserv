@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 20:57:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:46:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -469,6 +469,8 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 	
+		// const char **envp = cgienv->gen();
+		// (void)envp;
 	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -513,16 +515,22 @@ int	Connection::exec_cgi(void)
 // char cwd[PATH_MAX];
 		const char **envp = cgienv->gen();
 
+		// WsLog::color(WSL_RED);
+		// WsLog::_(LVL_DBG, TGT_CGI, "exec: ", cgienv->args[0]);
+		// WsLog::color(WSL_RED);
+		// WsLog::_(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
+
 		// pipes.dup_err();
 
-		std::string & cwd = cgienv->get("CWD");
+		std::string & cwd = cgienv->get("CGI_DIR");
 		if (cwd.size())
 		{
-			WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_DBG, TGT_CGI, "cwd  : ", cwd);
+			// WsLog::color(WSL_GREEN);
+			// WsLog::_(LVL_DBG, TGT_CGI, "cwd : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)
 				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));
+			// WsLog::pwd();
 		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		

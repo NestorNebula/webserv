@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 18:42:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:52:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,14 +45,17 @@ Request &Session::getRequest() {
   return _request;
 }
 
-Session::CgiInfo Session::getCgiInfo() const {
+Session::CgiInfo & Session::getCgiInfo() {
   throwIfNotAction(DOCGI);
-  CgiInfo info;
+  
+  // CgiInfo info;
 
   info.scriptPath = _resourcePath;
   std::string ext = _resourcePath.substr(_resourcePath.find_last_of("."));
   std::map<std::string, std::string>::const_iterator it = _route->cgi.find(ext);
   info.executablePath = it->second;
+  std::cerr << "CGI_INFO " << info.executablePath << std::endl;
+  std::cerr << "CGI_INFO " << info.scriptPath << std::endl;
   return info;
 }
 
@@ -198,8 +201,10 @@ void Session::resolveResource() {
 // #kd : absolute (?)
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  _cgi_exec = isCgi(_resourcePath, *_route);
-  if (_cgi_exec.size()) 
+  // _cgi_exec = 
+  
+  std::string tst = isCgi(_resourcePath, *_route);
+  if (tst.size()) 
   {
     _next = DOCGI;
     return;

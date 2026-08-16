@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:44:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:52:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,24 +66,28 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
+	// unaddressable bytes
+	Session::CgiInfo &info = sess.getCgiInfo();
+	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 	std::cerr << "METH  : " << methodToString(req.getMethod()) << std::endl;
 	
-	file = sess._resourcePath; // from server root 
+	file = info.scriptPath; //  sess._resourcePath; // from server root 
 	std::cerr << " URL  : " << file << std::endl;
 
 	std::cerr << "SERV  : root : " << conn.serv.get_conf().root << std::endl;
 	std::cerr << "ROUTE : root : " << sess._route->root << std::endl;
 	std::cerr << "ROUTE : path : " << sess._route->path << std::endl;
+
 #if 1
 	path = conn.serv.get_conf().root + file;
 	std::cerr << "(env) : path : " << path << std::endl;
-	this->add("SCRIPT_NAME", path.c_str());
+	// this->add("SCRIPT_NAME", path.c_str());
 
 // WEBSERV : SERVER
 	size_t pos = path.find_last_of("/");
 	std::string cwd = path.substr(0, pos);
-	this->add("CWD", cwd.c_str());	
+	this->add("CGI_DIR", cwd.c_str());	
 
 	WsLog::color(WSL_GREEN);
 	WsLog::_(LVL_DBG, TGT_CGI_ENV, "pdir : ", cwd);
@@ -117,7 +121,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
-	this->args[0] = sess._cgi_exec.c_str();
+	this->args[0] = info.executablePath.c_str();
 	this->args[1] = path.c_str();
 	this->args[2] = NULL;	
 

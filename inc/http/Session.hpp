@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 18:41:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:07:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ public:
   struct CgiInfo {
     std::string scriptPath;
     std::string executablePath;
-  };
+  } info;
 
   // Give access to the Session Request. Should only be called on DOCGI action.
   // const 
@@ -79,7 +79,7 @@ public:
 
   // Give informations about the CGI to be executed. Should only be called on
   // DOCGI action.
-  Session::CgiInfo getCgiInfo() const;
+  Session::CgiInfo & getCgiInfo();
 
   // Give access to the data of an executed CGI script. Corresponds to DOCGI
   // Action.
@@ -91,8 +91,6 @@ public:
   // Reset session state and clears all its data
   void reset();
 // #kd
-  std::string _resourcePath;
-  std::string _cgi_exec;
 
   std::string &get_resp(void)
   {
@@ -105,6 +103,7 @@ public:
     return (_ostr);
   }
 private:
+  std::string _resourcePath;
   std::string _ostr;
 
 private:
