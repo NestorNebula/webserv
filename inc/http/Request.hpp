@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 18:40:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 12:47:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ public:
   }
   void clear();
 
+// #kd
   std::string &get_body(void)
   {
     if (_ostr.size())

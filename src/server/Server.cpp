@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:46:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:23:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,13 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 		throw (std::runtime_error("Server : construct failed"));
 
 // WEBSERV -- CONFIG_PARSER
-	proj_root = std::string("/home/kdonlon/Documents/Projects/webserv/git/");
-	fcgi_sock = proj_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
-	pycgi = proj_root + std::string("pycgi/");
+	// server config .. should have root
+
+// FUCKING UGLY:
+	std::string git_root = conf.root + std::string("../");
+	
+	fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
+	pycgi = git_root + std::string("pycgi/");
 };
 
 Server::~Server()

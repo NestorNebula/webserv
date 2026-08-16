@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 18:39:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 12:47:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Stream &Stream::read(char *s, streamsize n) {
   return *this;
 }
 
+// #kd
 std::streamsize Stream::readsome(char *s, streamsize n) {
   throwIfNull();
   return _stream->readsome(s, n);
