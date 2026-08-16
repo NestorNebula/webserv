@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "DirectoryResource.hpp"
+#include <dirent.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -40,16 +41,24 @@ void DirectoryResource::buildList() {
               "<meta charset=\"utf-8\">\n"
               "<meta name=\"viewport\" content=\"width=device-width, "
               "initial-scale=1.0\" />\n"
+              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />"
               "<title>Directory listing for "
            << _dirpath
            << "</title>\n"
               "</head>\n"
               "<body>\n"
+
+              "<header>\n"
+              "<h1>WEBSERV</h1>\n"
+              "<p>Demonstration Website</p>\n"
+              "<p>for our HTTP server</p>\n"
+              "</header>\n"
+              "<section id=\"dir-list-section\">\n"
               "<h1>Directory listing for "
            << _dirpath
            << "</h1>\n"
               "<hr>\n"
-              "<ul>\n";
+              "<ul class=\"dir-list\">\n";
 
   dirent *dirFile;
   while ((dirFile = readdir(_dir)) != NULL) {
@@ -58,7 +67,7 @@ void DirectoryResource::buildList() {
       if (dirFile->d_type == DT_DIR)
         name += '/';
       *_stream << "<li>\n"
-                  "<a href=\""
+                  "<a class=\"file-link\" href=\""
                << name << "\">" << name
                << "</a>\n"
                   "</li>\n";
@@ -66,6 +75,19 @@ void DirectoryResource::buildList() {
   }
   *_stream << "</ul>\n"
               "<hr>\n"
+              "</section>\n"
               "</body>\n"
-              "</html>\n";
+              "</html>\n"
+              "<footer>\n"
+              "<div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>\n"
+              "<a "
+              "href=\"https://github.com/NestorNebula/webserv\" "
+              "target=\"_blank\" "
+              "rel=\"noopener noreferrer\" "
+              ">\n"
+              "<img id=\"gh-icon\" src=\"/assets/icons/github.svg\" "
+              "alt=\"GitHub\" />\n"
+              "</a>\n"
+              "<div>2026</div>\n"
+              "</footer>\n";
 }

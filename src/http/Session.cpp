@@ -18,6 +18,7 @@
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -42,6 +43,17 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 Request &Session::getRequest() {
   throwIfNotAction(DOCGI);
   return _request;
+}
+
+Session::CgiInfo Session::getCgiInfo() const {
+  throwIfNotAction(DOCGI);
+  CgiInfo info;
+
+  info.scriptPath = _resourcePath;
+  std::string ext = _resourcePath.substr(_resourcePath.find_last_of("."));
+  std::map<std::string, std::string>::const_iterator it = _route->cgi.find(ext);
+  info.executablePath = it->second;
+  return info;
 }
 
 void Session::setCgiResource(Resource *cgiResource) {
@@ -441,20 +453,9 @@ void Session::setResponseHeaders() {
 
   // Allow
   if (_response.getCode() == 405) {
-    std::vector<std::string> allowed;
-    // TODO Replace for-loop by the following line on merge
-    // std::transform(_route->methods.begin(), _route->methods.end(),
-    // allowed.begin(), methodToString);
-    for (std::set<HttpMethod>::iterator it = _route->methods.begin(),
-                                        ite = _route->methods.end();
-         it != ite; it++) {
-      if (*it == METHOD_GET)
-        allowed.push_back("GET");
-      else if (*it == METHOD_POST)
-        allowed.push_back("POST");
-      else if (*it == METHOD_DELETE)
-        allowed.push_back("DELETE");
-    }
+    std::vector<std::string> allowed(_route->methods.size());
+    std::transform(_route->methods.begin(), _route->methods.end(),
+                   allowed.begin(), methodToString);
     headers.insert("Allow", join(allowed));
   }
   // ...

@@ -41,3 +41,10 @@ std::string Headers::str(const std::string eol) const {
     oss << it->first << ": " << it->second << eol;
   return oss.str();
 }
+
+std::string Headers::get(const std::string &key) const {
+	Headers::const_iterator it = find(key);
+	if (it == this->end())
+		return std::string();
+	return it->second;
+}
