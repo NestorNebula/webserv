@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 17:34:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 21:00:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -310,8 +310,15 @@ int	Epoll::loop(void)
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
 			
-			if (epc->event(evt) < 0)
-				this->rem(epc);
+			try
+			{
+				if (epc->event(evt) < 0)
+					this->rem(epc);
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << e.what() << '\n';
+			}
         }
 		this->check_timeo();	
     }

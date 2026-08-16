@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:26:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/14 20:57:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ ssize_t	Connection::pollin(void)
 				this->set_err(404); // siege-friendly
 				return (0); // send error
 			}
+			// req_cnt
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
@@ -295,8 +296,8 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
 	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
 	// err = this->send(OSTR);
+// #endif
 #endif
-
 
 	if (err < 0)
 	{
@@ -314,13 +315,17 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	// else
 	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
-#if BUILD_DEMO
-	if (sess.nextAction() != Session::WRSOCK) // rsrc/state seems like a better check
+	sess.log_next();
+	// MAY BE KEEP-ALIVE
+	
+	if (sess.nextAction() == Session::KPALIVE)
 	{
-		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
-		return (-1);
+		this->reset();
 	}
-#endif
+	// {
+	// 	this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
+	// 	return (-1);
+	// }
 	return (err);
 }
 
