@@ -72,8 +72,6 @@
     }
     echo getcwd();
 
-//     CWD/something.php
-
 // CWD is the working directory where php-fpm is started (or configured to change to).
 
 // In case of chroot CWD = "".
