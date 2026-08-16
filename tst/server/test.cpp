@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 17:33:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/16 13:24:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,9 @@ int main (int argc, char ** argv, char **envp)
         {
         case '0':
            WsLog::tgt = TGT_NONE;
+           break;
+        case 'k':
+           WsLog::tgt = TGT_KD;
            break;
         case 'a':
            WsLog::tgt = TGT_ALL; //  & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
@@ -80,6 +83,7 @@ int main (int argc, char ** argv, char **envp)
         ep = new Epoll(envp); // , servers)
        
         err = ep->serve(servers);
+
         if (err)
           err = ep->loop();
         WsLog::_(LVL_INFO, TGT_MAIN, "exit: ", err);

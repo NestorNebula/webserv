@@ -3,9 +3,6 @@ from __future__ import print_function
 import sys
 import os
 
-
-# what is CWD .. when scripts are called (!)
-
 import cgi
 import cgitb
 

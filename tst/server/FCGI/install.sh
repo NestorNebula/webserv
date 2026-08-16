@@ -16,9 +16,9 @@ TGT_DIR=$(pwd)
 
 FPM_DIR=$TGT_DIR/.php-fpm
 
-PHP_FPM_BIN=$(which php-fpm)
+# PHP_FPM_BIN=$(which php-fpm)
 # HOME
-# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+PHP_FPM_BIN=/usr/sbin/php-fpm7.4
 
 
 if [ "$1" == "start" ]; then
