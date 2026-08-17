@@ -9,8 +9,13 @@ FPM_DIR=$TGT_DIR/.php-fpm
 # /usr/bin/php-fpm -v
 
 PHP_FPM_BIN=$(which php-fpm)
-# HOME - if not exists (?)
-# PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+
+if [[ -z $PHP_FPM_BIN ]]; then
+    PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+    # echo "(php-fpm) not found"
+    # echo "using : $PHP_FPM_BIN"
+fi
+
 
 if [ "$1" == "conf" ]; then
     cat << EOF > ~/.config/systemd/user/php-fpm.service
@@ -51,6 +56,9 @@ if [ "$1" == "stop" ]; then
 fi
 
 if [ "$1" == "run" ]; then
+    # echo
+    # INTERESTING : we can't ctrl-c this .. 
+    # an /sbin/ thing ?
     $PHP_FPM_BIN --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     exit 0
 fi
