@@ -32,6 +32,8 @@ bool isDirectory(const std::string &path);
 
 bool isCgi(const std::string &path, RouteConfig &config);
 
+bool isCgiExtension(const std::string &path);
+
 bool isAccessibleFile(const std::string &path, int accessMode = F_OK);
 
 std::string getStatusReason(Response::StatusCode code);
