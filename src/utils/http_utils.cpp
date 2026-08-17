@@ -97,6 +97,24 @@ bool isCgi(const std::string &path, RouteConfig &config) {
   return cgi;
 }
 
+bool isCgiExtension(const std::string &path) {
+	static const std::string extensions[] = {
+		"cgi",
+		"php",
+		"pl",
+		"py",
+		"",
+	};
+	std::string::size_type extStart = path.find_last_of('.');
+	if (extStart == std::string::npos || extStart == 0 || extStart == path.size() - 1)
+		return false;
+	std::string ext = path.substr(extStart + 1);
+	int i = 0;
+	while (!extensions[i].empty() && extensions[i] != ext)
+		i++;
+	return (!extensions[i].empty());
+}
+
 bool isAccessibleFile(const std::string &path, int accessMode) {
   return access(path.c_str(), accessMode) == 0;
 }
