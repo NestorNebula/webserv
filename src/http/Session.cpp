@@ -29,7 +29,8 @@
 #endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
-  throwIfNotAction(RDSOCK);
+  if (_request.isComplete())
+    throwIfNotAction(RDSOCK);
 
   _request.append(std::string(buf, count));
   std::ostringstream oss;
