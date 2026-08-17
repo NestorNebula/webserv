@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 19:08:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 13:54:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,13 @@ int     CgiEnv::from_conn(Connection & conn)
 	std::string path_rel = conn.serv.get_conf().root + info.scriptPath;
 	script.parse(path_rel);
 	// script.dump();
+
+	if (access(script.path.c_str(), F_OK))
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
+		conn.set_err(404);
+		return (-1);
+	}
 	
 	this->add("CWD", script.fldr.c_str()); 
 	

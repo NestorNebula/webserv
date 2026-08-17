@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/16 20:10:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 14:09:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,13 @@ void	Connection::set_err(int e)
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
+
+	this->sess.setResponseStatus(e);
+	this->sess.prepareErrorResource();
+	this->sess._next = Session::WRSOCK;
+
+	this->mod_evt(EPOLLOUT);
+	return;
 
 	WsLog::_(LVL_DBG, TGT_CONN, "err : ", e);
 	WsLog::_(LVL_DBG, TGT_CONN, "fd  : (conn) ", this->fd);

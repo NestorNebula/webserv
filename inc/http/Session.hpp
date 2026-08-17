@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/16 13:57:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 14:15:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,10 @@ private:
   Session(const Session &);
   Session &operator=(const Session &);
 
+// #kd
+public:
   Action _next;
+private:
 
   ServerConfig &_server;
 public: // #kd
@@ -132,7 +135,6 @@ private:
   void validateOperation();
 
   void handleResource();
-  void prepareErrorResource();
   void prepareDirectoryResource();
 
   void handleUpload();
@@ -140,6 +142,9 @@ private:
 
   void handleResponse();
   void setResponseHeaders();
+// #kd
+public:
+  void prepareErrorResource();
   void setResponseStatus(Response::StatusCode code);
 
   Stream::streamsize _sent;

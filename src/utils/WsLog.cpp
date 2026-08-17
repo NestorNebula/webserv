@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:24:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 14:01:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,13 @@ static const std::string tgt_str[] =
     "head  : ",
     "body  : ",
     "rsrc  : ",
-    "fcgi  : "
+    "fcgi  : ",
+    
+    "req   : ",
+    "res   : ",
+    "resp  : ",
+    "strm  : ",
+    "sess  : "
 };
 
 // so .. log .. takes more time 
@@ -70,6 +76,17 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[10]);
     if (tgt & TGT_FCGI)
         return (tgt_str[11]);
+
+    if (tgt & (TGT_REQ))
+        return (tgt_str[12]);
+    if (tgt & (TGT_RES))
+        return (tgt_str[13]);
+    if (tgt & (TGT_RESP))
+        return (tgt_str[14]);
+    if (tgt & (TGT_STRM))
+        return (tgt_str[15]);
+    if (tgt & (TGT_SESS))
+        return (tgt_str[16]);
 
     return (tgt_str[0]);
 }
