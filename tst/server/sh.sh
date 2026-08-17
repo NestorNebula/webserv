@@ -3,9 +3,14 @@
 tput reset
 
 C=250
-R=4
+R=8
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
+if [[ "$1" =~ "h" ]]; then
+	siege -f urls/html.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
@@ -133,14 +138,18 @@ fi
 # echo
 # exit 0
 
-curl -X POST 'http://localhost:8082/dd.pl' -i \
-	-d "p1=post-one&p2=post-two"
+curl -X GET 'http://localhost:8080/about.html' -i
+echo
+curl -X GET 'http://localhost:8080/contact.html' -i
+echo
+curl -X GET 'http://localhost:8080/index.html' -i
 echo
 exit 0
 
 curl -X POST http://localhost:8082/test.pl -i \
 	-d "p1=post-one&p2=post-two"
 echo
+exit 0
 
 curl -X POST http://localhost:8082/test.py -i \
 	-d "p1=post-one&p2=post-two"
