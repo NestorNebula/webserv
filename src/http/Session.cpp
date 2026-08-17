@@ -148,7 +148,7 @@ void Session::manageSession() {
 
 void Session::handleRequest() {
   preValidateRequest();
-  if (!_request.isComplete() && !_request.isInvalid())
+  if (!_request.isComplete() && !_request.isInvalid() && !_request.headersComplete())
     return;
   validateRequest();
   resolveResource();
@@ -226,6 +226,8 @@ void Session::validateOperation() {
 }
 
 void Session::handleResource() {
+  if (!_request.isComplete() && !_request.isInvalid())
+    return;
   if (_next == DOCGI)
     return;
   WsLog::_(LVL_INFO, TGT_SESS, "Preparing Session Resource generation");
