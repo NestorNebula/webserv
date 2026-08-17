@@ -196,7 +196,7 @@ void Session::resolveResource() {
 
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  if (isCgi(_resourcePath, *_route)) {
+  if (isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
     _next = DOCGI;
     return;
   }
