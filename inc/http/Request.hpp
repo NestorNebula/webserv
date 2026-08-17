@@ -13,7 +13,7 @@
 #pragma once
 
 #include "Headers.hpp"
-#include "HttpMethod.hpp" // Maxime's header
+#include "HttpMethod.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
 

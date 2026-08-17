@@ -15,7 +15,7 @@
 #include "Request.hpp"
 #include "Resource.hpp"
 #include "Response.hpp"
-#include "ServerConfig.hpp" // Maxime's Header
+#include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
 
