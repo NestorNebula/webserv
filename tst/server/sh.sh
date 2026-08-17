@@ -133,8 +133,8 @@ fi
 # echo
 # exit 0
 
-	#  -d "p1=post-one&p2=post-two"
-curl -X GET 'http://localhost:8082/test.pl' -i
+curl -X POST 'http://localhost:8082/dd.pl' -i \
+	-d "p1=post-one&p2=post-two"
 echo
 exit 0
 
