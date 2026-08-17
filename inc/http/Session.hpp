@@ -51,7 +51,7 @@ public:
   };
 
   // Give access to the Session Request. Should only be called on DOCGI action.
-  const Request &getRequest() const;
+  Request &getRequest();
 
   // Give informations about the CGI to be executed. Should only be called on
   // DOCGI action.

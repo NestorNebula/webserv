@@ -39,7 +39,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   return count;
 }
 
-const Request &Session::getRequest() const {
+Request &Session::getRequest() {
   throwIfNotAction(DOCGI);
   return _request;
 }
