@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:32:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 16:56:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	else if (script.fext == std::string(".py"))
 	{
 		lang = CGI_PYTHON;
-		// this->add("PYTHONPATH", serv.pycgi.c_str());
+		this->add("PYTHONPATH", conn.serv.pycgi.c_str());
 	}
 	else if (script.fext == std::string(".pl"))
 	{
