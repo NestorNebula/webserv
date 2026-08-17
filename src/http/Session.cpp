@@ -96,6 +96,13 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   return r;
 }
 
+void Session::setError(Response::StatusCode code) {
+  setResponseStatus(code);
+  handleResource();
+  handleResponse();
+  _next = WRSOCK;
+}
+
 void Session::reset() {
   throwIfNotAction(KPALIVE);
 
@@ -148,7 +155,8 @@ void Session::manageSession() {
 
 void Session::handleRequest() {
   preValidateRequest();
-  if (!_request.isComplete() && !_request.isInvalid() && !_request.headersComplete())
+  if (!_request.isComplete() && !_request.isInvalid() &&
+      !_request.headersComplete())
     return;
   validateRequest();
   resolveResource();
@@ -226,9 +234,8 @@ void Session::validateOperation() {
 }
 
 void Session::handleResource() {
-  if (!_request.isComplete() && !_request.isInvalid())
-    return;
-  if (_next == DOCGI)
+  if (!_response.getCode() &&
+      ((!_request.isComplete() && !_request.isInvalid()) || _next == DOCGI))
     return;
   WsLog::_(LVL_INFO, TGT_SESS, "Preparing Session Resource generation");
   if (_response.getCode() >= 400)
