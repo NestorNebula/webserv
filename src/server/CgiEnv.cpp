@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 13:54:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 14:25:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,10 @@
 #include "Server.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
+#include "helpers.hpp"
+#include "http_utils.hpp"
 
+CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {
 
@@ -30,13 +33,22 @@ CgiEnv::~CgiEnv()
 void	CgiEnv::add(const char *key, const char *val)
 {
 	this->kv[ std::string(key) ] = std::string(val);
+	this->kv[ std::string(key) ] = std::string(val);
 }
 
 void	CgiEnv::add(const char *key, int n)
 {
 	this->kv[ std::string (key) ] = num_2_str(n);
+	this->kv[ std::string (key) ] = num_2_str(n);
 }
 
+std::string & CgiEnv::get(const char *key)
+{
+	return (this->kv[ std::string (key) ]);
+}
+
+
+// BUILD_DEMO (!)
 std::string & CgiEnv::get(const char *key)
 {
 	return (this->kv[ std::string (key) ]);
@@ -159,13 +171,23 @@ int     CgiEnv::from_conn(Connection & conn)
 	this->add("GATEWAY_INTERFACE", "CGI/1.0");
 
     return (0);
+
 }
 
 const char	**CgiEnv::gen(void)
 {
 	this->data.clear();
+	this->data.clear();
 	if (res)
 		delete[] res;
+
+	std::map<std::string, std::string>::iterator kvit = kv.begin();
+	while (kvit != kv.end())
+	{
+		data.push_back(std::string(kvit->first) + std::string("=") + std::string(kvit->second));
+		kvit++;
+	}
+	
 
 	std::map<std::string, std::string>::iterator kvit = kv.begin();
 	while (kvit != kv.end())
@@ -184,6 +206,8 @@ const char	**CgiEnv::gen(void)
 	{
 		// WsLog::color(WSL_GREEN);
 		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
+		// WsLog::color(WSL_GREEN);
+		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}
@@ -191,4 +215,5 @@ const char	**CgiEnv::gen(void)
 	return (res);
 }
 
+// FCGI
 // FCGI
