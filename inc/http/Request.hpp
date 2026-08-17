@@ -46,6 +46,7 @@ public:
     return _state >= HEADERS && _headers.has(key);
   }
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
+  bool headersComplete() const { return _state > HEADERS; }
   const Headers &getHeaders() const { return _headers; }
   bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
   Stream *getBody() {
