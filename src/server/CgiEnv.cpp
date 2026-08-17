@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:25:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/17 14:32:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include "helpers.hpp"
 #include "http_utils.hpp"
 
-CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {
 
@@ -46,14 +45,6 @@ std::string & CgiEnv::get(const char *key)
 {
 	return (this->kv[ std::string (key) ]);
 }
-
-
-// BUILD_DEMO (!)
-std::string & CgiEnv::get(const char *key)
-{
-	return (this->kv[ std::string (key) ]);
-}
-
 
 // BUILD_DEMO (!)
 
@@ -177,7 +168,6 @@ int     CgiEnv::from_conn(Connection & conn)
 const char	**CgiEnv::gen(void)
 {
 	this->data.clear();
-	this->data.clear();
 	if (res)
 		delete[] res;
 
@@ -187,15 +177,7 @@ const char	**CgiEnv::gen(void)
 		data.push_back(std::string(kvit->first) + std::string("=") + std::string(kvit->second));
 		kvit++;
 	}
-	
 
-	std::map<std::string, std::string>::iterator kvit = kv.begin();
-	while (kvit != kv.end())
-	{
-		data.push_back(std::string(kvit->first) + std::string("=") + std::string(kvit->second));
-		kvit++;
-	}
-	
 	size_t	cnt	= data.size();
 
 	res = new const char*[cnt + 1];
