@@ -10,6 +10,9 @@ HttpServer*
 bak*
 diff*
 fcgi*
+<<<<<<< HEAD
 libfcgi*
+=======
+>>>>>>> main
 FCGI/.php-fpm
 noah.txt
