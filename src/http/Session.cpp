@@ -219,7 +219,7 @@ void Session::validateOperation() {
   }
   if (!isExistingFile(_resourcePath))
     return setResponseStatus(404);
-  if (!isAccessibleFile(_resourcePath, R_OK))
+  if (!isAccessibleFile(_resourcePath, R_OK) || isCgiExtension(_resourcePath))
     return setResponseStatus(403);
   WsLog::_(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
 }
