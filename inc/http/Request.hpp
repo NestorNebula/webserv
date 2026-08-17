@@ -48,7 +48,7 @@ public:
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
   bool headersComplete() const { return _state > HEADERS; }
   const Headers &getHeaders() const { return _headers; }
-  bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
+  bool hasBody() const { return _body != NULL && _bodySize > 0; }
   Stream *getBody() {
     if (_body == NULL)
       throw std::logic_error("accessing null body Stream");
