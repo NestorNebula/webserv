@@ -131,6 +131,19 @@ Stream::streamsize Stream::size() {
   return streamSize;
 }
 
+Stream &Stream::read(std::string &s) {
+  static const streamsize maxReadSize = 4096;
+  const streamsize available = this->size() - this->tellg();
+  if (available <= 0)
+    return *this;
+
+  const streamsize readSize = std::min(available, maxReadSize);
+  char buf[maxReadSize];
+  this->read(buf, readSize);
+  s.append(buf, this->gcount());
+  return *this;
+}
+
 void Stream::throwIfNull() const {
   if (!_stream)
     throw std::logic_error("calling method on null Stream pointer");
