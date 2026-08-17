@@ -64,6 +64,11 @@ public:
   // Read data from the Session Response. Corresponds to WRSOCK Action.
   Stream::streamsize read(char *buf, Stream::streamsize bufsize);
 
+  // Set an error code for the current Session and prepare the appropriate
+  // content. Callable whatever the current action is. Keep in mind that it will
+  // erase the current Session Resource in case action is already WRSOCK.
+  void setError(Response::StatusCode code);
+
   // Reset session state and clears all its data
   void reset();
 
