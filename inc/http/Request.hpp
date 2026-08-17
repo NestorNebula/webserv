@@ -54,6 +54,7 @@ public:
       throw std::logic_error("accessing null body Stream");
     return _body;
   }
+  Stream::streamsize availableBody() const;
   void clear();
 
 private:
