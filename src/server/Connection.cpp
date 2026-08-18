@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:17:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:25:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -610,11 +610,14 @@ int	Connection::exec_cgi(void)
 // conn  : req cnt: [0]
 // rsrc  : conn-closed : ip
 // rsrc  : conn-closed : op
+
 // rsrc  :  (~) ResourceCgi
 // rsrc  : stat: [-1]
 // rsrc  : pid : [17211]
 // rsrc  : conn-closed : ip
 // rsrc  : conn-closed : op
+// set ip/op to NULL ... 
+// set CONN to NULL
 // rsrc  : pid : [17211]
 // rsrc  : xit : [-1]
 // rsrc  : stat: [-1]
