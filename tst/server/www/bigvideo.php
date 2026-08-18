@@ -1,7 +1,7 @@
 <?php
     header('Content-Type: video/x-matroska');
 
-    $path = '../files/Black.Mirror.S07E04.mkv';
+    $path = './files/Black.Mirror.S07E04.mkv';
     $fsiz = filesize($path);
     header('Content-Length: ' . $fsiz);
 
