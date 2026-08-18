@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/05 14:41:57 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/18 15:58:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ void Request::append(const std::string &data) {
     WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
   }
-  WsLog::_(LVL_INFO, TGT_REQ, "Request received data: ", data);
+// #kd - may be heavy
+  // WsLog::_(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));

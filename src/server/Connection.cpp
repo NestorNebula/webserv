@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:46:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:43:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,7 @@
 
 Connection::Connection	(const Connection & that) : 
 	EpollClient(that), 
-#if BUILD_DEMO
 	sess(that.serv.get_conf()), 
-#endif
 	serv(that.serv), 
 	req_cnt(0)
 {
@@ -28,9 +26,7 @@ Connection::Connection	(const Connection & that) :
 
 Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
 	EpollClient(_ep, EPC_CONN, _fd), 
-#if BUILD_DEMO
 	sess(_serv.get_conf()),
-#endif
 	serv(_serv), 
 	res_cgi(NULL),
 	req_cnt(0)
@@ -75,6 +71,8 @@ void	Connection::set_err(int e)
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
+	// this->error = e;
+	WsLog::_(LVL_DBG, TGT_CONN, "err:  ", e);
 	this->sess.setError(e);
 	this->mod_evt(EPOLLOUT);
 }
@@ -102,7 +100,6 @@ ssize_t	Connection::pollin(void)
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 // WEBSERV : SESSION (write)
-#if 1 // BUILD_DEMO
 	sess.log_next();
 	// if (sess.nextAction() == Session::RDSOCK)
 	switch(sess.nextAction())
@@ -117,11 +114,6 @@ ssize_t	Connection::pollin(void)
 	switch (sess.nextAction()) 
 	{
 		case Session::DOCGI:
-// this->set_err(666);
-// still reads upload data ... 
-// sess  : Setting Response headers
-// Incomplete response generated
-// return (0);
 			if (this->exec_cgi() < 0)
 			{
 				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
@@ -133,6 +125,7 @@ ssize_t	Connection::pollin(void)
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
+			this->req_cnt++;
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
@@ -142,28 +135,6 @@ ssize_t	Connection::pollin(void)
 		case Session::CLOSE:
 			return (-1);
 	}
-#else
-	// int req_state = 
-	sess.write(this->ibuf, err);
-	return (-1);
-	// if (req_state < REQ_HAVE_HEAD)
-	// 	return (err);
-
-	if (this->res_cgi == NULL)
-	{
-		this->req_cnt++;
-		if (this->exec_cgi() < 0)
-		{
-			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-			// this->set_err(503); // CGI_ERR
-			this->set_err(404); // siege-friendly
-			return (0); // send error
-		}
-	}
-	
-// SESSION
-	this->res_cgi->push_body();
-#endif
 	return (err);
 }
 
@@ -178,48 +149,14 @@ ssize_t	Connection::pollout(void)
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	
 	ssize_t	err = 0;
-
-
+	
 	sess.log_next();
-#if 0 // BUILD_DEMO
-	if (sess.nextAction() != Session::WRSOCK)
-		return 0;
-
-	// rsrc.complete
-	char buf[4096];
-	// Stream::streamsize r 
-	err = sess.read(buf, 4096);
-	std::string OSTR(buf);
-
-	if (err > 0)
-	{
-		// if (r > 0)
-		// 	err = this->send(buf, r);
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
-		err = this->send(OSTR);
-	}
-#else
-
-// WEBSERV : RESOURCE (cgi)
-
-// if (res)
-	//check the stats
-// else
-	// check ostr
-	ResourceCgi *res = this->res_cgi;
-	// std::string & OSTR = res->get_resp();
-#if 1
-	// or (DOCGI)
-		// which could check (NULL)
-	// if (res)
 	if (sess.nextAction() == Session::DOCGI)
 	{
+		ResourceCgi *res = this->res_cgi;
 		if (res == NULL)
 		{
-			WsLog::_(LVL_ERR, TGT_CONN_SEND, "send:  (res == NULL)");
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
 			return (-1);
 		}
 		err = res->status();
@@ -241,13 +178,13 @@ ssize_t	Connection::pollout(void)
 			break;
 		}
 
-		std::string & OSTR = res->get_resp();	
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
+		std::string & OSTR = res->get_resp();
+		
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
 		err = this->send(OSTR);
-	
 	}
 	else
 	{
@@ -255,17 +192,17 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 		{
 			return (-1);
 		}
-		// if (sess.nextAction() != Session::WRSOCK)
-		// {
+		if (sess.nextAction() != Session::WRSOCK)
+		{
 
-		// }
+		}
 		std::string & OSTR = sess.get_resp();
 		if (OSTR.size())
 		{
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);			
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);			
 			err = this->send(OSTR);
 		}
 		else
@@ -273,36 +210,7 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 			// done (?)
 		}
 	}
-#else
-	if (res == NULL)
-	{
-		// base
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
-		return (-1);
-	}
-	err = res->status();
-	if (err < 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
-		if (res->resp.size() == 0)
-			return (-1);
-	}	
-#endif
-
-
-// WEBSERV : ERROR
-
 	
-// WEBSERV : RESOURCE (response)
-	// std::string & OSTR = res->get_resp();
-	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);
-	// err = this->send(OSTR);
-// #endif
-#endif
-
 	if (err < 0)
 	{
 		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
@@ -320,18 +228,12 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
 	sess.log_next();
-	// MAY BE KEEP-ALIVE
-#if 1
 	if (sess.nextAction() == Session::KPALIVE)
 	{
 		this->reset();
+		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
 		return (-1);
 	}
-#endif
-	// {
-	// 	this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
-	// 	return (-1);
-	// }
 	return (err);
 }
 
@@ -392,7 +294,7 @@ std::string		&Connection::get_addr(void)
 
 
 // SESSION / REQUEST (CgiPipe::pollout)
-// kd : CGI input may need to know :
+// CGI input may need to know :
 	// (1)	: body data has been received by the Connection
 	//		  and needs to be written to the (stdin) of the CGI
 	// (0)	: no body data is currently available
@@ -446,6 +348,8 @@ int	Connection::exec_cgi(void)
 	if (this->res_cgi)
 		return (0);
 		
+	this->req_cnt++;
+	
 	int			err;
 
 	CgiEnv *cgienv = new CgiEnv;

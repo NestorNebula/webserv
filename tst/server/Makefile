@@ -1,8 +1,7 @@
 NAME=test
 
 CC=c++
-CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP \
-	-DBUILD_DEMO="1" 
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP
 # -Wno-unused
 # -Wshadow=local
 

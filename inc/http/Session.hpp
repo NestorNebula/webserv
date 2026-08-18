@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 15:44:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:34:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ private:
   Stream::streamsize _sent;
 
 
-// #kd
+// #kd - get_resp => ostr
 public:
   std::string _ostr;
   std::string &get_resp(void)

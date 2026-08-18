@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 15:39:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:19:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ private:
   void handleBodyLine(std::string bodyLine, std::string::size_type eol);
 
 
-// #kd
+// #kd - get_body => ostr
 public:
   std::string _ostr;
   std::string &get_body(void)
@@ -99,8 +99,6 @@ public:
     if (_ostr.size())
       return (_ostr);
     char buf[4096];
-    // but we don't know how many ..
-    
     int err = getBody()->readsome(buf, 4096);
     if (err)
       _ostr.append(buf, err);

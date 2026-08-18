@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:53:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:22:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ std::string trim(std::string s, std::string set, bool beg, bool end) {
   return std::string(s, startIndex, endIndex - startIndex + 1);
 }
 
-// #kd
+// #kd - header_key
 void header_key(std::string &s) {
   for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
   {

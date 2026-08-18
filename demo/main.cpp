@@ -22,7 +22,7 @@ int main(int argc, char *argv[], char **envp) {
   }
   ConfigParser parser;
   try {
-	parser.parseFile(getConfigFileName(argv[1]));
+	  parser.parseFile(getConfigFileName(argv[1]));
   } catch (std::exception &e) {
 	  std::cout << e.what() << "\n";
 	  return 0;

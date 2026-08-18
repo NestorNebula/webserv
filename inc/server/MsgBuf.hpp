@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:39:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:10:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,27 @@
 
 #include "WsLog.hpp"
 
+#if 0
+void	*ft_memcpy(void *dst, const void *src, size_t n)
+{
+	size_t			i;
+	unsigned char	*d;
+	unsigned char	*s;
+
+	if (!dst && !src)
+		return (NULL);
+	d = (unsigned char *) dst;
+	s = (unsigned char *) src;
+	i = 0;
+	while (i < n)
+	{
+		d[i] = s[i];
+		i++;
+	}
+	return (dst);
+}
+#endif
+
 class MsgBuf
 {
 public:
@@ -45,7 +66,6 @@ public:
         if (this->buf)
             free(this->buf);
     }
-    // memset
     void zero()
     {
         this->siz = 0;
@@ -79,7 +99,7 @@ public:
     {
         this->avail(s);
 
-        memcpy(this->tail(), v, s);
+        memcpy(this->tail(), v, s); // WEBSERV : ATTN illegal function
 
         this->end += s;
     }
@@ -87,7 +107,7 @@ public:
     {
         this->avail(cnt);
 
-        memset(this->tail(), 0, cnt);
+        memset(this->tail(), 0, cnt); // WEBSERV : ATTN illegal function
         this->end += cnt;
     }
     void fcgi(const char * key, char * val)
@@ -115,7 +135,7 @@ php-fpm fastcgi.c
             WsLog::_(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
-            memcpy(tgt, &k, sizeof(int));
+            memcpy(tgt, &k, sizeof(int)); // WEBSERV : ATTN illegal function
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -131,7 +151,7 @@ php-fpm fastcgi.c
             WsLog::_(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
-            memcpy(tgt, &v, sizeof(int));
+            memcpy(tgt, &v, sizeof(int));// WEBSERV : ATTN illegal function
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -140,8 +160,13 @@ php-fpm fastcgi.c
             *tgt++ = v;
             z     += sizeof(char);
         }
-// WEBSERV : ATTN illegal function
-        sprintf(tgt, "%s%s", key, val);
+        // sprintf(tgt, "%s%s", key, val);
+        const char *src = key;
+        while (*src)
+            *tgt++ = *src++;
+        src = val;
+        while (*src)
+            *tgt++ = *src++;
 
         this->end += z;
     }
@@ -160,8 +185,6 @@ php-fpm fastcgi.c
             unsigned int ava = this->normal(); // copy to head (?)
             if (n <= ava)
                 return ava;
-            
-            // fprintf(stderr, "AVAIL (%i) : normalize FAILED\n", n);
         }
 
         this->siz = this->end + n;
@@ -169,7 +192,7 @@ php-fpm fastcgi.c
         unsigned char * tmp = (unsigned char*) malloc(this->siz);
         if (this->buf)
         {
-            memcpy(tmp, this->head(), this->size());
+            memcpy(tmp, this->head(), this->size()); // WEBSERV : ATTN illegal function
             this->end = this->size();
             this->beg = 0;
             free(this->buf);
@@ -198,14 +221,12 @@ php-fpm fastcgi.c
 
         if (this->beg < pad)
         {
-            // fprintf(stderr, "MsgBuf normal beg %i pad %i\n", this->beg, pad);
             // shift RIGHT .. ugh
         }
         // actually -- we can always normalize
         // just not always in one copy
         if (this->size() > (this->beg - pad))
         {
-            // fprintf(stderr, "MsgBuf - normal FAILED\n");
             unsigned int full_size = this->size();
             int copy_size = this->beg - pad;
             unsigned char * src = this->head();
@@ -213,7 +234,7 @@ php-fpm fastcgi.c
 
             do
             {
-                memcpy(dst, src, copy_size);
+                memcpy(dst, src, copy_size); // WEBSERV : ATTN illegal function
                 src += copy_size;
                 dst += copy_size;
                 this->beg += copy_size;
@@ -225,8 +246,7 @@ php-fpm fastcgi.c
             this->end = full_size + pad;
             return this->avail();
         }
-        // fprintf(stderr, "NORMAL\n");
-        memcpy(this->buf + pad, this->head(), this->size());
+        memcpy(this->buf + pad, this->head(), this->size()); // WEBSERV : ATTN illegal function
         this->end = this->size() + pad;
         this->beg = pad;
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 13:48:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:40:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ int main (int argc, char ** argv, char **envp)
     } 
     catch (std::exception &e) 
     {
-        std::cout << e.what() << "\n";
+        std::cout << "EX: ConfigParser::parseFile() : " << e.what() << "\n";
         return 0;
     }
 
@@ -91,7 +91,8 @@ int main (int argc, char ** argv, char **envp)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cout << "EX: main() : " << e.what() << "\n";
+        // unexpected .. should have been caught in LOOP .. 
     }
 
 

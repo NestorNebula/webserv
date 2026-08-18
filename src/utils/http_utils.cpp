@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 09:11:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:59:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,8 @@ std::string getStatusReason(Response::StatusCode code) {
   std::map<int, std::string>::const_iterator reason = reasons.find(code);
   if (reason != reasons.end())
     return reason->second;
-  return std::string();
+// #kd - Exception should have been caught (!)
+  return std::string("Unknown Reason");
 }
 
 std::string getMimeType(const std::string &path) {

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 21:00:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:39:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,9 +315,15 @@ int	Epoll::loop(void)
 				if (epc->event(evt) < 0)
 					this->rem(epc);
 			}
+			catch(const std::logic_error& e)
+			{
+				std::cerr << "EX: Epoll::loop() : " << e.what() << '\n';
+				// this->rem(epc);
+			}
 			catch(const std::exception& e)
 			{
-				std::cerr << e.what() << '\n';
+				std::cerr << "EX: Epoll::loop() : " << e.what() << '\n';
+				// this->rem(epc);
 			}
         }
 		this->check_timeo();	

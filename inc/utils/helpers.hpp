@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:25:26 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:52:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:20:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 std::string trim(std::string s, std::string set, bool beg = true,
                  bool end = true);
 
-// #kd
+// #kd - header_key
 void header_key(std::string &s);
 void capitalize(std::string &s);
 std::string capitalize(const std::string &s);
