@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 13:23:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 14:48:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   if (r < bufsize)
     _next = CLOSE;
   std::ostringstream oss;
-  oss << "Session sending " << r << "bytes of data";
+  oss << "Session sending " << r << " bytes of data";
   WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
   manageSession();
   return r;

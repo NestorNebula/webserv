@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 13:28:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:07:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class CgiPipe;
 class ResourceCgi;
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 10
+#  define CONN_TIMEOUT 2
 # endif
 
 # ifndef BUILD_DEMO
@@ -76,9 +76,6 @@ private:
 	
 	ResourceCgi			*res_cgi;
 	int					exec_cgi(void);
-	
-	// int					send_error(void);
-	// std::string			estr;
 	
 	struct sockaddr_in	addr;
 	std::string			astr;
