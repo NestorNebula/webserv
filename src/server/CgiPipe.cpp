@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 18:49:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 21:45:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,21 +123,56 @@ CgiPipe::~CgiPipe()
 		this->conn->cgi_rem(this);
 }
 
+
+static int to = 0;
 bool	CgiPipe::timeo(time_t now)
 {
 	if (this->lact == 0)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + CGI_TIMEOUT) < now)
+	if ((this->lact + CGI_TIMEOUT) > now)
+		return (false);
+	
+	if (this->rsrc && this->conn)
 	{
-		if (this->rsrc)
-			this->rsrc->set_err(504); // CGI_ERR
-		else if (this->conn)
-			this->conn->set_err(504); // CGI_ERR
-		return (true);
+		// MOSTLY (ip) .. but .. 
+		if (this == this->rsrc->ip)
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)");
+		else if (this == this->rsrc->op)
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
+			
+		Session &sess = conn->sess;
+		Request &req  = sess.getRequest();
+		if (req.hasHeaders())
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+		if (req.hasBody())
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : has body");
+		if (req.isComplete())
+		{
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : complete ", ++to); // 1500 (!)
+			if (this == this->rsrc->ip)
+			{
+				// expected .. if delivering large file 
+				this->lact = now;
+				// this->mod_evt(-EPOLLOUT);
+				// this->rsrc->rem(this);
+				return (false);
+			}
+		}
+		this->rsrc->set_err(504); // CGI_ERR
 	}
-	return (false);
+	else if (this->conn)
+	{
+		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn");
+		this->conn->set_err(504); // CGI_ERR
+	}
+	else
+	{
+		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : ????");
+		this->conn->set_err(504); // CGI_ERR
+	}
+	return (true);
 }
 
 ssize_t	CgiPipe::pollin(void)

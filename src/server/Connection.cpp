@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:43:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 22:01:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,12 @@ bool	Connection::timeo(time_t now)
 		return (false);
 	if ((this->lact + CONN_TIMEOUT) < now) // server (?)
 	{
+		// php-fpm : gets this .. 
+		// php-cgi : (ip) times out ... but it should not have been active anyway .. 
+		WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
+		// FWIW : normal (cgi) seems to survive low timeout values better .. 
+		if (this->res_cgi)	
+			this->res_cgi->conn_closed(); 
 		this->set_err(408);
 		return (true);
 	}
