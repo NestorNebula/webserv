@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:28:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:39:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,38 +88,61 @@ int	EpollClient::event(struct epoll_event *e)
 {
 	int err;
 
-	// this->lact = time(&this->lact);
-	if (e->events & EPOLLERR)
+#define TST_EX 1
+
+#if TST_EX
+	try
 	{
-		this->hup();
+#endif
+
+		// this->lact = time(&this->lact);
+		if (e->events & EPOLLERR)
+		{
+			this->hup();
+			return (-1);
+		}
+		if (e->events & EPOLLIN)
+		{
+			// if (fcntl(this->fd, F_GETFD) < 0)
+			// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
+				
+			err = this->pollin();
+			if (err > 0)
+				this->lact = time(&this->lact);
+			else if (err < 0)
+				return (err);
+		}
+		if (e->events & EPOLLOUT)
+		{
+			// if (fcntl(this->fd, F_GETFD) < 0)
+			// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
+			err = this->pollout();
+			if (err > 0)
+				this->lact = time(&this->lact);
+			else if (err < 0)
+				return (err);
+		}	
+		if (e->events & EPOLLRDHUP) // ugh
+			return (this->rdhup());
+		if (e->events == EPOLLHUP)
+			return (this->hup());
+		// return (0);	
+
+#if TST_EX
+	}
+	catch(const std::logic_error& e)
+	{
+		std::cerr << "EX: EpollClient::event() : " << e.what() << '\n';
 		return (-1);
 	}
-	if (e->events & EPOLLIN)
+	catch(const std::exception& e)
 	{
-		// if (fcntl(this->fd, F_GETFD) < 0)
-		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
-			
-		err = this->pollin();
-		if (err > 0)
-			this->lact = time(&this->lact);
-		else if (err < 0)
-			return (err);
+		std::cerr << "EX: EpollClient::event() : " << e.what() << '\n';
+		return (-1);
 	}
-	if (e->events & EPOLLOUT)
-	{
-		// if (fcntl(this->fd, F_GETFD) < 0)
-		// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
-		err = this->pollout();
-		if (err > 0)
-			this->lact = time(&this->lact);
-		else if (err < 0)
-			return (err);
-	}	
-	if (e->events & EPOLLRDHUP) // ugh
-		return (this->rdhup());
-	if (e->events == EPOLLHUP)
-		return (this->hup());
-	return (0);	
+#endif
+
+	return (0);
 }
 
 ssize_t	EpollClient::recv(void)

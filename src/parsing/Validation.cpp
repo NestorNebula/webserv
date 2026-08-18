@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/14 14:00:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:21:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
-		if (access(it->second.c_str(), F_OK) != 0) // #kd
+		if (access(it->second.c_str(), X_OK) != 0)
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");
 	}

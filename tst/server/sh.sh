@@ -152,7 +152,7 @@ fi
 # exit 0
 
 
-curl -X POST 'http://localhost:8082/test.php?g1=QUERY' -i \
+curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

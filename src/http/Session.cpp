@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 15:24:58 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/18 17:29:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,8 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   if (r < bufsize)
     _next = CLOSE;
   std::ostringstream oss;
-  oss << "Session sending " << r << "bytes of data";
+// #kd - add missing space
+  oss << "Session sending " << r << " bytes of data";
   WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
   manageSession();
   return r;
@@ -215,7 +216,9 @@ void Session::validateOperation() {
   if (_response.getCode())
     return;
   if (_next == DOCGI) {
-    if (!isAccessibleFile(_resourcePath, X_OK))
+    // if (!isAccessibleFile(_resourcePath, X_OK))
+// #kd : file does not need to be executable
+    if (!isAccessibleFile(_resourcePath, F_OK | R_OK))
       return setResponseStatus(403);
     return;
   }
@@ -461,8 +464,6 @@ void Session::setResponseHeaders() {
                    allowed.begin(), methodToString);
     headers.insert("Allow", join(allowed));
   }
-  // ...
-
   _response.addHeaders(headers.begin(), headers.end());
 }
 

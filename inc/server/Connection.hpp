@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:14:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:25:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,6 @@ class ResourceCgi;
 
 # ifndef CONN_TIMEOUT
 #  define CONN_TIMEOUT 2
-# endif
-
-# ifndef BUILD_DEMO
-#  define BUILD_DEMO 0
 # endif
 
 class Connection : public EpollClient

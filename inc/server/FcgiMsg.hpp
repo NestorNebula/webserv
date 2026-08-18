@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:49:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:08:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,17 +139,15 @@ public:
 	void 	new_params(unsigned short req = 0x1);
 
 	void 	add_param(const char * key, char * val);
-	void 	add_param(int  p_key, char * val);
-
 	void 	add_param(const char * key, int val);
-	// void 	add_param(int  p_key, int val);
+	void 	end_params(void);
 	
 	void	add_stdin(char *buf, int siz);
 	void	end_stdin(void);
 
-	void 	end_params(void);
-
-
+	void 	data(FcgiMsgData * data);
+	
+private:
 	void 	begin();
 	void 	make_head(unsigned char typ, unsigned short len);
 
@@ -167,10 +165,7 @@ public:
 	unsigned short get_role();
 
 	void 	zero();
-
 	void 	info();
-	void 	data(FcgiMsgData * data);
-	// void 	dump(int cnt);
 };
 
 

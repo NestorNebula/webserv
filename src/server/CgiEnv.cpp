@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:41:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 16:24:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,11 @@ std::string & CgiEnv::get(const char *key)
 	return (this->kv[ std::string (key) ]);
 }
 
-// BUILD_DEMO (!)
-
+// could return HTTP_ERRNO
 int     CgiEnv::from_conn(Connection & conn)
 {
 	this->kv.clear();
 
-// WEBSERV : REQUEST
 	Session &sess = conn.sess;
 	Request &req  = sess.getRequest();
 	const Headers &headers = req.getHeaders();
@@ -124,7 +122,6 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (req.hasQuery())
 	{
 		this->add("QUERY_STRING", req.getQuery().c_str());
-		std::cerr << "QRY   : " << req.getQuery() << std::endl;
 	}
 // If the output of a form is being processed, check that CONTENT_TYPE
 // is "application/x-www-form-urlencoded"

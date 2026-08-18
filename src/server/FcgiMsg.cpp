@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:30:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 17:04:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,30 +108,21 @@ void FcgiMsg::add_param(const char * key, char * val)
 	buf.fcgi(key, val);
 }
 
-void FcgiMsg::add_param(int p_key, char * val)
-{
-	buf.fcgi(p_name[p_key], val);
-}
-
 void FcgiMsg::add_param(const char * key, int val)
 {
 	char vStr[32];
-	sprintf(vStr, "%i", val);
+	sprintf(vStr, "%i", val); // WEBSERV : ATTN illegal function
 
 	buf.fcgi(key, vStr);
 }
-
-// void FcgiMsg::add_param(int p_key, int val)
-// {
-// 	add_param(p_name[p_key], val);
-// }
 
 void FcgiMsg::end_params(void)
 {
 	this->make_head(FCGI_PARAMS, buf.end - pBeg);
 
 	// insert params header with proper content-length
-	memcpy(buf.buf + pHed, this, 8); // this->hed
+
+	memcpy(buf.buf + pHed, this, 8); // WEBSERV : ATTN illegal function
 	buf.zero(this->head.paddingLength);
 
 	this->make_head(FCGI_PARAMS, 0);
@@ -239,7 +230,7 @@ void FcgiMsg::zero()
 
 	set_role(0);
 	body.flags = 0;
-	memset(body.reserved, 0, 5);
+	memset(body.reserved, 0, 5); // WEBSERV : ATTN illegal function
 }
 
 void FcgiMsg::info()
@@ -263,20 +254,3 @@ void FcgiMsg::data(FcgiMsgData * data)
 	data->role = this->get_role();
 
 }
-
-#if 0 
-void FcgiMsg::dump(int cnt)
-{
-	unsigned char * chk = (unsigned char*) this;
-    fprintf(stderr, "%02x ", chk[0]);
-    for (int i=1 ; i < cnt; i++)
-    {
-        if (!(i % 16))
-            fprintf(stderr, "\n");
-        else if (!(i % 8))
-            fprintf(stderr, " ");
-        fprintf(stderr, "%02x ", chk[i]);
-    }
-    fprintf(stderr, "\n\n");
-}
-#endif
