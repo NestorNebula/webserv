@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/16 20:47:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:49:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Headers.hpp"
-#include "HttpMethod.hpp" // Maxime's header
+#include "HttpMethod.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
 
@@ -46,14 +46,15 @@ public:
     return _state >= HEADERS && _headers.has(key);
   }
   bool hasHeaders() const { return _state >= HEADERS && _headers.size() > 0; }
+  bool headersComplete() const { return _state > HEADERS; }
   const Headers &getHeaders() const { return _headers; }
-  bool hasBody() const { return _state == COMPLETE && _bodySize > 0; }
-
-  Stream *getBody() const {
+  bool hasBody() const { return _body != NULL && _bodySize > 0; }
+  Stream *getBody() {
     if (_body == NULL)
       throw std::logic_error("accessing null body Stream");
     return _body;
   }
+  Stream::streamsize availableBody() const;
   void clear();
 
 // #kd

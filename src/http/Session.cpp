@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/17 14:04:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:48:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 #endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
-  throwIfNotAction(RDSOCK);
+  if (_request.isComplete())
+    throwIfNotAction(RDSOCK);
 
   _request.append(std::string(buf, count));
   std::ostringstream oss;
@@ -39,7 +40,6 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   return count;
 }
 
-// const 
 Request &Session::getRequest() {
   throwIfNotAction(DOCGI);
   return _request;
@@ -98,6 +98,13 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   return r;
 }
 
+void Session::setError(Response::StatusCode code) {
+  setResponseStatus(code);
+  handleResource();
+  handleResponse();
+  _next = WRSOCK;
+}
+
 void Session::reset() {
   throwIfNotAction(KPALIVE);
 
@@ -151,7 +158,8 @@ void Session::manageSession() {
 
 void Session::handleRequest() {
   preValidateRequest();
-  if (!_request.isComplete() && !_request.isInvalid())
+  if (!_request.isComplete() && !_request.isInvalid() &&
+      !_request.headersComplete())
     return;
   validateRequest();
   resolveResource();
@@ -201,11 +209,7 @@ void Session::resolveResource() {
 // #kd : absolute (?)
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  // _cgi_exec = 
-  
-  std::string tst = isCgi(_resourcePath, *_route);
-  if (tst.size()) 
-  {
+  if (isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
     _next = DOCGI;
     return;
   }
@@ -228,13 +232,14 @@ void Session::validateOperation() {
   }
   if (!isExistingFile(_resourcePath))
     return setResponseStatus(404);
-  if (!isAccessibleFile(_resourcePath, R_OK))
+  if (!isAccessibleFile(_resourcePath, R_OK) || isCgiExtension(_resourcePath))
     return setResponseStatus(403);
   WsLog::_(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
 }
 
 void Session::handleResource() {
-  if (_next == DOCGI)
+  if (!_response.getCode() &&
+      ((!_request.isComplete() && !_request.isInvalid()) || _next == DOCGI))
     return;
   WsLog::_(LVL_INFO, TGT_SESS, "Preparing Session Resource generation");
   if (_response.getCode() >= 400)
