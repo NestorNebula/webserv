@@ -13,7 +13,7 @@
 #pragma once
 
 #include "Response.hpp"
-#include "ServerConfig.hpp" // Maxime's header
+#include "ServerConfig.hpp"
 #include "unistd.h"
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config);
@@ -33,6 +33,8 @@ bool isDirectory(const std::string &path);
 // #kd
 std::string path_ext(const std::string & path);
 std::string isCgi(const std::string &path, RouteConfig &config);
+
+bool isCgiExtension(const std::string &path);
 
 bool isAccessibleFile(const std::string &path, int accessMode = F_OK);
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/17 14:15:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:49:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Request.hpp"
 #include "Resource.hpp"
 #include "Response.hpp"
-#include "ServerConfig.hpp" // Maxime's Header
+#include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
 
@@ -74,7 +74,6 @@ public:
   } info;
 
   // Give access to the Session Request. Should only be called on DOCGI action.
-  // const 
   Request &getRequest();
 
   // Give informations about the CGI to be executed. Should only be called on
@@ -87,6 +86,11 @@ public:
 
   // Read data from the Session Response. Corresponds to WRSOCK Action.
   Stream::streamsize read(char *buf, Stream::streamsize bufsize);
+
+  // Set an error code for the current Session and prepare the appropriate
+  // content. Callable whatever the current action is. Keep in mind that it will
+  // erase the current Session Resource in case action is already WRSOCK.
+  void setError(Response::StatusCode code);
 
   // Reset session state and clears all its data
   void reset();

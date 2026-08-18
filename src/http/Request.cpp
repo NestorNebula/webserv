@@ -210,3 +210,9 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
   }
   _raw.erase(0, eol + 2);
 }
+
+Stream::streamsize Request::availableBody() const {
+  if (!hasBody())
+    return (0);
+  return _body->size() - _body->tellg();
+}

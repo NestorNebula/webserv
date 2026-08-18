@@ -70,6 +70,7 @@ public:
 
   // Custom methods
   streamsize size();
+  Stream &read(std::string &s);
 
   template <typename T> Stream &operator>>(T &t) {
     throwIfNull();
