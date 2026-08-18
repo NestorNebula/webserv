@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=2
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -43,13 +43,13 @@ if [[ "$1" =~ "t" ]]; then
 fi
 
 if [ "$1" == "a" ]; then
-	# curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
-	# echo
-	# exit 0
-
-	curl -X GET http://127.0.0.1:8082/files/Kanan.mp3 --output data.mp3
+	curl -X GET http://127.0.0.1:8082/bigaudio.php --output data.mp3
 	echo
 	exit 0
+
+	# curl -X GET http://127.0.0.1:8082/files/Kanan.mp3 --output data.mp3
+	# echo
+	# exit 0
 fi
 
 if [ "$1" == "j" ]; then

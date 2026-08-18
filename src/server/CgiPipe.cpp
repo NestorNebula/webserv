@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:25:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 18:49:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,6 +260,7 @@ ssize_t	CgiPipe::pollout(void)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
 	}
+	
 #else
 	err = this->conn->req_body_status();
 	if (err < 0)
