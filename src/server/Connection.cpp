@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:32:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:17:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -574,3 +574,62 @@ int	Connection::exec_cgi(void)
 	this->res_cgi = pcgi;
 	return (err);
 }
+
+
+// we can get this when we ctrl-c a siege
+
+// not fatal .. but we should be able to handle it better
+
+// epoll : cli mod  : [352]
+// epoll : epoll_ctl: mod 
+// error : No such file or directory
+
+
+	// THE FULL SEQUENCE
+// epoll : evt tgt  : conn
+// epoll : evt fd   : [8]
+// epoll : evt typ  : in rdhup 
+// conn  : recv:  POLLIN
+// conn  : recv
+// epc   : read: [168]
+// conn  : recv: [168]
+// conn  : next:  RDSOCK
+// conn  : next:  DOCGI
+// conn  : next: docgi
+
+// rsrc  : init:  PIPE
+// epoll : cli add  : cgi
+// epoll : cli add  : cgi
+
+	// wow .. CGI has not yet even gotten started
+// conn  : RDHUP
+// epoll : cli mod  : conn
+// epoll : cli rem  : conn
+// epoll : cli del  : conn
+// conn  :  (~) Connection [8]
+// conn  : req cnt: [0]
+// rsrc  : conn-closed : ip
+// rsrc  : conn-closed : op
+// rsrc  :  (~) ResourceCgi
+// rsrc  : stat: [-1]
+// rsrc  : pid : [17211]
+// rsrc  : conn-closed : ip
+// rsrc  : conn-closed : op
+// rsrc  : pid : [17211]
+// rsrc  : xit : [-1]
+// rsrc  : stat: [-1]
+// rsrc  : kill
+// rsrc  : pid : [17211]
+// rsrc  : xit : [-1]
+// rsrc  : stat: [-1]
+// rsrc  : wait: [17211]
+// rsrc  : stat: [9]
+// rsrc  : sig : [9]
+// rsrc  : sig : Killed
+// conn  : err : [616]
+// conn  : fd  : (conn) [8]
+// epoll : cli mod  : conn
+// epoll : cli mod  : [8]
+// epoll : epoll_ctl: mod 
+// error : No such file or directory
+// epc   :  (~) EpollClient
