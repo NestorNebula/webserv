@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:28:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:27:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ ResourcePiped::~ResourcePiped()
 	WsLog::_(LVL_DBG, TGT_RSRC, "pid : " , this->pid);
 	
 	this->conn_closed();
+	this->conn = NULL;
 	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
@@ -77,6 +78,7 @@ void	ResourcePiped::conn_closed(void)
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
+	// this->conn = NULL;
 }
 
 void	ResourceCgi::set_err(int e)

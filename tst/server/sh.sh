@@ -138,8 +138,12 @@ fi
 # echo
 # exit 0
 
-curl -X GET 'http://localhost:8080/about.html' -i
+curl -X POST 'http://localhost:8082/test.py' -i \
+	-d "p1=post-one&p2=post-two"
 echo
+exit 0
+
+
 curl -X GET 'http://localhost:8080/contact.html' -i
 echo
 curl -X GET 'http://localhost:8080/index.html' -i
