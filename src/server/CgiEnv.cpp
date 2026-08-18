@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:44:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 13:29:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	{
 		lang = CGI_PYTHON;
 		// how does HOME work without this ?
-		// this->add("PYTHONPATH", conn.serv.pycgi.c_str());
+		this->add("PYTHONPATH", conn.serv.pycgi.c_str());
 	}
 	else if (script.fext == std::string(".pl"))
 	{

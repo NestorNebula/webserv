@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:25:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 13:27:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ void	Connection::set_err(int e)
 	if (e == 0)
 		return;
 		
+
+	
 	if (this->error)
 	{
 		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
@@ -77,7 +79,10 @@ void	Connection::set_err(int e)
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
-
+	this->sess.setError(e);
+	this->mod_evt(EPOLLOUT);
+	return;
+#if 0
 #if 0
 	this->sess.setResponseStatus(e);
 	this->sess.prepareErrorResource();
@@ -100,6 +105,7 @@ void	Connection::set_err(int e)
 
 	// WsLog::_(LVL_DBG, TGT_CONN, "err:\n", this->estr);
 	this->mod_evt(EPOLLOUT);
+#endif
 }
 
 ssize_t	Connection::pollin(void)
@@ -227,9 +233,9 @@ ssize_t	Connection::pollout(void)
 		err = this->send(OSTR);
 	}
 #else
-// WEBSERV : ERROR
-	if (this->error)
-		return (this->send_error());
+	// SESSION_ERROR
+	// if (this->error)
+	// 	return (this->send_error());
 
 // WEBSERV : RESOURCE (cgi)
 
@@ -242,8 +248,14 @@ ssize_t	Connection::pollout(void)
 #if 1
 	// or (DOCGI)
 		// which could check (NULL)
-	if (res)
+	// if (res)
+	if (sess.nextAction() == Session::DOCGI)
 	{
+		if (res == NULL)
+		{
+			WsLog::_(LVL_ERR, TGT_CONN_SEND, "send:  (res == NULL)");
+			return (-1);
+		}
 		err = res->status();
 		if (err < 0)
 		{
@@ -251,20 +263,29 @@ ssize_t	Connection::pollout(void)
 			if (res->resp.size() == 0)
 				return (-1);
 		}	
-		if (this->error)
-			return (this->send_error());
+		// SESSION_ERROR
+		// if (this->error)
+		// 	return (this->send_error());
 		if (err == 0)
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
 			this->mod_evt(-EPOLLOUT);
 			return (err);
 		}
-		std::string & OSTR = res->get_resp();	
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
-		err = this->send(OSTR);
+		if (err == 2)
+		{
+			// SESSION_ERROR -- set in status
+			return (0);
+		}
+		else
+		{
+			std::string & OSTR = res->get_resp();	
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
+	WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
+	// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
+			err = this->send(OSTR);
+		}
 	}
 	else
 	{
@@ -353,20 +374,20 @@ WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
 }
 
 // WEBSERV : ERROR 
-int		Connection::send_error(void)
-{
-	int	err;
+// int		Connection::send_error(void)
+// {
+// 	int	err;
 	
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
+// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  error ", this->error);
 
-	err = this->send(this->estr); 
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
-	if (err < 0)
-		return (-1);
-	if (this->estr.size())
-		return (err);
-	return (-1);
-}
+// 	err = this->send(this->estr); 
+// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
+// 	if (err < 0)
+// 		return (-1);
+// 	if (this->estr.size())
+// 		return (err);
+// 	return (-1);
+// }
 
 int	Connection::rdhup(void)
 {
@@ -399,7 +420,7 @@ void	Connection::reset(void)
 // WEBSERV : SESSION (keep-alive)
 	this->sess.reset();
 	
-	this->estr.clear();
+	// this->estr.clear();
 	this->error = 0;
 	this->mod_evt(EPOLLIN);
 	this->mod_evt(-EPOLLOUT);
