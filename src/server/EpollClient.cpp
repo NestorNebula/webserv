@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:39:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 18:44:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ int	EpollClient::event(struct epoll_event *e)
 			// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
 				
 			err = this->pollin();
-			if (err > 0)
+			if (err >= 0) // #kd IMPORTANT - still need TIMEOUT ~10
 				this->lact = time(&this->lact);
 			else if (err < 0)
 				return (err);
@@ -117,7 +117,7 @@ int	EpollClient::event(struct epoll_event *e)
 			// if (fcntl(this->fd, F_GETFD) < 0)
 			// 	WsLog::_(LVL_ERR, TGT_EPC, "evt : BAD FD");
 			err = this->pollout();
-			if (err > 0)
+			if (err >= 0) // #kd IMPORTANT
 				this->lact = time(&this->lact);
 			else if (err < 0)
 				return (err);
