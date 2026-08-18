@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 13:29:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:41:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		return (-1);
 	}
 	
-	// unaddressable bytes
-	Session::CgiInfo &info = sess.getCgiInfo();
+	info = sess.getCgiInfo();
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 

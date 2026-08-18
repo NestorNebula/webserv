@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:07:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:46:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ ssize_t	Connection::pollin(void)
 			if (this->exec_cgi() < 0)
 			{
 				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-				this->set_err(666); // CGI_ERR
+				this->set_err(404); // CGI_ERR
 				// this->set_err(404); // siege-friendly
 				return (0); // send error
 			}

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 15:26:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:39:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,22 +57,6 @@ public:
   Stream::streamsize availableBody() const;
   void clear();
 
-// #kd
-  std::string &get_body(void)
-  {
-    if (_ostr.size())
-      return (_ostr);
-    char buf[4096];
-    // but we don't know how many ..
-    
-    int err = getBody()->readsome(buf, 4096);
-    if (err)
-      _ostr.append(buf, err);
-    return (_ostr);
-  }
-private:
-  std::string _ostr;
-
 private:
   Request(const Request &);
   Request &operator=(const Request &);
@@ -105,4 +89,21 @@ private:
   void setupBody();
   void handleBody(std::string body, std::string::size_type eol);
   void handleBodyLine(std::string bodyLine, std::string::size_type eol);
+
+
+// #kd
+public:
+  std::string _ostr;
+  std::string &get_body(void)
+  {
+    if (_ostr.size())
+      return (_ostr);
+    char buf[4096];
+    // but we don't know how many ..
+    
+    int err = getBody()->readsome(buf, 4096);
+    if (err)
+      _ostr.append(buf, err);
+    return (_ostr);
+  }
 };
