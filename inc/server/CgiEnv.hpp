@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:14:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:45:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <sstream>
 
 # include "FilePath.hpp"
+# include "Session.hpp"
 
 // Utils.hpp
 template <typename T>
@@ -62,9 +63,33 @@ private:
 	std::vector<std::string>			data;
 	const char							**res;
 	
+	Session::CgiInfo					info;
 	std::string							exec;
-
 	FilePath							script;
 };
 
 #endif
+
+
+#if 0 
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   inc/http/Headers.hpp
+	modified:   inc/http/Request.hpp
+	modified:   inc/http/Session.hpp
+	modified:   src/http/Request.cpp
+	modified:   src/http/Response.cpp
+	modified:   src/http/Session.cpp
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   inc/http/Request.hpp
+	modified:   inc/http/Session.hpp
+	modified:   inc/server/CgiEnv.hpp
+	modified:   src/server/CgiEnv.cpp
+
+
+
+	#endif

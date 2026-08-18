@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 14:48:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 15:24:58 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,9 @@ Request &Session::getRequest() {
   return _request;
 }
 
-// #kd
-Session::CgiInfo & Session::getCgiInfo() {
+Session::CgiInfo Session::getCgiInfo() const {
   throwIfNotAction(DOCGI);
-  
-  // CgiInfo info;
+  CgiInfo info;
 
   info.scriptPath = _resourcePath;
   std::string ext = _resourcePath.substr(_resourcePath.find_last_of("."));
@@ -92,7 +90,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   if (r < bufsize)
     _next = CLOSE;
   std::ostringstream oss;
-  oss << "Session sending " << r << " bytes of data";
+  oss << "Session sending " << r << "bytes of data";
   WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
   manageSession();
   return r;
@@ -118,7 +116,6 @@ void Session::reset() {
   _next = RDSOCK;
 }
 
-// #kd : need to catch this 
 void Session::throwIfNotAction(Action action) const {
   if (action != _next)
     throw std::logic_error("Wrong action on Session");
@@ -206,7 +203,6 @@ void Session::resolveResource() {
   if (!isAllowedMethod(_request.getMethod(), *_route))
     return setResponseStatus(405);
 
-// #kd : absolute (?)
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WsLog::_(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
   if (isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
@@ -219,7 +215,7 @@ void Session::validateOperation() {
   if (_response.getCode())
     return;
   if (_next == DOCGI) {
-    if (!isAccessibleFile(_resourcePath, F_OK)) // #kd
+    if (!isAccessibleFile(_resourcePath, X_OK))
       return setResponseStatus(403);
     return;
   }
@@ -324,9 +320,6 @@ void Session::prepareDirectoryResource() {
     prepareErrorResource();
   }
 }
-
-// #kd
-// POST data -- is not necessarily UPLOAD data
 
 void Session::handleUpload() {
   WsLog::_(LVL_INFO, TGT_SESS, "Processing upload Request");

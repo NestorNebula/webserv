@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 15:26:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:44:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,89 @@ public:
   } Action;
 
   Action nextAction() const { return _next; }
+
+  // Write data to the Session Request. Corresponds to RDSOCK Action.
+  Stream::streamsize write(const char *buf, Stream::streamsize count);
+
+  struct CgiInfo {
+    std::string scriptPath;
+    std::string executablePath;
+  };
+
+  // Give access to the Session Request. Should only be called on DOCGI action.
+  Request &getRequest();
+
+  // Give informations about the CGI to be executed. Should only be called on
+  // DOCGI action.
+  Session::CgiInfo getCgiInfo() const;
+
+  // Give access to the data of an executed CGI script. Corresponds to DOCGI
+  // Action.
+  void setCgiResource(Resource *cgiResource);
+
+  // Read data from the Session Response. Corresponds to WRSOCK Action.
+  Stream::streamsize read(char *buf, Stream::streamsize bufsize);
+
+  // Set an error code for the current Session and prepare the appropriate
+  // content. Callable whatever the current action is. Keep in mind that it will
+  // erase the current Session Resource in case action is already WRSOCK.
+  void setError(Response::StatusCode code);
+
+  // Reset session state and clears all its data
+  void reset();
+
+private:
+  Session(const Session &);
+  Session &operator=(const Session &);
+
+  Action _next;
+
+  ServerConfig &_server;
+  RouteConfig *_route;
+  std::string _resourcePath;
+
+  Request _request;
+  Resource *_resource;
+  Response _response;
+
+  bool _keepalive;
+
+  void throwIfNotAction(Action action) const;
+  void manageSession();
+
+  void handleRequest();
+  void preValidateRequest();
+  void validateRequest();
+  void resolveResource();
+  void validateOperation();
+
+  void handleResource();
+  void prepareErrorResource();
+  void prepareDirectoryResource();
+
+  void handleUpload();
+  void handleDelete();
+
+  void handleResponse();
+  void setResponseHeaders();
+  void setResponseStatus(Response::StatusCode code);
+
+  Stream::streamsize _sent;
+
+
 // #kd
+public:
+  std::string _ostr;
+  std::string &get_resp(void)
+  {
+    if (_ostr.size())
+      return (_ostr);
+    char buf[4096];
+    int err = this->read(buf, 4096);
+    if (err)
+      _ostr.append(buf, err);
+    return (_ostr);
+  }
   void  log_next(void)
   {
     WsLog::color(WSL_YELLOW);
@@ -65,91 +147,4 @@ public:
     }
   }
 
-  // Write data to the Session Request. Corresponds to RDSOCK Action.
-  Stream::streamsize write(const char *buf, Stream::streamsize count);
-
-  struct CgiInfo {
-    std::string scriptPath;
-    std::string executablePath;
-  } info;
-
-  // Give access to the Session Request. Should only be called on DOCGI action.
-  Request &getRequest();
-
-  // Give informations about the CGI to be executed. Should only be called on
-  // DOCGI action.
-  Session::CgiInfo & getCgiInfo();
-
-  // Give access to the data of an executed CGI script. Corresponds to DOCGI
-  // Action.
-  void setCgiResource(Resource *cgiResource);
-
-  // Read data from the Session Response. Corresponds to WRSOCK Action.
-  Stream::streamsize read(char *buf, Stream::streamsize bufsize);
-
-  // Set an error code for the current Session and prepare the appropriate
-  // content. Callable whatever the current action is. Keep in mind that it will
-  // erase the current Session Resource in case action is already WRSOCK.
-  void setError(Response::StatusCode code);
-
-  // Reset session state and clears all its data
-  void reset();
-// #kd
-
-  std::string &get_resp(void)
-  {
-    if (_ostr.size())
-      return (_ostr);
-    char buf[4096];
-    int err = this->read(buf, 4096);
-    if (err)
-      _ostr.append(buf, err);
-    return (_ostr);
-  }
-private:
-  std::string _resourcePath;
-  std::string _ostr;
-
-private:
-  Session(const Session &);
-  Session &operator=(const Session &);
-
-// #kd
-public:
-  Action _next;
-private:
-
-  ServerConfig &_server;
-public: // #kd
-  RouteConfig *_route;
-private:
-  Request _request;
-  Resource *_resource;
-  Response _response;
-
-  bool _keepalive;
-
-  void throwIfNotAction(Action action) const;
-  void manageSession();
-
-  void handleRequest();
-  void preValidateRequest();
-  void validateRequest();
-  void resolveResource();
-  void validateOperation();
-
-  void handleResource();
-  void prepareDirectoryResource();
-
-  void handleUpload();
-  void handleDelete();
-
-  void handleResponse();
-  void setResponseHeaders();
-// #kd
-public:
-  void prepareErrorResource();
-  void setResponseStatus(Response::StatusCode code);
-
-  Stream::streamsize _sent;
 };
