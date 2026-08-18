@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:15:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 21:02:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,10 @@ public:
 
 	int			rem(EpollClient *epc);
 
-private:
 	pid_t		pid;
 	CgiPipe		*ip;
 	CgiPipe		*op;
+private:
 
 	int			stat;
 	int			xit;

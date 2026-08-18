@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 18:58:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 21:43:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,21 +30,59 @@ FcgiPipe::~FcgiPipe()
 		this->conn->cgi_rem(this);
 }
 
+static int to = 0;
 bool	FcgiPipe::timeo(time_t now)
 {
 	if (this->lact == 0)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + CGI_TIMEOUT) < now)
+	if ((this->lact + CGI_TIMEOUT) > now)
+		return (false);
+	
+	if (this->rsrc)
 	{
-		if (this->rsrc)
-			this->rsrc->set_err(504); // CGI_ERR
-		else if (this->conn)
-			this->conn->set_err(504); // CGI_ERR
-		return (true);
+		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : rsrc");
+		Session &sess = conn->sess;
+		Request &req  = sess.getRequest(); // Wrong Action on Session
+		if (req.hasHeaders())
+			WsLog::_(LVL_TMP, TGT_FCGI, "req : has headers");
+		if (req.hasBody())
+			WsLog::_(LVL_TMP, TGT_FCGI, "req : has body");
+		if (req.isComplete())
+		{
+			WsLog::_(LVL_TMP, TGT_FCGI, "req : complete ", ++to); // 1500 (!)
+			// sess body .. could be in between
+#if 0
+			// if (this == this->rsrc->ip)
+			{
+				this->lact = now;
+				this->mod_evt(-EPOLLOUT);
+// so .. timeout .. on an event we are not waiting for (?)
+// not the same as cgi pipe ... 
+				// this->rsrc->rem(this); // Wrong action on session
+// EX: main() : Wrong action on Session
+// pure virtual method called
+// terminate called without an active exception
+
+				return (false);
+			}
+#endif
+		}
+		this->rsrc->set_err(504); // CGI_ERR
 	}
-	return (false);
+	else if (this->conn)
+	{
+		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : conn");
+		this->conn->set_err(504); // CGI_ERR
+	}
+	else
+	{
+		// get this if (conn) timed out ..
+		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : ????");
+		this->conn->set_err(504); // CGI_ERR
+	}
+	return (true);
 }
 
 int		FcgiPipe::init(CgiEnv * cgienv)
