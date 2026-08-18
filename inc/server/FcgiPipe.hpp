@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:54:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:15:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class FcgiPipe : public EpollClient
 private:
 	FcgiPipe				(const FcgiPipe & that) : EpollClient(that), 
 		conn(that.conn) {};
-	FcgiPipe & operator=	(const CgiPipe & ) { return (*this); }
+	FcgiPipe & operator=	(const FcgiPipe & ) { return (*this); }
 public:
 	FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc);
 	~FcgiPipe();

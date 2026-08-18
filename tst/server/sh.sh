@@ -53,11 +53,10 @@ if [ "$1" == "a" ]; then
 fi
 
 if [ "$1" == "j" ]; then
-	# curl -X GET http://127.0.0.1:8082/bigimage.php --output data.jpg
-	# echo
-	# exit 0
+	curl -X GET http://127.0.0.1:8082/bigimage.php --output data-cgi.jpg
+	echo
 
-	curl -X GET http://127.0.0.1:8082/files/earth.jpg --output data.jpg
+	curl -X GET http://127.0.0.1:8082/files/earth.jpg --output data-file.jpg
 	echo
 	exit 0
 fi

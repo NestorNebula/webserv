@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:28:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:15:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 # include "Connection.hpp"
 # include "CgiPipe.hpp"
 # include "FcgiPipe.hpp"
-# include "bridge.hpp"
 
 enum
 {
