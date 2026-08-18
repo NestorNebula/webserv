@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:38:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 09:11:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,35 +80,21 @@ bool isDirectory(const std::string &path) {
   return S_ISDIR(statbuf.st_mode);
 }
 
-// #kd
-std::string path_ext(const std::string & path)
-{
-  std::string nstr;
+bool isCgi(const std::string &path, RouteConfig &config) {
   std::string::size_type extIndex = path.find_last_of(".");
   if (extIndex == std::string::npos || extIndex == 0 ||
       path[extIndex - 1] == '/')
-    return (nstr);
-  return (path.substr(extIndex));
-}
-
-std::string isCgi(const std::string &path, RouteConfig &config) {
-  std::string nstr;
-
-  std::string::size_type extIndex = path.find_last_of(".");
-  if (extIndex == std::string::npos || extIndex == 0 ||
-      path[extIndex - 1] == '/')
-    return nstr;
+    return false;
   std::string extension = path.substr(extIndex);
-  // bool cgi = false;
+  bool cgi = false;
   for (std::map<std::string, std::string>::const_iterator
            it = config.cgi.begin(),
            ite = config.cgi.end();
-            it != ite; it++) 
-  {
+       !cgi && it != ite; it++) {
     if (extension == it->first)
-      return (it->second);
+      cgi = true;
   }
-  return (nstr);
+  return cgi;
 }
 
 bool isCgiExtension(const std::string &path) {

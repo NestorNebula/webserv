@@ -43,21 +43,33 @@ if [[ "$1" =~ "t" ]]; then
 fi
 
 if [ "$1" == "a" ]; then
-	curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
+	# curl -X GET http://127.0.0.1:8080/bigaudio.php --output data.mp3
+	# echo
+	# exit 0
+
+	curl -X GET http://127.0.0.1:8082/files/Kanan.mp3 --output data.mp3
 	echo
 	exit 0
 fi
 
 if [ "$1" == "j" ]; then
-	curl -X GET http://127.0.0.1:8082/bigimage.php --output data.jpg
+	# curl -X GET http://127.0.0.1:8082/bigimage.php --output data.jpg
+	# echo
+	# exit 0
+
+	curl -X GET http://127.0.0.1:8082/files/earth.jpg --output data.jpg
 	echo
 	exit 0
 fi
 
 if [ "$1" == "v" ]; then
-	curl -X GET http://localhost:8081/bigvideo.php --output data.mkv
+	curl -X GET http://localhost:8082/bigvideo.php --output data.mkv
 	echo
 	exit 0
+
+	# curl -X GET http://127.0.0.1:8082/files/Black.Mirror.S07E04.mkv --output data.mkv
+	# echo
+	# exit 0
 fi
 
 
@@ -137,12 +149,6 @@ fi
 # 	 -d "p1=post-one&p2=post-two"
 # echo
 # exit 0
-
-curl -X GET 'http://localhost:8082/test.py' -i \
-	-d "p1=post-one&p2=post-two"
-echo
-exit 0
-
 
 
 curl -X POST 'http://localhost:8082/test.py' -i \

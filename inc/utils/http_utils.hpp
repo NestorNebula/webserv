@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/14 15:34:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 08:54:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,7 @@ bool isExistingFile(const std::string &path);
 
 bool isDirectory(const std::string &path);
 
-// #kd
-std::string path_ext(const std::string & path);
-std::string isCgi(const std::string &path, RouteConfig &config);
+bool isCgi(const std::string &path, RouteConfig &config);
 
 bool isCgiExtension(const std::string &path);
 
