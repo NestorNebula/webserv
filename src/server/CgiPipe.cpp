@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 21:45:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 22:06:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,7 @@ bool	CgiPipe::timeo(time_t now)
 	{
 		// MOSTLY (ip) .. but .. 
 		if (this == this->rsrc->ip)
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)");
+			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
 		else if (this == this->rsrc->op)
 			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
 			
