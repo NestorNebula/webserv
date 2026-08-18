@@ -9,6 +9,8 @@
 
     print("PHP : UPLOAD!\n");  
 
+// get this -- hang here .. 
+
 // POST Content-Length of 14976173 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 
     if (isset($_FILES['file']))

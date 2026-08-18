@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 13:09:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 14:11:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,7 @@ ssize_t	CgiPipe::pollin(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "recv:  POLLIN");
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_CGI_RECV, "conn: ", this->conn->get_fd());
@@ -186,6 +187,8 @@ ssize_t	CgiPipe::pollin(void)
 // after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
+
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
 	ssize_t	err;
 	
 	if (this->conn == NULL)
@@ -248,8 +251,14 @@ ssize_t	CgiPipe::pollout(void)
 	// ATTN : UPLOADS
 	if (!req.hasBody())
 	{
+// ATTN : changes here .. to FcigPipe as well 
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+		this->mod_evt(-EPOLLOUT);
 		return (0);
+	}
+	else if (req.isComplete())
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
 	}
 #else
 	err = this->conn->req_body_status();

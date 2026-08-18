@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:28:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 13:48:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,9 @@ static int          env_pwd(char **envp, std::string &str);
 
 int main (int argc, char ** argv, char **envp)
 {   
-
-    // std::string p("/media/kdonlon/data/Documents/42/webserv/git/tst/server/../../demo/./../tst/server/www/test.php");
-
-    // FilePath chk(p);
-    
-    // return (0);
-
     WsLog::kd();
     // WsLog::nh();
+    // WsLog::mm();
 
     if (argc < 2)
     {
@@ -83,14 +77,12 @@ int main (int argc, char ** argv, char **envp)
 
     const std::vector<ServerConfig> &servers = parser.getServers();
 
-
-
     int     err = 0;
     Epoll   *ep = NULL;
     
     try
     {
-        ep = new Epoll(envp); // , servers)
+        ep = new Epoll(envp);
        
         err = ep->serve(servers);
         if (err)

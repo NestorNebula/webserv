@@ -98,21 +98,23 @@ if [ "$1" == "u" ]; then
 	rm -f www/pl/upload*
 	rm -f www/py/upload*
 
-	FILES="tiny.jpg" # Kanan.mp3 earth.jpg tiny.jpg mid.jpg Kanan.mp3"
+# earth : timeout crashes
+	FILES="earth.jpg" #  earth.jpg tiny.jpg mid.jpg Kanan.mp3"
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
-		curl -X POST http://localhost:8081/php/ul.php -i \
-			-F file=@files/$FILE
+		curl -X POST http://localhost:8082/php/ul.php -i \
+			-F file=@www/files/$FILE
 		echo ; echo ; echo
-
-		# curl -X POST http://localhost:8081/pl/ul.pl -i \
-		# 	-F file=@files/$FILE
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@www/files/$FILE
 		# echo ; echo ; echo
-		# curl -X POST http://localhost:8081/py/ul.py -i \
-		# 	-F file=@files/$FILE
+		# curl -X POST http://localhost:8082/py/ul.py -i \
+		# 	-F file=@www/files/$FILE
 		# echo ; echo ; echo
 	done
+
+	ls -al www/p*
 
 	exit 0
 fi
