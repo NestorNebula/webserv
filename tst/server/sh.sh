@@ -67,19 +67,19 @@ if [ "$1" == "u" ]; then
 	# curl -X POST http://localhost:8081/test.php -i \
 	# 	-F p1=dash-f-one \
 	# 	-F p2=dash-f-two \
-	# 	-F file=@files/$FILE
+	# 	-F file=@www/files/$FILE
 	# echo
 	
 	# FILE="tiny.jpg"
 	# curl -X POST http://localhost:8081/test.php -i \
-	# 	-F file=@files/$FILE
+	# 	-F file=@www/files/$FILE
 	# echo
 
 	# FILE="Kanan.mp3"
 	# curl -X POST http://localhost:8081/test.php -i \
 	# 	-F p1=dash-f-one \
 	# 	-F p2=dash-f-two \
-	# 	-F file=@files/$FILE
+	# 	-F file=@www/files/$FILE
 	# echo
 
 	rm -f www/php/upload*
@@ -137,6 +137,13 @@ fi
 # 	 -d "p1=post-one&p2=post-two"
 # echo
 # exit 0
+
+curl -X GET 'http://localhost:8082/test.py' -i \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
+
+
 
 curl -X POST 'http://localhost:8082/test.py' -i \
 	-d "p1=post-one&p2=post-two"
@@ -196,7 +203,7 @@ exit 0
 # content-length is STRANGE here 
 
 # curl -X POST http://localhost:8081/test.php -i \
-# 	-d @files/earth.jpg
+# 	-d @www/files/earth.jpg
 # echo
 # exit 0
 
@@ -206,7 +213,7 @@ exit 0
 # Expect: 100-continue
 
 # curl -X POST http://localhost:8082/test.php \
-# 	-F file=@files/earth.jpg
+# 	-F file=@www/files/earth.jpg
 # echo
 # exit 0
 
@@ -218,7 +225,7 @@ exit 0
 # 	-H "Transfer-Encoding: chunked" \
 # 	-F p1=chunked_one \
 # 	-F p2=chunked_two \
-# 	-F file=@files/earth.jpg
+# 	-F file=@www/files/earth.jpg
 # echo
 # exit 0
 
