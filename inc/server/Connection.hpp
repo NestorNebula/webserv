@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:07:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:14:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,6 @@
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
 # include "CgiEnv.hpp"
-
-# include "bridge.hpp"
 
 # include "Session.hpp"
 

@@ -51,8 +51,7 @@ FILES = \
 	server/ResourceCgi.cpp \
 	server/FcgiMsg.cpp \
 	server/FcgiConn.cpp \
-	server/FcgiPipe.cpp \
-	server/bridge.cpp \
+	server/FcgiPipe.cpp
 	main.cpp
 
 # DEMO_SRC = main.cpp

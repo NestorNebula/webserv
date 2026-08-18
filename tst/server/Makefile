@@ -38,7 +38,6 @@ DEFS += -DTEST="$(TEST)"
 endif
 
 FILES = \
-	server/bridge.cpp \
 	utils/WsLog.cpp \
 	utils/helpers.cpp \
 	utils/http_utils.cpp \

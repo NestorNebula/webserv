@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:30:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:14:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # include <vector>
 # include <sstream>
 
-# include "bridge.hpp"
 # include "FilePath.hpp"
 
 // Utils.hpp

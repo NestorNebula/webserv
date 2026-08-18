@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 14:11:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 15:25:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,16 +275,6 @@ ssize_t	CgiPipe::pollout(void)
 	}
 #endif
 
-// WEBSERV : REQUEST (body)
-//   Stream *getBody() {
-//     if (_body == NULL)
-//       throw std::logic_error("accessing null body Stream");
-//     return _body;
-//   }
-// BUILD_DEMO
-	// std::string & body = this->conn->sess.req.get_body();
-	// Stream * body_stream = req.getBody();
-	
 	std::string & body = req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 	err = this->send(body);
