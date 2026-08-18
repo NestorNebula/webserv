@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=4
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -151,7 +151,7 @@ fi
 # exit 0
 
 
-curl -X POST 'http://localhost:8082/test.py' -i \
+curl -X POST 'http://localhost:8082/test.py?g1=QUERY' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

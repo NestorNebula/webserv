@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/17 14:28:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 13:28:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,8 @@ private:
 	ResourceCgi			*res_cgi;
 	int					exec_cgi(void);
 	
-	int					send_error(void);
-	std::string			estr;
+	// int					send_error(void);
+	// std::string			estr;
 	
 	struct sockaddr_in	addr;
 	std::string			astr;

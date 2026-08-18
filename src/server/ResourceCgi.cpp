@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:27:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/18 13:32:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,7 +220,7 @@ int	ResourcePiped::wait(int opt)
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	if (stat > 0)
-		this->set_err(616); // CGI_ERR
+		this->set_err(505); // 616); // CGI_ERR
 	this->pid = 0;
 	return (this->stat);
 }
@@ -302,7 +302,7 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 		return (RSRC_RESP_INIT);
 		
 	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
+	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
 	this->hed = 1;
 	
 // REQUIRE .. content-type (?)
