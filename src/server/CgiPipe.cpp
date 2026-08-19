@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 22:06:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 11:53:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,9 @@ bool	CgiPipe::timeo(time_t now)
 			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : complete ", ++to); // 1500 (!)
 			if (this == this->rsrc->ip)
 			{
+// timeout on IP is allowed .. 
+// though .. it SHOULD have been shut down
+// when the request was fully sent to it
 				// expected .. if delivering large file 
 				this->lact = now;
 				// this->mod_evt(-EPOLLOUT);
@@ -160,17 +163,18 @@ bool	CgiPipe::timeo(time_t now)
 				return (false);
 			}
 		}
-		this->rsrc->set_err(504); // CGI_ERR
+		this->rsrc->set_err(504); // Gateway Timeout
 	}
 	else if (this->conn)
 	{
 		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn");
-		this->conn->set_err(504); // CGI_ERR
+		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
 	{
 		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : ????");
-		this->conn->set_err(504); // CGI_ERR
+		// (conn) does not exist !
+		// this->conn->set_err(504); // Gateway Timeout
 	}
 	return (true);
 }
@@ -192,7 +196,7 @@ ssize_t	CgiPipe::pollin(void)
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
-		this->rsrc->set_err(501); // CGI_ERR : read failed
+		this->rsrc->set_err(500); // Internal Server Error
 		return (err);
 	}
 	if (err == 0)
@@ -231,47 +235,10 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-// WEBSERV : REQUEST (body)
 	Session &sess = conn->sess;
 	Request &req  = sess.getRequest();
 	
-#if 1
-// this is where WORK needs to be DONE
-// also -- when coming back
-// of course, I want BOTH
-// 1)  wait until Request is COMPLETE (body FULLY read)
-	// before doing ANYTHING
-		// launching CGI
-		// opening (fd) for UPLOAD
-// 2)  once Request HEADER is VALID
-	// launch CGI
-	// open (fd) for UPLOAD
-	// ...
-	// WHILE body is RECEIVED
-		// SEND to (cgi) [ or .. store in string for flush ]
-		// WRITE to UPLOAD (fd)
-		
-// STILL : want to consider .. all action in Connection
-// EpollClients .. matched by (fd)
-// BUT : evt.data.ptr .. is always (Connection)
-//  SO : when events() is called .. 
-	// check (fd)
-// pre-set event STATE in Epoll BEFORE calling events
-	// Conn :: input  / Cgi :: output
-		// 1) Conn gets input from client .. 
-			// q) is Cgi available to WRITE to (?)
-		// 2) Cgi can be written to
-			// q) does Conn have data, or need to fetch some (?)
-		
-	// Conn :: output / Cgi :: input 
-		// 1) Conn can output  to client
-			// q) does Cgi have data we can READ from
-		// 2) Cgi has data on stdout
-			// q) can Conn output to client 
-	
-// whichever comes FIRST .. can check the other ..
-// and UNSET its EVENT 
-
+// ATTN : changes here .. to FcigPipe as well 
 	// if (req.isComplete())
 	// {
 	// 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
@@ -286,7 +253,6 @@ ssize_t	CgiPipe::pollout(void)
 	// ATTN : UPLOADS
 	if (!req.hasBody())
 	{
-// ATTN : changes here .. to FcigPipe as well 
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
@@ -295,21 +261,7 @@ ssize_t	CgiPipe::pollout(void)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
 	}
-	
-#else
-	err = this->conn->req_body_status();
-	if (err < 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
-		return (-1);
-	}
-	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
-		this->mod_evt(0);
-		return (0);
-	}
-#endif
+
 
 	std::string & body = req.get_body();
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
@@ -317,7 +269,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
-		this->rsrc->set_err(502); // CGI_ERR : write failed
+		this->rsrc->set_err(500); // Internal Server Error
 		return (err);
 	}
 	if (err == 0)

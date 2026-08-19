@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:39:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 11:26:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,6 +262,8 @@ int	Epoll::exec(void)
 
 void	Epoll::check_timeo(void)
 {
+	// WsLog::_(LVL_DBG, TGT_EPOLL, "timeout : ", clients.size());
+
 	time_t	n;
 	
 	n = time(&n);
@@ -273,7 +275,7 @@ void	Epoll::check_timeo(void)
 	{
 		if ((*it)->timeo(n))
 		{
-			WsLog::_(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			// WsLog::_(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
 		}
 		it++;
 	}

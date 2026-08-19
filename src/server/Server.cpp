@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 08:32:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 10:48:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,9 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	this->addr.sin_port			= htons(this->port);
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
-
-// WEBSERV -- CONFIG_PARSER
-	// server config .. should have root
-
+// #kd
 // FUCKING UGLY:
 	std::string git_root = conf.root + std::string("../");
-	
 	fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
 	pycgi = git_root + std::string("pycgi/");
 };

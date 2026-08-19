@@ -1,7 +1,7 @@
 NAME=test
 
 CC=c++
-CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP -g3
 # -Wno-unused
 # -Wshadow=local
 

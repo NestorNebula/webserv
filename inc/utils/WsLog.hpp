@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 16:54:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 10:50:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,12 +127,6 @@ public:
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 
-	// static void pwd(void)
-	// {
-	// 	char buf[256];
-	// 	char *pwd = getcwd(buf, 256); // WEBSERV : illegal function
-	// 	std::cerr << "PWD   : " << pwd << std::endl;
-	// }
 	static void	kd(void);
 	static void mm(void) {}
 	static void	nh(void);

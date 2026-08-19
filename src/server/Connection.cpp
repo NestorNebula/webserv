@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 22:01:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 12:25:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,21 +50,19 @@ bool	Connection::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-	if ((this->lact + CONN_TIMEOUT) < now) // server (?)
-	{
-		// php-fpm : gets this .. 
-		// php-cgi : (ip) times out ... but it should not have been active anyway .. 
-		WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
-		// FWIW : normal (cgi) seems to survive low timeout values better .. 
-		if (this->res_cgi)	
-			this->res_cgi->conn_closed(); 
-		this->set_err(408);
-		return (true);
-	}
-	return (false);
+	if ((this->lact + CONN_TIMEOUT) > now)
+		return (false);
+		
+	// php-fpm : gets this .. 
+	// php-cgi : (ip) times out ... but it should not have been active anyway .. 
+	WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
+	// FWIW : normal (cgi) seems to survive low timeout values better .. 
+	if (this->res_cgi)	
+		this->res_cgi->conn_closed(); 
+	this->set_err(408); // Request Timeout 
+	return (true);
 }
 
-// WEBSERV : ERROR
 void	Connection::set_err(int e)
 {
 	if (e == 0)
@@ -77,13 +75,15 @@ void	Connection::set_err(int e)
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
-	// this->error = e;
 	WsLog::_(LVL_DBG, TGT_CONN, "err:  ", e);
+	this->error = e; // why not (?)
 	this->sess.setError(e);
 	this->mod_evt(EPOLLOUT);
 }
 
 ssize_t	Connection::pollin(void)
+{
+try
 {
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
 	sess.log_next();
@@ -100,48 +100,60 @@ ssize_t	Connection::pollin(void)
 	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
+		// FCGI : may need to END STDIN
 		this->mod_evt(EPOLLOUT); 
+
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-// WEBSERV : SESSION (write)
 	sess.log_next();
-	// if (sess.nextAction() == Session::RDSOCK)
 	switch(sess.nextAction())
 	{
 	case Session::RDSOCK:
 	case Session::DOCGI:
 		sess.write(this->ibuf, err);
 		break;
+	case Session::CLOSE:
+		return (-1);
 	default:
 		break;
 	}
+	// Request & req = sess.getRequest();
+	// (void)req;
 	switch (sess.nextAction()) 
 	{
-		case Session::DOCGI:
-			if (this->exec_cgi() < 0)
-			{
-				WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
-				this->set_err(404); // CGI_ERR
-				// this->set_err(404); // siege-friendly
-				return (0); // send error
-			}
-			// req_cnt
-			this->res_cgi->push_body();
-			break;
-		case Session::WRSOCK:
-			this->req_cnt++;
-			this->mod_evt(EPOLLOUT);
-			break;
-		case Session::RDSOCK:
-			break;
-		case Session::KPALIVE:
-			return (-1);
-		case Session::CLOSE:
-			return (-1);
+	case Session::DOCGI:
+		if (this->exec_cgi() < 0)
+		{
+			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+			return (0); // send error
+		}
+		// data has been written to (sess)
+		this->res_cgi->push_body();
+		break;
+	case Session::WRSOCK:
+		this->req_cnt++;
+		this->mod_evt(EPOLLOUT);
+		break;
+	case Session::RDSOCK:
+		break;
+	case Session::KPALIVE:
+		return (-1);
+	case Session::CLOSE:
+		return (-1);
 	}
 	return (err);
+}
+catch(const std::exception& e)
+{
+	// not bigaudio.php friendly
+	// linked to TIMEOUT (?)
+	// set an error (?)
+	std::cerr << "POLLIN " << e.what() << '\n';
+	this->set_err(404);
+}
+	return (0);
 }
 
 // ∗ Just remember that, for chunked requests, your server needs to un-chunk them, 
@@ -151,6 +163,8 @@ ssize_t	Connection::pollin(void)
 // ∗ The CGI should be run in the correct directory for relative path file access.
 
 ssize_t	Connection::pollout(void)
+{
+try
 {
 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	
@@ -174,7 +188,7 @@ ssize_t	Connection::pollout(void)
 		}
 		switch (err)
 		{
-		case 0:
+		case 0: // ENUM
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
 			this->mod_evt(-EPOLLOUT);
 			return (err);
@@ -234,19 +248,32 @@ ssize_t	Connection::pollout(void)
 	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
 	sess.log_next();
-	if (sess.nextAction() == Session::KPALIVE)
+	switch (sess.nextAction())
 	{
+	case Session::KPALIVE:
 		this->reset();
 		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
 		return (-1);
+	case Session::CLOSE:
+		return (-1);
+	default:
+		break;
 	}
 	return (err);
+}
+catch(const std::exception& e)
+{
+	// not bigaudio.php friendly
+	std::cerr << "POLLOUT " << e.what() << '\n';
+	this->set_err(404);
+}
+	return (0);
 }
 
 int	Connection::rdhup(void)
 {
-	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
-	// check res status (?)
+	WsLog::color(WSL_GREEN);
+	WsLog::_(LVL_TMP, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
 	return (-1); // may need error (?)
 	return (0);
@@ -270,8 +297,7 @@ void	Connection::reset(void)
 		delete (this->res_cgi); // conn : reset 
 		this->res_cgi = NULL;
 	}
-	
-// WEBSERV : SESSION (keep-alive)
+
 	this->sess.reset();
 	this->error = 0;
 	this->mod_evt(EPOLLIN);
@@ -308,18 +334,19 @@ std::string		&Connection::get_addr(void)
 	// (-1) : there is no more body data to write to the CGI
 
 // WEBSERV : REQUEST (body)
-int	Connection::req_body_status(void)
-{
-	int	err = -1; // DEMO (!) this->sess.req.body_stat();
+// int	Connection::req_body_status(void)
+// {
+// 	int	err = -1; // DEMO (!) this->sess.req.body_stat();
 
-	if (err == 1) // body.size()
-		return (1);
-	if (err == 0) // not done
-		return (0); 
+// 	if (err == 1) // body.size()
+// 		return (1);
+// 	if (err == 0) // not done
+// 		return (0); 
 		
-	this->mod_evt(EPOLLOUT); // seems wrong 		
-	return (-1);
-}
+// 	// IMPORTANT
+// 	this->mod_evt(EPOLLOUT); // seems wrong 		
+// 	return (-1);
+// }
 
 // called on ~CgiPipe()
 void	Connection::cgi_rem(EpollClient *epc)
@@ -391,7 +418,6 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 
-	// WsLog::pwd();
 	pid_t pid = fork();
 	if (pid < 0)
 	{

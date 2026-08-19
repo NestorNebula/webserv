@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 16:24:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 10:48:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,15 +55,16 @@ int     CgiEnv::from_conn(Connection & conn)
 	Request &req  = sess.getRequest();
 	const Headers &headers = req.getHeaders();
 
-// WEBSERV : SERVER
 	if (!req.hasMethod())
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
+		conn.set_err(400); // Bad Request
 		return (-1);
 	}
 	if (!req.hasURL())
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "URL not set");
+		conn.set_err(400); // Bad Request
 		return (-1);
 	}
 	
@@ -82,7 +83,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (access(script.path.c_str(), F_OK))
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
-		conn.set_err(404);
+		conn.set_err(404); // File Not Found
 		return (-1);
 	}
 	
@@ -113,6 +114,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	else
 	{
 		WsLog::_(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
+		conn.set_err(403); // Forbidden
 		return (-1);
 	}
 	this->args[0] = info.executablePath.c_str();
