@@ -44,7 +44,7 @@ void TemporaryFileStream::openTmpFile() {
       _stream = fstream;
     } else {
       delete fstream;
-      throw std::runtime_error("Impossible to open temporary file stram");
+      throw std::runtime_error("Impossible to open temporary file stream");
     }
   }
   std::ostringstream oss;
@@ -55,7 +55,7 @@ void TemporaryFileStream::openTmpFile() {
 std::string TemporaryFileStream::getNextFilePath() {
   const static std::string safeChars(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
-  const static std::string path(".tmp/");
+  const static std::string path = isDirectory(".tmp") ? ".tmp/" : "./.";
   static std::string filename = safeChars.substr(0, 1);
 
   while (access(std::string(path + filename).c_str(), F_OK) == 0) {
