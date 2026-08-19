@@ -24,6 +24,16 @@ if [[ "$1" =~ "p" ]]; then
 	echo
 fi
 
+if [[ "$1" =~ "y" ]]; then
+	siege http://localhost:8082/test.py --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
+if [[ "$1" =~ "l" ]]; then
+	siege http://localhost:8082/test.pl --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
 
 if [[ "$1" =~ "f" ]]; then
 	siege -f urls/fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
@@ -123,13 +133,25 @@ if [ "$1" ]; then
 	exit 0
 fi
 
+# -H "Transfer-Encoding: chunked" 
+# curl -i -X POST -F @www/files/earth.jpg http://127.0.0.1:7777/php/ul.php
+# echo
+# exit 0
+
 # -H "Connection: keep-alive" \
 
 	# -d "p1=post-one&p2=post-two" \
-# curl -X POST http://localhost:8081/test.php -i \
-# 	-H "Content-Type: application/x-www-form-urlencoded"
+# curl -X POST http://localhost:7777/test.php -i \
+# 	-H "Content-Type: application/x-www-form-urlencoded" \
+# 	 -H "Transfer-Encoding: chunked" \
+# 	-d @wtf.txt
 # echo
 # exit 0
+
+curl -X GET http://localhost:8082/to.php -i
+echo
+exit 0
+
 
 # curl -X GET http://localhost:8081/py/ul.py -i
 # echo
@@ -150,6 +172,34 @@ fi
 # 	 -d "p1=post-one&p2=post-two"
 # echo
 # exit 0
+
+# Content-Length: 463274
+# Content-Type: multipart/form-data; boundary=------------------------86fb49c9ac1e2c93
+
+# --------------------------86fb49c9ac1e2c93
+# Content-Disposition: form-data; name="data"; filename="earth.jpg"
+# Content-Type: image/jpeg
+
+# ����ExifII�
+# curl -i -X POST -H "Content-Type: multipart/form-data" \
+# 	 -F "data=@www/files/earth.jpg" http://127.0.0.1:8082/media/1234/uploads
+# echo
+# exit 0
+
+
+# content-length tells cgi when it has enough
+	# -H "Transfer-Encoding: chunked" \
+
+	# -H "Content-Type: application/x-www-form-urlencoded" \
+	# -H "Transfer-Encoding: chunked" \
+curl -X POST http://localhost:8082/test.php \
+	-F p1=chunked_one \
+	-F p2=chunked_two \
+	-F file=@www/files/earth.jpg
+echo
+exit 0
+
+
 
 
 curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
@@ -224,15 +274,5 @@ exit 0
 # echo
 # exit 0
 
-# content-length tells cgi when it has enough
-	# -H "Transfer-Encoding: chunked" \
 
-	# -H "Content-Type: application/x-www-form-urlencoded" \
-# curl -X POST http://localhost:8082/test.php \
-# 	-H "Transfer-Encoding: chunked" \
-# 	-F p1=chunked_one \
-# 	-F p2=chunked_two \
-# 	-F file=@www/files/earth.jpg
-# echo
-# exit 0
 

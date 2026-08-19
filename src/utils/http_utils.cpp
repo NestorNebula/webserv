@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 17:59:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 09:49:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,8 +136,13 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[431] = "Request Header Fields Too Large";
     reasons[500] = "Internal Server Error";
     reasons[501] = "Not Implemented";
+// #kd
+    reasons[502] = "Bad Gateway";
+    reasons[504] = "Gateway Timeout";
     reasons[505] = "HTTP Version Not Supported";
   }
+
+
   std::map<int, std::string>::const_iterator reason = reasons.find(code);
   if (reason != reasons.end())
     return reason->second;

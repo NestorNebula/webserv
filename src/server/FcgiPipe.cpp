@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 21:43:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 11:46:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ bool	FcgiPipe::timeo(time_t now)
 	if ((this->lact + CGI_TIMEOUT) > now)
 		return (false);
 	
+// tricky .. CGI at (2s)
+
 	if (this->rsrc)
 	{
 		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : rsrc");
@@ -69,18 +71,20 @@ bool	FcgiPipe::timeo(time_t now)
 			}
 #endif
 		}
-		this->rsrc->set_err(504); // CGI_ERR
+		// may still need to receive .. 
+		this->rsrc->set_err(504); // Gateway Timeout
 	}
 	else if (this->conn)
 	{
 		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : conn");
-		this->conn->set_err(504); // CGI_ERR
+		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
 	{
-		// get this if (conn) timed out ..
 		WsLog::_(LVL_TMP, TGT_FCGI, "TIMEO : ????");
-		this->conn->set_err(504); // CGI_ERR
+		// why doesn't return (true) kill it 
+		// but .. no (conn) anymore 
+		// this->conn->set_err(504); // CGI_ERR
 	}
 	return (true);
 }
@@ -121,7 +125,7 @@ ssize_t	FcgiPipe::pollin(void)
 	{
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
-		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
+		// WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
 		return (0);
 	}
 	
@@ -213,7 +217,7 @@ ssize_t	FcgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WsLog::_(LVL_ERR, TGT_FCGI, "send");
-		this->rsrc->set_err(502); // CGI_ERR : write failed
+		this->rsrc->set_err(500); // Internal Server Error
 		return (err);
 	}
 	if (err == 0)
@@ -226,7 +230,7 @@ ssize_t	FcgiPipe::pollout(void)
 	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
 	this->mod_evt(EPOLLIN); 
-
+#if 0 // still need to send NULL (?)
 	if (req.isComplete())
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
@@ -234,6 +238,7 @@ ssize_t	FcgiPipe::pollout(void)
 		// this->mod_evt(EPOLLIN);
 		return (0);
 	}
+#endif 
 	return (0);
 }
 
@@ -260,22 +265,28 @@ int		FcgiPipe::rdhup(void)
 // STATE CHECK
 // find TEST CASES
 	// still need to send BODY_DONE 
+	// may be error (?)
 	if (this->rsrc->resp.size())
 	{
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: resp.size()");
+		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
+		// THIS REALLY HELPED
+		this->conn->mod_evt(EPOLLOUT);
 		return (0);
 	}
-#if 1
-	if (this->conn->req_body_status() >= 0)
-	{
-		
-		WsLog::color(WSL_GREEN);
-		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: body status");
-		return (0);
-	}
-#endif
+	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
+// #if 1
+// 	if (this->conn->req_body_status() >= 0)
+// 	{
+		
+// 		WsLog::color(WSL_GREEN);
+// 		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: body status");
+// 		return (0);
+// 	}
+// #endif
+// 	return (-1);
 }
 
 int		FcgiPipe::hup(void)

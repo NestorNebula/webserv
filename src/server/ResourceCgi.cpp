@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 21:03:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/19 11:53:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ int	ResourcePiped::status(void)
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (2);
-		return (-1);
+		return (-1); // EXITED
 	}
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
@@ -219,8 +219,9 @@ int	ResourcePiped::wait(int opt)
 	{
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
-	if (stat > 0)
-		this->set_err(505); // 616); // CGI_ERR
+		// thsi might have been the mod_cli problem
+	// if (stat > 0)
+	// 	this->set_err(505); // 616); // CGI_ERR
 	this->pid = 0;
 	return (this->stat);
 }
