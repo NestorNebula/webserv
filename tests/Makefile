@@ -41,13 +41,6 @@ PROJECT_SRC = $(SRC_DIR)/http/Headers.cpp \
 			  $(SRC_DIR)/parsing/ParserTools.cpp \
 			  $(SRC_DIR)/parsing/Tokenizer.cpp \
 			  $(SRC_DIR)/parsing/Validation.cpp \
-			  $(SRC_DIR)/server/CgiEnv.cpp \
-			  $(SRC_DIR)/server/CgiPipe.cpp \
-			  $(SRC_DIR)/server/Connection.cpp \
-			  $(SRC_DIR)/server/Epoll.cpp \
-			  $(SRC_DIR)/server/EpollClient.cpp \
-			  $(SRC_DIR)/server/Server.cpp \
-			  $(SRC_DIR)/server/Socket.cpp \
 
 TEST_SRC_DIR = .
 
@@ -56,6 +49,7 @@ TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
 		   $(TEST_SRC_DIR)/StaticResource.cpp \
 		   $(TEST_SRC_DIR)/DirectoryResource.cpp \
 		   $(TEST_SRC_DIR)/BuiltinResource.cpp \
+			 $(TEST_SRC_DIR)/TemporaryFileStream.cpp \
 		   $(TEST_SRC_DIR)/http_utils.cpp \
 		   $(TEST_SRC_DIR)/Session.cpp \
 		   $(TEST_SRC_DIR)/main.cpp
