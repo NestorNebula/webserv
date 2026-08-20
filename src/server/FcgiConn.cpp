@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:49:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 21:14:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void FcgiConn::req_body(char *buf, int siz)
 {
 	FcgiMsg		body;
 	
-	if (buf)
+	if (buf && siz)
 		body.add_stdin(buf, siz);
 	else
 		body.end_stdin();

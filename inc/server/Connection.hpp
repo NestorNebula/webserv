@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:32:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 21:22:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ public:
 	
 	Session			sess;
 	Server			&serv;
-	// int				req_body_status(void);
 	
 	void			cgi_rem(EpollClient *epc);
 	

@@ -96,6 +96,12 @@ fpm-stop:
 fpm-run: fpm-conf
 	cd FCGI && ./install.sh run
 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp | $(OBJ_DIR)
+	@echo "$(<F)$(\t)=>$(\t)$(@F)"
+	@$(CC) $(DEFS) $(CFLAGS) -o $@ -c $<
+
+# ATTN : these rules over-rode detection of changes in (hpp) files 
+# ---- : when they were place BEFORE it
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
 	@$(CC) $(DEFS) $(CFLAGS) -o $@ -c $<
@@ -104,9 +110,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
 	@$(CC) $(DEFS) $(CFLAGS) -o $@ -c $<
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp | $(OBJ_DIR)
-	@echo "$(<F)$(\t)=>$(\t)$(@F)"
-	@$(CC) $(DEFS) $(CFLAGS) -o $@ -c $<
+
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)

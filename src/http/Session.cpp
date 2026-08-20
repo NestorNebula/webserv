@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/19 12:09:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 17:59:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,10 @@
 #include <sstream>
 #include <sys/stat.h>
 
-#ifndef BUFSIZE
-#define BUFSIZE 4096
-#endif
+// #kd - moved to SizeDefs.hpp
+// #ifndef BUFSIZE
+// #define BUFSIZE 4096
+// #endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete())
@@ -340,8 +341,8 @@ void Session::handleUpload() {
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WsLog::_(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
-    char buf[BUFSIZE];
-    while (bodyStream->read(buf, BUFSIZE))
+    char buf[STREAM_READ_SIZ];
+    while (bodyStream->read(buf, STREAM_READ_SIZ))
       ofs.write(buf, bodyStream->gcount());
     if (bodyStream->eof() && bodyStream->gcount())
       ofs.write(buf, bodyStream->gcount());

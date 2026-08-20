@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 16:34:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 20:18:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
+#include "SizeDefs.hpp"
 
 class Session {
 public:
@@ -111,18 +112,18 @@ private:
   Stream::streamsize _sent;
 
 
-// #kd - get_resp => ostr
+// #kd
 public:
-  std::string _ostr;
+  std::string resp;
   std::string &get_resp(void)
   {
-    if (_ostr.size())
-      return (_ostr);
-    char buf[4096];
-    int err = this->read(buf, 4096);
-    if (err)
-      _ostr.append(buf, err);
-    return (_ostr);
+    if (resp.size())
+      return (resp);
+    char buf[RSP_READ_SIZ];
+    int err = this->read(buf, RSP_READ_SIZ);
+    if (err > 0)
+      resp.append(buf, err);
+    return (resp);
   }
   void  log_next(void)
   {

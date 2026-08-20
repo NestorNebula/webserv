@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 14:03:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 22:56:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,59 @@ bool	CgiPipe::timeo(time_t now)
 	return (true);
 }
 
+// The server is in no way obligated to send end-of-file 
+// after the script reads CONTENT_LENGTH bytes. 
+ssize_t	CgiPipe::pollout(void)
+{
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
+	
+	ssize_t	err;
+	
+	if (this->conn == NULL)
+		return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
+
+	switch(rsrc->req_body())
+	{
+	case -1:
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
+		this->mod_evt(0);
+		return (0);
+	case -2:
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+		this->mod_evt(-EPOLLOUT);
+			
+		// this->mod_evt(EPOLLIN);
+		// return (-1);
+		
+		return (0); // upload (bigfile?) needs this 
+		// this->mod_evt(EPOLLIN);
+		// return (-1); // no body .. nothing to do
+	case -3:
+		// rsrc->set_done(RSRC_DONE_IP);
+		return (-1);
+	default:
+		break;
+	}
+
+	err = this->send(rsrc->body);
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+		this->rsrc->set_err(500); // Internal Server Error
+		return (err);
+	}
+	if (err == 0)
+	{
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		// rsrc->set_done(RSRC_DONE_IP);
+		return (-1);
+	}
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+	return (0);
+}
+
 ssize_t	CgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
@@ -221,66 +274,6 @@ ssize_t	CgiPipe::pollin(void)
 		break;
 	}
 	return (err);
-}
-
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
-ssize_t	CgiPipe::pollout(void)
-{
-
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
-	ssize_t	err;
-	
-	if (this->conn == NULL)
-		return (-1);
-	if (this->rsrc == NULL)
-		return (-1);
-
-	Session &sess = conn->sess;
-	Request &req  = sess.getRequest();
-	
-// ATTN : changes here .. to FcgiPipe as well 
-	// if (req.isComplete())
-	// {
-	// 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
-	// 	return (-1);
-	// }
-	if (!req.hasHeaders())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
-		this->mod_evt(0);
-		return (0);
-	}
-	// ATTN : UPLOADS
-	if (!req.hasBody())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
-		this->mod_evt(-EPOLLOUT);
-		return (0);
-	}
-	else if (req.isComplete())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
-	}
-
-
-	std::string & body = req.get_body();
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
-	err = this->send(body);
-	if (err < 0)
-	{
-		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
-		this->rsrc->set_err(500); // Internal Server Error
-		return (err);
-	}
-	if (err == 0)
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
-		// rsrc->set_done(RSRC_DONE_IP);
-		return (-1);
-	}
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
-	return (0);
 }
 
 int		CgiPipe::rdhup(void)

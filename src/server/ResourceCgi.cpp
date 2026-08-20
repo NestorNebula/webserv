@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:39:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 22:56:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,11 +105,13 @@ int	ResourceFcgi::status(void)
 	if (!this->hed && this->fcgi)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
+		this->fcgi->mod_evt(EPOLLOUT);	
 		return (0); // NEED_HEAD
 	}
 
+		// HAVE_SOME_DATA
 	if (this->resp.size())
-		return (1); // HAVE_DATA
+		return (1);
 	
 	if (this->fcgi == NULL)
 	{
@@ -118,6 +120,10 @@ int	ResourceFcgi::status(void)
 			return (2);
 		return (-1);
 	}
+	// not yet deleted ... 
+	// but .. resp still has data
+
+	// STILL RUNNING
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 	this->fcgi->mod_evt(EPOLLIN);
@@ -135,25 +141,27 @@ int	ResourcePiped::status(void)
 	if (!this->hed && this->ip)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
+		this->ip->mod_evt(EPOLLOUT);		
 		return (0); // NEED_HEAD
 	}
 
+	// HAVE_SOME_DATA
 	if (this->resp.size())
-		return (1); // HAVE_DATA
+		return (1);
 	
 	if (this->wait(WNOHANG) != -1)
 	{
 		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (2);
-		return (-1); // EXITED
+		return (-1);
 	}
+	// STILL RUNNING
+	
 	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 	if (this->op)
 		this->op->mod_evt(EPOLLIN);
-	if (this->ip)
-		this->ip->mod_evt(EPOLLOUT);
 	return (0); // NEED_DATA
 }
 
@@ -219,6 +227,8 @@ int	ResourcePiped::wait(int opt)
 	{
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
+	// if (this->stat > 0)
+	// 	this->set_err(500);
 	this->pid = 0;
 	return (this->stat);
 }
@@ -323,6 +333,40 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	ostr.insert(0, stat_hed);
 	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", this->ostr);	
 	return (RSRC_RESP_HEAD);
+}
+
+int	ResourceCgi::req_body(void)
+{
+	Session &sess = conn->sess;
+	Request &req  = sess.getRequest();
+
+	if (body.size())
+		return (1);
+		
+	if (!req.hasHeaders())
+	{
+		WsLog::_(LVL_DBG, TGT_RSRC, "req : (!) hasHeaders");
+		return (-1);
+	}
+	if (!req.hasBody())
+	{
+		WsLog::_(LVL_DBG, TGT_RSRC, "req : (!) hasBody");
+		if (req.isComplete())
+			return (-3);
+		return (-2);
+	}
+
+	Stream * rbody = req.getBody();
+
+    char buf[REQ_READ_SIZ];
+    ssize_t err = rbody->readsome(buf, REQ_READ_SIZ);
+    WsLog::_(LVL_DBG, TGT_CGI, "SOME: ", err);
+	if (err <= 0)
+		return (-3);
+    body.append(buf, err);
+    WsLog::_(LVL_DBG, TGT_CGI, "body: ", body.size());
+
+	return (body.size());
 }
 
 int		ResourceCgi::recv_data(char *buf, int siz)

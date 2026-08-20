@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:14:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 21:51:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ public:
 	int				recv_data(char *buf, int siz);
 	int				chk_rsp_hed(std::string & ostr);
 	void			set_err(int e);
+	int				req_body(void);
 	std::string &	get_resp(void) { return (this->resp); }
 	int				set_done(int d)
 	{
@@ -62,6 +63,7 @@ public:
 	int				hed; // state - input 
 	int				error;
 	int				done;
+	std::string		body; // Request
 	std::string		resp;
 	
 	virtual void	push_body(void) = 0;

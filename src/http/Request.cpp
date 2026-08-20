@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 14:12:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 22:48:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ void Request::append(const std::string &data) {
     WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
   }
-// #kd - may be heavy
-  // WsLog::_(LVL_INFO, TGT_REQ, "Request received data: ", data);
+// #kd - ATTN (!)
+  // WsLog::_(LVL_TMP, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));
@@ -161,6 +161,7 @@ void Request::setupBody() {
 }
 
 void Request::handleBody(std::string body, std::string::size_type eol) {
+// #kd - DO NOT USE TEMP FILES
   if (false) { // !_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
     TemporaryFileStream *bodyFile = new TemporaryFileStream();
     *bodyFile << _body->rdbuf();

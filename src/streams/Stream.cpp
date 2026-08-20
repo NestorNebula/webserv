@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 16:21:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 18:20:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ Stream::streamsize Stream::size() {
 }
 
 Stream &Stream::read(std::string &s) {
-  static const streamsize maxReadSize = 4096;
+  static const streamsize maxReadSize = STREAM_READ_SIZ;
   const streamsize available = this->size() - this->tellg();
   if (available <= 0)
     return *this;
