@@ -26,7 +26,7 @@ TEST(StaticResource, BasicFile) {
 	oss1 << fstream.rdbuf();
 
 	resource.generate();
-	oss2 << resource.stream().rdbuf();
+	oss2 << resource.stream().str();
 
 	EXPECT_TRUE(resource.done());
 	EXPECT_FALSE(resource.inProgress());
@@ -41,7 +41,7 @@ TEST(StaticResource, AsInterfacePtr) {
 	oss1 << fstream.rdbuf();
 
 	resource->generate();
-	oss2 << resource->stream().rdbuf();
+	oss2 << resource->stream().str();
 
 	EXPECT_TRUE(resource->done());
 	EXPECT_FALSE(resource->inProgress());
@@ -57,7 +57,7 @@ TEST(StaticResource, EmptyFile) {
 	oss1 << fstream.rdbuf();
 
 	resource.generate();
-	oss2 << resource.stream().rdbuf();
+	oss2 << resource.stream().str();
 
 	EXPECT_TRUE(resource.done());
 	EXPECT_FALSE(resource.inProgress());
@@ -72,7 +72,7 @@ TEST(StaticResource, LargeFile) {
 	oss1 << fstream.rdbuf();
 
 	resource.generate();
-	oss2 << resource.stream().rdbuf();
+	oss2 << resource.stream().str();
 
 	EXPECT_TRUE(resource.done());
 	EXPECT_FALSE(resource.inProgress());

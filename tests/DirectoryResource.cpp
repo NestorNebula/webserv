@@ -44,7 +44,7 @@ TEST(DirectoryResource, ClassicDirectory) {
 
 	resource.generate();
 	std::stringstream oss;
-	oss << resource.stream().rdbuf();
+	oss << resource.stream().str();
 	EXPECT_TRUE(resource.done());
 	EXPECT_FALSE(resource.inProgress());
 	EXPECT_FALSE(resource.failed());
@@ -58,7 +58,7 @@ TEST(DirectoryResource, AsInterfacePtr) {
 
 	resource->generate();
 	std::stringstream oss;
-	oss << resource->stream().rdbuf();
+	oss << resource->stream().str();
 	EXPECT_TRUE(resource->done());
 	EXPECT_FALSE(resource->inProgress());
 	EXPECT_FALSE(resource->failed());

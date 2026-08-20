@@ -53,3 +53,35 @@ TEST(TemporaryFileStream, AlternateWriteAndRead) {
   stream.read(buf, str.size());
   EXPECT_EQ(std::string(buf, str.size()), str);
 }
+
+TEST(TemporaryFileStream, FromStream) {
+  std::string w1("Hello"), w2("world!");
+  Stream stream(new std::stringstream());
+  stream << w1 + " " + w2;
+  std::string s;
+  stream >> s;
+  TemporaryFileStream tempFileStream(stream);
+  EXPECT_EQ(tempFileStream.str(), " " + w2);
+  EXPECT_EQ(stream.tellg(), stream.size());
+}
+
+TEST(TemporaryFileStream, FromStreamThenRead) {
+  std::string w1("Hello"), w2("world!");
+  Stream stream(new std::stringstream());
+  stream << w1 + " " + w2;
+  std::string s;
+  stream >> s;
+  TemporaryFileStream tempFileStream(stream);
+  EXPECT_EQ(tempFileStream.str(), " " + w2);
+  tempFileStream >> s;
+  EXPECT_EQ(s, w2);
+}
+
+TEST(TemporaryFileStream, FromStreamThenWrite) {
+  std::string w1("Hello"), w2("world!");
+  Stream stream(new std::stringstream());
+  stream << w1;
+  TemporaryFileStream tempFileStream(stream);
+  tempFileStream << " " + w2;
+  EXPECT_EQ(tempFileStream.str(), w1 + " " + w2);
+}
