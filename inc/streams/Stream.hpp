@@ -63,12 +63,14 @@ public:
   bool bad() const;
   bool operator!() const;
   operator void *() const;
-  streambuf *rdbuf() const;
-  streambuf *rdbuf(streambuf *sb);
 
   // Custom methods
   streamsize size();
   Stream &read(std::string &s);
+
+  // Create a string from Stream content.
+  // Should only be used on small-sized Streams or for testing.
+  std::string str();
 
   template <typename T> Stream &operator>>(T &t) {
     throwIfNull();
