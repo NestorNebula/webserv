@@ -17,6 +17,10 @@
 class TemporaryFileStream : public Stream {
 public:
   TemporaryFileStream();
+
+  // Create a TemporaryFileStream containing the data from the given Stream
+  // This consumes the data available in the given Stream
+  TemporaryFileStream(Stream &);
   virtual ~TemporaryFileStream();
 
 private:

@@ -161,8 +161,7 @@ void Request::setupBody() {
 
 void Request::handleBody(std::string body, std::string::size_type eol) {
   if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
-    TemporaryFileStream *bodyFile = new TemporaryFileStream();
-    *bodyFile << _body->rdbuf();
+    TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
     delete _body;
     _body = bodyFile;
     _hasLargeBody = true;
@@ -209,4 +208,10 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
     _remainingBody = std::string::npos;
   }
   _raw.erase(0, eol + 2);
+}
+
+Stream::streamsize Request::availableBody() const {
+  if (!hasBody())
+    return (0);
+  return _body->size() - _body->tellg();
 }

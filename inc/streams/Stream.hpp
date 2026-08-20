@@ -17,10 +17,10 @@
 
 class Stream {
 public:
-  Stream() : _stream(NULL) {
+  Stream() : _stream(NULL), _g(0), _p(0), _gcount(0) {
     WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
   }
-  Stream(std::iostream *stream) : _stream(stream) {}
+  Stream(std::iostream *stream, std::streampos g = 0, std::streampos p = 0) : _stream(stream), _g(g), _p(p), _gcount(0) {}
   virtual ~Stream() {
     WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
     delete _stream;
@@ -39,7 +39,7 @@ public:
   } SeekDir;
 
   // Stream becomes the owner of the given stream
-  void adoptStream(std::iostream *stream);
+  void adoptStream(std::iostream *stream, streampos g = 0, streampos p = 0);
 
   // istream methods
   streamsize gcount() const;
@@ -63,21 +63,28 @@ public:
   bool bad() const;
   bool operator!() const;
   operator void *() const;
-  streambuf *rdbuf() const;
-  streambuf *rdbuf(streambuf *sb);
 
   // Custom methods
   streamsize size();
+  Stream &read(std::string &s);
+
+  // Create a string from Stream content.
+  // Should only be used on small-sized Streams or for testing.
+  std::string str();
 
   template <typename T> Stream &operator>>(T &t) {
     throwIfNull();
+    _stream->seekg(_g);
     *_stream >> t;
+    _g = _stream->tellg();
     return *this;
   }
 
   template <typename T> Stream &operator<<(T const &t) {
     throwIfNull();
+    _stream->seekp(_p);
     *_stream << t;
+    _p = _stream->tellp();
     return *this;
   }
 
@@ -88,4 +95,8 @@ protected:
 private:
   Stream(const Stream &);
   Stream &operator=(const Stream &);
+
+  streampos _g;
+  streampos _p;
+  streamsize _gcount;
 };

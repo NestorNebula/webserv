@@ -12,6 +12,7 @@
 
 #include "TemporaryFileStream.hpp"
 #include "http_utils.hpp"
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -20,6 +21,24 @@
 TemporaryFileStream::TemporaryFileStream() {
   WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor");
   openTmpFile();
+}
+
+TemporaryFileStream::TemporaryFileStream(Stream &stream) {
+  WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor from Stream");
+  openTmpFile();
+  if (!stream) {
+    WsLog::_(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
+    return;
+  }
+  static const streamsize maxReadSize = 4096; 
+  char buf[maxReadSize];
+  while (stream && stream.tellg() < stream.size()) {
+    streamsize readSize = std::min(stream.size() - stream.tellg(), maxReadSize);
+    stream.read(buf, readSize);
+    write(buf, stream.gcount());
+  }
+  if (!stream || !*this)
+    WsLog::_(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
 }
 
 TemporaryFileStream::~TemporaryFileStream() {
@@ -44,7 +63,7 @@ void TemporaryFileStream::openTmpFile() {
       _stream = fstream;
     } else {
       delete fstream;
-      throw std::runtime_error("Impossible to open temporary file stram");
+      throw std::runtime_error("Impossible to open temporary file stream");
     }
   }
   std::ostringstream oss;
@@ -55,7 +74,7 @@ void TemporaryFileStream::openTmpFile() {
 std::string TemporaryFileStream::getNextFilePath() {
   const static std::string safeChars(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
-  const static std::string path(".tmp/");
+  const static std::string path = isDirectory(".tmp") ? ".tmp/" : "./.";
   static std::string filename = safeChars.substr(0, 1);
 
   while (access(std::string(path + filename).c_str(), F_OK) == 0) {
