@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:08:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:54:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,7 @@ public:
 
 	void 	new_params(unsigned short req = 0x1);
 
-	void 	add_param(const char * key, char * val);
+	void 	add_param(const char * key, const char * val);
 	void 	add_param(const char * key, int val);
 	void 	end_params(void);
 	

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 21:02:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:14:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,21 @@ enum
 	RSRC_RESP_ERR
 };
 
+enum
+{
+	RSRC_DONE_IP  = (1 << 0),
+	RSRC_DONE_OP  = (1 << 1),
+	RSRC_DONE_IO  = (RSRC_DONE_IP | RSRC_DONE_OP),
+	RSRC_DONE_ERR = (1 << 2)
+};
+
 class ResourceCgi
 {
 public:
 	ResourceCgi(void) :  
 		hed(0),
 		error(0),
+		done(0),
 		conn(NULL)
 	{}
 	virtual ~ResourceCgi() {};
@@ -40,9 +49,19 @@ public:
 	int				chk_rsp_hed(std::string & ostr);
 	void			set_err(int e);
 	std::string &	get_resp(void) { return (this->resp); }
-	
-	int				hed; // state
+	int				set_done(int d)
+	{
+		this->done |= d;
+		if (this->done & RSRC_DONE_ERR)
+			return (-1);
+		if (this->done == RSRC_DONE_IO)
+			return (-1);
+		return (0);
+	}
+
+	int				hed; // state - input 
 	int				error;
+	int				done;
 	std::string		resp;
 	
 	virtual void	push_body(void) = 0;

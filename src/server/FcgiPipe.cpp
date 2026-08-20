@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 11:46:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:13:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,7 @@ ssize_t	FcgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		// WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
+		rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
 	
@@ -190,9 +191,11 @@ ssize_t	FcgiPipe::pollout(void)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
 		fcgi.req_body(NULL, 0);
+		rsrc->set_done(RSRC_DONE_IP);
 	}
 	else
 	{
+		rsrc->set_done(RSRC_DONE_IP);
 		return (0);
 	}
 #else
@@ -224,6 +227,7 @@ ssize_t	FcgiPipe::pollout(void)
 	{
 		WsLog::color(WSL_GREEN);
 		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
+		rsrc->set_done(RSRC_DONE_IP);
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
@@ -248,10 +252,14 @@ int		FcgiPipe::rdhup(void)
 	// but .. still may be receiving an upload
 	// this->mod_evt(-EPOLLIN); // BAD IDEA
 	// this->mod_evt(-EPOLLOUT);
+	WsLog::color(WSL_YELLOW);
 	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
+	if (rsrc == NULL)
+		return (-1);
+	// CLEAN (!)
+	return (rsrc->set_done(RSRC_DONE_IP));
 	
 // THE QUESTION : when to die 
-	// return (0); // UGLY 
 #if 1
 	if (this->fcgi.req.size())
 	{

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 15:59:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:53:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,11 @@
 # include <vector>
 # include <sstream>
 
+# include <libft.hpp>
+
 # include "FilePath.hpp"
 # include "Session.hpp"
 
-// Utils.hpp
-template <typename T>
-std::string num_2_str(T value)
-{
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
 
 class Connection;
 

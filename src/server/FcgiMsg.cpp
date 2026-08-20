@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:04:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:54:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,17 +103,18 @@ const char * p_name[] =
 // buf.fcgi() : keylen, vallen, key, val
 // push fcgi-formatted key/val pair onto buf
 // kLen, vLen, kStr, vStr
-void FcgiMsg::add_param(const char * key, char * val)
+void FcgiMsg::add_param(const char * key, const char * val)
 {
 	buf.fcgi(key, val);
 }
 
 void FcgiMsg::add_param(const char * key, int val)
 {
-	char vStr[32];
-	sprintf(vStr, "%i", val); // WEBSERV : ATTN illegal function
+	// char vStr[32];
+	// sprintf(vStr, "%i", val); // WEBSERV : ATTN illegal function
 
-	buf.fcgi(key, vStr);
+	std::string vStr = num_2_str(val);
+	buf.fcgi(key, vStr.c_str());
 }
 
 void FcgiMsg::end_params(void)
@@ -122,7 +123,7 @@ void FcgiMsg::end_params(void)
 
 	// insert params header with proper content-length
 
-	memcpy(buf.buf + pHed, this, 8); // WEBSERV : ATTN illegal function
+	ft_memcpy(buf.buf + pHed, this, 8);
 	buf.zero(this->head.paddingLength);
 
 	this->make_head(FCGI_PARAMS, 0);
@@ -230,7 +231,7 @@ void FcgiMsg::zero()
 
 	set_role(0);
 	body.flags = 0;
-	memset(body.reserved, 0, 5); // WEBSERV : ATTN illegal function
+	ft_memset(body.reserved, 0, 5);
 }
 
 void FcgiMsg::info()
