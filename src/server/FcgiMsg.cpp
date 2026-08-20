@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 13:49:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 18:01:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ void FcgiMsg::end_params(void)
 
 void FcgiMsg::add_stdin(char * data, int dSiz)
 {
-	const int dMax = 8192; // 
+	const int dMax = 8192 << 1;
 	while (dSiz > dMax)
 	{
 		this->make_head(FCGI_STDIN, dMax);

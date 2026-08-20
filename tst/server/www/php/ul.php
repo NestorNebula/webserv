@@ -60,6 +60,14 @@
         move_uploaded_file($_FILES['file']['tmp_name'], "./upload-php-" . $_FILES['file']['name']);
         // move_uploaded_file($_FILES['file']['tmp_name'], getcwd()."/uploads/php-" . $_FILES['file']['name']);
     }
+    else
+    {
+        // failed -- still sends stdout
+        // warning only 
+        // SO : MUST wait for ENTIRE REPONSE .. before SENDING 
+        // conn .. cannot send .. until rsrc is COMPLETE 
+        exit (2);
+    }
     echo getcwd();
 
 // CWD is the working directory where php-fpm is started (or configured to change to).

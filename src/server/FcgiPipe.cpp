@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 14:04:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 22:56:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,80 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 	return (err);
 }
 
+
+// The server is in no way obligated to send end-of-file 
+// after the script reads CONTENT_LENGTH bytes. 
+
+ssize_t	FcgiPipe::pollout(void)
+{
+	ssize_t	err;
+	
+	if (this->conn == NULL)
+		return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
+		
+	switch(rsrc->req_body())
+	{
+	case -1:
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
+		this->mod_evt(0);
+		return (0);
+	case -2:
+		// actually -- no body to wait for ...
+		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+		this->mod_evt(-EPOLLOUT);
+		return (0);
+		// this->mod_evt(EPOLLIN);
+		// return (-1);
+		
+		// return (0); // upload BIG FILE wants this 
+		// basic GET . HATES THIS
+		// it's that HTTP CONTINUE .. on the big files 
+		// that pauses .. 
+		// not has body .. BUT .. body coming 
+		// 
+	case -3: // no body -- still need to send (0)
+	default:
+		break;
+	}
+			
+// and now .. big file downloads are incomplete ...
+
+	if (rsrc->body.size() == 0)
+	{
+		this->mod_evt(-EPOLLOUT);
+// REQ_BODY_SENT
+		this->mod_evt(EPOLLIN); 
+		// rsrc->set_done(RSRC_DONE_IP);
+	}
+	
+	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", rsrc->body.size());
+	fcgi.req_body((char*) rsrc->body.c_str(), rsrc->body.size());
+	rsrc->body.clear();
+
+	err = this->send(fcgi.req);
+	if (err < 0)
+	{
+		WsLog::_(LVL_ERR, TGT_FCGI, "send");
+		this->rsrc->set_err(500); // Internal Server Error
+		return (err);
+	}
+	if (err == 0)
+	{
+		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
+		// rsrc->set_done(RSRC_DONE_IP);
+		return (0);
+	}
+	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
+	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
+
+	// only once all sent
+// REQ_DATA_SENT
+	// this->mod_evt(EPOLLIN); 
+	return (0);
+}
+
 ssize_t	FcgiPipe::pollin(void)
 {
 	if (this->conn == NULL)
@@ -125,8 +199,6 @@ ssize_t	FcgiPipe::pollin(void)
 	{
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
-		// WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
-		// rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
 	
@@ -155,102 +227,6 @@ ssize_t	FcgiPipe::pollin(void)
 	return (err);
 }
 
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
-
-ssize_t	FcgiPipe::pollout(void)
-{
-	ssize_t	err;
-	
-	if (this->conn == NULL)
-		return (-1);
-	if (this->rsrc == NULL)
-		return (-1);
-	
-	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT: ", fcgi.req.size());
-	// WsLog::_(LVL_DBG, TGT_FCGI, "POUT\n", fcgi.req);
-// WEBSERV : REQUEST (body)
-	Session &sess = conn->sess;
-	Request &req  = sess.getRequest();
-
-	// upload problem in here
-#if 1
-	if (!req.hasHeaders())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
-		this->mod_evt(-EPOLLOUT);
-		return (0);
-	}
-	// ATTN : UPLOADS
-	if (req.hasBody())
-	{
-		// not sending (0)
-		std::string & body = req.get_body();
-		// strange body size 
-		// not getting flushed .. like send does 
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
-		fcgi.req_body((char*) body.c_str(), body.size());
-		body.clear();
-	}
-	else if (req.isComplete())
-	{
-		WsLog::color(WSL_RED);
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
-		fcgi.req_body(NULL, 0);
-		// rsrc->set_done(RSRC_DONE_IP); // dangerous
-	}
-	else
-	{
-		// rsrc->set_done(RSRC_DONE_IP);
-		return (0);
-	}
-#else
-	err = this->conn->req_body_status();
-
-
-	if (err > 0)
-	{
-		// std::string & body = this->conn->sess.req.get_body();
-// BUIDL_DEMO
-		std::string body;
-		WsLog::_(LVL_DBG, TGT_FCGI, "body: ", body.size());
-
-		fcgi.req_body((char*) body.c_str(), body.size());
-		body.clear(); 
-	}
-#endif
-
-
-
-	err = this->send(fcgi.req);
-	if (err < 0)
-	{
-		WsLog::_(LVL_ERR, TGT_FCGI, "send");
-		this->rsrc->set_err(500); // Internal Server Error
-		return (err);
-	}
-	if (err == 0)
-	{
-		WsLog::color(WSL_GREEN);
-		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
-		// rsrc->set_done(RSRC_DONE_IP);
-		return (0);
-	}
-	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
-	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
-
-	this->mod_evt(EPOLLIN); 
-#if 0 // still need to send NULL (?)
-	if (req.isComplete())
-	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : complete");
-		this->mod_evt(-EPOLLOUT);
-		// this->mod_evt(EPOLLIN);
-		return (0);
-	}
-#endif 
-	return (0);
-}
 
 int		FcgiPipe::rdhup(void)
 {
@@ -260,9 +236,8 @@ int		FcgiPipe::rdhup(void)
 	// this->mod_evt(-EPOLLOUT);
 	WsLog::color(WSL_YELLOW);
 	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
-
-	// if (rsrc == NULL) // bad idea (?)
-	// 	return (-1);
+	if (this->rsrc == NULL)
+		return (-1);
 	// return (rsrc->set_done(RSRC_DONE_IP));
 	
 // THE QUESTION : when to die 
@@ -282,27 +257,25 @@ int		FcgiPipe::rdhup(void)
 // find TEST CASES
 	// still need to send BODY_DONE 
 	// may be error (?)
+
+	// if (this->rsrc->error)
+	// 	return (-1);
 	if (this->rsrc->resp.size())
 	{
 		WsLog::color(WSL_YELLOW);
 		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: resp.size()");
 		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
 		// THIS REALLY HELPED
+
+// we should be able to DIE
+// the rsrc should stay open 
+
 		this->conn->mod_evt(EPOLLOUT);
 		return (0);
+		// return (-1); // what did this help (?)
 	}
 	this->conn->mod_evt(EPOLLOUT);
 	return (-1);
-// #if 1
-// 	if (this->conn->req_body_status() >= 0)
-// 	{
-		
-// 		WsLog::color(WSL_GREEN);
-// 		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: body status");
-// 		return (0);
-// 	}
-// #endif
-// 	return (-1);
 }
 
 int		FcgiPipe::hup(void)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:39:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 21:22:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,23 +188,23 @@ try
 		}
 		switch (err)
 		{
-		case 0: // ENUM
+		case 0:
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
 			this->mod_evt(-EPOLLOUT);
-			return (err);
-		case 2: // set_err
+			return (0);
+		case 2: // ERROR
 			return (0);
 		default:
 			break;
 		}
 
-		std::string & OSTR = res->get_resp();
+		std::string & RESP = res->get_resp();
 		
 		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);	
-		err = this->send(OSTR);
+		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp");
+		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
+		err = this->send(RESP);
 	}
 	else
 	{
@@ -216,14 +216,14 @@ try
 		{
 
 		}
-		std::string & OSTR = sess.get_resp();
-		if (OSTR.size())
+		std::string & RESP = sess.get_resp();
+		if (RESP.size())
 		{
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr: " , OSTR.size());
-			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "ostr");
-			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", OSTR);			
-			err = this->send(OSTR);
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp");
+			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+			err = this->send(RESP);
 		}
 		else
 		{
@@ -334,20 +334,6 @@ std::string		&Connection::get_addr(void)
 	//		  BUT .. more needs to be received to complete the request
 	// (-1) : there is no more body data to write to the CGI
 
-// WEBSERV : REQUEST (body)
-// int	Connection::req_body_status(void)
-// {
-// 	int	err = -1; // DEMO (!) this->sess.req.body_stat();
-
-// 	if (err == 1) // body.size()
-// 		return (1);
-// 	if (err == 0) // not done
-// 		return (0); 
-		
-// 	// IMPORTANT
-// 	this->mod_evt(EPOLLOUT); // seems wrong 		
-// 	return (-1);
-// }
 
 // called on ~CgiPipe()
 void	Connection::cgi_rem(EpollClient *epc)
@@ -443,7 +429,7 @@ int	Connection::exec_cgi(void)
 		// WsLog::color(WSL_RED);
 		// WsLog::_(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
-		pipes.dup_err();
+		// pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
 		// REQUIRE (!)
