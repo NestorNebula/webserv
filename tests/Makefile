@@ -49,6 +49,7 @@ TEST_SRC = $(TEST_SRC_DIR)/Request.cpp \
 		   $(TEST_SRC_DIR)/StaticResource.cpp \
 		   $(TEST_SRC_DIR)/DirectoryResource.cpp \
 		   $(TEST_SRC_DIR)/BuiltinResource.cpp \
+			 $(TEST_SRC_DIR)/Stream.cpp \
 			 $(TEST_SRC_DIR)/TemporaryFileStream.cpp \
 		   $(TEST_SRC_DIR)/http_utils.cpp \
 		   $(TEST_SRC_DIR)/Session.cpp \
