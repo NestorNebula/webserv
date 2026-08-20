@@ -161,8 +161,7 @@ void Request::setupBody() {
 
 void Request::handleBody(std::string body, std::string::size_type eol) {
   if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
-    TemporaryFileStream *bodyFile = new TemporaryFileStream();
-    *bodyFile << _body->rdbuf();
+    TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
     delete _body;
     _body = bodyFile;
     _hasLargeBody = true;
