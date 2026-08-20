@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 10:48:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 13:43:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add("DOCUMENT_ROOT", script.fldr.c_str());
 		this->add("SCRIPT_NAME", script.file.c_str());
 		this->add("SCRIPT_FILENAME", script.path.c_str());
-
+		
 		this->add("REDIRECT_STATUS", "1");		
 	}
 	else if (script.fext == std::string(".py"))

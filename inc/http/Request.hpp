@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 18:48:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 14:08:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,20 @@ public:
   std::string _ostr;
   std::string &get_body(void)
   {
+    WsLog::_(LVL_TMP, TGT_REQ, "ostr: ", _ostr.size());
     if (_ostr.size())
       return (_ostr);
+      
+    // conn keeps receiving 
+    // we do not see body size growing
+    // because .. temp file (?)
+    WsLog::_(LVL_TMP, TGT_REQ, "body: ", getBody()->size());
     char buf[4096];
     int err = getBody()->readsome(buf, 4096);
-    if (err)
+    WsLog::_(LVL_TMP, TGT_REQ, "SOME: ", err);
+    if (err > 0)
       _ostr.append(buf, err);
+    WsLog::_(LVL_TMP, TGT_CGI, "ostr: ", _ostr.size());
     return (_ostr);
   }
 };

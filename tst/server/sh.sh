@@ -108,19 +108,31 @@ if [ "$1" == "u" ]; then
 	rm -f www/py/upload*
 
 # earth : timeout crashes
-	FILES="earth.jpg" #  earth.jpg tiny.jpg mid.jpg Kanan.mp3"
+
+# php-cgi
+	# tiny : works
+	# earth : hangs
+# fcgi
+	# more flow .. get resp .. no data
+	# cwd (?)
+# perl
+	# tiny : works
+	# earth : hangs
+# python
+
+	FILES="earth.jpg tiny.jpg mid.jpg Kanan.mp3"
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo
-		# curl -X POST http://localhost:8082/pl/ul.pl -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/py/ul.py -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/pl/ul.pl -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
+		curl -X POST http://localhost:8082/py/ul.py -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
 	done
 
 	ls -al www/p*

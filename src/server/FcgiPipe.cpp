@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:13:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 14:04:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ ssize_t	FcgiPipe::pollin(void)
 		WsLog::_(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		WsLog::_(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		// WsLog::_(LVL_DBG, TGT_FCGI, "body: ", this->conn->req_body_status());
-		rsrc->set_done(RSRC_DONE_OP);
+		// rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
 	
@@ -173,6 +173,7 @@ ssize_t	FcgiPipe::pollout(void)
 	Session &sess = conn->sess;
 	Request &req  = sess.getRequest();
 
+	// upload problem in here
 #if 1
 	if (!req.hasHeaders())
 	{
@@ -183,19 +184,24 @@ ssize_t	FcgiPipe::pollout(void)
 	// ATTN : UPLOADS
 	if (req.hasBody())
 	{
+		// not sending (0)
 		std::string & body = req.get_body();
+		// strange body size 
+		// not getting flushed .. like send does 
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", body.size());
 		fcgi.req_body((char*) body.c_str(), body.size());
+		body.clear();
 	}
 	else if (req.isComplete())
 	{
+		WsLog::color(WSL_RED);
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : done (?)");
 		fcgi.req_body(NULL, 0);
-		rsrc->set_done(RSRC_DONE_IP);
+		// rsrc->set_done(RSRC_DONE_IP); // dangerous
 	}
 	else
 	{
-		rsrc->set_done(RSRC_DONE_IP);
+		// rsrc->set_done(RSRC_DONE_IP);
 		return (0);
 	}
 #else
@@ -227,7 +233,7 @@ ssize_t	FcgiPipe::pollout(void)
 	{
 		WsLog::color(WSL_GREEN);
 		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
-		rsrc->set_done(RSRC_DONE_IP);
+		// rsrc->set_done(RSRC_DONE_IP);
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
@@ -254,17 +260,19 @@ int		FcgiPipe::rdhup(void)
 	// this->mod_evt(-EPOLLOUT);
 	WsLog::color(WSL_YELLOW);
 	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
-	if (rsrc == NULL)
-		return (-1);
-	// CLEAN (!)
-	return (rsrc->set_done(RSRC_DONE_IP));
+
+	// if (rsrc == NULL) // bad idea (?)
+	// 	return (-1);
+	// return (rsrc->set_done(RSRC_DONE_IP));
 	
 // THE QUESTION : when to die 
 #if 1
 	if (this->fcgi.req.size())
 	{
 		WsLog::color(WSL_RED);
-		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: req.size()");
+		// but .. upload has already returned ... 
+		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
+		
 		return (0);
 	}
 #endif

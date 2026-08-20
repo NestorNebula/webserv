@@ -21,25 +21,30 @@
         echo ($_FILES['file']['name']) . PHP_EOL;
             // partial -- 
             // can't close CONN until FCGI has flushed its body
-        // switch ($_FILES['file']['error']) {
-        //     case UPLOAD_ERR_OK:
-        //         break;
-        //     case UPLOAD_ERR_NO_FILE:
-        //         echo ('No file sent.');
-        //         break;
-        //     case UPLOAD_ERR_INI_SIZE:
-        //     case UPLOAD_ERR_FORM_SIZE:
-        //         echo ('Exceeded filesize limit.');
-        //         break;
-        //     default:
-        //         echo ('Unknown errors.');
-        //         break;
-        // }
+        switch ($_FILES['file']['error']) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                echo ('No file sent.');
+                break;
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                echo ('Exceeded filesize limit.');
+                break;
+            // case UPLOAD_ERR_NO_TMP_DIR:
+            //     echo ("No tmp dir.");
+            //     break;
+            default:
+                echo "Unknown error " . $_FILES['file']['error'];
+                break;
+        }
 //  UPLOAD_ERROR_OK, value 0, means no error occurred.
 //  UPLOAD_ERR_INI_SIZE, value 1, means that the size of the uploaded file exceeds the
 // maximum value specified in your php.ini file with the upload_max_filesize directive.
 //  UPLOAD_ERR_FORM_SIZE, value 2, means that the size of the uploaded file exceeds the
 // maximum value specified in the HTML form in the MAX_FILE_SIZE element.
+
+    // partial -- bad data from REQUEST 
 //  UPLOAD_ERR_PARTIAL, value 3, means that the file was only partially uploaded.
 //  UPLOAD_ERR_NO_FILE, value 4, means that no file was uploaded.
 //  UPLOAD_ERR_NO_TMP_DIR, value 6, means that no temporary directory is specified in the
@@ -50,6 +55,8 @@
 
 // UPLOAD_ERR_PARTIAL is given when the mime boundary is not found after the file data. A possibly cause for this is that the upload was cancelled by the user (pressed ESC, etc).
 
+
+// php-fpm : WHERE ARE WE (?)
         move_uploaded_file($_FILES['file']['tmp_name'], "./upload-php-" . $_FILES['file']['name']);
         // move_uploaded_file($_FILES['file']['tmp_name'], getcwd()."/uploads/php-" . $_FILES['file']['name']);
     }
