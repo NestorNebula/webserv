@@ -40,6 +40,7 @@ FILES = \
 	utils/WsLog.cpp \
 	utils/helpers.cpp \
 	utils/http_utils.cpp \
+	utils/libft.cpp \
 	http/Headers.cpp \
 	http/Request.cpp \
 	http/Response.cpp \

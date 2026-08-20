@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/18 17:10:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:54:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,28 +25,9 @@
 #include <arpa/inet.h>
 #endif
 
+#include "libft.hpp"
 #include "WsLog.hpp"
 
-#if 0
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-	size_t			i;
-	unsigned char	*d;
-	unsigned char	*s;
-
-	if (!dst && !src)
-		return (NULL);
-	d = (unsigned char *) dst;
-	s = (unsigned char *) src;
-	i = 0;
-	while (i < n)
-	{
-		d[i] = s[i];
-		i++;
-	}
-	return (dst);
-}
-#endif
 
 class MsgBuf
 {
@@ -99,7 +80,7 @@ public:
     {
         this->avail(s);
 
-        memcpy(this->tail(), v, s); // WEBSERV : ATTN illegal function
+        ft_memcpy(this->tail(), v, s);
 
         this->end += s;
     }
@@ -107,10 +88,10 @@ public:
     {
         this->avail(cnt);
 
-        memset(this->tail(), 0, cnt); // WEBSERV : ATTN illegal function
+        ft_memset(this->tail(), 0, cnt);
         this->end += cnt;
     }
-    void fcgi(const char * key, char * val)
+    void fcgi(const char * key, const char * val)
     {
         int k = strlen(key);
         int v = strlen(val);
@@ -135,7 +116,7 @@ php-fpm fastcgi.c
             WsLog::_(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
-            memcpy(tgt, &k, sizeof(int)); // WEBSERV : ATTN illegal function
+            ft_memcpy(tgt, &k, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -151,7 +132,7 @@ php-fpm fastcgi.c
             WsLog::_(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
-            memcpy(tgt, &v, sizeof(int));// WEBSERV : ATTN illegal function
+            ft_memcpy(tgt, &v, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -192,7 +173,7 @@ php-fpm fastcgi.c
         unsigned char * tmp = (unsigned char*) malloc(this->siz);
         if (this->buf)
         {
-            memcpy(tmp, this->head(), this->size()); // WEBSERV : ATTN illegal function
+            ft_memcpy(tmp, this->head(), this->size());
             this->end = this->size();
             this->beg = 0;
             free(this->buf);
@@ -234,7 +215,7 @@ php-fpm fastcgi.c
 
             do
             {
-                memcpy(dst, src, copy_size); // WEBSERV : ATTN illegal function
+                ft_memcpy(dst, src, copy_size);
                 src += copy_size;
                 dst += copy_size;
                 this->beg += copy_size;
@@ -246,7 +227,7 @@ php-fpm fastcgi.c
             this->end = full_size + pad;
             return this->avail();
         }
-        memcpy(this->buf + pad, this->head(), this->size()); // WEBSERV : ATTN illegal function
+        ft_memcpy(this->buf + pad, this->head(), this->size());
         this->end = this->size() + pad;
         this->beg = pad;
 

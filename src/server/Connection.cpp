@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 12:25:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:39:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ bool	Connection::timeo(time_t now)
 	// php-fpm : gets this .. 
 	// php-cgi : (ip) times out ... but it should not have been active anyway .. 
 	WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
+	if (res_cgi)
+		WsLog::_(LVL_TMP, TGT_CONN, "cgi state ", res_cgi->done);
 	// FWIW : normal (cgi) seems to survive low timeout values better .. 
 	if (this->res_cgi)	
 		this->res_cgi->conn_closed(); 
@@ -100,9 +102,7 @@ try
 	if (err == 0) 
 	{
 		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-		// FCGI : may need to END STDIN
 		this->mod_evt(EPOLLOUT); 
-
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
@@ -273,9 +273,10 @@ catch(const std::exception& e)
 int	Connection::rdhup(void)
 {
 	WsLog::color(WSL_GREEN);
-	WsLog::_(LVL_TMP, TGT_CONN, "RDHUP");
+	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
-	return (-1); // may need error (?)
+	// ATTN : may need error (?)
+	return (-1); 
 	return (0);
 }
 
@@ -475,65 +476,3 @@ int	Connection::exec_cgi(void)
 	this->res_cgi = pcgi;
 	return (err);
 }
-
-
-// we can get this when we ctrl-c a siege
-
-// not fatal .. but we should be able to handle it better
-
-// epoll : cli mod  : [352]
-// epoll : epoll_ctl: mod 
-// error : No such file or directory
-
-
-	// THE FULL SEQUENCE
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [8]
-// epoll : evt typ  : in rdhup 
-// conn  : recv:  POLLIN
-// conn  : recv
-// epc   : read: [168]
-// conn  : recv: [168]
-// conn  : next:  RDSOCK
-// conn  : next:  DOCGI
-// conn  : next: docgi
-
-// rsrc  : init:  PIPE
-// epoll : cli add  : cgi
-// epoll : cli add  : cgi
-
-	// wow .. CGI has not yet even gotten started
-// conn  : RDHUP
-// epoll : cli mod  : conn
-// epoll : cli rem  : conn
-// epoll : cli del  : conn
-// conn  :  (~) Connection [8]
-// conn  : req cnt: [0]
-// rsrc  : conn-closed : ip
-// rsrc  : conn-closed : op
-
-// rsrc  :  (~) ResourceCgi
-// rsrc  : stat: [-1]
-// rsrc  : pid : [17211]
-// rsrc  : conn-closed : ip
-// rsrc  : conn-closed : op
-// set ip/op to NULL ... 
-// set CONN to NULL
-// rsrc  : pid : [17211]
-// rsrc  : xit : [-1]
-// rsrc  : stat: [-1]
-// rsrc  : kill
-// rsrc  : pid : [17211]
-// rsrc  : xit : [-1]
-// rsrc  : stat: [-1]
-// rsrc  : wait: [17211]
-// rsrc  : stat: [9]
-// rsrc  : sig : [9]
-// rsrc  : sig : Killed
-// conn  : err : [616]
-// conn  : fd  : (conn) [8]
-// epoll : cli mod  : conn
-// epoll : cli mod  : [8]
-// epoll : epoll_ctl: mod 
-// error : No such file or directory
-// epc   :  (~) EpollClient

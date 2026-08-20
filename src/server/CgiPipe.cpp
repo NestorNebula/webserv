@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 11:53:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:08:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,7 @@ ssize_t	CgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
+		rsrc->set_done(RSRC_DONE_OP);
 		return (-1);
 	}
 	
@@ -275,8 +276,8 @@ ssize_t	CgiPipe::pollout(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		rsrc->set_done(RSRC_DONE_IP);
 		return (-1);
-		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 	return (0);

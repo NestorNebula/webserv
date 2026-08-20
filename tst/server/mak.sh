@@ -4,6 +4,11 @@ tput reset
 if [[ "$1" =~ "r" ]]; then
 	make fclean
 fi
+if [[ "$1" =~ "c" ]]; then
+	make fclean
+	exit 0
+fi
+
 make -j12 || exit 1
 
 if [[ "$1" =~ "x" ]]; then

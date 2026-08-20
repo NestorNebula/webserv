@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 11:53:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/20 11:39:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,9 +157,9 @@ int	ResourcePiped::status(void)
 	return (0); // NEED_DATA
 }
 
+// Header Safety: You must send HTTP headers (like Content-Type) before any body text. If an error occurs midway through generating output, buffering lets you discard the partial text and output a clean 500 Internal Server Error page instead of a broken, half-rendered HTML file.
 
-
-// Header Safety: You must send HTTP headers (like Content-Type) before any body text. If an error occurs midway through generating output, buffering lets you discard the partial text and output a clean 500 Internal Server Error page instead of a broken, half-rendered HTML file.Content-Length: Holding the output lets you measure the exact byte size of your response so you can send an accurate Content-Length header.
+// Content-Length: Holding the output lets you measure the exact byte size of your response so you can send an accurate Content-Length header.
 
 int	ResourceFcgi::wait(int opt)
 {
@@ -219,9 +219,6 @@ int	ResourcePiped::wait(int opt)
 	{
 		WsLog::_(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
-		// thsi might have been the mod_cli problem
-	// if (stat > 0)
-	// 	this->set_err(505); // 616); // CGI_ERR
 	this->pid = 0;
 	return (this->stat);
 }
@@ -306,8 +303,8 @@ int		ResourceCgi::chk_rsp_hed(std::string & ostr)
 	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "OSTR:\n", ostr);	
 	this->hed = 1;
 	
-// REQUIRE .. content-type (?)
-
+// REQUIRE (!)
+	// Content-Type (?)
 	std::string conn_close("Connection: close\r\n");
 	ostr.insert(0, conn_close);
 	
@@ -384,7 +381,6 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	
 	this->pid = _pid;
 	
-
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)
 		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
