@@ -127,16 +127,6 @@ Stream::operator void *() const {
   return *_stream;
 }
 
-Stream::streambuf *Stream::rdbuf() const {
-  throwIfNull();
-  return _stream->rdbuf();
-}
-
-Stream::streambuf *Stream::rdbuf(streambuf *sb) {
-  throwIfNull();
-  return _stream->rdbuf(sb);
-}
-
 Stream::streamsize Stream::size() {
   streampos curr = tellg();
   streampos streamSize;
@@ -158,6 +148,26 @@ Stream &Stream::read(std::string &s) {
   this->read(buf, readSize);
   s.append(buf, this->gcount());
   return *this;
+}
+
+std::string Stream::str() {
+  WsLog::_(LVL_INFO, TGT_STRM, "calling str() method on Stream");
+  if (!*this)
+    return std::string();
+  std::string s;
+  streampos g = _g, p = _p;
+  streamsize gcount = _gcount;
+
+  seekg(0);
+  for (std::string::size_type prev = s.size(); read(s) && s.size() != prev; prev = s.size());
+
+  _g = g;
+  _p = p;
+  _gcount = gcount;
+  if (!*this)
+    _stream->clear();
+  seekg(g);
+  return s;
 }
 
 void Stream::throwIfNull() const {
