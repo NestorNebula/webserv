@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:24:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 14:14:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,22 +29,14 @@ static const std::string tgt_str[] =
     "head  : ",
     "body  : ",
     "rsrc  : ",
-    "fcgi  : "
+    "fcgi  : ",
+    
+    "req   : ",
+    "res   : ",
+    "resp  : ",
+    "strm  : ",
+    "sess  : "
 };
-
-// so .. log .. takes more time 
-// cgi .. finishes in "background" sooner (?)
-
-// Lots of writes to stderr can confuse socket communication by causing I/O blocking, buffer saturation, and timing disruptions in the application event loop. When a program spams error logs, it starves network tasks of CPU time and resources.
-
-// While the CPU waits for stderr to clear, it cannot read from or write to the network socket
-
-
-// Why Logging Interferes with SocketsBlocking I/O: Writing to stderr often blocks execution if the destination stream (like a terminal or a slow log file) cannot process data instantly. While the CPU waits for stderr to clear, it cannot read from or write to the network socket.
-
-// Buffer Backpressure: If stderr fills up operating system pipes, the process pauses. This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
-
-// Event Loop Starvation: In single-threaded event loops (like Node.js or Python asyncio), synchronous or heavy logging operations monopolize the thread. The application fails to poll socket descriptors, delaying packet reads and handshakes.
 
 static const std::string &tgt_prefix(log_tgt tgt)
 {
@@ -70,6 +62,17 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[10]);
     if (tgt & TGT_FCGI)
         return (tgt_str[11]);
+
+    if (tgt & (TGT_REQ))
+        return (tgt_str[12]);
+    if (tgt & (TGT_RES))
+        return (tgt_str[13]);
+    if (tgt & (TGT_RESP))
+        return (tgt_str[14]);
+    if (tgt & (TGT_STRM))
+        return (tgt_str[15]);
+    if (tgt & (TGT_SESS))
+        return (tgt_str[16]);
 
     return (tgt_str[0]);
 }
@@ -152,7 +155,7 @@ int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);
-    // WsLog::color(WSL_RED);
+    // WSCOL(WSL_RED);
     WsLog::op(stream);
 
     return (-1);
@@ -191,8 +194,6 @@ void WsLog::color(int c)
     }
 }
 #if 0
-
-# Not source who sources this ...
 
 # Reset
 Color_Off='\e[0m'       # Text Reset
@@ -359,3 +360,14 @@ void    WsLog::kd(void)
     // WsLog::lvl = LVL_INFO;
     // WsLog::tgt = TGT_ALL;
 }
+
+// Lots of writes to stderr can confuse socket communication by causing I/O blocking, buffer saturation, and timing disruptions in the application event loop. When a program spams error logs, it starves network tasks of CPU time and resources.
+
+// While the CPU waits for stderr to clear, it cannot read from or write to the network socket
+
+
+// Why Logging Interferes with SocketsBlocking I/O: Writing to stderr often blocks execution if the destination stream (like a terminal or a slow log file) cannot process data instantly. While the CPU waits for stderr to clear, it cannot read from or write to the network socket.
+
+// Buffer Backpressure: If stderr fills up operating system pipes, the process pauses. This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
+
+// Event Loop Starvation: In single-threaded event loops (like Node.js or Python asyncio), synchronous or heavy logging operations monopolize the thread. The application fails to poll socket descriptors, delaying packet reads and handshakes.
