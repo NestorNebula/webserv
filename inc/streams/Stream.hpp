@@ -3,27 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   Stream.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:33:17 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 14:24:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "WsLog.hpp"
+#include "SizeDefs.hpp"
 #include <iostream>
 
 class Stream {
 public:
   Stream() : _stream(NULL), _g(0), _p(0), _gcount(0) {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream constructor");
   }
   Stream(std::iostream *stream, std::streampos g = 0, std::streampos p = 0)
       : _stream(stream), _g(g), _p(p), _gcount(0) {}
   virtual ~Stream() {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream destructor");
     delete _stream;
   }
 

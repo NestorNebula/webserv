@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TemporaryFileStream.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 11:12:28 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 12:52:24 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 14:18:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,15 @@
 #include <unistd.h>
 
 TemporaryFileStream::TemporaryFileStream() {
-  WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor");
+  WSLOG(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor");
   openTmpFile();
 }
 
 TemporaryFileStream::TemporaryFileStream(Stream &stream) {
-  WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor from Stream");
+  WSLOG(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor from Stream");
   openTmpFile();
   if (!stream) {
-    WsLog::_(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
+    WSLOG(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
     return;
   }
   static const streamsize maxReadSize = 4096; 
@@ -38,14 +38,16 @@ TemporaryFileStream::TemporaryFileStream(Stream &stream) {
     write(buf, stream.gcount());
   }
   if (!stream || !*this)
-    WsLog::_(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
+  {
+    WSLOG(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
+  }
 }
 
 TemporaryFileStream::~TemporaryFileStream() {
-  WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream destructor");
+  WSLOG(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream destructor");
   if (_stream)
     static_cast<std::fstream *>(_stream)->close();
-  WsLog::_(LVL_INFO, TGT_TMP_STRM, "Removing TemporaryFileStream: ", _path);
+  WSLOG(LVL_INFO, TGT_TMP_STRM, "Removing TemporaryFileStream: ", _path);
   std::remove(_path);
 }
 
@@ -68,7 +70,7 @@ void TemporaryFileStream::openTmpFile() {
   }
   std::ostringstream oss;
   oss << "Opened " << _path << " as TemporaryFileStream";
-  WsLog::_(LVL_INFO, TGT_TMP_STRM, oss.str());
+  WSLOG(LVL_INFO, TGT_TMP_STRM, oss.str());
 }
 
 std::string TemporaryFileStream::getNextFilePath() {
