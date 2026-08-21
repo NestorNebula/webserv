@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 20:44:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 21:09:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 {	
 	int err;
 
-	WSLOG(LVL_TMP, TGT_RSRC, "init:  FCGI");
+	WSLOG(LVL_DBG, TGT_RSRC, "init:  FCGI");
 		// should have been checked before calling
 	if (conn->serv.get_conf().fcgi_sock.empty())
 	{
