@@ -8,7 +8,7 @@ tput reset
 
 
 C=250
-R=8
+R=2
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -133,21 +133,21 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	FILES+="Kanan.mp3 "
-	FILES+="tiny.jpg "
-	FILES+="mid.jpg "
-	FILES+="earth.jpg "
+	# FILES+="tiny.jpg "
+	# FILES+="mid.jpg "
+	# FILES+="earth.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/py/ul.py -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/py/ul.py -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
 	done
 
 	ls -l www/p*

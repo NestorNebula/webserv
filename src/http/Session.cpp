@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 14:00:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 14:14:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,10 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
     _request.append(std::string(buf, count));
     std::ostringstream oss;
     oss << "Session received " << count << " bytes of data";
-    WsLog::_(LVL_INFO, TGT_SESS_WR, oss.str());
+    WSLOG(LVL_INFO, TGT_SESS_WR, oss.str());
     manageSession();
   } catch (std::exception &e) {
-    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
     setError(500);
   }
   return count;
@@ -100,10 +100,10 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
       _next = CLOSE;
     std::ostringstream oss;
     oss << "Session sending " << r << "bytes of data";
-    WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
+    WSLOG(LVL_INFO, TGT_SESS_RD, oss.str());
     manageSession();
   } catch (std::exception &e) {
-    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
     if (_response.getCode() == 500)
       _next = CLOSE;
     else
@@ -119,7 +119,7 @@ void Session::setError(Response::StatusCode code) {
     handleResponse();
     _next = WRSOCK;
   } catch (std::exception &e) {
-    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
     if (code != 500)
       setError(500);
     else

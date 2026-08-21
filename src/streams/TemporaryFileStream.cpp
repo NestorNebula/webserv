@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 11:12:28 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 14:18:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ TemporaryFileStream::TemporaryFileStream() {
 }
 
 TemporaryFileStream::TemporaryFileStream(Stream &stream) {
-  WsLog::_(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor from Stream");
+  WSLOG(LVL_DBG, TGT_TMP_STRM, "TemporaryFileStream constructor from Stream");
   openTmpFile();
   if (!stream) {
-    WsLog::_(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
+    WSLOG(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
     return;
   }
   static const streamsize maxReadSize = 4096; 
@@ -38,7 +38,9 @@ TemporaryFileStream::TemporaryFileStream(Stream &stream) {
     write(buf, stream.gcount());
   }
   if (!stream || !*this)
-    WsLog::_(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
+  {
+    WSLOG(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
+  }
 }
 
 TemporaryFileStream::~TemporaryFileStream() {
