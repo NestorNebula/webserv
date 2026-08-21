@@ -44,6 +44,7 @@ public:
   Action nextAction() const { return _next; }
 
   // Write data to the Session Request. Corresponds to RDSOCK Action.
+  // Can be used for DOCGI action while Request isn't complete or invalid
   Stream::streamsize write(const char *buf, Stream::streamsize count);
 
   struct CgiInfo {
