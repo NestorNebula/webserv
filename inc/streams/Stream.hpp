@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 13:55:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@
 
 class Stream {
 public:
-  Stream() : _stream(NULL) {
-    WSLOG(LVL_DBG, TGT_STRM, "Stream constructor");
+  Stream() : _stream(NULL), _g(0), _p(0), _gcount(0) {
+    WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
   }
-  Stream(std::iostream *stream) : _stream(stream) {}
+  Stream(std::iostream *stream, std::streampos g = 0, std::streampos p = 0)
+      : _stream(stream), _g(g), _p(p), _gcount(0) {}
   virtual ~Stream() {
     WSLOG(LVL_DBG, TGT_STRM, "Stream destructor");
     delete _stream;
@@ -40,14 +41,13 @@ public:
   } SeekDir;
 
   // Stream becomes the owner of the given stream
-  void adoptStream(std::iostream *stream);
+  void adoptStream(std::iostream *stream, streampos g = 0, streampos p = 0);
 
   // istream methods
   streamsize gcount() const;
   Stream &getline(char *s, streamsize n, char delim = '\n');
   Stream &read(char *s, streamsize n);
-// #kd - readsome
-  std::streamsize readsome(char *s, streamsize n);
+  streamsize readsome(char *s, streamsize n);
   streampos tellg();
   Stream &seekg(streampos pos);
   Stream &seekg(streamoff off, SeekDir way);
@@ -66,22 +66,28 @@ public:
   bool bad() const;
   bool operator!() const;
   operator void *() const;
-  streambuf *rdbuf() const;
-  streambuf *rdbuf(streambuf *sb);
 
   // Custom methods
   streamsize size();
   Stream &read(std::string &s);
 
+  // Create a string from Stream content.
+  // Should only be used on small-sized Streams or for testing.
+  std::string str();
+
   template <typename T> Stream &operator>>(T &t) {
     throwIfNull();
+    _stream->seekg(_g);
     *_stream >> t;
+    _g = _stream->tellg();
     return *this;
   }
 
   template <typename T> Stream &operator<<(T const &t) {
     throwIfNull();
+    _stream->seekp(_p);
     *_stream << t;
+    _p = _stream->tellp();
     return *this;
   }
 
@@ -92,4 +98,8 @@ protected:
 private:
   Stream(const Stream &);
   Stream &operator=(const Stream &);
+
+  streampos _g;
+  streampos _p;
+  streamsize _gcount;
 };

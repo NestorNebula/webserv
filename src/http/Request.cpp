@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 13:56:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,10 +161,8 @@ void Request::setupBody() {
 }
 
 void Request::handleBody(std::string body, std::string::size_type eol) {
-// #kd - DO NOT USE TEMP FILES
-  if (false) { // !_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
-    TemporaryFileStream *bodyFile = new TemporaryFileStream();
-    *bodyFile << _body->rdbuf();
+  if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
+    TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
     delete _body;
     _body = bodyFile;
     _hasLargeBody = true;
