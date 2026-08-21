@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 11:44:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 16:44:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,12 +111,10 @@ private:
   void setResponseStatus(Response::StatusCode code);
 
   Stream::streamsize _sent;
-
-
-// #kd
+  
+  std::string resp; // #kd
 public:
-  std::string resp;
-  std::string &get_resp(void)
+  std::string &get_resp(void) // #kd
   {
     if (resp.size())
       return (resp);
@@ -126,7 +124,7 @@ public:
       resp.append(buf, err);
     return (resp);
   }
-  void  log_next(void)
+  void  log_next(void) // #kd
   {
     WSCOL(WSL_YELLOW);
     switch(this->nextAction())

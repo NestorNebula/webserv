@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 04:25:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 16:45:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int	EpollClient::event(struct epoll_event *e)
 	if (e->events & EPOLLIN)
 	{
 		err = this->pollin();
-		if (err >= 0) // #kd IMPORTANT - still need TIMEOUT ~10
+		if (err >= 0)
 			this->lact = time(&this->lact);
 		else if (err < 0)
 			return (err);
@@ -106,7 +106,7 @@ int	EpollClient::event(struct epoll_event *e)
 	if (e->events & EPOLLOUT)
 	{
 		err = this->pollout();
-		if (err >= 0) // #kd IMPORTANT
+		if (err >= 0)
 			this->lact = time(&this->lact);
 		else if (err < 0)
 			return (err);

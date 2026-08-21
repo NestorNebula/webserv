@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/18 16:18:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 16:43:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,10 @@ class ConfigParser {
 		void	validateDirExists(const std::string& path, const std::string& context);
 		void	validateFileExists(const std::string& path, const std::string& context);
 
-// #kd - conf_file_root
-		const std::string _root;
+		const std::string _root; // #kd - conf_file_root
+		
 	public:
-// #kd - conf_file_root
-		ConfigParser(const std::string &root);
+		ConfigParser(const std::string &root); // #kd - conf_file_root
 		~ConfigParser();
 
 		void	parseFile(const std::string& filename);
