@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 17:23:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:37:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,12 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 		throw (std::runtime_error("Server : construct failed"));
 // #kd
 // UGLY:
-	std::string git_root = conf.root + std::string("../");
-	fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
+	// std::string git_root = conf.root + std::string("../");
+	// fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
 
-	pycgi = git_root + std::string("pycgi/");
+	// pycgi = git_root + std::string("pycgi/");
 
-	// fastcgi_pass unix:/var/run/php/php-fpm.sock;
+	
 };
 
 Server::~Server()

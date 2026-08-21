@@ -141,6 +141,15 @@ if [ "$1" ]; then
 	exit 0
 fi
 
+curl -X POST 'http://localhost:8082/test.py?g1=QUERYSHIT' -i \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
+
+curl -X POST 'http://localhost:8082/stat.php?g1=QUERYSHIT' -i \
+	-d "p1=post-one&p2=post-two"
+echo
+exit 0
 # -H "Content-Type:application/octet-stream" --data-binary @asdf.file http://server:1234/url
 
 curl -X POST http://localhost:8080/uploads/small \
@@ -166,9 +175,6 @@ exit 0
 # echo
 # exit 0
 
-curl -X POST 'http://localhost:8082/stat.php?g1=QUERYSHIT' -i \
-	-d "p1=post-one&p2=post-two"
-echo
 
 curl -X POST 'http://localhost:8082/ka.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"

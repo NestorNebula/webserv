@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 10:17:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:48:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ public:
 	int				hup    (void);
 	bool			timeo  (time_t now);
 	
-	void			set_err(int e);
+	int				set_err(int e);
 	
 	void			set_addr(struct sockaddr_in *a);
 	std::string		&get_addr(void);

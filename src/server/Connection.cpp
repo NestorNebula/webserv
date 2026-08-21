@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 17:53:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:50:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,22 +62,23 @@ bool	Connection::timeo(time_t now)
 	return (true);
 }
 
-void	Connection::set_err(int e)
+int	Connection::set_err(int e)
 {
 	if (e == 0)
-		return;
+		return (-1);
 	if (this->error)
 	{
 		WSLOG(LVL_DBG, TGT_CONN, "err:  already set!");
 		WSLOG(LVL_DBG, TGT_CONN, "cur:  ", this->error);
 		WSLOG(LVL_DBG, TGT_CONN, "new:  ", e);
 		this->mod_evt(EPOLLOUT);
-		return;
+		return (-1);
 	}
 	WSLOG(LVL_DBG, TGT_CONN, "err:  ", e);
 	this->error = e; // why not (?)
 	this->sess.setError(e);
 	this->mod_evt(EPOLLOUT);
+	return (-1);
 }
 
 ssize_t	Connection::pollin(void)
@@ -343,10 +344,12 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		return (-1);
 	}
-	
-#if 0 // WITH_FCGI
-	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
+
+#if 1 // WITH_FCGI
+	if ((cgienv->lang == CGI_PHP) &&
+		!this->serv.get_conf().fcgi_sock.empty())
 	{
+		WSLOG(LVL_TMP, TGT_CGI, "FCGI_SOCK");
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
 		
@@ -421,8 +424,7 @@ int	Connection::exec_cgi(void)
 	if (err < 0)
 	{
 		delete (pcgi); // conn : cgi FAIL
-		this->set_err(503); // CGI_ERR
-		return (err);
+		return (this->set_err(503)); // CGI_ERR
 	}
 	this->res_cgi = pcgi;
 	return (err);

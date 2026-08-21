@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:51:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:47:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ public:
 	
 	int				recv_data(char *buf, int siz);
 	std::string &	get_resp(void) { return (this->resp); }
-	void			set_err(int e);
+	int				set_err(int e);
 	int				set_done(int d);
 	
 	virtual void	push_body(void) = 0;

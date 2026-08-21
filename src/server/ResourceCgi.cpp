@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 12:56:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:53:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,11 +135,12 @@ void	ResourceCgi::chk_rsp_len(void)
 	resp.insert(pos, clen_str);
 }
 
-void	ResourceCgi::set_err(int e)
+int	ResourceCgi::set_err(int e)
 {
 	this->error = e;
 	if (this->conn)
-		this->conn->set_err(e);
+		return (this->conn->set_err(e));
+	return (-1);
 }
 
 int	ResourceCgi::set_done(int d)

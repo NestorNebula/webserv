@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:09:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:50:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,8 +158,7 @@ ssize_t	FcgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI, "send");
-		this->rsrc->set_err(500); // Internal Server Error
-		return (err);
+		return (this->rsrc->set_err(500)); // Internal Server Error
 	}
 	if (err == 0)
 	{
@@ -195,8 +194,7 @@ ssize_t	FcgiPipe::pollin(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI, "recv: err");
-		this->rsrc->set_err(501); // CGI_ERR : read failed
-		return (err);
+		return (this->rsrc->set_err(501)); // CGI_ERR : read failed
 	}
 	if (err == 0)
 	{

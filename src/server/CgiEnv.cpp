@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 17:30:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:49:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,14 +58,12 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (!req.hasMethod())
 	{
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
-		conn.set_err(400); // Bad Request
-		return (-1);
+		return (conn.set_err(400)); // Bad Request
 	}
 	if (!req.hasURL())
 	{
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "URL not set");
-		conn.set_err(400); // Bad Request
-		return (-1);
+		return (conn.set_err(400)); // Bad Request
 	}
 	
 	info = sess.getCgiInfo();
@@ -83,8 +81,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
-		conn.set_err(404); // File Not Found
-		return (-1);
+		return (conn.set_err(404)); // File Not Found
 	}
 	
 	this->add("CWD", script.fldr.c_str()); 
@@ -104,8 +101,12 @@ int     CgiEnv::from_conn(Connection & conn)
 	else if (script.fext == std::string(".py"))
 	{
 		lang = CGI_PYTHON;
-		// how does HOME work without this ?
-		this->add("PYTHONPATH", conn.serv.pycgi.c_str());
+			// this should have been checked elsewhere
+		if (conn.serv.get_conf().pycgi_dir.empty())
+		{
+			return (conn.set_err(403)); // Forbidden
+		}
+		this->add("PYTHONPATH", conn.serv.get_conf().pycgi_dir.c_str());
 	}
 	else if (script.fext == std::string(".pl"))
 	{
@@ -114,8 +115,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	else
 	{
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
-		conn.set_err(403); // Forbidden
-		return (-1);
+		return (conn.set_err(403)); // Forbidden
 	}
 	this->args[0] = info.executablePath.c_str();
 	this->args[1] = script.file.c_str();
