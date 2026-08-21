@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 02:58:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:32:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ enum
 	RSRC_DONE_IP  = (1 << 0),
 	RSRC_DONE_OP  = (1 << 1),
 	RSRC_DONE_IO  = (RSRC_DONE_IP | RSRC_DONE_OP),
-	RSRC_DONE_ERR = (1 << 2)
+	RSRC_FLUSHING = (1 << 2),
+	RSRC_DONE_ERR = (1 << 3)
 };
 
 enum
@@ -46,6 +47,7 @@ enum
 	RSP_ERROR = (-4)
 };
 
+// AH : sending partial .. CGI TIMEOUT .. half-sent
 # ifndef RES_CGI_WAIT_COMPLETE
 #  define RES_CGI_WAIT_COMPLETE 0
 # endif
@@ -82,6 +84,7 @@ protected:
 	int				hed; // state - input 
 	
 	virtual int		wait(int opt) = 0;
+	void			chk_rsp_len(void);
 private:
 	int				chk_rsp_hed(void);
 	

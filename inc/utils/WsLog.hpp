@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:30:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,17 @@ enum
 	WSL_CYAN
 };
 
-// #define WSLOG WsLog::_
-#define WSLOG(...) 
+# ifndef NOLOG
+#  define NOLOG 1
+# endif
+
+# if NOLOG
+#  define WSLOG(...)
+#  define WSCOL(...)
+#else
+#  define WSLOG WsLog::_
+#  define WSCOL WsLog::color
+#endif
 
 class WsLog
 {

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 04:50:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,9 @@ bool	Connection::timeo(time_t now)
 	if ((this->lact + CONN_TIMEOUT) > now)
 		return (false);
 		
-	// php-fpm : gets this .. 
-	// php-cgi : (ip) times out ... but it should not have been active anyway .. 
-	WSLOG(LVL_TMP, TGT_CONN, "TIMEO");
-	// FWIW : normal (cgi) seems to survive low timeout values better .. 
-	if (this->res_cgi)	
-		this->res_cgi->conn_closed(); 
+	WSLOG(LVL_DBG, TGT_CONN, "TIMEO");
+	// if (this->res_cgi)	
+	// 	this->res_cgi->conn_closed(); 
 	this->set_err(408); // Request Timeout 
 	return (true);
 }
@@ -119,8 +116,7 @@ try
 	default:
 		break;
 	}
-	// Request & req = sess.getRequest();
-	// (void)req;
+	
 	switch (sess.nextAction()) 
 	{
 	case Session::DOCGI:
@@ -129,7 +125,6 @@ try
 			WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 			return (0); // send error
 		}
-		// data has been written to (sess)
 		this->res_cgi->push_body();
 		break;
 	case Session::WRSOCK:
@@ -170,7 +165,7 @@ try
 	
 	ssize_t	err = 0;
 	
-	sess.log_next();
+	// sess.log_next();
 	if (sess.nextAction() == Session::DOCGI)
 	{
 		ResourceCgi *res = this->res_cgi;
@@ -206,26 +201,21 @@ try
 	}
 	else
 	{
-		if (sess.nextAction() == Session::CLOSE)
+		switch (sess.nextAction())
 		{
+		case Session::CLOSE:
 			return (-1);
-		}
-		if (sess.nextAction() != Session::WRSOCK)
-		{
-
-		}
-		std::string & RESP = sess.get_resp();
-		if (RESP.size())
-		{
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
-			err = this->send(RESP);
-		}
-		else
-		{
-			// done (?)
+		case Session::WRSOCK:
+		default:
+			std::string & RESP = sess.get_resp();
+			if (RESP.size())
+			{
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+				// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+				// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+				err = this->send(RESP);
+			}
 		}
 	}
 	
@@ -239,18 +229,14 @@ try
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
 		return (0);
 	}
-	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
-	// if (OSTR.size())
-	// 	WSLOG(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
-	// else
-	// 	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent:  all");
+	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 	
-	sess.log_next();
+	// sess.log_next();
 	switch (sess.nextAction())
 	{
 	case Session::KPALIVE:
 		this->reset();
-		this->mod_evt(-EPOLLOUT); // otherwise, we get stuck here 
+		this->mod_evt(-EPOLLOUT);
 		return (-1);
 	case Session::CLOSE:
 		return (-1);
@@ -270,12 +256,11 @@ catch(const std::exception& e)
 
 int	Connection::rdhup(void)
 {
-	WsLog::color(WSL_GREEN);
+	WSCOL(WSL_GREEN);
 	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
-	// ATTN : may need error (?)
-	return (-1); 
-	return (0);
+	// return (0); // may need error (?)
+	return (-1);
 }
 
 int	Connection::hup(void)
@@ -293,7 +278,7 @@ void	Connection::reset(void)
 	if (this->res_cgi)
 	{
 		this->res_cgi->conn_closed();
-		delete (this->res_cgi); // conn : reset 
+		delete (this->res_cgi);
 		this->res_cgi = NULL;
 	}
 
@@ -314,26 +299,6 @@ std::string		&Connection::get_addr(void)
 	return (this->astr);
 }
 
-// multipart/form-data : cgi would need to know the BOUNDARY in the HEADER
-	// write rest of BODY to cgi->ifd;
-// 		A request-body is supplied with the request if the CONTENT_LENGTH is
-//    not NULL.  The server MUST make at least that many bytes available
-//    for the script to read.
-// The script MUST check the value of the CONTENT_LENGTH variable before
-//    reading the attached message-body, and SHOULD check the CONTENT_TYPE
-//    value before processing it
-
-
-// SESSION / REQUEST (CgiPipe::pollout)
-// CGI input may need to know :
-	// (1)	: body data has been received by the Connection
-	//		  and needs to be written to the (stdin) of the CGI
-	// (0)	: no body data is currently available
-	//		  BUT .. more needs to be received to complete the request
-	// (-1) : there is no more body data to write to the CGI
-
-
-// called on ~CgiPipe()
 void	Connection::cgi_rem(EpollClient *epc)
 {
 	switch (this->res_cgi->rem(epc))
@@ -387,14 +352,14 @@ int	Connection::exec_cgi(void)
 		WSLOG(LVL_DBG, TGT_CONN, "php : ", err);
 		if (err == 0)
 		{
-			WsLog::color(WSL_GREEN);
+			WSCOL(WSL_GREEN);
 			WSLOG(LVL_DBG, TGT_CONN, "php :  fcgi");			
 			delete (cgienv);
 			this->res_cgi = fcgi;
 			return (err);
 		}
 		delete (fcgi);
-		WsLog::color(WSL_YELLOW);
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
 
@@ -422,9 +387,9 @@ int	Connection::exec_cgi(void)
 // char cwd[PATH_MAX];
 		const char **envp = cgienv->gen();
 
-		// WsLog::color(WSL_RED);
+		// WSCOL(WSL_RED);
 		// WSLOG(LVL_DBG, TGT_CGI, "exec: ", cgienv->args[0]);
-		// WsLog::color(WSL_RED);
+		// WSCOL(WSL_RED);
 		// WSLOG(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
 		pipes.dup_err();
@@ -433,7 +398,7 @@ int	Connection::exec_cgi(void)
 		// REQUIRE (!)
 		if (cwd.size())
 		{
-			// WsLog::color(WSL_GREEN);
+			// WSCOL(WSL_GREEN);
 			// WSLOG(LVL_DBG, TGT_CGI, "cwd : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)

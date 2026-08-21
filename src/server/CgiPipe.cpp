@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:25:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:10:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,14 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc
 
 CgiPipe::~CgiPipe()
 {
-	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe");
+	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe ", this->fd);
 	if (this->conn)
+	{
+		WSLOG(LVL_DBG, TGT_CGI, " (~) conn_fd ", this->conn->get_fd());
 		this->conn->cgi_rem(this);
+	}
+	if (this->rsrc)
+		this->rsrc->rem(this);
 }
 
 
@@ -226,6 +231,8 @@ void	CgiPipe::rsrc_closed(void)
 	this->conn = NULL;
 	this->rsrc = NULL;
 }
+
+
 
 
 

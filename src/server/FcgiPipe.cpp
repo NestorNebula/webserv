@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:27:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:09:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,14 @@ FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsr
 	
 FcgiPipe::~FcgiPipe()
 {
-	WSLOG(LVL_DBG, TGT_FCGI, " (~) Fcgi");
+	WSLOG(LVL_DBG, TGT_FCGI, " (~) Fcgi ", this->fd);
 	if (this->conn)
+	{
+		WSLOG(LVL_DBG, TGT_FCGI, " (~) conn_fd ", this->conn->get_fd());
 		this->conn->cgi_rem(this);
+	}
+	if (this->rsrc)
+		this->rsrc->rem(this);
 }
 
 // static int to = 0;
@@ -44,19 +49,23 @@ bool	FcgiPipe::timeo(time_t now)
 
 	if (this->rsrc)
 	{
+		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : rsrc");
 		Session &sess = conn->sess;
 		Request &req  = sess.getRequest(); // Wrong Action on Session
 		if (req.hasHeaders())
 		{
+			WSCOL(WSL_RED);
 			WSLOG(LVL_TMP, TGT_FCGI, "req : has headers");
 		}
 		if (req.hasBody())
 		{
+			WSCOL(WSL_RED);
 			WSLOG(LVL_TMP, TGT_FCGI, "req : has body");
 		}	
 		if (req.isComplete())
 		{
+			WSCOL(WSL_RED);
 			WSLOG(LVL_TMP, TGT_FCGI, "req : complete"); // , ++to); // 1500 (!)
 			// sess body .. could be in between
 #if 0
@@ -75,15 +84,19 @@ bool	FcgiPipe::timeo(time_t now)
 			}
 #endif
 		}
+		// error .. should not wait 
+		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504); // Gateway Timeout
 	}
 	else if (this->conn)
 	{
+		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : conn");
 		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
 	{
+		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : ????");
 	}
 	return (true);
@@ -256,19 +269,18 @@ ssize_t	FcgiPipe::pollin(void)
 
 int		FcgiPipe::rdhup(void)
 {
-	WsLog::color(WSL_YELLOW);
+	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_FCGI, "RDHUP");
 	if (this->rsrc == NULL)
 		return (-1);
 	if (this->conn == NULL)
 		return (-1);
 		
-	// rsrc->set_done(RSRC_DONE_OP);
-	WSLOG(LVL_TMP, TGT_FCGI, "rdhup: done ", rsrc->done); 
+	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done); 
 		
 	if (this->fcgi.req.size())
 	{
-		WsLog::color(WSL_RED);
+		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
 		return (0);
 	}
@@ -276,7 +288,7 @@ int		FcgiPipe::rdhup(void)
 	// 	return (-1);
 	if (this->rsrc->resp.size())
 	{
-		WsLog::color(WSL_YELLOW);
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
 		

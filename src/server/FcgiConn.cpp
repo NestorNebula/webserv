@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:55:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ int FcgiConn::rsp_data(char * buf, int cnt)
 	switch(data.typ)
 	{
 	case FCGI_STDERR:
-		WsLog::color(WSL_YELLOW);
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "push data : error");
 		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
 		break;
