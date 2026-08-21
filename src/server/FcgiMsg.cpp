@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:39:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:13:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,11 @@ void FcgiMsg::new_params(unsigned short req)
 	this->begin(); // (BEGIN_REQUEST, RESPONDER)
 	set_req(req);  // head.requestId
 
-	buf.push(&head, 8);
-	buf.push(&body, 8); // body.role
+	buf.push(&head, FCGI_HEADER_LEN);
+	buf.push(&body, FCGI_HEADER_LEN); // body.role
 
 	pHed = buf.end; // remember where to insert FCGI_PARAMS
-	buf.skip(8);
+	buf.skip(FCGI_HEADER_LEN);
 	pBeg = buf.end; // for calculating length of FCGI_PARAMS
 }
 
@@ -120,11 +120,11 @@ void FcgiMsg::end_params(void)
 
 	// insert params header with proper content-length
 
-	ft_memcpy(buf.buf + pHed, this, 8);
+	ft_memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
 	buf.zero(this->head.paddingLength);
 
 	this->make_head(FCGI_PARAMS, 0);
-	buf.push(this, 8);
+	buf.push(this, FCGI_HEADER_LEN);
 }
 
 void FcgiMsg::add_stdin(const char * data, int dSiz)
@@ -133,7 +133,7 @@ void FcgiMsg::add_stdin(const char * data, int dSiz)
 	while (dSiz > dMax)
 	{
 		this->make_head(FCGI_STDIN, dMax);
-		buf.push(this, 8);
+		buf.push(this, FCGI_HEADER_LEN);
 		buf.push(data, dMax);
 
 		data += dMax;
@@ -142,7 +142,7 @@ void FcgiMsg::add_stdin(const char * data, int dSiz)
 	if (dSiz)
 	{
 		this->make_head(FCGI_STDIN, dSiz);
-		buf.push(this, 8);
+		buf.push(this, FCGI_HEADER_LEN);
 		buf.push(data, dSiz);
 		buf.zero(this->head.paddingLength);
 		// padding (?)
@@ -155,7 +155,7 @@ void FcgiMsg::end_stdin(void)
 	WSCOL(WSL_RED);
 	WSLOG(LVL_DBG, TGT_FCGI, "END STDIN");
 	this->make_head(FCGI_STDIN, 0);
-	buf.push(this, 8);
+	buf.push(this, FCGI_HEADER_LEN);
 }
 
 
@@ -163,7 +163,7 @@ void FcgiMsg::begin()
 {
 	this->zero();
 	head.type = FCGI_BEGIN_REQUEST;
-	set_len(8); // FCGI_BEGIN_REQUEST (body)
+	set_len(FCGI_HEADER_LEN); // FCGI_BEGIN_REQUEST (body)
 	set_role(FCGI_RESPONDER);
 }
 
@@ -177,7 +177,7 @@ void FcgiMsg::make_head(unsigned char typ, unsigned short len)
 
 int FcgiMsg::full_size()
 {
-	return 8 + this->get_len() + this->head.paddingLength;
+	return FCGI_HEADER_LEN + this->get_len() + this->head.paddingLength;
 }
 
 
@@ -217,7 +217,7 @@ unsigned short FcgiMsg::get_role()
 }
 void FcgiMsg::zero()
 {
-	head.version = 0x01;
+	head.version = FCGI_VERSION_1; // 0x1
 	head.type = 0;
 
 	set_req(0);

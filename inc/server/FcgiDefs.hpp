@@ -1,24 +1,19 @@
-/* 
- * fastcgi.h --
- *
- *	Defines for the FastCGI protocol.
- *
- *
- * Copyright (c) 1995-1996 Open Market, Inc.
- *
- * See the file "LICENSE" for information on usage and redistribution
- * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * $Id: fastcgi.h,v 1.1.1.1 1997/09/16 15:36:32 stanleyg Exp $
- */
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   FcgiDefs.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/08/21 17:07:27 by kdonlon           #+#    #+#             */
+/*   Updated: 2026/08/21 17:16:58 by kdonlon          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef _FASTCGI_H
-#define _FASTCGI_H
+#ifndef FCGI_DEFS_HPP
+# define FCGI_DEFS_HPP
 
-/*
- * Listening socket file number
- */
-#define FCGI_LISTENSOCK_FILENO 0
+# include <ctype.h>
 
 typedef struct {
     unsigned char version;
@@ -33,20 +28,10 @@ typedef struct {
 
 #define FCGI_MAX_LENGTH 0xffff
 
-/*
- * Number of bytes in a FCGI_Header.  Future versions of the protocol
- * will not reduce this number.
- */
 #define FCGI_HEADER_LEN  8
 
-/*
- * Value for version component of FCGI_Header
- */
 #define FCGI_VERSION_1           1
 
-/*
- * Values for type component of FCGI_Header
- */
 #define FCGI_BEGIN_REQUEST       1
 #define FCGI_ABORT_REQUEST       2
 #define FCGI_END_REQUEST         3
@@ -60,9 +45,6 @@ typedef struct {
 #define FCGI_UNKNOWN_TYPE       11
 #define FCGI_MAXTYPE (FCGI_UNKNOWN_TYPE)
 
-/*
- * Value for requestId component of FCGI_Header
- */
 #define FCGI_NULL_REQUEST_ID     0
 
 
@@ -78,18 +60,13 @@ typedef struct {
     FCGI_BeginRequestBody body;
 } FCGI_BeginRequestRecord;
 
-/*
- * Mask for flags component of FCGI_BeginRequestBody
- */
+    // FCGI_BeginRequestBody :: flags
 #define FCGI_KEEP_CONN  1
 
-/*
- * Values for role component of FCGI_BeginRequestBody
- */
+    // FCGI_BeginRequestBody :: role
 #define FCGI_RESPONDER  1
 #define FCGI_AUTHORIZER 2
 #define FCGI_FILTER     3
-
 
 typedef struct {
     unsigned char appStatusB3;
@@ -105,22 +82,11 @@ typedef struct {
     FCGI_EndRequestBody body;
 } FCGI_EndRequestRecord;
 
-/*
- * Values for protocolStatus component of FCGI_EndRequestBody
- */
+    // FCGI_EndRequestBody :: protocolStatus
 #define FCGI_REQUEST_COMPLETE 0
 #define FCGI_CANT_MPX_CONN    1
 #define FCGI_OVERLOADED       2
 #define FCGI_UNKNOWN_ROLE     3
-
-
-/*
- * Variable names for FCGI_GET_VALUES / FCGI_GET_VALUES_RESULT records
- */
-#define FCGI_MAX_CONNS  "FCGI_MAX_CONNS"
-#define FCGI_MAX_REQS   "FCGI_MAX_REQS"
-#define FCGI_MPXS_CONNS "FCGI_MPXS_CONNS"
-
 
 typedef struct {
     unsigned char type;    
@@ -132,5 +98,5 @@ typedef struct {
     FCGI_UnknownTypeBody body;
 } FCGI_UnknownTypeRecord;
 
-#endif	/* _FASTCGI_H */
 
+#endif

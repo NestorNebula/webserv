@@ -17,6 +17,26 @@ if [[ -z $PHP_FPM_BIN ]]; then
 fi
 
 
+if [ "$1" == "pycgi" ]; then
+# https://pypi.org/project/legacy-cgi/
+# https://pypi.org/project/legacy-cgi/2.6/#files
+
+    PYCGI_TARBALL=pycgi.tar.gz
+    PYCGI_FOLDER=legacy-cgi-2.6
+    if [ "$2" == "clean" ]; then
+        rm -f $PYCGI_TARBALL
+        rm -fr $PYCGI_FOLDER
+        exit 0
+    fi
+    if [ ! -f $PYCGI_TARBALL ]; then
+        curl https://files.pythonhosted.org/packages/8c/de/d5385d8e6f37ac1f19d9839eaab2f10bd7062ad33b7d23075553baf4c1d2/legacy-cgi-2.6.tar.gz -o $PYCGI_TARBALL
+    fi
+    if [ ! -d $PYCGI_FOLDER ]; then
+        tar xvf $PYCGI_TARBALL # -C folder --strip-components=1
+    fi
+    exit 0
+fi
+
 if [ "$1" == "conf" ]; then
     cat << EOF > ~/.config/systemd/user/php-fpm.service
 [Unit]
