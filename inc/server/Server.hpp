@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 16:44:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 20:39:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,8 @@ public:
 	ServerConfig		&get_conf() { return (this->conf); }
 	
 // #kd
-	std::string			fcgi_sock;
-	std::string			pycgi;
+	// std::string			fcgi_sock;
+	// std::string			pycgi;
 	
 private:
 	ServerConfig		conf;

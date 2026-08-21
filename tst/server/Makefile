@@ -66,10 +66,12 @@ FILES = \
 	parsing/Validation.cpp 
 
 # WITH_FCGI
-# 	server/ResourceFcgi.cpp \
-# 	server/FcgiMsg.cpp \
-# 	server/FcgiConn.cpp \
-# 	server/FcgiPipe.cpp \
+FILES += \
+	server/ResourceFcgi.cpp \
+	server/FcgiMsg.cpp \
+	server/FcgiConn.cpp \
+	server/FcgiPipe.cpp 
+
 TPP = 
 
 SRCS = $(addprefix $(SRC_DIR)/, $(FILES))
