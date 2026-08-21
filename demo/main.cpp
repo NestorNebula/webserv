@@ -55,7 +55,7 @@ int main(int argc, char *argv[], char **envp) {
         } 
         if (err)
           err = ep->loop();
-        WsLog::_(LVL_INFO, TGT_MAIN, "exit: ", err);
+        WSLOG(LVL_INFO, TGT_MAIN, "exit: ", err);
     }
     catch(const std::exception& e)
     {

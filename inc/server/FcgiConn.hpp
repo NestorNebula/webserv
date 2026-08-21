@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 22:59:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:02:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ public:
 	~FcgiConn() {}
 
 	int				req_init(CgiEnv *env);
-	void			req_body(char *buf, int siz);
+	void			req_body(const char *buf, int siz);
+	void			req_body(std::string & buf);
 	int				rsp_recv(char *buf, int siz);
 
 private:

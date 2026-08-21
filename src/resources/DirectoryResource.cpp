@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   DirectoryResource.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 10:07:44 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 03:23:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,15 @@ void DirectoryResource::generate() {
   if (_state != DEFAULT)
     throw std::logic_error("generate called multiple times");
 
-  WsLog::_(LVL_INFO, TGT_DIR_RES, "Directory Listing for: ", _dirpath);
+  WSLOG(LVL_INFO, TGT_DIR_RES, "Directory Listing for: ", _dirpath);
   _stream = new Stream(new std::stringstream());
   if (_dir)
     buildList();
   _state = (_dir != NULL && _stream->good()) ? DONE : FAIL;
   if (_state != DONE)
-    WsLog::_(LVL_WARN, TGT_DIR_RES, "Directory listing error for: ", _dirpath);
+  {
+    WSLOG(LVL_WARN, TGT_DIR_RES, "Directory listing error for: ", _dirpath);
+  }
 }
 
 Stream &DirectoryResource::stream() {

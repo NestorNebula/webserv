@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:54:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:02:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ public:
 	void 	add_param(const char * key, int val);
 	void 	end_params(void);
 	
-	void	add_stdin(char *buf, int siz);
+	void	add_stdin(const char *buf, int siz);
 	void	end_stdin(void);
 
 	void 	data(FcgiMsgData * data);

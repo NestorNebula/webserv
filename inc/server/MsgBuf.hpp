@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:54:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ public:
         this->avail(s);
         this->end += s;
     }
-    void push(void * v, int s)
+    void push(const void * v, int s)
     {
         this->avail(s);
 
@@ -113,7 +113,7 @@ php-fpm fastcgi.c
         if (k >= 128)
         {
             WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "keylen ", k);
+            WSLOG(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
             ft_memcpy(tgt, &k, sizeof(int));
@@ -129,7 +129,7 @@ php-fpm fastcgi.c
         {
 
             WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "vallen ", k);
+            WSLOG(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
             ft_memcpy(tgt, &v, sizeof(int));

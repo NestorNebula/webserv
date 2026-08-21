@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 02:18:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WsLog::_(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WsLog::_(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	if (this->res_cgi)
 	{
 		this->res_cgi->conn_closed();
@@ -57,7 +57,7 @@ bool	Connection::timeo(time_t now)
 		
 	// php-fpm : gets this .. 
 	// php-cgi : (ip) times out ... but it should not have been active anyway .. 
-	WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
+	WSLOG(LVL_TMP, TGT_CONN, "TIMEO");
 	// FWIW : normal (cgi) seems to survive low timeout values better .. 
 	if (this->res_cgi)	
 		this->res_cgi->conn_closed(); 
@@ -71,13 +71,13 @@ void	Connection::set_err(int e)
 		return;
 	if (this->error)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN, "err:  already set!");
-		WsLog::_(LVL_DBG, TGT_CONN, "cur:  ", this->error);
-		WsLog::_(LVL_DBG, TGT_CONN, "new:  ", e);
+		WSLOG(LVL_DBG, TGT_CONN, "err:  already set!");
+		WSLOG(LVL_DBG, TGT_CONN, "cur:  ", this->error);
+		WSLOG(LVL_DBG, TGT_CONN, "new:  ", e);
 		this->mod_evt(EPOLLOUT);
 		return;
 	}
-	WsLog::_(LVL_DBG, TGT_CONN, "err:  ", e);
+	WSLOG(LVL_DBG, TGT_CONN, "err:  ", e);
 	this->error = e; // why not (?)
 	this->sess.setError(e);
 	this->mod_evt(EPOLLOUT);
@@ -87,25 +87,25 @@ ssize_t	Connection::pollin(void)
 {
 try
 {
-	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
+	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
 	// sess.log_next();
 	
 	ssize_t	err;
 
-	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv");
+	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
 	err = this->recv();
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv", err);
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv", err);
 		return (err);
 	}
 	if (err == 0) 
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
 		this->mod_evt(EPOLLOUT); 
 		return (0);
 	}
-	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
+	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
 	// sess.log_next();
 	switch(sess.nextAction())
@@ -126,7 +126,7 @@ try
 	case Session::DOCGI:
 		if (this->exec_cgi() < 0)
 		{
-			WsLog::_(LVL_DBG, TGT_CONN, "exec: cgi");
+			WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 			return (0); // send error
 		}
 		// data has been written to (sess)
@@ -166,7 +166,7 @@ ssize_t	Connection::pollout(void)
 {
 try
 {
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
+	WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 	
 	ssize_t	err = 0;
 	
@@ -176,21 +176,21 @@ try
 		ResourceCgi *res = this->res_cgi;
 		if (res == NULL)
 		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
 			return (-1);
 		}
 		switch (res->status())
 		{
 		case RSP_COMPLETE:
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
 			return (-1);
 		case RSP_WAIT_HEAD:
 		case RSP_WAIT_BODY:
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
 			this->mod_evt(-EPOLLOUT);
 			return (0);
 		case RSP_ERROR:
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (error)");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (error)");
 			return (0);
 		default:
 			break;
@@ -198,10 +198,10 @@ try
 
 		std::string & RESP = res->get_resp();
 		
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp");
-		// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+		// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+		// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
 		err = this->send(RESP);
 	}
 	else
@@ -217,10 +217,10 @@ try
 		std::string & RESP = sess.get_resp();
 		if (RESP.size())
 		{
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send");
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "resp");
-			// WsLog::_(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
 			err = this->send(RESP);
 		}
 		else
@@ -236,14 +236,14 @@ try
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
 		return (0);
 	}
-	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
+	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);	
 	// if (OSTR.size())
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
+	// 	WSLOG(LVL_DBG, TGT_CONN_SEND, "left: ", OSTR.size());
 	// else
-	// 	WsLog::_(LVL_DBG, TGT_CONN_SEND, "sent:  all");
+	// 	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent:  all");
 	
 	sess.log_next();
 	switch (sess.nextAction())
@@ -271,7 +271,7 @@ catch(const std::exception& e)
 int	Connection::rdhup(void)
 {
 	WsLog::color(WSL_GREEN);
-	WsLog::_(LVL_DBG, TGT_CONN, "RDHUP");
+	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
 	// ATTN : may need error (?)
 	return (-1); 
@@ -280,7 +280,7 @@ int	Connection::rdhup(void)
 
 int	Connection::hup(void)
 {
-	WsLog::_(LVL_DBG, TGT_CONN, "hup!");
+	WSLOG(LVL_DBG, TGT_CONN, "hup!");
 	if (this->res_cgi == NULL)
 		return (-1);
 	this->res_cgi->conn_closed();
@@ -339,20 +339,20 @@ void	Connection::cgi_rem(EpollClient *epc)
 	switch (this->res_cgi->rem(epc))
 	{
 	case 1: // (ip)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
+		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
 	case 2: // (op)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
+		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
+		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
+		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
 	case 3: // (done)
-		WsLog::_(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
-		WsLog::_(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
+		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
+		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
@@ -374,7 +374,7 @@ int	Connection::exec_cgi(void)
 	err = cgienv->from_conn(*this);
 	if (err < 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI, "cgienv: FAIL");
+		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
 		return (-1);
 	}
@@ -384,18 +384,18 @@ int	Connection::exec_cgi(void)
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
 		
-		WsLog::_(LVL_DBG, TGT_CONN, "php : ", err);
+		WSLOG(LVL_DBG, TGT_CONN, "php : ", err);
 		if (err == 0)
 		{
 			WsLog::color(WSL_GREEN);
-			WsLog::_(LVL_DBG, TGT_CONN, "php :  fcgi");			
+			WSLOG(LVL_DBG, TGT_CONN, "php :  fcgi");			
 			delete (cgienv);
 			this->res_cgi = fcgi;
 			return (err);
 		}
 		delete (fcgi);
 		WsLog::color(WSL_YELLOW);
-		WsLog::_(LVL_DBG, TGT_CONN, "php :  pipe");
+		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
 
 	cgi_pipes	pipes;
@@ -423,9 +423,9 @@ int	Connection::exec_cgi(void)
 		const char **envp = cgienv->gen();
 
 		// WsLog::color(WSL_RED);
-		// WsLog::_(LVL_DBG, TGT_CGI, "exec: ", cgienv->args[0]);
+		// WSLOG(LVL_DBG, TGT_CGI, "exec: ", cgienv->args[0]);
 		// WsLog::color(WSL_RED);
-		// WsLog::_(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
+		// WSLOG(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
 		pipes.dup_err();
 
@@ -434,7 +434,7 @@ int	Connection::exec_cgi(void)
 		if (cwd.size())
 		{
 			// WsLog::color(WSL_GREEN);
-			// WsLog::_(LVL_DBG, TGT_CGI, "cwd : ", cwd);
+			// WSLOG(LVL_DBG, TGT_CGI, "cwd : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)
 				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));

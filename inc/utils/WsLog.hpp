@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 10:50:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,9 @@ enum
 	WSL_PURPLE,
 	WSL_CYAN
 };
+
+// #define WSLOG WsLog::_
+#define WSLOG(...) 
 
 class WsLog
 {

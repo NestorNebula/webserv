@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 18:07:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@
 class Stream {
 public:
   Stream() : _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream constructor");
   }
   Stream(std::iostream *stream) : _stream(stream) {}
   virtual ~Stream() {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream destructor");
     delete _stream;
   }
 

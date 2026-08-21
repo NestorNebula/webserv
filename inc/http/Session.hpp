@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 20:18:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,11 @@ public:
   Session(ServerConfig &server)
       : _next(RDSOCK), _server(server), _route(NULL), _resource(NULL),
         _keepalive(false), _sent(0) {
-    WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
+    WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
     delete _resource;
-    WsLog::_(LVL_DBG, TGT_SESS, "Session destructor");
+    WSLOG(LVL_DBG, TGT_SESS, "Session destructor");
   }
 
   // Action to do from Network
@@ -131,19 +131,19 @@ public:
     switch(this->nextAction())
     {
     case Session::RDSOCK:
-      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
       break;
     case Session::DOCGI:
-      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
       break;
     case Session::WRSOCK:
-      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
       break;
     case Session::CLOSE:
-      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
       break;
     case Session::KPALIVE:
-      WsLog::_(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
       break;
     }
   }

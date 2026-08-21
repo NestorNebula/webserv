@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 01:12:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,21 +36,21 @@ int	ResourceCgi::get_req_body(void)
 
     char buf[REQ_READ_SIZ];
     ssize_t err = rbody->readsome(buf, REQ_READ_SIZ);
-    // WsLog::_(LVL_DBG, TGT_CGI, "SOME: ", err);
+    // WSLOG(LVL_DBG, TGT_CGI, "SOME: ", err);
 	if (err <= 0)
 		return (REQ_COMPLETE);
     body.append(buf, err);
-    // WsLog::_(LVL_DBG, TGT_CGI, "body: ", body.size());
+    // WSLOG(LVL_DBG, TGT_CGI, "body: ", body.size());
 	return (body.size());
 }
 
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
 	this->resp.append(buf, siz);
-	WsLog::_(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
+	WSLOG(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
 
-	// WsLog::_(LVL_DBG, TGT_RSRC, "ostr");
-	// WsLog::_(LVL_DBG, TGT_RSRC, "****\n", ostr);
+	// WSLOG(LVL_DBG, TGT_RSRC, "ostr");
+	// WSLOG(LVL_DBG, TGT_RSRC, "****\n", ostr);
 	
 	return (this->chk_rsp_hed());
 }
@@ -63,7 +63,6 @@ static bool	icmp(char a, char b)
 
 static std::string hedval_str(std::string & str, const char *key)
 {
-	// std::string	kstr = std::string("\n") + std::string(key);
 	std::string	kstr = std::string(key);
 	std::string	val("");
 
@@ -85,8 +84,9 @@ int		ResourceCgi::chk_rsp_hed(void)
 {
 	if (this->hed)
 	{
-// HAVE_SOME_DATA
-		// conn->mod_evt(EPOLLOUT);
+#if !RES_CGI_WAIT_COMPLETE
+		conn->mod_evt(EPOLLOUT);
+#endif
 		return (RSRC_RESP_BODY);
 	}	
 	
@@ -94,8 +94,8 @@ int		ResourceCgi::chk_rsp_hed(void)
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
 		
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp);	
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp);	
 	this->hed = 1;
 	
 // REQUIRE (!)
@@ -105,7 +105,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 	
 	std::string stat_hed;
 	std::string stat_str = hedval_str(resp, "Status");
-	WsLog::_(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
 	if (stat_str.size())
 	{
 		// HTTP/1.1 STATUS [Status Message]
@@ -116,7 +116,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 		stat_hed = std::string("HTTP/1.0 200 OK\r\n");
 	}
 	resp.insert(0, stat_hed);
-	// WsLog::_(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", this->resp);	
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", this->resp);	
 	return (RSRC_RESP_HEAD);
 }
 

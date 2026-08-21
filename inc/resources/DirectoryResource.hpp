@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   DirectoryResource.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 07:10:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/26 12:03:29 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@ public:
   DirectoryResource(const std::string &dirpath)
       : _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())),
         _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_DIR_RES,
+    WSLOG(LVL_DBG, TGT_DIR_RES,
              "DirectoryResource constructor for: ", dirpath);
   }
   ~DirectoryResource() {
-    WsLog::_(LVL_DBG, TGT_DIR_RES,
+    WSLOG(LVL_DBG, TGT_DIR_RES,
              "DirectoryResource destructor for: ", _dirpath);
     if (_dir)
       closedir(_dir);
