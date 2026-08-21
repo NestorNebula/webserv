@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 21:22:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 02:18:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include "Server.hpp"
 #include "CgiPipe.hpp"
 #include "ResourceCgi.hpp"
+#include "ResourceFcgi.hpp"
+#include "ResourcePiped.hpp"
 
 Connection::Connection	(const Connection & that) : 
 	EpollClient(that), 
@@ -56,8 +58,6 @@ bool	Connection::timeo(time_t now)
 	// php-fpm : gets this .. 
 	// php-cgi : (ip) times out ... but it should not have been active anyway .. 
 	WsLog::_(LVL_TMP, TGT_CONN, "TIMEO");
-	if (res_cgi)
-		WsLog::_(LVL_TMP, TGT_CONN, "cgi state ", res_cgi->done);
 	// FWIW : normal (cgi) seems to survive low timeout values better .. 
 	if (this->res_cgi)	
 		this->res_cgi->conn_closed(); 
@@ -88,7 +88,7 @@ ssize_t	Connection::pollin(void)
 try
 {
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-	sess.log_next();
+	// sess.log_next();
 	
 	ssize_t	err;
 
@@ -107,7 +107,7 @@ try
 	}
 	WsLog::_(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-	sess.log_next();
+	// sess.log_next();
 	switch(sess.nextAction())
 	{
 	case Session::RDSOCK:
@@ -179,20 +179,18 @@ try
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
 			return (-1);
 		}
-		err = res->status();
-		if (err < 0)
+		switch (res->status())
 		{
+		case RSP_COMPLETE:
 			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
-			if (res->resp.size() == 0)
-				return (-1);
-		}
-		switch (err)
-		{
-		case 0:
-			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data    ", err);
+			return (-1);
+		case RSP_WAIT_HEAD:
+		case RSP_WAIT_BODY:
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "send:  no data");
 			this->mod_evt(-EPOLLOUT);
 			return (0);
-		case 2: // ERROR
+		case RSP_ERROR:
+			WsLog::_(LVL_DBG, TGT_CONN_SEND, "res : (error)");
 			return (0);
 		default:
 			break;
@@ -429,7 +427,7 @@ int	Connection::exec_cgi(void)
 		// WsLog::color(WSL_RED);
 		// WsLog::_(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
-		// pipes.dup_err();
+		pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
 		// REQUIRE (!)

@@ -2,6 +2,11 @@
 
 tput reset
 
+# error : Connection reset by peer
+# pure virtual method called
+# terminate called without an active exception
+
+
 C=100
 R=2
 if [[ "$1" =~ "s" ]]; then
@@ -120,12 +125,12 @@ if [ "$1" == "u" ]; then
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/py/ul.py -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/py/ul.py -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
 	done
 
 	ls -l www/p*
@@ -153,7 +158,7 @@ fi
 # echo
 # exit 0
 
-curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
+curl -X POST 'http://localhost:8082/exit.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
