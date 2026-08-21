@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 00:20:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 10:17:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,7 @@ class ResourceCgi;
 class Connection : public EpollClient
 {
 private:
-// DEMO
-	Connection				(const Connection & that); // : EpollClient(that), 
-		// sess(that.serv.get_conf()), serv(that.serv), req_cnt(0) {}
+	Connection				(const Connection & that);
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
 		

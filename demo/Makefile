@@ -24,22 +24,22 @@ SRC_DIR = ../src
 
 FILES = \
 	http/Headers.cpp \
-	  utils/helpers.cpp \
-	  http/Request.cpp \
-	  http/Response.cpp \
-	  resources/StaticResource.cpp \
-	  resources/DirectoryResource.cpp \
-	  resources/BuiltinResource.cpp \
-	  streams/Stream.cpp \
-	  streams/TemporaryFileStream.cpp \
-	  utils/http_utils.cpp \
-	  utils/WsLog.cpp \
-	  http/Session.cpp \
-	  parsing/ConfigParser.cpp \
-	  parsing/ParseBlocks.cpp \
-	  parsing/ParserTools.cpp \
-	  parsing/Tokenizer.cpp \
-	  parsing/Validation.cpp \
+	utils/helpers.cpp \
+	http/Request.cpp \
+	http/Response.cpp \
+	resources/StaticResource.cpp \
+	resources/DirectoryResource.cpp \
+	resources/BuiltinResource.cpp \
+	streams/Stream.cpp \
+	streams/TemporaryFileStream.cpp \
+	utils/http_utils.cpp \
+	utils/WsLog.cpp \
+	http/Session.cpp \
+	parsing/ConfigParser.cpp \
+	parsing/ParseBlocks.cpp \
+	parsing/ParserTools.cpp \
+	parsing/Tokenizer.cpp \
+	parsing/Validation.cpp \
 	utils/WsLog.cpp \
 	server/EpollClient.cpp \
 	server/Epoll.cpp \

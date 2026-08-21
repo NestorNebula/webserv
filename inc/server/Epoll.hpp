@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 00:20:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 10:18:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,9 @@ class EpollClient;
 class Epoll
 {
 private:
-	Epoll 			   (const Epoll & that) : envp(that.envp) {}
+	Epoll 			   (const Epoll & that) : 
+		envp(that.envp) 
+		{}
 	Epoll & operator = (const Epoll & ) 
 		{ return (*this); }
 
@@ -52,7 +54,6 @@ public:
 	int		mod(EpollClient *cli);
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
-	// void	dupx(void);
 	
 	void	cleanup(void);
 	

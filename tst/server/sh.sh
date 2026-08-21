@@ -9,6 +9,23 @@ tput reset
 
 C=250
 R=8
+
+while getopts "c:r:" o; do
+    case "${o}" in
+        c)
+            C=${OPTARG}
+            ;;
+        r)
+            R=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -125,12 +142,12 @@ if [ "$1" == "u" ]; then
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo
-		# curl -X POST http://localhost:8082/pl/ul.pl -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/py/ul.py -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/pl/ul.pl -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
+		curl -X POST http://localhost:8082/py/ul.py -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
 	done
 
 	ls -l www/p*

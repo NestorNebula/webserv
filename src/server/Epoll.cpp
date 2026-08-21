@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 04:23:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 10:17:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,23 +88,6 @@ Epoll::~Epoll()
 	this->cleanup();
 };
 
-#if 0
-void	Epoll::dupx(void)
-{
-	std::set<EpollClient*>::iterator it = this->clients.begin();
-	while (it != this->clients.end())
-	{
-		int cfd = (*it)->get_fd();
-		// close(cfd);
-		// // int d = 
-		dup(cfd);
-		// close(cfd);
-		this->del(*it); // necessary (?)
-		it++;
-
-	}
-}
-#endif
 void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:02:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 10:20:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,20 @@
 
 class FcgiConn
 {
+private:
+	FcgiConn			  (const FcgiConn & );
+	FcgiConn & operator = (const FcgiConn & ) { return (*this); }
+
 public:
+	FcgiConn() {}
+	~FcgiConn() {}
+	
 	static int		make_sock(const char * sock_path);
 	
 	FcgiMsgData		data; 
 	std::string		req;
 	std::string		rsp;
 
-	FcgiConn() {}
-	~FcgiConn() {}
 
 	int				req_init(CgiEnv *env);
 	void			req_body(const char *buf, int siz);

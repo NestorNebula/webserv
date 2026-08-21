@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:02:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 10:21:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 # include <stdio.h>
 # include <string.h>
 # include <iostream>
-// libfcgi0ldbl
-// libfcgi-dev
 # include <fastcgi.h>
 
 # include "MsgBuf.hpp"
@@ -26,6 +24,9 @@
 
 class FcgiMsgData
 {
+private:
+	FcgiMsgData				 (const FcgiMsgData & );
+	FcgiMsgData & operator = (const FcgiMsgData & ) { return (*this); }
 public:
 	int				siz;  // full_size
 	int				len;  // msg_len
@@ -125,6 +126,9 @@ enum
 
 class FcgiMsg
 {
+private:
+	FcgiMsg				 (const FcgiMsg & );
+	FcgiMsg & operator = (const FcgiMsg & ) { return (*this); }
 public:
 	FCGI_Header           head;
 	FCGI_BeginRequestBody body;

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:49:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 11:34:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # define DEF_BUF_SIZ 4096
 
 // MUST BE : > (8) for FCGI	
-
+// #nh says we can keep these
 # ifndef EPC_BUF_SIZ
 #  define EPC_BUF_SIZ (DEF_BUF_SIZ)
 # endif

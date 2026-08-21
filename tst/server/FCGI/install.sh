@@ -56,10 +56,7 @@ if [ "$1" == "stop" ]; then
 fi
 
 if [ "$1" == "run" ]; then
-    # echo
-    # INTERESTING : we can't ctrl-c this .. 
-    # an /sbin/ thing ?
-    $PHP_FPM_BIN --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
+    echo $PHP_FPM_BIN --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     exit 0
 fi
 
