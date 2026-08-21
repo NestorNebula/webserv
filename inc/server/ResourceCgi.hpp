@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:32:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:49:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ enum
 };
 
 // AH : sending partial .. CGI TIMEOUT .. half-sent
+// BUT : bigimage .. takes hella ..
+// ATTN : fpm
 # ifndef RES_CGI_WAIT_COMPLETE
 #  define RES_CGI_WAIT_COMPLETE 0
 # endif
@@ -76,15 +78,16 @@ public:
 	virtual int		rem(EpollClient *epc) = 0;
 	
 	std::string		body; // Request
-	std::string		resp;
+	std::string		resp; // CGI output
 	int				done;
 	int				error;
 	
 protected:
-	int				hed; // state - input 
+	int				hed;
 	
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
+	
 private:
 	int				chk_rsp_hed(void);
 	
