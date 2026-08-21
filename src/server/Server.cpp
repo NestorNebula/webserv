@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 12:59:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,11 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
 // #kd
-// FUCKING UGLY:
+// UGLY:
 	std::string git_root = conf.root + std::string("../");
-	fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
+	fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");\
+// https://pypi.org/project/legacy-cgi/
+// https://pypi.org/project/legacy-cgi/2.6/#files
 	pycgi = git_root + std::string("pycgi/");
 };
 
