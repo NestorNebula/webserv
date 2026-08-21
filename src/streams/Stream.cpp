@@ -46,11 +46,11 @@ Stream &Stream::read(char *s, streamsize n) {
 }
 
 Stream::streamsize Stream::readsome(char *s, streamsize n) {
-	throwIfNull();
-	_stream->seekg(_g);
-	_gcount = _stream->readsome(s, n);
-	_g += _gcount;
-	return _gcount;
+  throwIfNull();
+  _stream->seekg(_g);
+  _gcount = _stream->readsome(s, n);
+  _g += _gcount;
+  return _gcount;
 }
 
 Stream::streampos Stream::tellg() {
@@ -167,7 +167,9 @@ std::string Stream::str() {
   streamsize gcount = _gcount;
 
   seekg(0);
-  for (std::string::size_type prev = s.size(); read(s) && s.size() != prev; prev = s.size());
+  for (std::string::size_type prev = s.size(); read(s) && s.size() != prev;
+       prev = s.size())
+    ;
 
   _g = g;
   _p = p;
