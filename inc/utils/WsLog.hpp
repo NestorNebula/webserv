@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:24:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 14:15:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,18 @@ enum
 	WSL_CYAN
 };
 
+# ifndef NOLOG
+#  define NOLOG 1
+# endif
+
+# if NOLOG
+#  define WSLOG(...)
+#  define WSCOL(...)
+#else
+#  define WSLOG WsLog::_
+#  define WSCOL WsLog::color
+#endif
+
 class WsLog
 {
 private:
@@ -127,12 +139,6 @@ public:
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 
-	static void pwd(void)
-	{
-		char buf[256];
-		char *pwd = getcwd(buf, 256); // WEBSERV : illegal function
-		std::cerr << "PWD   : " << pwd << std::endl;
-	}
 	static void	kd(void);
 	static void mm(void) {}
 	static void	nh(void);
