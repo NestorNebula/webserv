@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/21 16:43:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:27:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class ConfigParser {
 		std::vector<Token>			_tokens;
 		size_t						_pos;
 		std::vector<ServerConfig>	_servers;
+// #kd - conf_file_root
+		const std::string			_conf_file_root;
 
 		/* Parser Tools */
 		void	tokenize(const std::string& content);
@@ -63,10 +65,10 @@ class ConfigParser {
 		void	validateDirExists(const std::string& path, const std::string& context);
 		void	validateFileExists(const std::string& path, const std::string& context);
 
-		const std::string _root; // #kd - conf_file_root
 		
 	public:
-		ConfigParser(const std::string &root); // #kd - conf_file_root
+// #kd - conf_file_root
+		ConfigParser(const std::string &conf_file_root);
 		~ConfigParser();
 
 		void	parseFile(const std::string& filename);

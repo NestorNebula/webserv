@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 16:45:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 18:17:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,7 @@ void Session::validateOperation() {
     return;
   if (_next == DOCGI) {
     // if (!isAccessibleFile(_resourcePath, X_OK))
-// #kd : file does not need to be executable
+// #kd : .cgi file does not need to be executable
     if (!isAccessibleFile(_resourcePath, F_OK | R_OK))
       return setResponseStatus(403);
     return;

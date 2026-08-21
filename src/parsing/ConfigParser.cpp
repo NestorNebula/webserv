@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/21 16:45:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:35:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(0)
 }
 
 // #kd - conf_file_root
-ConfigParser::ConfigParser(const std::string &root) : _pos(0), _root(root) {}
+ConfigParser::ConfigParser(const std::string &conf_file_root) : _pos(0), _conf_file_root(conf_file_root) {}
 ConfigParser::~ConfigParser() {}
 
 ConfigParser::ConfigException::ConfigException(const std::string& msg)

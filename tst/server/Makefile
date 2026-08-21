@@ -1,7 +1,7 @@
 NAME=test
 
 CC=c++
-CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP -g3
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP
 # -Wno-unused
 # -Wshadow=local
 
@@ -58,17 +58,18 @@ FILES = \
 	server/CgiEnv.cpp \
 	server/CgiPipe.cpp \
 	server/ResourceCgi.cpp \
-	server/ResourceFcgi.cpp \
 	server/ResourcePiped.cpp \
-	server/FcgiMsg.cpp \
-	server/FcgiConn.cpp \
-	server/FcgiPipe.cpp \
 	parsing/ConfigParser.cpp \
 	parsing/ParseBlocks.cpp \
 	parsing/ParserTools.cpp \
 	parsing/Tokenizer.cpp \
 	parsing/Validation.cpp 
 
+# WITH_FCGI
+# 	server/ResourceFcgi.cpp \
+# 	server/FcgiMsg.cpp \
+# 	server/FcgiConn.cpp \
+# 	server/FcgiPipe.cpp \
 TPP = 
 
 SRCS = $(addprefix $(SRC_DIR)/, $(FILES))
@@ -86,6 +87,7 @@ all: $(NAME)
 $(NAME): $(OBJS) $(TPP) $(BIN)
 	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(BIN) $(LIBS) -o $@
 
+# ATTN : "bonus"
 fpm-conf:
 	cd FCGI && ./install.sh conf
 

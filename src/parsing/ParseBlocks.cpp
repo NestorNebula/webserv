@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/21 16:45:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:26:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ void	ConfigParser::parseServer()
 	if (directives.count("root"))
 		// server.root = directives["root"];
 // #kd - conf_file_root
-		server.root = this->_root + directives["root"];
+		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);
 	if (directives.count("upload_dir"))

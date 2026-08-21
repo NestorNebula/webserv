@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:55:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:30:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	script.parse(path_rel);
 	// script.dump();
 
-	if (access(script.path.c_str(), F_OK))
+	if (access(script.path.c_str(), F_OK | R_OK))
 	{
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
 		conn.set_err(404); // File Not Found

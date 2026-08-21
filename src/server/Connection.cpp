@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 04:50:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 17:53:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,6 +344,7 @@ int	Connection::exec_cgi(void)
 		return (-1);
 	}
 	
+#if 0 // WITH_FCGI
 	if (cgienv->lang == CGI_PHP) // PHP_FPM fcgi_sock
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -362,6 +363,7 @@ int	Connection::exec_cgi(void)
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
+#endif
 
 	cgi_pipes	pipes;
 
