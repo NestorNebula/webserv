@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 22:53:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@
 class Request {
 public:
   Request() : _state(EMPTY), _body(NULL), _bodySize(0) {
-    WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
+    WSLOG(LVL_DBG, TGT_REQ, "Request constructor");
   }
   ~Request() {
-    WsLog::_(LVL_DBG, TGT_REQ, "Request destructor");
+    WSLOG(LVL_DBG, TGT_REQ, "Request destructor");
     delete _body;
   }
 

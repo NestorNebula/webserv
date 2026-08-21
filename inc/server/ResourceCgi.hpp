@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 00:50:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 02:58:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,17 @@ enum
 	RSP_ERROR = (-4)
 };
 
+# ifndef RES_CGI_WAIT_COMPLETE
+#  define RES_CGI_WAIT_COMPLETE 0
+# endif
+
 class ResourceCgi
 {
 public:
 	ResourceCgi(void) :  
+		done(0),
 		error(0),
 		hed(0),
-		done(0),
 		conn(NULL)
 	{}
 	virtual ~ResourceCgi() {};
@@ -71,10 +75,11 @@ public:
 	
 	std::string		body; // Request
 	std::string		resp;
+	int				done;
 	int				error;
+	
 protected:
 	int				hed; // state - input 
-	int				done;
 	
 	virtual int		wait(int opt) = 0;
 private:

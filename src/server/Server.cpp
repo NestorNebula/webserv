@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/19 10:48:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 
 Server::~Server()
 {
-	WsLog::_(LVL_DBG, TGT_SERV, " (~) Server");
-	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
+	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
+	WSLOG(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 
 int Server::init(void)
@@ -44,7 +44,7 @@ int Server::init(void)
 
 	if (this->port == 0)
 	{
-		WsLog::_(LVL_ERR, TGT_SERV, "bad port");
+		WSLOG(LVL_ERR, TGT_SERV, "bad port");
 		return (-1);
 	}
 	
@@ -71,7 +71,7 @@ int Server::init(void)
 
 	err = this->ini_evt(EPOLLIN);
 
-	WsLog::_(LVL_INFO, TGT_SERV, "listening on port: ", this->port);
+	WSLOG(LVL_INFO, TGT_SERV, "listening on port: ", this->port);
 	return (err);
 }
 

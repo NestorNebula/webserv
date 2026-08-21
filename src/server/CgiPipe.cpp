@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 01:16:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:25:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,13 +45,13 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc
 
 CgiPipe::~CgiPipe()
 {
-	WsLog::_(LVL_DBG, TGT_CGI, " (~) CgiPipe");
+	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe");
 	if (this->conn)
 		this->conn->cgi_rem(this);
 }
 
 
-static int to = 0;
+// static int to = 0;
 bool	CgiPipe::timeo(time_t now)
 {
 	if (this->lact == 0)
@@ -65,19 +65,27 @@ bool	CgiPipe::timeo(time_t now)
 	{
 		// MOSTLY (ip) .. but .. 
 		if (this == this->rsrc->ip)
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
+		}
 		else if (this == this->rsrc->op)
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
+		}
 			
 		Session &sess = conn->sess;
 		Request &req  = sess.getRequest();
 		if (req.hasHeaders())
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+		}
 		if (req.hasBody())
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : has body");
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has body");
+		}
 		if (req.isComplete())
 		{
-			WsLog::_(LVL_TMP, TGT_CGI_SEND, "req : complete ", ++to); // 1500 (!)
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : complete"); // , ++to); // 1500 (!)
 			if (this == this->rsrc->ip)
 			{
 // timeout on IP is allowed .. 
@@ -94,12 +102,12 @@ bool	CgiPipe::timeo(time_t now)
 	}
 	else if (this->conn)
 	{
-		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn");
+		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn");
 		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
 	{
-		WsLog::_(LVL_TMP, TGT_CGI_SEND, "TIMEO : ????");
+		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : ????");
 		// (conn) does not exist !
 		// this->conn->set_err(504); // Gateway Timeout
 	}
@@ -110,7 +118,7 @@ bool	CgiPipe::timeo(time_t now)
 // after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
 	
 	ssize_t	err;
 	
@@ -122,16 +130,16 @@ ssize_t	CgiPipe::pollout(void)
 	switch(rsrc->get_req_body())
 	{
 	case REQ_WAIT_HEAD:
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
 		this->mod_evt(0);
 		return (0);
 	case REQ_WAIT_BODY:
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
 	case REQ_COMPLETE:
 		this->rsrc->rem(this);
-		// rsrc->set_done(RSRC_DONE_IP);
+		rsrc->set_done(RSRC_DONE_IP);
 		return (-1);
 	default:
 		break;
@@ -140,17 +148,17 @@ ssize_t	CgiPipe::pollout(void)
 	err = this->send(rsrc->body);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_SEND, "send");
+		WSLOG(LVL_ERR, TGT_CGI_SEND, "send");
 		this->rsrc->set_err(500); // Internal Server Error
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
-		// rsrc->set_done(RSRC_DONE_IP);
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "send:  ZERO");
+		rsrc->set_done(RSRC_DONE_IP);
 		return (-1);
 	}
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "sent: ", err);
 	return (0);
 }
 
@@ -161,25 +169,26 @@ ssize_t	CgiPipe::pollin(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WsLog::_(LVL_DBG, TGT_CGI_SEND, "recv:  POLLIN");
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "conn: ", this->conn->get_fd());
+	
 	ssize_t	err = 0;
 	
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "conn: ", this->conn->get_fd());
-	
 	err = this->recv();
-	WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_RECV, "recv: err");
+		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
 		this->rsrc->set_err(500); // Internal Server Error
 		return (err);
 	}
 	if (err == 0)
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
+		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		// rsrc->set_done(RSRC_DONE_OP);
-		// HAVE_ALL_DATA
+#if RES_CGI_WAIT_COMPLETE
 		conn->mod_evt(EPOLLOUT);
+#endif
 		return (-1);
 	}
 	
@@ -194,8 +203,9 @@ ssize_t	CgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_BODY:
 	default:
-// HAVE_SOME_DATA
-		// conn->mod_evt(EPOLLOUT);
+#if !RES_CGI_WAIT_COMPLETE
+		conn->mod_evt(EPOLLOUT);
+#endif
 		break;
 	}
 	return (err);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 02:10:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:24:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 
 EpollClient::~EpollClient()
 {
-	WsLog::_(LVL_DBG, TGT_EPC, " (~) EpollClient");
+	WSLOG(LVL_DBG, TGT_EPC, " (~) EpollClient");
 	if (this->fd != -1)
 		close(this->fd);
 }
@@ -36,7 +36,7 @@ int	EpollClient::ini_evt(int e)
 {
 	if (evt.data.ptr != NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "ini_evt  : already initialized");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "ini_evt  : already initialized");
 		return (this->mod_evt(e));
 	}
 	evt.data.ptr = this;
@@ -50,17 +50,17 @@ int	EpollClient::mod_evt(int e)
 	if (evt.data.ptr == NULL)
 	{
 		// WsLog::color(WSL_RED);
-		// WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod_evt  : not yet initialized");
+		// WSLOG(LVL_ERR, TGT_EPOLL_CTL, "mod_evt  : not yet initialized");
 		return (this->ini_evt(e));
 	}
 
-	// WsLog::_(LVL_WARN, TGT_EPC, "mod  : ", e);
-	// WsLog::_(LVL_WARN, TGT_EPC, "cur  : ", (evt.events & ~(EPOLLRDHUP)));
+	// WSLOG(LVL_WARN, TGT_EPC, "mod  : ", e);
+	// WSLOG(LVL_WARN, TGT_EPC, "cur  : ", (evt.events & ~(EPOLLRDHUP)));
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
 	
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
 	if (e == 0)
 		evt.events = e;
@@ -73,14 +73,14 @@ int	EpollClient::mod_evt(int e)
 	{
 		if (evt.events == (e | EPOLLRDHUP))
 		{
-			// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
+			// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
 			return (0);
 		}
 		evt.events |= e;
 	}
 	
 	evt.events |= EPOLLRDHUP;
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
 
 	return (this->ep->mod(this));
 }
@@ -124,11 +124,13 @@ ssize_t	EpollClient::recv(void)
 
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
 	
-	WsLog::_(LVL_DBG, TGT_EPC_RECV, "read: ", err);
+	WSLOG(LVL_DBG, TGT_EPC_RECV, "read: ", err);
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read");
 	if (err == 0)
-		WsLog::_(LVL_DBG, TGT_EPC_RECV, "read:  ZERO");
+	{
+		WSLOG(LVL_DBG, TGT_EPC_RECV, "read:  ZERO");
+	}
 	return (err);
 }
 
@@ -136,18 +138,20 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 {
 	ssize_t err;
 	
-	WsLog::_(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
+	WSLOG(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
 
 	err = write(this->fd, buf, siz);
 
-	WsLog::_(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
+	WSLOG(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
 	if (err < 0)
 		return WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write");
 	if (err == 0)
-		WsLog::_(LVL_DBG, TGT_EPC_SEND, "send:  ZERO");
+	{
+		WSLOG(LVL_DBG, TGT_EPC_SEND, "send:  ZERO");
+	}
 	return (err);
 }
 

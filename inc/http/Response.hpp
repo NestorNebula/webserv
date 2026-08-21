@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:08:55 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:25:51 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ public:
   typedef unsigned int StatusCode;
 
   Response(Resource *resource = NULL) : _code(0), _resource(resource) {
-    WsLog::_(LVL_DBG, TGT_RESP, "Response constructor");
+    WSLOG(LVL_DBG, TGT_RESP, "Response constructor");
   }
 
   const std::string &getVersion() const { return _version; }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BuiltinResource.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/12 08:50:02 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 14:57:35 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ class BuiltinResource : public Resource {
 public:
   BuiltinResource(Response::StatusCode code)
       : _code(code), _state(DEFAULT), _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_BUI_RES, "BuiltinResource constructor for code ",
+    WSLOG(LVL_DBG, TGT_BUI_RES, "BuiltinResource constructor for code ",
              code);
   }
   ~BuiltinResource() {
-    WsLog::_(LVL_DBG, TGT_BUI_RES, "BuiltinResource destructor for code ",
+    WSLOG(LVL_DBG, TGT_BUI_RES, "BuiltinResource destructor for code ",
              _code);
     delete _stream;
   }

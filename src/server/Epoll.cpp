@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 13:43:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ static void sigint_handler(int signo)
 {
     (void)signo;
 	
-	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
+	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+	WSLOG(LVL_ERR, TGT_EPOLL, "SIGINT");
 
     stop = 1;
 }
@@ -33,8 +33,8 @@ static void sigint_handler(int signo)
 // {
 //     (void)signo;
 	
-// 	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-// 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGPIPE");
+// 	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+// 	WSLOG(LVL_ERR, TGT_EPOLL, "SIGPIPE");
 // }
 
 static const char *evt_name[] =
@@ -84,7 +84,7 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 
 Epoll::~Epoll()
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL, " (~) Epoll");
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll");
 	this->cleanup();
 };
 
@@ -130,17 +130,17 @@ int	Epoll::add(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
 		// return (this->mod(cli));
 		return (0);
 	}
@@ -161,24 +161,24 @@ int	Epoll::mod(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
 		// return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
 		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
 	}
 	return (err);
@@ -188,11 +188,11 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -206,7 +206,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->clients.find(cli);
 	if (it != this->clients.end())
 	{
@@ -216,9 +216,9 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
 	}
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
 	return (0);
 }
 
@@ -255,14 +255,14 @@ int	Epoll::exec(void)
 		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
 	if (this->ecnt == 0)
 		return (this->ecnt);
-	WsLog::_(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
+	WSLOG(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
 	return (this->ecnt);
 }
 
 
 void	Epoll::check_timeo(void)
 {
-	// WsLog::_(LVL_DBG, TGT_EPOLL, "timeout : ", clients.size());
+	// WSLOG(LVL_DBG, TGT_EPOLL, "timeout : ", clients.size());
 
 	time_t	n;
 	
@@ -275,7 +275,7 @@ void	Epoll::check_timeo(void)
 	{
 		if ((*it)->timeo(n))
 		{
-			// WsLog::_(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			// WSLOG(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
 		}
 		it++;
 	}
@@ -297,20 +297,20 @@ int	Epoll::loop(void)
 			evt = this->get_evt(k);
 			if (evt == NULL)
 			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
+				WSLOG(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
 				continue;
 			}
 			epc = this->get_epc(evt->data.ptr);
 			if (epc == NULL)
 			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
+				WSLOG(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
 			
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "");
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "");
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
 			
 			try
 			{

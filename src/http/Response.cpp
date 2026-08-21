@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 12:42:35 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/18 17:22:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:23:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ std::string Response::getHead() const {
   throwIfNotReady();
   oss << _version << " " << _code << " " << _reason << "\r\n";
   oss << _headers.str() << "\r\n";
-  WsLog::_(LVL_INFO, TGT_RESP, "Response forwarding head");
+  WSLOG(LVL_INFO, TGT_RESP, "Response forwarding head");
   return oss.str();
 }
 
@@ -57,19 +57,27 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
   Stream::streamsize readCount = _resource->stream().gcount();
   std::ostringstream oss;
   oss << "Response forwarding " << readCount << " bytes of body";
-  WsLog::_(LVL_INFO, TGT_RESP, oss.str());
+  WSLOG(LVL_INFO, TGT_RESP, oss.str());
   return readCount;
 }
 
 bool Response::isReady() const {
   if (_version.empty())
-    WsLog::_(LVL_ERR, TGT_RESP, "ready: version empty");
+  {
+    WSLOG(LVL_ERR, TGT_RESP, "ready: version empty");
+  }
   if (!_code)
-    WsLog::_(LVL_ERR, TGT_RESP, "ready: code == 0");
+  {
+    WSLOG(LVL_ERR, TGT_RESP, "ready: code == 0");
+  }
   if (_reason.empty())
-    WsLog::_(LVL_ERR, TGT_RESP, "ready: reason empty");
+  {
+    WSLOG(LVL_ERR, TGT_RESP, "ready: reason empty");
+  }
   if (_resource && !hasBody())
-    WsLog::_(LVL_ERR, TGT_RESP, "ready: rsrc without body");
+  {
+    WSLOG(LVL_ERR, TGT_RESP, "ready: rsrc without body");
+  }
 
   return !_version.empty() && _code && !_reason.empty() &&
          (!_resource || hasBody());

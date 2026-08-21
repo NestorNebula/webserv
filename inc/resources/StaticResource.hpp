@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StaticResource.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:02:21 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ class StaticResource : public Resource {
 public:
   StaticResource(const std::string &filepath)
       : _filepath(filepath), _state(DEFAULT), _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_STAT_RES,
+    WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource constructor for: ", filepath);
   }
   ~StaticResource() {
-    WsLog::_(LVL_DBG, TGT_STAT_RES,
+    WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource destructor for: ", _filepath);
     delete _stream;
   }

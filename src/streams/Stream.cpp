@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 18:20:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Stream.hpp>
 
 void Stream::adoptStream(std::iostream *stream) {
-  WsLog::_(LVL_DBG, TGT_STRM, "Stream adopting new stream");
+  WSLOG(LVL_DBG, TGT_STRM, "Stream adopting new stream");
   delete _stream;
   _stream = stream;
 }

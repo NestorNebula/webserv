@@ -77,7 +77,7 @@ if [ "$1" == "j" ]; then
 fi
 
 if [ "$1" == "v" ]; then
-	curl -X GET http://localhost:8082/bigvideo.php --output data.mkv
+	curl -X GET http://localhost:8082/bigvideo.php -i --output data.mkv
 	echo
 	exit 0
 
@@ -158,7 +158,7 @@ fi
 # echo
 # exit 0
 
-curl -X POST 'http://localhost:8082/exit.php?g1=QUERYSHIT' -i \
+curl -X POST 'http://localhost:8082/stat.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

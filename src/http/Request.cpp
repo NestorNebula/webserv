@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/20 22:48:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@
 
 void Request::append(const std::string &data) {
   if (_state == COMPLETE || _state == INVALID) {
-    WsLog::_(LVL_WARN, TGT_REQ, "Sending data to closed request");
+    WSLOG(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
   }
 // #kd - ATTN (!)
-  // WsLog::_(LVL_TMP, TGT_REQ, "Request received data: ", data);
+  // WSLOG(LVL_TMP, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));

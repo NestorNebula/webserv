@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 13:43:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,13 @@ int     CgiEnv::from_conn(Connection & conn)
 
 	if (!req.hasMethod())
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
+		WSLOG(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
 		conn.set_err(400); // Bad Request
 		return (-1);
 	}
 	if (!req.hasURL())
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_ENV, "URL not set");
+		WSLOG(LVL_ERR, TGT_CGI_ENV, "URL not set");
 		conn.set_err(400); // Bad Request
 		return (-1);
 	}
@@ -82,7 +82,7 @@ int     CgiEnv::from_conn(Connection & conn)
 
 	if (access(script.path.c_str(), F_OK))
 	{
-		WsLog::_(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
+		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
 		conn.set_err(404); // File Not Found
 		return (-1);
 	}
@@ -113,7 +113,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else
 	{
-		WsLog::_(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
+		WSLOG(LVL_ERR, TGT_CGI_ENV, "EXEC not set");
 		conn.set_err(403); // Forbidden
 		return (-1);
 	}
@@ -186,9 +186,9 @@ const char	**CgiEnv::gen(void)
 	while (it != data.end())
 	{
 		// WsLog::color(WSL_GREEN);
-		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
+		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		// WsLog::color(WSL_GREEN);
-		// WsLog::_(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
+		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}

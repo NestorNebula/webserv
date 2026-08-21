@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 02:28:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 ResourceFcgi::~ResourceFcgi()
 {
-	WsLog::_(LVL_DBG, TGT_RSRC, " (~) ResourceFcgi");
+	WSLOG(LVL_DBG, TGT_RSRC, " (~) ResourceFcgi");
 	this->conn_closed();
 }
 
@@ -30,33 +30,35 @@ int	ResourceFcgi::status(void)
 {
 	if (this->error)
 	{
-		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
+		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (RSP_ERROR);
 	}
 		
 	if (!this->hed && this->fcgi)
 	{
-		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
+		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		this->fcgi->mod_evt(EPOLLOUT);	
 		return (RSP_WAIT_HEAD);
 	}
 
-// HAVE_SOME_DATA
-	// if (this->resp.size())
-	// 	return (1);
+#if !RES_CGI_WAIT_COMPLETE
+	if (this->resp.size())
+		return (1);
+#endif
 	
-	if (this->fcgi == NULL)
+	if (this->done == RSRC_DONE_IO)
 	{
-		WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
+		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (RSP_ERROR);
-// HAVE_ALL_DATA
+#if RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);
+#endif
 		return (RSP_COMPLETE); // RSP_COMPLETE
 	}
 	// STILL RUNNING
-	WsLog::_(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
+	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 	this->fcgi->mod_evt(EPOLLIN);
 	return (RSP_WAIT_BODY); 
@@ -88,7 +90,7 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 {	
 	int err;
 
-	WsLog::_(LVL_DBG, TGT_RSRC, "init:  FCGI");
+	WSLOG(LVL_DBG, TGT_RSRC, "init:  FCGI");
 
 // WEBSERV : SERVER
 	int fd = FcgiConn::make_sock(conn->serv.fcgi_sock.c_str());
