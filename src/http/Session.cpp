@@ -20,6 +20,7 @@
 #include "http_utils.hpp"
 #include <algorithm>
 #include <cstring>
+#include <exception>
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
@@ -32,11 +33,16 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete())
     throwIfNotAction(RDSOCK);
 
-  _request.append(std::string(buf, count));
-  std::ostringstream oss;
-  oss << "Session received " << count << " bytes of data";
-  WsLog::_(LVL_INFO, TGT_SESS_WR, oss.str());
-  manageSession();
+  try {
+    _request.append(std::string(buf, count));
+    std::ostringstream oss;
+    oss << "Session received " << count << " bytes of data";
+    WsLog::_(LVL_INFO, TGT_SESS_WR, oss.str());
+    manageSession();
+  } catch (std::exception &e) {
+    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    setError(500);
+  }
   return count;
 }
 
@@ -69,38 +75,54 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 
   Stream::streamsize r = 0;
 
-  std::string head = _response.getHead();
-  if (static_cast<unsigned long>(_sent) < head.size()) {
-    head.erase(0, _sent);
-    if (head.size() > static_cast<unsigned long>(bufsize))
-      head.erase(bufsize);
-    std::strncpy(buf, head.c_str(), head.size());
-    buf += head.size();
-    bufsize -= head.size();
-    _sent += head.size();
-    r += head.size();
-  }
+  try {
+    std::string head = _response.getHead();
+    if (static_cast<unsigned long>(_sent) < head.size()) {
+      head.erase(0, _sent);
+      if (head.size() > static_cast<unsigned long>(bufsize))
+        head.erase(bufsize);
+      std::strncpy(buf, head.c_str(), head.size());
+      buf += head.size();
+      bufsize -= head.size();
+      _sent += head.size();
+      r += head.size();
+    }
 
-  if (bufsize && _response.hasBody()) {
-    Stream::streamsize bodyRead = _response.readBody(buf, bufsize);
-    _sent += bodyRead;
-    r += bodyRead;
-  }
+    if (bufsize && _response.hasBody()) {
+      Stream::streamsize bodyRead = _response.readBody(buf, bufsize);
+      _sent += bodyRead;
+      r += bodyRead;
+    }
 
-  if (r < bufsize)
-    _next = CLOSE;
-  std::ostringstream oss;
-  oss << "Session sending " << r << "bytes of data";
-  WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
-  manageSession();
+    if (r < bufsize)
+      _next = CLOSE;
+    std::ostringstream oss;
+    oss << "Session sending " << r << "bytes of data";
+    WsLog::_(LVL_INFO, TGT_SESS_RD, oss.str());
+    manageSession();
+  } catch (std::exception &e) {
+    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    if (_response.getCode() == 500)
+      _next = CLOSE;
+    else
+      setError(500);
+  }
   return r;
 }
 
 void Session::setError(Response::StatusCode code) {
-  setResponseStatus(code);
-  handleResource();
-  handleResponse();
-  _next = WRSOCK;
+  try {
+    setResponseStatus(code);
+    handleResource();
+    handleResponse();
+    _next = WRSOCK;
+  } catch (std::exception &e) {
+    WsLog::_(LVL_ERR, TGT_SESS_WR, e.what());
+    if (code != 500)
+      setError(500);
+    else
+      _next = CLOSE;
+  }
 }
 
 void Session::reset() {
