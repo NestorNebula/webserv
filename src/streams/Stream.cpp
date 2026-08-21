@@ -45,6 +45,14 @@ Stream &Stream::read(char *s, streamsize n) {
   return *this;
 }
 
+Stream::streamsize Stream::readsome(char *s, streamsize n) {
+	throwIfNull();
+	_stream->seekg(_g);
+	_gcount = _stream->readsome(s, n);
+	_g += _gcount;
+	return _gcount;
+}
+
 Stream::streampos Stream::tellg() {
   throwIfNull();
   return _g;

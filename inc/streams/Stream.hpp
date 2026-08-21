@@ -45,6 +45,7 @@ public:
   streamsize gcount() const;
   Stream &getline(char *s, streamsize n, char delim = '\n');
   Stream &read(char *s, streamsize n);
+  streamsize readsome(char *s, streamsize n);
   streampos tellg();
   Stream &seekg(streampos pos);
   Stream &seekg(streamoff off, SeekDir way);
