@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:26:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:31:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ ResourcePiped::~ResourcePiped()
 	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
-		// WsLog::color(WSL_RED);
+		// WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_RSRC, "kill");
 		kill(this->pid, SIGKILL);
 		this->wait(0); // do not set error
@@ -68,12 +68,14 @@ int	ResourcePiped::status(void)
 	if (this->resp.size())
 		return (1);
 #endif
-	if (this->wait(WNOHANG) != -1)
+	if (this->wait(WNOHANG) != -1) // exited
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 		    return (RSP_ERROR);
 #if RES_CGI_WAIT_COMPLETE
+		// on FIRST EXIT
+		//  check for content-length if not exists
         if (this->resp.size())
             return (1);
 #endif
@@ -93,6 +95,9 @@ int	ResourcePiped::status(void)
 // Content-Length: Holding the output lets you measure the exact byte size of your response so you can send an accurate Content-Length header.
 
 
+// PIPE_EXIT_SUCCESS
+// PIPE_EXIT_COMPLETE
+// PIPE_EXIT_STATUS
 int	ResourcePiped::wait(int opt)
 {
 	int	err;
@@ -108,7 +113,7 @@ int	ResourcePiped::wait(int opt)
 	}
 	if (this->pid == 0)
 	{
-		WsLog::color(WSL_RED);
+		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
 		return (this->stat);
 	}
@@ -150,6 +155,12 @@ int	ResourcePiped::wait(int opt)
 	}
 	if (this->stat > 0)
 		this->set_err(500);
+#if RES_CGI_WAIT_COMPLETE
+	else
+	{
+		this->chk_rsp_len();
+	}
+#endif
 	this->pid = 0;
 	return (this->stat);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:55:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ void FcgiMsg::add_stdin(const char * data, int dSiz)
 
 void FcgiMsg::end_stdin(void)
 {
-	WsLog::color(WSL_RED);
+	WSCOL(WSL_RED);
 	WSLOG(LVL_DBG, TGT_FCGI, "END STDIN");
 	this->make_head(FCGI_STDIN, 0);
 	buf.push(this, 8);

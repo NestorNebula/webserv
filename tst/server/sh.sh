@@ -161,6 +161,11 @@ fi
 curl -X POST 'http://localhost:8082/stat.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
+
+curl -X POST 'http://localhost:8082/ka.php?g1=QUERYSHIT' -i \
+	-d "p1=post-one&p2=post-two"
+echo
+
 exit 0
 
 # curl -X GET http://localhost:8081/py/ul.py -i

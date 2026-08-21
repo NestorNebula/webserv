@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 03:55:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,9 +185,9 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
-		// WsLog::color(WSL_GREEN);
+		// WSCOL(WSL_GREEN);
 		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
-		// WsLog::color(WSL_GREEN);
+		// WSCOL(WSL_GREEN);
 		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;

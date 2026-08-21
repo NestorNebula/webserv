@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:29:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,21 @@ int		ResourceCgi::chk_rsp_hed(void)
 	resp.insert(0, stat_hed);
 	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", this->resp);	
 	return (RSRC_RESP_HEAD);
+}
+void	ResourceCgi::chk_rsp_len(void)
+{
+	std::string clen_str = hedval_str(resp, "Content-Length");
+	if (clen_str.size())
+	{
+		// consider adding keep-alive
+		return;
+	}
+	size_t	pos = resp.find("\r\n\r\n");
+	std::string hed = resp.substr(0, pos + 4);
+	size_t clen = (resp.size() - pos - 4);
+
+	clen_str = std::string("\r\nContent-Length:") + num_2_str(clen);
+	resp.insert(pos, clen_str);
 }
 
 void	ResourceCgi::set_err(int e)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:30:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,8 @@ int	ResourceFcgi::status(void)
 		return (1);
 #endif
 	
-	if (this->done == RSRC_DONE_IO)
+	if (this->wait(0) != -1) // exited
+	// if (this->done == RSRC_DONE_IO)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
@@ -66,8 +67,20 @@ int	ResourceFcgi::status(void)
 int	ResourceFcgi::wait(int opt)
 {
 	(void)opt;
+	if (this->done & RSRC_DONE_ERR)
+		return (0);
+	if (this->done == RSRC_FLUSHING)
+		return (0);
+	if (this->done == RSRC_DONE_IO)
+	{
+#if RES_CGI_WAIT_COMPLETE
+		this->chk_rsp_len();
+#endif
+		this->done = RSRC_FLUSHING;
+		return (0);
+	}
 	if (this->fcgi)
-		return (-1);
+		return (-1); // continue
 	return (0);
 }
 int	ResourceFcgi::rem(EpollClient *epc)
@@ -76,6 +89,7 @@ int	ResourceFcgi::rem(EpollClient *epc)
 
 	if (epc == this->fcgi)
 	{
+		// set_done()
 		this->fcgi = NULL;
 		err = 3;
 	}
