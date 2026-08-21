@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 17:57:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 00:20:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,15 @@
 // The default connection timeout of Apache httpd 1.3 and 2.0 is as little as 15 seconds[6][7] and just 5 seconds for Apache httpd 2.2 and above.
 
 // HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
+
+# ifndef CONN_TIMEOUT
+#  define CONN_TIMEOUT 60
+# endif
+
+# ifndef CGI_TIMEOUT
+#  define CGI_TIMEOUT 60
+# endif
+
 
 typedef enum
 {

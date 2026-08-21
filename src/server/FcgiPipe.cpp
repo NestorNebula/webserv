@@ -6,12 +6,12 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 22:56:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 02:32:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "FcgiPipe.hpp"
-#include "ResourceCgi.hpp"
+#include "ResourceFcgi.hpp"
 
 #include <string>
 
@@ -114,39 +114,27 @@ ssize_t	FcgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 		
-	switch(rsrc->req_body())
+	switch(rsrc->get_req_body())
 	{
-	case -1:
+	case REQ_WAIT_HEAD:
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "head     : waiting");
 		this->mod_evt(0);
 		return (0);
-	case -2:
-		// actually -- no body to wait for ...
+	case REQ_WAIT_BODY:
 		WsLog::_(LVL_DBG, TGT_CGI_SEND, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
-		// this->mod_evt(EPOLLIN);
-		// return (-1);
-		
-		// return (0); // upload BIG FILE wants this 
-		// basic GET . HATES THIS
-		// it's that HTTP CONTINUE .. on the big files 
-		// that pauses .. 
-		// not has body .. BUT .. body coming 
-		// 
-	case -3: // no body -- still need to send (0)
+	case REQ_COMPLETE: // still need to send END_STDIN
 	default:
 		break;
 	}
-			
-// and now .. big file downloads are incomplete ...
-
+		
 	if (rsrc->body.size() == 0)
 	{
+		rsrc->set_done(RSRC_DONE_IP);
 		this->mod_evt(-EPOLLOUT);
-// REQ_BODY_SENT
+// ALL_BODY_SENT
 		this->mod_evt(EPOLLIN); 
-		// rsrc->set_done(RSRC_DONE_IP);
 	}
 	
 	WsLog::_(LVL_DBG, TGT_CGI_SEND, "send: ", rsrc->body.size());
@@ -163,14 +151,14 @@ ssize_t	FcgiPipe::pollout(void)
 	if (err == 0)
 	{
 		WsLog::_(LVL_DBG, TGT_FCGI, "send:  ZERO");
-		// rsrc->set_done(RSRC_DONE_IP);
+		rsrc->set_done(RSRC_DONE_IP);
+		this->mod_evt(-EPOLLOUT);
 		return (0);
 	}
 	WsLog::_(LVL_DBG, TGT_FCGI, "sent: ", err);
 	WsLog::_(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
-	// only once all sent
-// REQ_DATA_SENT
+// SOME_BODY_SENT
 	// this->mod_evt(EPOLLIN); 
 	return (0);
 }
@@ -182,6 +170,7 @@ ssize_t	FcgiPipe::pollin(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
+	WsLog::_(LVL_DBG, TGT_FCGI, "recv:  POLLIN");
 	ssize_t	err = 0;
 	
 	WsLog::_(LVL_DBG, TGT_FCGI, "recv");
@@ -219,7 +208,8 @@ ssize_t	FcgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_BODY:
 	default:
-		conn->mod_evt(EPOLLOUT);
+// HAVE_SOME_DATA
+		// conn->mod_evt(EPOLLOUT);
 		break;
 	}
 	
@@ -227,54 +217,66 @@ ssize_t	FcgiPipe::pollin(void)
 	return (err);
 }
 
+// epoll : evt tgt  : conn
+// epoll : evt fd   : [7]
+// epoll : evt typ  : in out rdhup err hup 
+// conn  : hup!
+// epoll : cli rem  : conn
+// epoll : cli del  : conn
+// conn  :  (~) Connection [7]
+// conn  : req cnt: [1]
+// rsrc  :  (~) ResourceFcgi
+// epc   :  (~) EpollClient
+// epoll : ecnt  : [1]
+// epoll : 
+// epoll : evt tgt  : fcgi
+// epoll : evt fd   : [8]
+// epoll : evt typ  : in rdhup 
+// fcgi  : recv:  POLLIN
+// fcgi  : recv
+// epc   : read: [0]
+// epc   : read:  ZERO
+// fcgi  : recv: [0]
+// fcgi  : recv:  ZERO
+// fcgi  : req : [0]
+// fcgi  : RDHUP
+// fcgi  : rdhup: resp.size() [4776824]
+// fcgi  : rdhup: error [0]
+// ./mak.sh: line 24: 2102233 Segmentation fault         (core dumped) ./test "$CONF" "$1"
 
 int		FcgiPipe::rdhup(void)
 {
-	// nothing more to "send back"
-	// but .. still may be receiving an upload
-	// this->mod_evt(-EPOLLIN); // BAD IDEA
-	// this->mod_evt(-EPOLLOUT);
 	WsLog::color(WSL_YELLOW);
 	WsLog::_(LVL_DBG, TGT_FCGI, "RDHUP");
 	if (this->rsrc == NULL)
 		return (-1);
-	// return (rsrc->set_done(RSRC_DONE_IP));
-	
-// THE QUESTION : when to die 
-#if 1
+	if (this->conn == NULL)
+		return (-1);
+		
 	if (this->fcgi.req.size())
 	{
 		WsLog::color(WSL_RED);
-		// but .. upload has already returned ... 
 		WsLog::_(LVL_TMP, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
-		
 		return (0);
 	}
-#endif
-// we may (rdhup) 
-// but can't CLOSE until BOTH SIDES ARE DONE 
-// STATE CHECK
-// find TEST CASES
-	// still need to send BODY_DONE 
-	// may be error (?)
-
 	// if (this->rsrc->error)
 	// 	return (-1);
 	if (this->rsrc->resp.size())
 	{
 		WsLog::color(WSL_YELLOW);
-		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: resp.size()");
+		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
 		WsLog::_(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
-		// THIS REALLY HELPED
-
-// we should be able to DIE
-// the rsrc should stay open 
-
-		this->conn->mod_evt(EPOLLOUT);
+		
+// connection close .. by client
+// rsrc->fcgi set to NULL
+// when pipe hangs up -- output is done .. 
+		this->rsrc->rem(this);
+		if (this->conn)
+			this->conn->mod_evt(EPOLLOUT);
 		return (0);
-		// return (-1); // what did this help (?)
 	}
-	this->conn->mod_evt(EPOLLOUT);
+	if (this->conn)
+		this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }
 

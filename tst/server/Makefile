@@ -58,6 +58,8 @@ FILES = \
 	server/CgiEnv.cpp \
 	server/CgiPipe.cpp \
 	server/ResourceCgi.cpp \
+	server/ResourceFcgi.cpp \
+	server/ResourcePiped.cpp \
 	server/FcgiMsg.cpp \
 	server/FcgiConn.cpp \
 	server/FcgiPipe.cpp \

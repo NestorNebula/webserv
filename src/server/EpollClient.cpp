@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/20 11:06:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 02:10:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@ int	EpollClient::mod_evt(int e)
 {
 	if (evt.data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod_evt  : not yet initialized");
+		// WsLog::color(WSL_RED);
+		// WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "mod_evt  : not yet initialized");
 		return (this->ini_evt(e));
 	}
 
