@@ -4,18 +4,7 @@ tput reset
 
 TGT_DIR=$(pwd)
 
-FPM_DIR=$TGT_DIR/.php-fpm
-
-# /usr/bin/php-fpm -v
-
-PHP_FPM_BIN=$(which php-fpm)
-
-if [[ -z $PHP_FPM_BIN ]]; then
-    PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-    # echo "(php-fpm) not found"
-    # echo "using : $PHP_FPM_BIN"
-fi
-
+# pycgi.sh : install, clean
 
 if [ "$1" == "pycgi" ]; then
 # https://pypi.org/project/legacy-cgi/
@@ -37,7 +26,30 @@ if [ "$1" == "pycgi" ]; then
     exit 0
 fi
 
+
+
+FPM_DIR=$TGT_DIR/.php-fpm
+
+PHP_FPM_BIN=$(which php-fpm)
+if [[ -z $PHP_FPM_BIN ]]; then
+    PHP_FPM_BIN=/usr/sbin/php-fpm7.4
+    # echo "(php-fpm) not found"
+    # echo "using : $PHP_FPM_BIN"
+fi
+
+# VALIDATE : $PHP_FPM_BIN
+
+if [ "$1" == "clean" ]; then
+    rm -f ~/.config/systemd/user/php-fpm.service
+    rm -f $FPM_DIR/php-fpm.conf
+    rm -f $FPM_DIR/php-fpm.d/www.conf
+    exit 0
+fi
+
+
+SRC_DIR=./src
 if [ "$1" == "conf" ]; then
+    echo "Generating and installing php-fpm.service file"
     cat << EOF > ~/.config/systemd/user/php-fpm.service
 [Unit]
 Description=PHP FastCGI process manager
@@ -58,13 +70,15 @@ EOF
     mkdir -p $FPM_DIR
     mkdir -p $FPM_DIR/php-fpm.d
 
-    sed -e "s#FPM_DIR#$FPM_DIR#" php-fpm.conf.src > $FPM_DIR/php-fpm.conf
-    sed -e "s#FPM_DIR#$FPM_DIR#" www.conf.src > $FPM_DIR/php-fpm.d/www.conf
+    echo "Generating and installing php-fpm.conf"
+    sed -e "s#FPM_DIR#$FPM_DIR#" $SRC_DIR/php-fpm.conf.src > $FPM_DIR/php-fpm.conf
+
+    echo "Generating and installing www.conf"
+    sed -e "s#FPM_DIR#$FPM_DIR#" $SRC_DIR/www.conf.src > $FPM_DIR/php-fpm.d/www.conf
     exit 0
 fi
 
-
-
+# php-fpm.sh : conf, start, stop, cmd, clean
 if [ "$1" == "start" ]; then
     systemctl --user daemon-reload 
     systemctl --user start php-fpm.service
@@ -75,7 +89,7 @@ if [ "$1" == "stop" ]; then
     exit 0
 fi
 
-if [ "$1" == "run" ]; then
+if [ "$1" == "cmd" ]; then
     echo $PHP_FPM_BIN --nodaemonize --fpm-config $FPM_DIR/php-fpm.conf
     exit 0
 fi

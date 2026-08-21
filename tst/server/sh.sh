@@ -105,25 +105,6 @@ fi
 
 
 if [ "$1" == "u" ]; then
-	
-	# FILE="mid.jpg"
-	# curl -X POST http://localhost:8081/test.php -i \
-	# 	-F p1=dash-f-one \
-	# 	-F p2=dash-f-two \
-	# 	-F file=@www/files/$FILE
-	# echo
-	
-	# FILE="tiny.jpg"
-	# curl -X POST http://localhost:8081/test.php -i \
-	# 	-F file=@www/files/$FILE
-	# echo
-
-	# FILE="Kanan.mp3"
-	# curl -X POST http://localhost:8081/test.php -i \
-	# 	-F p1=dash-f-one \
-	# 	-F p2=dash-f-two \
-	# 	-F file=@www/files/$FILE
-	# echo
 
 	rm -f www/php/upload*
 	rm -f www/pl/upload*
@@ -142,12 +123,12 @@ if [ "$1" == "u" ]; then
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo
-		# curl -X POST http://localhost:8082/pl/ul.pl -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/py/ul.py -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/pl/ul.pl -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
+		curl -X POST http://localhost:8082/py/ul.py -i \
+			-F file=@www/files/$FILE
+		echo ; echo ; echo
 	done
 
 	ls -l www/p*
@@ -159,6 +140,16 @@ fi
 if [ "$1" ]; then
 	exit 0
 fi
+
+# -H "Content-Type:application/octet-stream" --data-binary @asdf.file http://server:1234/url
+
+curl -X POST http://localhost:8080/uploads/small \
+	-H "Content-Type:application/octet-stream" \
+	--data-binary @www/files/e4.jpg
+echo ; echo ; echo
+exit 0
+# -F file=@www/files/earth.jpg
+
 
 # -H "Transfer-Encoding: chunked" 
 # curl -i -X POST -F @www/files/earth.jpg http://127.0.0.1:7777/php/ul.php
