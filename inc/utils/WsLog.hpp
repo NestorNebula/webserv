@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:30:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:44:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ enum
 };
 
 # ifndef NOLOG
-#  define NOLOG 1
+#  define NOLOG 0
 # endif
 
 # if NOLOG

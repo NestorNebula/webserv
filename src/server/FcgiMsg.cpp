@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 03:55:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/21 05:39:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,6 @@ void FcgiMsg::add_param(const char * key, const char * val)
 
 void FcgiMsg::add_param(const char * key, int val)
 {
-	// char vStr[32];
-	// sprintf(vStr, "%i", val); // WEBSERV : ATTN illegal function
-
 	std::string vStr = num_2_str(val);
 	buf.fcgi(key, vStr.c_str());
 }

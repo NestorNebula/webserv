@@ -7,8 +7,8 @@ tput reset
 # terminate called without an active exception
 
 
-C=100
-R=2
+C=250
+R=8
 if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
