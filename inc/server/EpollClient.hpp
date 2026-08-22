@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 10:18:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:16:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@
 # include "SizeDefs.hpp"
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 60
+#  define CONN_TIMEOUT 1
 # endif
 
 # ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 60
+#  define CGI_TIMEOUT 1
 # endif
 
 typedef enum

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:40:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:35:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,66 @@ bool	CgiPipe::timeo(time_t now)
 	if ((this->lact + CGI_TIMEOUT) > now)
 		return (false);
 	
+
+	this->lact = now; // do not call again
+	// this->mod_evt(-EPOLLOUT);
+	
+
+	WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe ", this->get_fd());
+	
+
+	// yea -- we need Request
+	// timeout on "inactive" should be allowed
+	// or : once the Request is SENT : shut down the PIPE
+	if (this->rsrc && this->conn)
+	{
+		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : rsrc ", conn->get_fd());
+		if (this == this->rsrc->ip)
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe (ip)"); // biguadio.php can get blocky
+		}
+		else if (this == this->rsrc->op)
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe (op)");
+		}
+		// basically .. does conn still esit (?)
+try {
+		Session &sess = conn->sess;
+		Request &req  = sess.getRequest();
+		if (req.hasHeaders())
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+		}
+		if (req.hasBody())
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has body");
+		}
+		if (req.isComplete())
+		{
+			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : complete");
+		}
+}
+catch(const std::exception& e)
+{
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO\n", e.what());
+}
+		rsrc->set_done(RSRC_DONE_ERR);
+		this->rsrc->set_err(504); 
+	}
+	else if (this->conn)
+	{
+		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
+		this->conn->set_err(504);
+	}
+	else
+	{
+		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : ???? ");
+	}
+
+	
+	return (false);
+#if 0
 	if (this->rsrc && this->conn)
 	{
 		// MOSTLY (ip) .. but .. 
@@ -85,9 +145,9 @@ bool	CgiPipe::timeo(time_t now)
 			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
 		}
 			
-#if 0 // Exceptionns suck
-		Session *sess = conn->sess;
-		Request &req  = sess->getRequest();
+#if 1 // Exceptions suck
+		Session &sess = conn->sess;
+		Request &req  = sess.getRequest();
 		if (req.hasHeaders())
 		{
 			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
@@ -126,6 +186,7 @@ bool	CgiPipe::timeo(time_t now)
 		// this->conn->set_err(504); // Gateway Timeout
 	}
 	return (true);
+#endif
 }
 
 // The server is in no way obligated to send end-of-file 
