@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 05:31:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 16:04:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,10 @@ int	ResourcePiped::status(void)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
+		{
 		    return (RSP_ERROR);
+		}
+			
 #if RES_CGI_WAIT_COMPLETE
 		// on FIRST EXIT
 		//  check for content-length if not exists

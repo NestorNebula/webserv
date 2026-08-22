@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:35:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:48:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ bool	CgiPipe::timeo(time_t now)
 	WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe ", this->get_fd());
 	
 
+// ATTN : half-delivered (1)
 	// yea -- we need Request
 	// timeout on "inactive" should be allowed
 	// or : once the Request is SENT : shut down the PIPE

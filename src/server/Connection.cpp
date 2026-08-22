@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:37:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 16:06:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,9 @@ int	Connection::set_err(int e)
 		return (-1);
 	if (this->error)
 	{
-		WSLOG(LVL_DBG, TGT_CONN, "err:  already set!");
-		WSLOG(LVL_DBG, TGT_CONN, "cur:  ", this->error);
-		WSLOG(LVL_DBG, TGT_CONN, "new:  ", e);
+		WSLOG(LVL_ERR, TGT_CONN, "err:  already set!");
+		WSLOG(LVL_ERR, TGT_CONN, "cur:  ", this->error);
+		WSLOG(LVL_ERR, TGT_CONN, "new:  ", e);
 		this->mod_evt(EPOLLOUT);
 		return (-1);
 	}
@@ -176,6 +176,9 @@ try
 	// sess.log_next();
 	if (sess.nextAction() == Session::DOCGI)
 	{
+		// should never get this 
+		// if (this->error)
+		// 	return (0);
 		ResourceCgi *res = this->res_cgi;
 		if (res == NULL)
 		{
@@ -201,8 +204,8 @@ try
 
 		std::string & RESP = res->get_resp();
 		
-		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-		WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+		WSLOG(LVL_TMP, TGT_CONN_SEND, "send: ", this->get_fd());
+		WSLOG(LVL_TMP, TGT_CONN_SEND, "resp: " , RESP.size());
 		// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
 		// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
 		err = this->send(RESP);

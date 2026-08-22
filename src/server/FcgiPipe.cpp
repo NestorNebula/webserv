@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:28:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 16:10:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,19 @@ bool	FcgiPipe::timeo(time_t now)
 	this->lact = now; // do not call again
 	this->mod_evt(-EPOLLOUT);
 	
-
 	WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());
 
 	if (this->rsrc && this->conn)
 	{
 		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : rsrc ", conn->get_fd());
+
+		if (rsrc->done == RSRC_DONE_IO)
+		{
+			WSCOL(WSL_GREEN);
+			WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : done");
+			return (false);
+		}
+		
 		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504); 
 	}
