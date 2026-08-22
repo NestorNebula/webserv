@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:54:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:37:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ enum
 // BUT : bigimage .. takes hella ..
 // ATTN : fpm
 # ifndef RES_CGI_WAIT_COMPLETE
-#  define RES_CGI_WAIT_COMPLETE 0
+#  define RES_CGI_WAIT_COMPLETE 1
 # endif
 
 class ResourceCgi

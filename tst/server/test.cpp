@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:55:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:26:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,6 @@
 #include "FilePath.hpp"
 
 #include <deque>
-
-static bool         setWorkingDirectory(const std::string &path, std::string &cwd);
-static std::string  getConfigFileName(const std::string &path);
-
-static int          env_pwd(char **envp, std::string &str);
 
 int main (int argc, char ** argv, char **envp)
 {   
@@ -97,39 +92,4 @@ int main (int argc, char ** argv, char **envp)
 
     delete (ep);
     return (err);
-}
-
-
-static bool setWorkingDirectory(const std::string &path, std::string &cwd) 
-{
-    std::string::size_type lastSlash = path.find_last_of('/');
-    if (lastSlash == std::string::npos)
-        return true;
-    std::string directory = path.substr(0, lastSlash);
-    cwd += directory + std::string("/");
-    return chdir(directory.c_str()) == 0;
-}
-
-static std::string getConfigFileName(const std::string &path) 
-{
-    std::string::size_type lastSlash = path.find_last_of('/');
-    if (lastSlash == std::string::npos)
-        return path;
-    return path.substr(lastSlash + 1);
-}
-
-
-static int  env_pwd(char **envp, std::string &str)
-{
-    char **chk = envp;
-    while (*chk)
-    {
-        if (std::string(*chk).substr(0,4) == std::string("PWD="))
-        {
-            str = std::string(*chk).substr(4) + std::string("/");
-            return (0);
-        }
-        chk++;
-    }
-    return (1);
 }

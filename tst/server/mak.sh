@@ -22,5 +22,14 @@ if [[ "$1" =~ "v" ]]; then
 elif [[ "$1" =~ "g" ]]; then
 	gdb --args ./test "$CONF" 0
 else
-	./test "$CONF" "$1"
+	ARG=
+	if [[ "$1" =~ "0" ]]; then
+		ARG=0
+	elif [[ "$1" =~ "k" ]]; then
+		ARG=k
+	elif [[ "$1" =~ "a" ]]; then
+		ARG=a
+	fi
+
+	./test "$CONF" $ARG
 fi

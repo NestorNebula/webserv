@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 20:59:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:33:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 }
 
 Request &Session::getRequest() {
-  throwIfNotAction(DOCGI);
+  // throwIfNotAction(DOCGI);
   return _request;
 }
 
