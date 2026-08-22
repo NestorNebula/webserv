@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:37:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 15:59:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ enum
 // AH : sending partial .. CGI TIMEOUT .. half-sent
 // BUT : bigimage .. takes hella ..
 // ATTN : fpm
+// ATTN : CGI TIMEOUT 
 # ifndef RES_CGI_WAIT_COMPLETE
 #  define RES_CGI_WAIT_COMPLETE 1
 # endif

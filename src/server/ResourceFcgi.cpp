@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 13:05:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 16:06:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,11 @@ int	ResourceFcgi::status(void)
 	if (this->wait(0) != -1) // exited
 	// if (this->done == RSRC_DONE_IO)
 	{
+		// this->wait(0);
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (RSP_ERROR);
+			
 #if RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);

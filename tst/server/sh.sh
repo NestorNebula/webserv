@@ -42,7 +42,7 @@ fi
 # fi
 
 if [[ "$1" =~ "p" ]]; then
-	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C  -b
 	echo
 fi
 
