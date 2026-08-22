@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 20:49:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:40:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,20 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc
 CgiPipe::~CgiPipe()
 {
 	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe ", this->fd);
-	if (this->conn)
+	try 
 	{
-		WSLOG(LVL_DBG, TGT_CGI, " (~) conn_fd ", this->conn->get_fd());
-		this->conn->cgi_rem(this);
+		if (this->conn)
+		{
+			WSLOG(LVL_DBG, TGT_CGI, " (~) conn_fd ", this->conn->get_fd());
+			this->conn->cgi_rem(this);
+		}
+		if (this->rsrc)
+			this->rsrc->rem(this);
 	}
-	if (this->rsrc)
-		this->rsrc->rem(this);
+	catch(const std::exception& e)
+	{
+		WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe\n", e.what());
+	}
 }
 
 
@@ -78,8 +85,9 @@ bool	CgiPipe::timeo(time_t now)
 			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
 		}
 			
-		Session &sess = conn->sess;
-		Request &req  = sess.getRequest();
+#if 0 // Exceptionns suck
+		Session *sess = conn->sess;
+		Request &req  = sess->getRequest();
 		if (req.hasHeaders())
 		{
 			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
@@ -103,6 +111,7 @@ bool	CgiPipe::timeo(time_t now)
 				return (false);
 			}
 		}
+#endif
 		this->rsrc->set_err(504); // Gateway Timeout
 	}
 	else if (this->conn)

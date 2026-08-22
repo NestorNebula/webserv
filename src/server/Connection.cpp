@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 21:08:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:57:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,19 @@ Connection::~Connection()
 {
 	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
 	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-	if (this->res_cgi)
+	try 
 	{
-		this->res_cgi->conn_closed();
-		delete (this->res_cgi); // (~) Connection
+		if (this->res_cgi)
+		{
+			this->res_cgi->conn_closed();
+			delete (this->res_cgi); // (~) Connection
+		}
 	}
-};
+	catch(const std::exception& e)
+	{
+		WSLOG(LVL_DBG, TGT_CONN, " (~) Connection\n", e.what());
+	}
+}
 
 bool	Connection::timeo(time_t now)
 {
@@ -143,10 +150,7 @@ try
 }
 catch(const std::exception& e)
 {
-	// not bigaudio.php friendly
-	// linked to TIMEOUT (?)
-	// set an error (?)
-	std::cerr << "POLLIN " << e.what() << '\n';
+	WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
 	this->set_err(404);
 }
 	return (0);
@@ -248,8 +252,7 @@ try
 }
 catch(const std::exception& e)
 {
-	// not bigaudio.php friendly
-	std::cerr << "POLLOUT " << e.what() << '\n';
+	WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
 	this->set_err(404);
 }
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 21:09:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 13:05:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,14 +108,14 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 		// should have been checked before calling
 	if (conn->serv.get_conf().fcgi_sock.empty())
 	{
-		WSLOG(LVL_TMP, TGT_CGI, "fcgi_sock: empty");
+		WSLOG(LVL_DBG, TGT_CGI, "fcgi_sock: empty");
 		return (-1);
 	}
 // WEBSERV : SERVER
 	int fd = FcgiConn::make_sock(conn->serv.get_conf().fcgi_sock.c_str());
 	if (fd < 0)
 	{
-		WSLOG(LVL_TMP, TGT_CGI, "fcgi_sock: FAIL");
+		WSLOG(LVL_DBG, TGT_CGI, "fcgi_sock: FAIL");
 		return (-1);
 	}
 	

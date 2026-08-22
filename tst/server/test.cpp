@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 21:11:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:55:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,14 +55,15 @@ int main (int argc, char ** argv, char **envp)
     std::string conf_root;
     if (env_pwd(envp, conf_root))
     {
-        std::cerr << "couldn't detect working directory\n";
+        WSLOG(LVL_INFO, TGT_MAIN, "couldn't detect working directory");
         return (0);
     }
     if (!setWorkingDirectory(argv[1], conf_root)) 
     {
-        std::cerr << "couldn't setup working directory.\n";
+        WSLOG(LVL_INFO, TGT_MAIN, "couldn't setup working directory");
         return 0;
     }
+    
 // #kd - conf_file_root
     ConfigParser parser(conf_root);
     try 
@@ -71,7 +72,7 @@ int main (int argc, char ** argv, char **envp)
     } 
     catch (std::exception &e) 
     {
-        std::cout << "EX: ConfigParser::parseFile() : " << e.what() << "\n";
+        WSLOG(LVL_INFO, TGT_MAIN, "ex: main\n", e.what());
         return 0;
     }
 
@@ -91,10 +92,8 @@ int main (int argc, char ** argv, char **envp)
     }
     catch(const std::exception& e)
     {
-        std::cout << "EX: main() : " << e.what() << "\n";
-        // unexpected .. should have been caught in LOOP .. 
+        WSLOG(LVL_INFO, TGT_MAIN, "ex: main\n", e.what());
     }
-
 
     delete (ep);
     return (err);

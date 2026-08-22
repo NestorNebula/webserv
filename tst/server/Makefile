@@ -1,11 +1,12 @@
 NAME=test
 
 CC=c++
-CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP -g3
 # -Wno-unused
 # -Wshadow=local
 
 GIT_DIR=../..
+
 SRC_DIR=$(GIT_DIR)/src
 INC_DIR=$(GIT_DIR)/inc
 OBJ_DIR=.obj
@@ -18,15 +19,9 @@ CFLAGS+=-I . \
 	-I $(INC_DIR)/http \
 	-I $(INC_DIR)/streams \
 	-I $(INC_DIR)/resources
+
 LFLAGS=
 LIBS =
-
-FCGI_INC=-I ./FCGI/include
-FCGI_LIB=
-# -L ./FCGI/lib -Wl,-rpath,./FCGI/lib/ -lfcgi
-
-CFLAGS += $(FCGI_INC)
-LIBS += $(FCGI_LIB)
 
 ifdef DBG
 DEFS += -DDBG_CANON="$(DBG)"
@@ -88,19 +83,6 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(TPP) $(BIN)
 	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(BIN) $(LIBS) -o $@
-
-# ATTN : "bonus"
-fpm-conf:
-	cd FCGI && ./install.sh conf
-
-fpm-start: fpm-conf
-	cd FCGI && ./install.sh start
-
-fpm-stop:
-	cd FCGI && ./install.sh stop
-
-fpm-run: fpm-conf
-	cd FCGI && ./install.sh run
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp | $(OBJ_DIR)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"

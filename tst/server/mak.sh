@@ -19,6 +19,8 @@ CONF=../../demo/config.conf
 tput reset
 if [[ "$1" =~ "v" ]]; then
 	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test "$CONF" 0
+elif [[ "$1" =~ "g" ]]; then
+	gdb --args ./test "$CONF" 0
 else
 	./test "$CONF" "$1"
 fi
