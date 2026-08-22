@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 20:50:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:56:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,21 @@ FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsr
 FcgiPipe::~FcgiPipe()
 {
 	WSLOG(LVL_DBG, TGT_FCGI, " (~) Fcgi ", this->fd);
-	if (this->conn)
+	try 
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, " (~) conn_fd ", this->conn->get_fd());
-		this->conn->cgi_rem(this);
+		if (this->conn)
+		{
+			WSLOG(LVL_DBG, TGT_FCGI, " (~) conn_fd ", this->conn->get_fd());
+			this->conn->cgi_rem(this);
+		}
+		if (this->rsrc)
+			this->rsrc->rem(this);
+
 	}
-	if (this->rsrc)
-		this->rsrc->rem(this);
+	catch(const std::exception& e)
+	{
+		WSLOG(LVL_DBG, TGT_FCGI, " (~) Fcgi\n", e.what());
+	}
 }
 
 // static int to = 0;
@@ -51,8 +59,9 @@ bool	FcgiPipe::timeo(time_t now)
 	{
 		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : rsrc");
-		Session &sess = conn->sess;
-		Request &req  = sess.getRequest(); // Wrong Action on Session
+#if 0 // Exceptions suck
+		Session *sess = conn->sess;
+		Request &req  = sess->getRequest(); // Wrong Action on Session
 		if (req.hasHeaders())
 		{
 			WSCOL(WSL_RED);
@@ -84,6 +93,7 @@ bool	FcgiPipe::timeo(time_t now)
 			}
 #endif
 		}
+#endif
 		// error .. should not wait 
 		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504); // Gateway Timeout

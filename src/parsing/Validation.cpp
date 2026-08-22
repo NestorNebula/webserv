@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/21 20:40:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 13:27:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,8 +154,8 @@ void	ConfigParser::validateServerConfig(const ServerConfig& server)
 	if (server.upload && !server.upload_dir.empty())
 		validateDirExists(server.upload_dir, "server upload_dir");
 // #kd
-	if (!server.fcgi_sock.empty())
-		validateFileExists(server.fcgi_sock, "server fcgi_sock");
+	// if (!server.fcgi_sock.empty())
+	// 	validateFileExists(server.fcgi_sock, "server fcgi_sock");
 	if (!server.pycgi_dir.empty())
 		validateDirExists(server.pycgi_dir, "server pycgi_dir");
 

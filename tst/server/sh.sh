@@ -120,12 +120,12 @@ if [ "$1" == "u" ]; then
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
-		curl -X POST http://localhost:8082/php/ul.php -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
-			-F file=@www/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/php/ul.php -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@www/files/$FILE
+		# echo ; echo ; echo
 		curl -X POST http://localhost:8082/py/ul.py -i \
 			-F file=@www/files/$FILE
 		echo ; echo ; echo

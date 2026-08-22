@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 20:49:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:57:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ std::string & CgiEnv::get(const char *key)
 	return (this->kv[ std::string (key) ]);
 }
 
-// could return HTTP_ERRNO
 int     CgiEnv::from_conn(Connection & conn)
 {
 	this->kv.clear();
@@ -69,10 +68,6 @@ int     CgiEnv::from_conn(Connection & conn)
 	info = sess.getCgiInfo();
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
-
-	// std::cerr << "METH  : " << methodToString(req.getMethod()) << std::endl;
-	// std::cerr << " URL  : " << info.scriptPath << std::endl;
-	// std::cerr << "SERV  : root : " << conn.serv.get_conf().root << std::endl;
 
 	std::string path_rel = conn.serv.get_conf().root + info.scriptPath;
 	script.parse(path_rel);
