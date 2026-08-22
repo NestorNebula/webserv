@@ -54,18 +54,15 @@ FILES = \
 	server/CgiPipe.cpp \
 	server/ResourceCgi.cpp \
 	server/ResourcePiped.cpp \
+	server/ResourceFcgi.cpp \
+	server/FcgiMsg.cpp \
+	server/FcgiConn.cpp \
+	server/FcgiPipe.cpp \
 	parsing/ConfigParser.cpp \
 	parsing/ParseBlocks.cpp \
 	parsing/ParserTools.cpp \
 	parsing/Tokenizer.cpp \
 	parsing/Validation.cpp 
-
-# WITH_FCGI
-FILES += \
-	server/ResourceFcgi.cpp \
-	server/FcgiMsg.cpp \
-	server/FcgiConn.cpp \
-	server/FcgiPipe.cpp 
 
 TPP = 
 
