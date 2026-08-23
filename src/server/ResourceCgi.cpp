@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:08:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 18:09:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,12 @@ int	ResourceCgi::get_req_body(void)
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
 	this->resp.append(buf, siz);
+	// ah -- continually flushing
+	// good place to "see" WAIT_COMPLETE
 	WSLOG(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
 
-	// WSLOG(LVL_DBG, TGT_RSRC, "ostr");
-	// WSLOG(LVL_DBG, TGT_RSRC, "****\n", ostr);
+	WSLOG(LVL_NONE, TGT_RSRC, "resp");
+	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
 	
 	return (this->chk_rsp_hed());
 }
@@ -99,9 +101,18 @@ int		ResourceCgi::chk_rsp_hed(void)
 	this->hed = 1;
 	
 // REQUIRE (?) Content-Type (?)
+// KPALIVE .. 
+/*
+Session
+  _keepalive =
+      (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 &&
+       (!_request.hasHeader("Connection") ||
+        _request.getHeaders().find("Connection")->second == "keep-alive"));
+*/
+#if !RES_CGI_WAIT_COMPLETE
 	std::string conn_close("Connection: close\r\n");
 	resp.insert(0, conn_close);
-	
+#endif
 	std::string stat_hed;
 	std::string stat_str = hedval_str(resp, "Status");
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
@@ -118,17 +129,23 @@ int		ResourceCgi::chk_rsp_hed(void)
 	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", this->resp);	
 	return (RSRC_RESP_HEAD);
 }
+
 void	ResourceCgi::chk_rsp_len(void)
 {
+
+	size_t	pos = resp.find("\r\n\r\n");
+	std::string hed = resp.substr(0, pos + 4);
+	
+	std::string kastr = std::string("\r\nConnection: Keep-Alive");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
 			// consider adding keep-alive
 		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
+		// if (KPALIVE)
+		resp.insert(pos, kastr);
 		return;
 	}
-	size_t	pos = resp.find("\r\n\r\n");
-	std::string hed = resp.substr(0, pos + 4);
 	size_t clen = (resp.size() - pos - 4);
 
 	clen_str = std::string("\r\nContent-Length:") + num_2_str(clen);
@@ -136,6 +153,8 @@ void	ResourceCgi::chk_rsp_len(void)
 	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 	
 	resp.insert(pos, clen_str);
+	// if (KPALIVE) && !(Connection: close)
+	resp.insert(pos, kastr);
 }
 
 int	ResourceCgi::set_err(int e)
