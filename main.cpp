@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 17:23:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 20:10:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int main (int argc, char ** argv, char **envp)
 
     if (argc < 2)
     {
-        std::cerr << "usage: demo <config>\n";
+        std::cerr << "usage: webserv <config>\n";
         return 0;
     }
     if (argc > 2)
