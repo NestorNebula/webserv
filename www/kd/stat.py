@@ -7,7 +7,7 @@ import cgi
 import cgitb
 
 
-print("Status: 755", end="\r\n\r\n");
-print("seven-five-five");
+print("Status: 202", end="\r\n\r\n");
+print("two-oh-two");
 
 

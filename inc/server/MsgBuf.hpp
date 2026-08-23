@@ -6,27 +6,20 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 11:18:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:07:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MSG_BUF_HPP
-#define MSG_BUF_HPP
+# define MSG_BUF_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-// DOC_OPT/src
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <arpa/inet.h>
 
-
-#ifdef __WIN32__
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
-
-#include "libft.hpp"
-#include "WsLog.hpp"
+# include "libft.hpp"
+# include "WsLog.hpp"
 
 
 class MsgBuf

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 08:37:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:01:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,6 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc
 {
 	sock_non_block(this->fd);
 }
-	
-// epoll : evt tgt  : cgi
-// epoll : evt fd   : [12]
-// epoll : evt typ  : out 
-// cgi   : send:  POLLOUT
-// cgi   : SOME: [0]
-	// REQ_COMPLETE
-// epoll : cli rem  : cgi
-// epoll : cli del  : cgi
-// cgi   :  (~) CgiPipe
-// rsrc  : rem : (ip)
-// epoll : mod_evt  : not yet initialized
-// epoll : cli add  : cgi
-// conn  : rem cgi  : (ip)   [7]
-// epoll : cli mod  : conn
-// epoll : cli mod  : conn
-// epc   :  (~) EpollClient
 
 CgiPipe::~CgiPipe()
 {
@@ -63,7 +46,6 @@ CgiPipe::~CgiPipe()
 }
 
 
-// static int to = 0;
 bool	CgiPipe::timeo(time_t now)
 {
 	if (this->lact == 0)
@@ -74,61 +56,56 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	
 
-	this->lact = now; // do not call again
-	// this->mod_evt(-EPOLLOUT);
+	this->lact = now;
 	
-
-	WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe ", this->get_fd());
-	
-
-// ATTN : half-delivered (1)
-	// yea -- we need Request
-	// timeout on "inactive" should be allowed
-	// or : once the Request is SENT : shut down the PIPE
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe ", this->get_fd());
+	if (this->conn)
+	{
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
+	}
 	if (this->rsrc && this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : rsrc ", conn->get_fd());
 		if (this == this->rsrc->ip)
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe (ip)"); // biguadio.php can get blocky
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe (ip)");
 		}
 		else if (this == this->rsrc->op)
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : pipe (op)");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe (op)");
 		}
-		// basically .. does conn still esit (?)
+
 try {
 		Session &sess = conn->sess;
 		Request &req  = sess.getRequest();
 		if (req.hasHeaders())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has headers");
 		}
 		if (req.hasBody())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has body");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has body");
 		}
 		if (req.isComplete())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : complete");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : complete");
 		}
 }
 catch(const std::exception& e)
 {
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO\n", e.what());
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO\n", e.what());
 }
 		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504); 
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
 		this->conn->set_err(504);
 	}
 	else
 	{
-		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : ???? ");
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : ???? ");
 	}
 
 	
@@ -139,11 +116,11 @@ catch(const std::exception& e)
 		// MOSTLY (ip) .. but .. 
 		if (this == this->rsrc->ip)
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
 		}
 		else if (this == this->rsrc->op)
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "pipe: TIMEO (op)");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "pipe: TIMEO (op)");
 		}
 			
 #if 1 // Exceptions suck
@@ -151,15 +128,15 @@ catch(const std::exception& e)
 		Request &req  = sess.getRequest();
 		if (req.hasHeaders())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has headers");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has headers");
 		}
 		if (req.hasBody())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : has body");
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has body");
 		}
 		if (req.isComplete())
 		{
-			WSLOG(LVL_TMP, TGT_CGI_SEND, "req : complete"); // , ++to); // 1500 (!)
+			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : complete"); // , ++to); // 1500 (!)
 			if (this == this->rsrc->ip)
 			{
 // timeout on IP is allowed .. 
@@ -177,12 +154,12 @@ catch(const std::exception& e)
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : conn");
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn");
 		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
 	{
-		WSLOG(LVL_TMP, TGT_CGI_SEND, "TIMEO : ????");
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : ????");
 		// (conn) does not exist !
 		// this->conn->set_err(504); // Gateway Timeout
 	}

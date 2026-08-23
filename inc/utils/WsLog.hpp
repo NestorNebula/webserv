@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 08:04:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:06:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,19 @@
 # include <string>
 # include <cstring>
 # include <cerrno>
+
+# ifndef NOLOG
+#  define NOLOG 0
+# endif
+
+# if NOLOG
+#  define WSLOG(...)
+#  define WSCOL(...) 
+#else
+#  define WSLOG WsLog::_
+#  define WSCOL WsLog::color
+#endif
+
 
 typedef long unsigned int log_lvl;
 typedef long unsigned int log_tgt;
@@ -108,18 +121,6 @@ enum
 	WSL_PURPLE,
 	WSL_CYAN
 };
-
-# ifndef NOLOG
-#  define NOLOG 0
-# endif
-
-# if NOLOG
-#  define WSLOG(...)
-#  define WSCOL(...)
-#else
-#  define WSLOG WsLog::_
-#  define WSCOL WsLog::color
-#endif
 
 class WsLog
 {

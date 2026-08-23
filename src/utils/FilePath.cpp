@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 15:23:02 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:26:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:14:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ std::string getConfigFileName(const std::string &path)
     return path.substr(lastSlash + 1);
 }
 
-
 int  env_pwd(char **envp, std::string &str)
 {
     char **chk = envp;
@@ -45,8 +44,6 @@ int  env_pwd(char **envp, std::string &str)
     }
     return (1);
 }
-
-
 
 void FilePath::parse(std::string & p)
 {   
@@ -92,6 +89,7 @@ void FilePath::parse(std::string & p)
         b = e + 1;
     }
 }
+
 void FilePath::dump(void)
 {
     std::cerr << "praw : " << praw << std::endl;

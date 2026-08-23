@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 20:39:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:21:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,6 @@
 #  define SERV_BACKLOG 256
 # endif
 
-// class Connection;
-
 class Server : public EpollClient
 {
 private:
@@ -55,10 +53,6 @@ public:
 	
 	unsigned short		get_port(void)	const;
 	ServerConfig		&get_conf() { return (this->conf); }
-	
-// #kd
-	// std::string			fcgi_sock;
-	// std::string			pycgi;
 	
 private:
 	ServerConfig		conf;

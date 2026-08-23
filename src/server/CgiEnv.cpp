@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 07:52:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:55:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,8 +135,6 @@ int     CgiEnv::from_conn(Connection & conn)
 	if (req.hasHeader("Content-length"))
 		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
 	
-
-
 	Headers::const_iterator hit = headers.begin();
 	while (hit != headers.end())
 	{
@@ -153,8 +151,9 @@ int     CgiEnv::from_conn(Connection & conn)
 	// this->add("REMOTE_USER", "remote user");
 	
 	this->add("SERVER_NAME", "webserv");
+	// SERVER_ADDR
 	this->add("SERVER_PORT", conn.serv.get_port());
-	this->add("SERVER_PROTOCOL", "HTTP/1.0");
+	this->add("SERVER_PROTOCOL", "HTTP/1.0"); // conn.serv (?)
 	this->add("SERVER_SOFTWARE", "webserv");
 	
 	this->add("GATEWAY_INTERFACE", "CGI/1.0");
@@ -194,6 +193,3 @@ const char	**CgiEnv::gen(void)
 	*ins = NULL;
 	return (res);
 }
-
-// FCGI
-// FCGI

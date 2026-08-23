@@ -6,14 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 16:04:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:15:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ResourcePiped.hpp"
-
-
-
 
 ResourcePiped::~ResourcePiped()
 {
@@ -26,7 +23,7 @@ ResourcePiped::~ResourcePiped()
 	this->wait(WNOHANG);
 	if (this->stat == -1 && this->pid)
 	{
-		// WSCOL(WSL_RED);
+		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_RSRC, "kill");
 		kill(this->pid, SIGKILL);
 		this->wait(0); // do not set error
@@ -47,7 +44,6 @@ void	ResourcePiped::conn_closed(void)
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
-	// this->conn = NULL;
 }
 
 int	ResourcePiped::status(void)
@@ -68,23 +64,18 @@ int	ResourcePiped::status(void)
 	if (this->resp.size())
 		return (1);
 #endif
-	if (this->wait(WNOHANG) != -1) // exited
+	if (this->wait(WNOHANG) != -1)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
-		{
 		    return (RSP_ERROR);
-		}
 			
 #if RES_CGI_WAIT_COMPLETE
-		// on FIRST EXIT
-		//  check for content-length if not exists
         if (this->resp.size())
             return (1);
 #endif
 		return (RSP_COMPLETE);
 	}
-	// STILL RUNNING
 	
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
@@ -93,14 +84,6 @@ int	ResourcePiped::status(void)
 	return (RSP_WAIT_BODY); 
 }
 
-// Header Safety: You must send HTTP headers (like Content-Type) before any body text. If an error occurs midway through generating output, buffering lets you discard the partial text and output a clean 500 Internal Server Error page instead of a broken, half-rendered HTML file.
-
-// Content-Length: Holding the output lets you measure the exact byte size of your response so you can send an accurate Content-Length header.
-
-
-// PIPE_EXIT_SUCCESS
-// PIPE_EXIT_COMPLETE
-// PIPE_EXIT_STATUS
 int	ResourcePiped::wait(int opt)
 {
 	int	err;
@@ -182,7 +165,6 @@ int	ResourcePiped::rem(EpollClient *epc)
 		if (this->op)
         {
             WSLOG(LVL_INFO, TGT_RSRC, "mod : (op)");
-            // ah -- not yet initialized .. because 
 			this->op->mod_evt(EPOLLIN);
         }
 	}
@@ -192,9 +174,7 @@ int	ResourcePiped::rem(EpollClient *epc)
 		err = 2;
 		this->op = NULL;
 	}
-	// else  // WTF (!)
-	
-	if (this->ip == NULL && this->op == NULL)
+	if ((this->ip == NULL) && (this->op == NULL))
 	{
 		WSLOG(LVL_INFO, TGT_RSRC, "rem : (done)");
 		err = 3;
@@ -217,6 +197,7 @@ void    ResourcePiped::push_body(void)
 int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
+	
 	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
 	
 	this->pid = _pid;

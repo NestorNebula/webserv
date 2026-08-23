@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 09:45:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:15:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void	Epoll::cleanup()
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
 	{
-		// this->del(*it); // necessary (?)
+		// this->del(*it);
 		delete (*it++);
 	}
 	this->clients.clear();
@@ -124,7 +124,7 @@ int	Epoll::add(EpollClient *cli)
 	if (this->has_client(cli))
 	{
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
-		// return (this->mod(cli));
+		return (this->mod(cli));
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
@@ -156,7 +156,7 @@ int	Epoll::mod(EpollClient *cli)
 	if (!this->has_client(cli))
 	{
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
-		// return (this->add(cli));
+		return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
@@ -245,8 +245,6 @@ int	Epoll::exec(void)
 
 void	Epoll::check_timeo(void)
 {
-	// WSLOG(LVL_DBG, TGT_EPOLL, "timeout : ", clients.size());
-
 	time_t	n;
 	
 	n = time(&n);
@@ -336,3 +334,24 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 	}
 	return (err);
 }
+
+
+
+
+// It is not currently possible to reliably delete epoll items when using the same epoll set from multiple threads. After calling epoll_ctl with EPOLL_CTL_DEL, another thread might still be executing code related to an event for that epoll item (in response to epoll_wait). Therefore the deleting thread does not know when it is safe to delete resources pertaining to the associated epoll item because another thread might be using those resources. 
+
+// HM : do not delete ..CgiPipe .. until .. we are sure (cgi) is complete (?)
+// so .. keep them in the epoll .. but .. disabled
+
+// the reading application would be tied up for a long period; 
+// meanwhile, it does not service I/O events on the other file descriptors—those descriptors are starved of service by the application. 
+
+// The solution to file descriptor starvation is for the application to maintain a user-space data structure that caches the readiness of each of the file descriptors that it is monitoring. 
+
+// so .. cache as (READY) .. until .. recv/send ZERO ...
+
+// EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
+
+// A defunct or "zombie" process in Linux occurs when a child process finishes running via fork(), but its parent process does not read its exit status using a wait() system call. The process remains in the table holding its PID until reaped.
+
+

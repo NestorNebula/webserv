@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:45:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:59:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ void FcgiMsgData::zero()
 
 
 #if 0
-
-
 https://fastcgi-archives.github.io/FastCGI_Specification.html
 
     The Responder application receives CGI/1.1 environment variables from the Web server over FCGI_PARAMS.
@@ -44,8 +42,6 @@ https://fastcgi-archives.github.io/FastCGI_Specification.html
 A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
 
 SO : send the WHOLE request (headers included)
-
-
 #endif
 
 FcgiMsg::FcgiMsg()
@@ -69,38 +65,7 @@ void FcgiMsg::new_params(unsigned short req)
 	pBeg = buf.end; // for calculating length of FCGI_PARAMS
 }
 
-const char * p_name[] =
-{
-	"SERVER_PROTOCOL",
-	"REQUEST_METHOD",
-	"SCRIPT_FILENAME",
-	"CONTENT_TYPE",
-	"QUERY_STRING",
-	"CONTENT_LENGTH",
-	"HTTP_ACCEPT",
-	"MIME_TYPE",
-	"SERVER_ADDR",
-	"REQUEST_URI",
-	"SERVER_PORT",
-	"HTTP_COOKIE",
-	"HTTP_HOST",
-	"HTTPS",
-	"DOCUMENT_ROOT",
-	"REMOTE_ADDR"
-	// "SCRIPT_NAME",
-	// "REDIRECT_STATUS",
-	// "HTTP_REFERER",
-	// "HTTP_USER_AGENT"
-	// "HTTP_TRANSFER_ENCODING"
-	// "HTTP_ACCEPT_ENCODING"
-	// "HTTP_ACCEPT_LANGUAGE"
-	// "HTTP_CONNECTION"
-	// "SERVER_NAME"
-	// "SERVER_SOFTWARE"
-	// "GATEWAY_INTERFACE"  "CGI/1.0"
-};
-
-// buf.fcgi() : keylen, vallen, key, val
+// MsgBuf::fcgi() : keylen, vallen, key, val
 // push fcgi-formatted key/val pair onto buf
 // kLen, vLen, kStr, vStr
 void FcgiMsg::add_param(const char * key, const char * val)
@@ -117,9 +82,7 @@ void FcgiMsg::add_param(const char * key, int val)
 void FcgiMsg::end_params(void)
 {
 	this->make_head(FCGI_PARAMS, buf.end - pBeg);
-
-	// insert params header with proper content-length
-
+		// insert params header with proper content-length
 	ft_memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
 	buf.zero(this->head.paddingLength);
 
@@ -144,9 +107,7 @@ void FcgiMsg::add_stdin(const char * data, int dSiz)
 		this->make_head(FCGI_STDIN, dSiz);
 		buf.push(this, FCGI_HEADER_LEN);
 		buf.push(data, dSiz);
-		buf.zero(this->head.paddingLength);
-		// padding (?)
-		// buf.zero()
+		buf.zero(this->head.paddingLength); // IMPORTANT
 	}
 }
 
@@ -172,7 +133,7 @@ void FcgiMsg::make_head(unsigned char typ, unsigned short len)
 	this->zero();
 	head.type = typ;
 	set_len(len);
-	set_pad(len); // could be in (set_len)
+	set_pad(len);
 }
 
 int FcgiMsg::full_size()
