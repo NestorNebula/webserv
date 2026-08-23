@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 17:22:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 18:04:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,13 @@ Connection::~Connection()
 		WSLOG(LVL_DBG, TGT_CONN, " (~) Connection\n", e.what());
 	}
 }
+
+// A "connection reset by peer" error (TCP RST packet) means the remote host, firewall, or proxy closed the network connection abruptly. To resolve it, you must identify whether the issue is caused by misconfigured timeouts, aggressive firewalls, stale connection pools, or application code crashes
+
+// the error is the one that shows up after the TCP connection was established. The SYN succeeded, the SYN-ACK succeeded, the ACK succeeded, data flowed, and then the RST appeared.
+
+// socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1))
+
 
 bool	Connection::timeo(time_t now)
 {
@@ -141,7 +148,9 @@ ssize_t	Connection::pollin(void)
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
-			return (-1);
+			// return (-1);
+			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			return (0);
 		case Session::CLOSE:
 			return (-1);
 		}
@@ -239,8 +248,11 @@ ssize_t	Connection::pollout(void)
 		{
 		case Session::KPALIVE:
 			this->reset();
-			this->mod_evt(-EPOLLOUT);
-			return (-1);
+			// this->mod_evt(-EPOLLOUT);
+			// unless we sent back error ...
+			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			return (0);
+			// return (-1);
 		case Session::CLOSE:
 			return (-1);
 		default:
