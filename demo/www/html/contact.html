@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/styles.css" />
+	<script src="/js/contact.js" defer></script>
+    <title>Webserv - Contact Us</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>WEBSERV</h1>
+      <p>Demonstration Website</p>
+      <p>for our HTTP server</p>
+    </header>
+    <section id="contact">
+      <h2>Contact Us</h2>
+      <p>Send us a message through our HTTP server</p>
+      <form id="contact-form" action="" method="post">
+        <div class="input-container">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" value="" required />
+        </div>
+        <div class="input-container">
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            cols=""
+            required
+          ></textarea>
+        </div>
+        <button class="request" type="submit">
+              <p class="method">POST</p>
+              <p>/to-be-defined</p>
+              <p>Send Message</p>
+		</button>
+      </form>
+    </section>
+    <footer>
+      <div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>
+      <a
+        href="https://github.com/NestorNebula/webserv"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img id="gh-icon" src="/assets/icons/github.svg" alt="GitHub" />
+      </a>
+      <div>2026</div>
+    </footer>
+  </body>
+</html>

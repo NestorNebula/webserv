@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:55:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 20:19:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,10 @@ int     CgiEnv::from_conn(Connection & conn)
 	{
 		lang = CGI_PYTHON;
 			// this should have been checked before
-		if (conf.pycgi_dir.empty())
-			return (conn.set_err(403)); // Forbidden
+		
+		// if (conf.pycgi_dir.empty())
+		// 	return (conn.set_err(403)); // Forbidden
+
 			// this could be fixed at startup
 		std::string pyrel = conf.root + conf.pycgi_dir;
 		FilePath pypath(pyrel);
