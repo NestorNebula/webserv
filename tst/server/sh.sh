@@ -114,9 +114,9 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	FILES+="Kanan.mp3 "
-	# FILES+="tiny.jpg "
-	# FILES+="mid.jpg "
-	# FILES+="earth.jpg "
+	FILES+="tiny.jpg "
+	FILES+="mid.jpg "
+	FILES+="earth.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -141,7 +141,7 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-curl -X POST 'http://localhost:8082/test.py?g1=QUERYSHIT' -i \
+curl -X GET 'http://localhost:8082/ka.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

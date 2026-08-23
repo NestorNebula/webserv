@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 10:18:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:28:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@
 #  define EPOLL_MAX_EVT 1024
 # endif
 
-# ifndef SERV_TIMEOUT
-#  define SERV_TIMEOUT 1
+# ifndef EPOLL_TIMEOUT
+#  define EPOLL_TIMEOUT 1
 # endif
 
 std::string evt_type(int evt);
@@ -63,7 +63,7 @@ private:
 	int						epfd;
 	int						ecnt;
 	struct epoll_event		evts[EPOLL_MAX_EVT];
-	static const int		toms = (SERV_TIMEOUT * 1000);
+	static const int		toms = (EPOLL_TIMEOUT * 1000);
 	
 	std::set<EpollClient*>	clients;
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 16:06:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:11:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,8 +204,8 @@ try
 
 		std::string & RESP = res->get_resp();
 		
-		WSLOG(LVL_TMP, TGT_CONN_SEND, "send: ", this->get_fd());
-		WSLOG(LVL_TMP, TGT_CONN_SEND, "resp: " , RESP.size());
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send: ", this->get_fd());
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 		// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
 		// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
 		err = this->send(RESP);

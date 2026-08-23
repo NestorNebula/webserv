@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:57:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 07:52:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	Request &req  = sess.getRequest();
 	const Headers &headers = req.getHeaders();
 
+	ServerConfig	&conf = conn.serv.get_conf();
+
 	if (!req.hasMethod())
 	{
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "METHOD not set");
@@ -69,10 +71,10 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 
-	std::string path_rel = conn.serv.get_conf().root + info.scriptPath;
+	std::string path_rel = conf.root + info.scriptPath;
 	script.parse(path_rel);
-	// script.dump();
 
+			// this should have been checked before
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
@@ -96,12 +98,14 @@ int     CgiEnv::from_conn(Connection & conn)
 	else if (script.fext == std::string(".py"))
 	{
 		lang = CGI_PYTHON;
-			// this should have been checked elsewhere
-		if (conn.serv.get_conf().pycgi_dir.empty())
-		{
+			// this should have been checked before
+		if (conf.pycgi_dir.empty())
 			return (conn.set_err(403)); // Forbidden
-		}
-		this->add("PYTHONPATH", conn.serv.get_conf().pycgi_dir.c_str());
+			// this could be fixed at startup
+		std::string pyrel = conf.root + conf.pycgi_dir;
+		FilePath pypath(pyrel);
+		
+		this->add("PYTHONPATH", pypath.path.c_str());
 	}
 	else if (script.fext == std::string(".pl"))
 	{

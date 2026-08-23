@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/16 18:40:20 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:26:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 07:28:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ public:
     std::string     fext;
     
     FilePath() {}
+    FilePath(std::string &str) { this->parse(str); }
+    ~FilePath() {}
+    
     void    parse(std::string & p);
     void    dump(void);
 };

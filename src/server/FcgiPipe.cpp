@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 16:10:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:17:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ FcgiPipe::~FcgiPipe()
 		}
 		if (this->rsrc)
 			this->rsrc->rem(this);
-
 	}
 	catch(const std::exception& e)
 	{
@@ -198,9 +197,9 @@ ssize_t	FcgiPipe::pollout(void)
 	{
 		rsrc->set_done(RSRC_DONE_IP);
 		this->mod_evt(-EPOLLOUT);
-#if RES_CGI_WAIT_COMPLETE
+// #if RES_CGI_WAIT_COMPLETE
 		this->mod_evt(EPOLLIN);
-#endif
+// #endif
 	}
 	
 	WSLOG(LVL_DBG, TGT_CGI_SEND, "send: ", rsrc->body.size());
@@ -263,7 +262,7 @@ ssize_t	FcgiPipe::pollin(void)
 	
 	if (fcgi.rsp_recv(this->ibuf, err) < 0)
 	{
-		WSLOG(LVL_ERR, TGT_FCGI, "parse failed");
+		WSLOG(LVL_ERR, TGT_FCGI_PARSE, "parse: failed");
 		return (-1);
 	}
 		
@@ -288,70 +287,38 @@ ssize_t	FcgiPipe::pollin(void)
 	return (err);
 }
 
-// client quit
-// epoll : evt tgt  : conn
-// epoll : evt fd   : [7]
-// epoll : evt typ  : in out rdhup err hup 
-// conn  : hup!
-// epoll : cli rem  : conn
-// epoll : cli del  : conn
-// conn  :  (~) Connection [7]
-// conn  : req cnt: [1]
-	// BUT : rsrc .. has ALREADY set 
-// rsrc  :  (~) ResourceFcgi -- deleted (!)
-// epc   :  (~) EpollClient
-// epoll : ecnt  : [1]
-// epoll : 
-// epoll : evt tgt  : fcgi
-// epoll : evt fd   : [8]
-// epoll : evt typ  : in rdhup 
-// fcgi  : recv:  POLLIN
-// fcgi  : recv
-// epc   : read: [0]
-// epc   : read:  ZERO
-// fcgi  : recv: [0]
-// fcgi  : recv:  ZERO
-// fcgi  : req : [0]
-// fcgi  : RDHUP
-// fcgi  : rdhup: resp.size() [4776824]
-// fcgi  : rdhup: error [0]
-// ./mak.sh: line 24: 2102233 Segmentation fault         (core dumped) ./test "$CONF" "$1"
-
 int		FcgiPipe::rdhup(void)
 {
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_FCGI, "RDHUP");
+	
 	if (this->rsrc == NULL)
 		return (-1);
-	if (this->conn == NULL)
-		return (-1);
-		
-	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done); 
-		
+	rsrc->set_done(RSRC_DONE_IP);
+	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
+
 	if (this->fcgi.req.size())
 	{
 		WSCOL(WSL_RED);
 		WSLOG(LVL_TMP, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
 		return (0);
 	}
-	// if (this->rsrc->error)
-	// 	return (-1);
+	
+	if (this->conn == NULL)
+		return (-1);
+	this->conn->mod_evt(EPOLLOUT);
+
+	if (rsrc->set_done(0) == -1)
+		return (-1);
+
 	if (this->rsrc->resp.size())
 	{
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
-		
-// connection close .. by client
-// rsrc->fcgi set to NULL
-// when pipe hangs up -- output is done .. 
-		// this->rsrc->rem(this); // infinite
-		if (this->conn)
-			this->conn->mod_evt(EPOLLOUT);
 		return (0);
 	}
-	if (this->conn)
-		this->conn->mod_evt(EPOLLOUT);
 	return (-1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 17:45:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 08:11:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,7 +222,7 @@ int FcgiConn::rsp_recv(char * buf, int siz)
     		rsp_data(chk, siz);
     		return (1);
 		}
-		WSLOG(LVL_DBG, TGT_FCGI, "parse: done");
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: done");
 		chk += rsp_data(chk, data.len);
 		chk += data.pad; // not 100% CERTAIN we have enough for this
 	}
@@ -232,7 +232,7 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 		// if ((end - chk) < 8)
 			// we're fucked
 
-		WSLOG(LVL_DBG, TGT_FCGI, "parse: rest ", end - chk);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: rest ", end - chk);
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
 
@@ -240,26 +240,26 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 
 		if (hed->head.type == FCGI_END_REQUEST)
 		{
-			WSLOG(LVL_DBG, TGT_FCGI, "parse: end ", end - chk);
-			WSLOG(LVL_DBG, TGT_FCGI, "parse: len ", data.len);
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
 			return (2);
 		}
 
-		WSLOG(LVL_DBG, TGT_FCGI, "parse: need ", data.siz);
-		WSLOG(LVL_DBG, TGT_FCGI, "parse: have ", end - chk);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: need ", data.siz);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: have ", end - chk);
 
 		if (data.siz <= (end - chk))
 		{
-			WSLOG(LVL_DBG, TGT_FCGI, "parse: full");
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: full");
 			chk += 8;
     		chk += rsp_data(chk, data.len);
     		chk += hed->head.paddingLength;
     		continue;
 		}
-		WSLOG(LVL_DBG, TGT_FCGI, "parse: partial");
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: partial");
 		chk += 8; // ATTN : 
 		chk += rsp_data(chk, (end - chk)); // negative (?)
     }
-	WSLOG(LVL_DBG, TGT_FCGI, "parse: complete");
+	WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: complete");
     return 0;
 }

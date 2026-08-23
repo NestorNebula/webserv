@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 16:06:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:21:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,10 @@ int	ResourceFcgi::status(void)
 		return (1);
 #endif
 	
-	if (this->wait(0) != -1) // exited
+	if (this->wait(0) != -1) // exited -- different for fcgi
 	// if (this->done == RSRC_DONE_IO)
 	{
+		// this->set_done(RSRC_DONE_IO);// much worse ... 
 		// this->wait(0);
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
@@ -63,35 +64,55 @@ int	ResourceFcgi::status(void)
 	// STILL RUNNING
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
-	this->fcgi->mod_evt(EPOLLIN);
+	if (this->fcgi)
+		this->fcgi->mod_evt(EPOLLIN);
 	return (RSP_WAIT_BODY); 
 }
 int	ResourceFcgi::wait(int opt)
 {
 	(void)opt;
 	if (this->done & RSRC_DONE_ERR)
+	{
+		WSLOG(LVL_TMP, TGT_FCGI, "wait:  (error)");
 		return (0);
-	if (this->done == RSRC_FLUSHING)
+	}
+	if (this->done & RSRC_FLUSHING)
+	{
+		// WSLOG(LVL_TMP, TGT_FCGI, "wait:  (flush)");
 		return (0);
+	}
+		// is this set properly .. 
 	if (this->done == RSRC_DONE_IO)
 	{
+		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
 #if RES_CGI_WAIT_COMPLETE
 		this->chk_rsp_len();
 #endif
-		this->done = RSRC_FLUSHING;
+		// this->done = RSRC_FLUSHING;
+		this->set_done(RSRC_FLUSHING);
 		return (0);
 	}
-	if (this->fcgi)
-		return (-1); // continue
-	return (0);
+	return (-1);
+	
+	// if (this->fcgi)
+	// 	return (-1); // continue
+		
+	// // who removed it .. without setting done (?)
+	// WSLOG(LVL_TMP, TGT_FCGI, "wait:  (null)");
+	// // this->done = RSRC_FLUSHING;
+	// this->set_done(RSRC_FLUSHING);
+	// return (0);
 }
+
 int	ResourceFcgi::rem(EpollClient *epc)
 {
 	int err = 0;
 
 	if (epc == this->fcgi)
 	{
-		// set_done()
+		// WSLOG(LVL_DBG, TGT_FCGI, "rem");
+		// WSLOG(LVL_DBG, TGT_FCGI, "done ", this->done);
+		this->set_done(RSRC_DONE_IO);
 		this->fcgi = NULL;
 		err = 3;
 	}
