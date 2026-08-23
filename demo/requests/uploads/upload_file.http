@@ -1,7 +1,0 @@
-POST /uploads/upload.txt HTTP/1.1
-Host: localhost
-Content-Length: 41
-
-Hello there!
-This is an uploaded file!
-
