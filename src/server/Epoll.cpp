@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:15:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:12:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,14 @@ void	Epoll::cleanup()
 	while (it != this->clients.end())
 	{
 		// this->del(*it);
-		delete (*it++);
+		try 
+		{	
+			delete (*it++);
+		}
+		catch(const std::exception& e)
+		{
+			WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
+		}
 	}
 	this->clients.clear();
 	

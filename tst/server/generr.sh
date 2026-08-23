@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cat << EOF
 <!doctype html>
 <html lang="en">
 
@@ -16,7 +19,12 @@
 	</header>
 	<main>
 		<section id="error-section">
-			<h1>404 Not Found</h1>
+EOF
+	echo -n "<h1>"
+	echo -n "$1 "
+	echo -n "$2"
+	echo "</h1>"
+cat << EOF
 		</section>
 	</main>
 	<footer>
@@ -29,3 +37,4 @@
 </body>
 
 </html>
+EOF
