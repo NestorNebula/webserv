@@ -7,20 +7,14 @@ tput reset
 # terminate called without an active exception
 
 
-C=250
+C=255
 R=4
 
 while getopts "c:r:" o; do
     case "${o}" in
-        c)
-            C=${OPTARG}
-            ;;
-        r)
-            R=${OPTARG}
-            ;;
-        *)
-            usage
-            ;;
+        c)	C=${OPTARG} ;;
+        r)	R=${OPTARG} ;;
+        *)	usage ;;
     esac
 done
 shift $((OPTIND-1))
@@ -153,7 +147,7 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-curl -X GET 'http://localhost:8082/ka.php?g1=QUERYSHIT' -i \
+curl -X GET 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

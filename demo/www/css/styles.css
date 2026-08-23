@@ -341,6 +341,7 @@ footer {
 }
 
 #error-section {
+	font-size: 2em;
 	color: var(--error-color);
 	letter-spacing: 0.1rem;
 }
