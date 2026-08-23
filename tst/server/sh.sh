@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=8
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -19,6 +19,12 @@ if [[ "$1" =~ "s" ]]; then
 	siege -f urls/staging-urls.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
+
+if [[ "$1" =~ "b" ]]; then
+	siege -f urls/big.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
 
 if [[ "$1" =~ "h" ]]; then
 	siege -f urls/html.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b

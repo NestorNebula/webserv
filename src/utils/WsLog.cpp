@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:17:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 17:24:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,6 +313,7 @@ void    WsLog::nh(void)
 void    WsLog::kd(void)
 {
     WsLog::lvl = LVL_NONE
+        | LVL_MAIN
         | LVL_ERR
         | LVL_WARN
         | LVL_INFO
