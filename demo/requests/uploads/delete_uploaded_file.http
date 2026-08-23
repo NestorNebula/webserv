@@ -1,3 +1,0 @@
-DELETE /uploads/upload.txt HTTP/1.1
-Host: localhost
-
