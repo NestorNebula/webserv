@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/16 18:40:20 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 07:28:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 15:28:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 # include <iostream>
 # include <string>
 # include <deque>
-
 
 bool         setWorkingDirectory(const std::string &path, std::string &cwd);
 std::string  getConfigFileName(const std::string &path);

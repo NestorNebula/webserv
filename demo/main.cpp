@@ -20,7 +20,8 @@ int main(int argc, char *argv[], char **envp) {
     std::cerr << "couldn't setup working directory.\n";
     return 0;
   }
-  ConfigParser parser;
+  std::string cf;
+  ConfigParser parser(cf);
   try {
 	  parser.parseFile(getConfigFileName(argv[1]));
   } catch (std::exception &e) {

@@ -2,12 +2,7 @@
 
 tput reset
 
-# error : Connection reset by peer
-# pure virtual method called
-# terminate called without an active exception
-
-
-C=255
+C=250
 R=4
 
 while getopts "c:r:" o; do
@@ -110,10 +105,10 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	# FILES+="Kanan.mp3 "
-	# FILES+="tiny.jpg "
+	FILES+="tiny.jpg "
 	# FILES+="mid.jpg "
 	# FILES+="earth.jpg "
-	FILES+="e4.jpg "
+	# FILES+="e4.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
