@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:15:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 12:15:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,13 +204,13 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)
-		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
+		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
 
 	int cgifd_op = dup(pipes->p2[0]);
 	if (cgifd_op < 0)
 	{
 		close(cgifd_ip);
-		return WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)");
+		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
 	}	
 	
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
