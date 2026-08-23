@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 11:34:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:34:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,7 +362,7 @@ void Session::handleUpload() {
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
-// #kd
+// #kd - STREAM_READ_SIZ
     char buf[STREAM_READ_SIZ];
     while (bodyStream->read(buf, STREAM_READ_SIZ))
       ofs.write(buf, bodyStream->gcount());

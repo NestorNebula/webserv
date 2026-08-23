@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 11:40:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:35:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ public:
   // Number of characters that are still to be consumed from the body
   Stream::streamsize availableBody() const;
   void clear();
-// #kd
-  int get_state(void) { return this->_state; }
 private:
   Request(const Request &);
   Request &operator=(const Request &);
