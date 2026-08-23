@@ -9,6 +9,7 @@ CPPFLAGS = -I../inc \
 		   -I../inc/resources \
 		   -I../inc/streams \
 		   -I../inc/utils \
+		   -I../inc/server
 
 RM = rm -rf
 MKDIR = mkdir -p
@@ -19,6 +20,7 @@ SRC_DIR = ../src
 
 SRC = $(SRC_DIR)/http/Headers.cpp \
 	  $(SRC_DIR)/utils/helpers.cpp \
+	  $(SRC_DIR)/utils/FilePath.cpp \
 	  $(SRC_DIR)/http/Request.cpp \
 	  $(SRC_DIR)/http/Response.cpp \
 	  $(SRC_DIR)/resources/StaticResource.cpp \
@@ -28,6 +30,7 @@ SRC = $(SRC_DIR)/http/Headers.cpp \
 	  $(SRC_DIR)/streams/TemporaryFileStream.cpp \
 	  $(SRC_DIR)/utils/http_utils.cpp \
 	  $(SRC_DIR)/utils/WsLog.cpp \
+	  $(SRC_DIR)/utils/libft.cpp \
 	  $(SRC_DIR)/http/Session.cpp \
 	  $(SRC_DIR)/parsing/ConfigParser.cpp \
 	  $(SRC_DIR)/parsing/ParseBlocks.cpp \
@@ -41,6 +44,12 @@ SRC = $(SRC_DIR)/http/Headers.cpp \
 	  $(SRC_DIR)/server/EpollClient.cpp \
 	  $(SRC_DIR)/server/Server.cpp \
 	  $(SRC_DIR)/server/Socket.cpp \
+		$(SRC_DIR)/server/ResourceCgi.cpp \
+		$(SRC_DIR)/server/ResourcePiped.cpp \
+		$(SRC_DIR)/server/ResourceFcgi.cpp \
+		$(SRC_DIR)/server/FcgiMsg.cpp \
+		$(SRC_DIR)/server/FcgiConn.cpp \
+		$(SRC_DIR)/server/FcgiPipe.cpp 
 
 DEMO_SRC = main.cpp
 

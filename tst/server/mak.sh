@@ -1,6 +1,9 @@
 #!/bin/bash
 
 tput reset
+
+cd ../..
+
 if [[ "$1" =~ "r" ]]; then
 	make fclean
 fi
@@ -15,12 +18,12 @@ if [[ "$1" =~ "x" ]]; then
 	exit 0
 fi
 
-CONF=../../demo/config.conf
+CONF=demo/config.conf
 tput reset
 if [[ "$1" =~ "v" ]]; then
-	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./test "$CONF" 0
+	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./webserv "$CONF" 0
 elif [[ "$1" =~ "g" ]]; then
-	gdb --args ./test "$CONF" 0
+	gdb --args ./webserv "$CONF" 0
 else
 	ARG=
 	if [[ "$1" =~ "0" ]]; then
@@ -31,5 +34,5 @@ else
 		ARG=a
 	fi
 
-	./test "$CONF" $ARG
+	./webserv "$CONF" $ARG
 fi
