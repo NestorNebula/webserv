@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 16:05:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:27:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,6 @@
 # include "WsLog.hpp"
 # include "SizeDefs.hpp"
 
-# ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 60
-# endif
-
-# ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 1
-# endif
 
 typedef enum
 {

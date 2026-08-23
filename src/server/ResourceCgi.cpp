@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:34:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:26:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,8 @@ void	ResourceCgi::chk_rsp_len(void)
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
-		// consider adding keep-alive
+			// consider adding keep-alive
+		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 		return;
 	}
 	size_t	pos = resp.find("\r\n\r\n");
@@ -132,6 +133,9 @@ void	ResourceCgi::chk_rsp_len(void)
 	size_t clen = (resp.size() - pos - 4);
 
 	clen_str = std::string("\r\nContent-Length:") + num_2_str(clen);
+		// consider adding keep-alive
+	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
+	
 	resp.insert(pos, clen_str);
 }
 
@@ -148,7 +152,8 @@ int	ResourceCgi::set_done(int d)
 	this->done |= d;
 	if (this->done & RSRC_DONE_ERR)
 		return (-1);
-	if (this->done == RSRC_DONE_IO)
+	// if (this->done == RSRC_DONE_IO) // FLUSHING (!)
+	if ((this->done & RSRC_DONE_IO) == RSRC_DONE_IO)
 		return (-1);
 	return (0);
 }
