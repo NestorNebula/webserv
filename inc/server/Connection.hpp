@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 17:20:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/22 12:32:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,28 +25,16 @@
 # include "EpollClient.hpp"
 # include "CgiEnv.hpp"
 
-# include "bridge.hpp"
-
 # include "Session.hpp"
 
 class Server;
 class CgiPipe;
 class ResourceCgi;
 
-# ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 10
-# endif
-
-# ifndef BUILD_DEMO
-#  define BUILD_DEMO 0
-# endif
-
 class Connection : public EpollClient
 {
 private:
-// DEMO
-	Connection				(const Connection & that); // : EpollClient(that), 
-		// sess(that.serv.get_conf()), serv(that.serv), req_cnt(0) {}
+	Connection				(const Connection & that);
 	Connection & operator = (const Connection & ) 
 		{ return (*this); }
 		
@@ -60,19 +48,13 @@ public:
 	int				hup    (void);
 	bool			timeo  (time_t now);
 	
-	void			set_err(int e);
+	int				set_err(int e);
 	
 	void			set_addr(struct sockaddr_in *a);
 	std::string		&get_addr(void);
 	
-// WEBSERV / SESSION
-#if 1 // BUILD_DEMO
 	Session			sess;
-#else
-	br_Session		sess;
-#endif
 	Server			&serv;
-	int				req_body_status(void);
 	
 	void			cgi_rem(EpollClient *epc);
 	
@@ -81,9 +63,6 @@ private:
 	
 	ResourceCgi			*res_cgi;
 	int					exec_cgi(void);
-	
-	int					send_error(void);
-	std::string			estr;
 	
 	struct sockaddr_in	addr;
 	std::string			astr;

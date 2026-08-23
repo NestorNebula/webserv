@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 10:59:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:18:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,10 @@
 # include <vector>
 # include <sstream>
 
-# include "bridge.hpp"
+# include <libft.hpp>
 
-// Utils.hpp
-template <typename T>
-std::string num_2_str(T value)
-{
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
+# include "FilePath.hpp"
+# include "Session.hpp"
 
 class Connection;
 
@@ -62,9 +56,8 @@ private:
 	std::vector<std::string>			data;
 	const char							**res;
 	
+	Session::CgiInfo					info;
 	std::string							exec;
-	std::string							file;
-	std::string							path;
+	FilePath							script;
 };
-
 #endif

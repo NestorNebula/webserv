@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:49:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 12:24:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@
 
 int FcgiConn::uid = 1;
 
-int FcgiConn::make_sock(const char *sock_path)
+int FcgiConn::make_sock(std::string &sock_path)
 {
 	struct sockaddr_un fpm;
 	fpm.sun_family = AF_UNIX;
-	strcpy(fpm.sun_path, sock_path);
+	ft_memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -34,7 +34,7 @@ int FcgiConn::make_sock(const char *sock_path)
     if (err < 0)
 	{
 		close(fd);
-		WsLog::_(LVL_DBG, TGT_FCGI, "connect");
+		WSLOG(LVL_DBG, TGT_FCGI, "connect");
 		return (err);
 	}
     return (fd);
@@ -122,26 +122,20 @@ int FcgiConn::req_init(CgiEnv * env)
 	char proto[] = "HTTP/1.1";
 	msg.add_param("SERVER_PROTOCOL", proto);
 
-	// validate
-
-	// REQUEST_URI : how did HttpServer build it 
-	// DOCUMENT_ROOT
-
 	std::map<std::string, std::string>::iterator kvit = env->kv.begin();
 	while (kvit != env->kv.end())
 	{
-
 		// char * tok = strtok(req->cook, "; ");
 		// while( tok != NULL )
 		// {
-			// WsLog::_(LVL_DBG, TGT_FCGI, "cookie: ", tok);
+			// WSLOG(LVL_DBG, TGT_FCGI, "cookie: ", tok);
 		// 	msg.add_param("HTTP_COOKIE", tok);
 		// 	tok = strtok(NULL, "; ");
 		// }
 		// msg.add_param("HTTP_COOKIE", req->cook);
 
-		// WsLog::_(LVL_DBG, TGT_FCGI, "pkey:  ", (kvit->first).c_str());
-		// WsLog::_(LVL_DBG, TGT_FCGI, "pval:  ", (kvit->second).c_str());
+		// WSLOG(LVL_DBG, TGT_FCGI, "pkey:  ", (kvit->first).c_str());
+		// WSLOG(LVL_DBG, TGT_FCGI, "pval:  ", (kvit->second).c_str());
 		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
 		kvit++;
 	}
@@ -152,11 +146,11 @@ int FcgiConn::req_init(CgiEnv * env)
 	return (0);
 }
 
-void FcgiConn::req_body(char *buf, int siz)
+void FcgiConn::req_body(const char *buf, int siz)
 {
 	FcgiMsg		body;
 	
-	if (buf)
+	if (buf && siz)
 		body.add_stdin(buf, siz);
 	else
 		body.end_stdin();
@@ -164,38 +158,34 @@ void FcgiConn::req_body(char *buf, int siz)
 	req.append(body.buf.text(), body.buf.size());
 }
 
+void FcgiConn::req_body(std::string & buf)
+{
+	this->req_body(buf.c_str(), buf.size());
+	buf.clear();
+}
+
 
 // A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
-
-/*
-The start line of an HTTP response, called the status line, contains the following information:
-
-    The protocol version, usually HTTP/1.1.
-
-    A status code, indicating success or failure of the request. Common status codes are 200, 404, or 302
-
-    A status text. A brief, purely informational, textual description of the status code to help a human understand the HTTP message.
-*/
 
 int FcgiConn::rsp_data(char * buf, int cnt)
 {
 	switch(data.typ)
 	{
 	case FCGI_STDERR:
-		WsLog::color(WSL_YELLOW);
-		WsLog::_(LVL_DBG, TGT_FCGI, "push data : error");
-		WsLog::_(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : error");
+		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
 		break;
 	case FCGI_END_REQUEST:
-		WsLog::_(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
-		WsLog::_(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);
 		// should have (8) bytes of FCGI_EndRequestBody
 		break;
 	case FCGI_STDOUT:
 		rsp.append(buf, cnt);
 		break;
 	default:
-		WsLog::_(LVL_DBG, TGT_FCGI, "push data : default ", data.typ);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : default ", data.typ);
 		break;
 	}
 	data.len -= cnt;
@@ -208,7 +198,7 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 	char * chk = buf;
 	char * end = buf + siz;
 
-	WsLog::_(LVL_DBG, TGT_FCGI, "recv: ", siz);
+	WSLOG(LVL_DBG, TGT_FCGI, "recv: ", siz);
 	if (data.len)
 	{
 		if (data.len > siz)
@@ -216,17 +206,15 @@ int FcgiConn::rsp_recv(char * buf, int siz)
     		rsp_data(chk, siz);
     		return (1);
 		}
-		WsLog::_(LVL_DBG, TGT_FCGI, "parse: done");
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: done");
 		chk += rsp_data(chk, data.len);
-		chk += data.pad; // not 100% CERTAIN we have enough for this
+		chk += data.pad;
 	}
 
 	while (data.len == 0 && chk < end)
 	{
-		// if ((end - chk) < 8)
-			// we're fucked
-
-		WsLog::_(LVL_DBG, TGT_FCGI, "parse: rest ", end - chk);
+		// if ((end - chk) < 8) {}
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: rest ", end - chk);
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
 
@@ -234,26 +222,26 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 
 		if (hed->head.type == FCGI_END_REQUEST)
 		{
-			WsLog::_(LVL_DBG, TGT_FCGI, "parse: end ", end - chk);
-			WsLog::_(LVL_DBG, TGT_FCGI, "parse: len ", data.len);
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
 			return (2);
 		}
 
-		WsLog::_(LVL_DBG, TGT_FCGI, "parse: need ", data.siz);
-		WsLog::_(LVL_DBG, TGT_FCGI, "parse: have ", end - chk);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: need ", data.siz);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: have ", end - chk);
 
 		if (data.siz <= (end - chk))
 		{
-			WsLog::_(LVL_DBG, TGT_FCGI, "parse: full");
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: full");
 			chk += 8;
     		chk += rsp_data(chk, data.len);
     		chk += hed->head.paddingLength;
     		continue;
 		}
-		WsLog::_(LVL_DBG, TGT_FCGI, "parse: partial");
-		chk += 8; // ATTN : 
-		chk += rsp_data(chk, (end - chk)); // negative (?)
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: partial");
+		chk += 8; // ATTN : (chk > end)
+		chk += rsp_data(chk, (end - chk));
     }
-	WsLog::_(LVL_DBG, TGT_FCGI, "parse: complete");
+	WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: complete");
     return 0;
 }

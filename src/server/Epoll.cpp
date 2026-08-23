@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 21:00:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:12:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ static void sigint_handler(int signo)
 {
     (void)signo;
 	
-	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGINT");
+	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+	WSLOG(LVL_ERR, TGT_EPOLL, "SIGINT");
 
     stop = 1;
 }
@@ -33,8 +33,8 @@ static void sigint_handler(int signo)
 // {
 //     (void)signo;
 	
-// 	WsLog::_(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-// 	WsLog::_(LVL_ERR, TGT_EPOLL, "SIGPIPE");
+// 	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+// 	WSLOG(LVL_ERR, TGT_EPOLL, "SIGPIPE");
 // }
 
 static const char *evt_name[] =
@@ -84,34 +84,24 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 
 Epoll::~Epoll()
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL, " (~) Epoll");
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll");
 	this->cleanup();
 };
 
-#if 0
-void	Epoll::dupx(void)
-{
-	std::set<EpollClient*>::iterator it = this->clients.begin();
-	while (it != this->clients.end())
-	{
-		int cfd = (*it)->get_fd();
-		// close(cfd);
-		// // int d = 
-		dup(cfd);
-		// close(cfd);
-		this->del(*it); // necessary (?)
-		it++;
-
-	}
-}
-#endif
 void	Epoll::cleanup()
 {
 	std::set<EpollClient*>::iterator it = this->clients.begin();
 	while (it != this->clients.end())
 	{
-		// this->del(*it); // necessary (?)
-		delete (*it++);
+		// this->del(*it);
+		try 
+		{	
+			delete (*it++);
+		}
+		catch(const std::exception& e)
+		{
+			WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
+		}
 	}
 	this->clients.clear();
 	
@@ -130,18 +120,18 @@ int	Epoll::add(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "add fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
-		// return (this->mod(cli));
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : already exists");
+		return (this->mod(cli));
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
@@ -161,24 +151,24 @@ int	Epoll::mod(EpollClient *cli)
 {
 	if (cli->get_evt()->data.ptr == NULL)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
 		return (-1);
 	}
 	
 	int	err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod evt  : ", evt_type(cli->get_evt()->events));
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!this->has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
-		// return (this->add(cli));
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : does not exist");
+		return (this->add(cli));
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_MOD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
 		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
 	}
 	return (err);
@@ -188,11 +178,11 @@ int	Epoll::del(EpollClient *cli)
 {
 	int err;
 
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli del  : ", cli->typ_str());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "del fd   : ", cli->get_fd()); // DBG_EPC_FD
 	if (!has_client(cli))
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli del  : does not exist");
 		return (0);
 	}
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
@@ -206,7 +196,7 @@ int	Epoll::del(EpollClient *cli)
 
 int	Epoll::rem(EpollClient *cli)
 {
-	WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
+	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli rem  : ", cli->typ_str());
 	std::set<EpollClient*>::iterator it = this->clients.find(cli);
 	if (it != this->clients.end())
 	{
@@ -216,9 +206,9 @@ int	Epoll::rem(EpollClient *cli)
 	}
 	else
 	{
-		WsLog::_(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
+		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli rem  : does not exist");
 	}
-	// WsLog::_(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "clients  : ", this->clients.size());
 	return (0);
 }
 
@@ -255,7 +245,7 @@ int	Epoll::exec(void)
 		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
 	if (this->ecnt == 0)
 		return (this->ecnt);
-	WsLog::_(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
+	WSLOG(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);
 	return (this->ecnt);
 }
 
@@ -273,7 +263,7 @@ void	Epoll::check_timeo(void)
 	{
 		if ((*it)->timeo(n))
 		{
-			WsLog::_(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			// WSLOG(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
 		}
 		it++;
 	}
@@ -295,29 +285,35 @@ int	Epoll::loop(void)
 			evt = this->get_evt(k);
 			if (evt == NULL)
 			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
+				WSLOG(LVL_WARN, TGT_EPOLL_EVT, "evt NULL");
 				continue;
 			}
 			epc = this->get_epc(evt->data.ptr);
 			if (epc == NULL)
 			{
-				WsLog::_(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
+				WSLOG(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
 			
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "");
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
-			WsLog::_(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "");
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
+			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
 			
 			try
 			{
 				if (epc->event(evt) < 0)
 					this->rem(epc);
 			}
+			catch(const std::logic_error& e)
+			{
+				WSLOG(LVL_DBG, TGT_EPOLL, "ex: loop\n", e.what());
+				this->rem(epc);
+			}
 			catch(const std::exception& e)
 			{
-				std::cerr << e.what() << '\n';
+				WSLOG(LVL_DBG, TGT_EPOLL, "ex: loop\n", e.what());
+				this->rem(epc);
 			}
         }
 		this->check_timeo();	
@@ -340,7 +336,29 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 		catch (const std::exception& e)
 		{
 			std::cerr << e.what() << '\n';
+			return (0);
 		}
 	}
 	return (err);
 }
+
+
+
+
+// It is not currently possible to reliably delete epoll items when using the same epoll set from multiple threads. After calling epoll_ctl with EPOLL_CTL_DEL, another thread might still be executing code related to an event for that epoll item (in response to epoll_wait). Therefore the deleting thread does not know when it is safe to delete resources pertaining to the associated epoll item because another thread might be using those resources. 
+
+// HM : do not delete ..CgiPipe .. until .. we are sure (cgi) is complete (?)
+// so .. keep them in the epoll .. but .. disabled
+
+// the reading application would be tied up for a long period; 
+// meanwhile, it does not service I/O events on the other file descriptors—those descriptors are starved of service by the application. 
+
+// The solution to file descriptor starvation is for the application to maintain a user-space data structure that caches the readiness of each of the file descriptors that it is monitoring. 
+
+// so .. cache as (READY) .. until .. recv/send ZERO ...
+
+// EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
+
+// A defunct or "zombie" process in Linux occurs when a child process finishes running via fork(), but its parent process does not read its exit status using a wait() system call. The process remains in the table holding its PID until reaped.
+
+
