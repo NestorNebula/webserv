@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 14:16:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:45:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,6 +331,7 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 		catch (const std::exception& e)
 		{
 			std::cerr << e.what() << '\n';
+			return (0);
 		}
 	}
 	return (err);

@@ -106,17 +106,20 @@ fi
 
 if [ "$1" == "u" ]; then
 
-	rm -f www/php/upload*
-	rm -f www/pl/upload*
-	rm -f www/py/upload*
+	WWW=../../www/kd
+	rm -f $WWW/php/upload*
+	rm -f $WWW/pl/upload*
+	rm -f $WWW/py/upload*
+	rm -f $WWW/uploads/*
 
-	ls -l www/p*
+	ls -l $WWW/p*
 
 	FILES=
-	FILES+="Kanan.mp3 "
-	FILES+="tiny.jpg "
-	FILES+="mid.jpg "
-	FILES+="earth.jpg "
+	# FILES+="Kanan.mp3 "
+	# FILES+="tiny.jpg "
+	# FILES+="mid.jpg "
+	# FILES+="earth.jpg "
+	FILES+="e4.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -127,11 +130,20 @@ if [ "$1" == "u" ]; then
 		# 	-F file=@www/files/$FILE
 		# echo ; echo ; echo
 		curl -X POST http://localhost:8082/py/ul.py -i \
-			-F file=@www/files/$FILE
+			-F file=@$WWW/files/$FILE
+
+
+		# curl -X POST http://localhost:8082/uploads/FILE -i \
+		# 	-F file=@$WWW/files/$FILE
+
+		curl -X POST http://localhost:8082/uploads/$FILE -i \
+			-H "Content-Type:application/octet-stream" \
+			--data-binary @$WWW/files/$FILE
 		echo ; echo ; echo
 	done
 
-	ls -l www/p*
+	ls -l $WWW/p*
+	ls -l $WWW/uploads
 
 	exit 0
 fi

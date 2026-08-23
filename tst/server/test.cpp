@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 15:40:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:43:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,12 @@ int main (int argc, char ** argv, char **envp)
     std::string conf_root;
     if (env_pwd(envp, conf_root))
     {
-        WSLOG(LVL_INFO, TGT_MAIN, "couldn't detect working directory");
+        WSLOG(LVL_ERR, TGT_MAIN, "couldn't detect working directory");
         return (0);
     }
     if (!setWorkingDirectory(argv[1], conf_root)) 
     {
-        WSLOG(LVL_INFO, TGT_MAIN, "couldn't setup working directory");
+        WSLOG(LVL_ERR, TGT_MAIN, "couldn't setup working directory");
         return 0;
     }
     
@@ -67,7 +67,7 @@ int main (int argc, char ** argv, char **envp)
     } 
     catch (std::exception &e) 
     {
-        WSLOG(LVL_INFO, TGT_MAIN, "ex: main\n", e.what());
+        WSLOG(LVL_ERR, TGT_MAIN, "ex: main\n", e.what());
         return 0;
     }
 
@@ -83,11 +83,11 @@ int main (int argc, char ** argv, char **envp)
         err = ep->serve(servers);
         if (err)
           err = ep->loop();
-        WSLOG(LVL_INFO, TGT_MAIN, "exit: ", err);
+        WSLOG(LVL_ERR, TGT_MAIN, "exit: ", err);
     }
     catch(const std::exception& e)
     {
-        WSLOG(LVL_INFO, TGT_MAIN, "ex: main\n", e.what());
+        WSLOG(LVL_ERR, TGT_MAIN, "ex: main\n", e.what());
     }
 
     delete (ep);

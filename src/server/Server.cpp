@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 12:15:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 09:41:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	// fcgi_sock = git_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
 
 	// pycgi = git_root + std::string("pycgi/");
-
-	
 };
 
 Server::~Server()
