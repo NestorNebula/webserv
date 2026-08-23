@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 09:41:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 12:16:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,13 +85,16 @@ ssize_t	Server::pollin(void)
 
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
-		return (WsLog::_errno(LVL_DBG, TGT_SERV, "accept"));
-		
+	{
+		WsLog::_errno(LVL_DBG, TGT_SERV, "accept");
+		return (0);
+	}	
 	err = sock_non_block(conn_fd);
 	if (err < 0)
 	{
 		close(conn_fd);
-		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
+		WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block");
+		return (0);
 	}
 	
 	Connection *c = new Connection(this->ep, conn_fd, *this);
@@ -100,7 +103,7 @@ ssize_t	Server::pollin(void)
 	if (err < 0)
 	{
 		delete (c);
-		return (err);
+		return (0);
 	}
 	c->set_addr(&conn_addr);
 

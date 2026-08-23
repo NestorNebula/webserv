@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:50:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 12:16:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -365,8 +365,10 @@ int	Connection::exec_cgi(void)
 	cgi_pipes	pipes;
 
 	if (pipes.init() < 0)
+	{
+		delete (cgienv);
 		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
-
+	}
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -394,7 +396,13 @@ int	Connection::exec_cgi(void)
 			// WSLOG(LVL_DBG, TGT_CGI, "cwd : ", cwd);
 			err = chdir(cwd.c_str());
 			if (err < 0)
-				return (WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir"));
+			{
+				WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir");
+				pipes.shutdown();
+				delete (cgienv);
+				delete (this->ep);
+				exit(1);				
+			}
 		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
 		
