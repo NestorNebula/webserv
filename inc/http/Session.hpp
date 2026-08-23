@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 11:59:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:35:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
-// #kd
+// #kd - SizeDefs.hpp
 #include "SizeDefs.hpp"
 
 class Session {
@@ -113,10 +113,10 @@ private:
 
   Stream::streamsize _sent;
   
-// #kd
+// #kd - Session::resp 
   std::string resp;
 public:
-// #kd
+// #kd - Session::resp 
   std::string &get_resp(void)
   {
     if (resp.size())
@@ -127,7 +127,7 @@ public:
       resp.append(buf, err);
     return (resp);
   }
-// #kd
+// #kd - log_next
   void  log_next(void)
   {
     WSCOL(WSL_YELLOW);

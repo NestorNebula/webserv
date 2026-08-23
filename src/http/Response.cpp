@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 12:42:35 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 11:32:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:34:50 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 }
 
 bool Response::isReady() const {
-// #kd
+// #kd - added brackets for NOLOG
   if (_version.empty())
   {
     WSLOG(LVL_ERR, TGT_RESP, "ready: version empty");
