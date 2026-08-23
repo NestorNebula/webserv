@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:34 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 19:54:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:18:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,27 +45,25 @@ public:
 class Connection;
 class ResourcePiped;
 
-# ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 10
-# endif
-
 class CgiPipe : public EpollClient
 {
 private:
-	CgiPipe				(const CgiPipe & that) : EpollClient(that), 
-		conn(that.conn) {};
+	CgiPipe				(const CgiPipe & that) : 
+		EpollClient(that), 
+		conn(that.conn) 
+		{};
 	CgiPipe & operator=	(const CgiPipe & ) { return (*this); }
 public:
 	CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc);
 	~CgiPipe();
 	
-	ssize_t		pollin (void);
-	ssize_t		pollout(void);
-	int			rdhup  (void);
-	int			hup    (void);
-	bool		timeo  (time_t);
+	ssize_t			pollin (void);
+	ssize_t			pollout(void);
+	int				rdhup  (void);
+	int				hup    (void);
+	bool			timeo  (time_t);
 
-	void		rsrc_closed(void);
+	void			rsrc_closed(void);
 
 private:
 	Connection		*conn;

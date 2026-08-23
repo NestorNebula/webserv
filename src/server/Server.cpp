@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/14 18:46:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 14:30:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,12 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	this->addr.sin_port			= htons(this->port);
 	if (this->init() < 0)
 		throw (std::runtime_error("Server : construct failed"));
-
-// WEBSERV -- CONFIG_PARSER
-	proj_root = std::string("/home/kdonlon/Documents/Projects/webserv/git/");
-	fcgi_sock = proj_root + std::string("tst/server/FCGI/.php-fpm/SOCK");
-	pycgi = proj_root + std::string("pycgi/");
 };
 
 Server::~Server()
 {
-	WsLog::_(LVL_DBG, TGT_SERV, " (~) Server");
-	WsLog::_(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
+	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
+	WSLOG(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
 };
 
 int Server::init(void)
@@ -44,7 +39,7 @@ int Server::init(void)
 
 	if (this->port == 0)
 	{
-		WsLog::_(LVL_ERR, TGT_SERV, "bad port");
+		WSLOG(LVL_ERR, TGT_SERV, "bad port");
 		return (-1);
 	}
 	
@@ -71,7 +66,7 @@ int Server::init(void)
 
 	err = this->ini_evt(EPOLLIN);
 
-	WsLog::_(LVL_INFO, TGT_SERV, "listening on port: ", this->port);
+	WSLOG(LVL_INFO, TGT_SERV, "listening on port: ", this->port);
 	return (err);
 }
 
@@ -84,13 +79,16 @@ ssize_t	Server::pollin(void)
 
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
-		return (WsLog::_errno(LVL_DBG, TGT_SERV, "accept"));
-		
+	{
+		WsLog::_errno(LVL_DBG, TGT_SERV, "accept");
+		return (0);
+	}	
 	err = sock_non_block(conn_fd);
 	if (err < 0)
 	{
 		close(conn_fd);
-		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
+		WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block");
+		return (0);
 	}
 	
 	Connection *c = new Connection(this->ep, conn_fd, *this);
@@ -99,7 +97,7 @@ ssize_t	Server::pollin(void)
 	if (err < 0)
 	{
 		delete (c);
-		return (err);
+		return (0);
 	}
 	c->set_addr(&conn_addr);
 

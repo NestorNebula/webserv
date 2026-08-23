@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 15:53:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:19:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,21 +19,8 @@
 # include <string>
 # include <vector>
 # include "WsLog.hpp"
+# include "SizeDefs.hpp"
 
-
-// The default connection timeout of Apache httpd 1.3 and 2.0 is as little as 15 seconds[6][7] and just 5 seconds for Apache httpd 2.2 and above.
-
-// HTTP 1.1 introduced a chunked transfer coding that defines a last-chunk bit.[13] The last-chunk bit is set at the end of each response so that the client knows where the next response begins.
-
-// MUST BE : > (8) for FCGI	
-
-# ifndef EPC_BUF_SIZ
-#  define EPC_BUF_SIZ (4096)
-# endif
-
-# ifndef EPC_OUT_SIZ
-#  define EPC_OUT_SIZ (4096)
-# endif
 
 typedef enum
 {

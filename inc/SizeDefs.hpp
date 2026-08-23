@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 11:34:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 15:23:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,5 +40,17 @@
 
 
 
+# ifndef CONN_TIMEOUT
+#  define CONN_TIMEOUT 60
+# endif
+
+# ifndef CGI_TIMEOUT
+#  define CGI_TIMEOUT 60
+# endif
+
+
+# ifndef RES_CGI_WAIT_COMPLETE
+#  define RES_CGI_WAIT_COMPLETE 0
+# endif
 
 #endif

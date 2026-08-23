@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:27:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:52:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,35 +31,31 @@
 # include "Socket.hpp"
 # include "EpollClient.hpp"
 
-#if 0
-void find_pad(unsigned short len)
-{
-	unsigned short up8 = (len + 7) & ~(7);
-	fprintf(stderr, "%i + (%i / %i) = %i\n", len, (up8 - len), 8 - (len & 0x7), up8);
-}
-#endif
-
-
 class FcgiConn
 {
+private:
+	FcgiConn			  (const FcgiConn & );
+	FcgiConn & operator = (const FcgiConn & ) { return (*this); }
+
 public:
-	static int		make_sock(const char * sock_path);
+	FcgiConn() {}
+	~FcgiConn() {}
+	
+	static int		make_sock(std::string & sock_path);
 	
 	FcgiMsgData		data; 
 	std::string		req;
 	std::string		rsp;
 
-	FcgiConn() {}
-	~FcgiConn() {}
 
 	int				req_init(CgiEnv *env);
-	void			req_body(char *buf, int siz);
-	
-	int				rsp_recv(char * buf, int siz);
+	void			req_body(const char *buf, int siz);
+	void			req_body(std::string & buf);
+	int				rsp_recv(char *buf, int siz);
 
 private:
 	static int		uid;
-	int				rsp_data(char * buf, int cnt);
+	int				rsp_data(char *buf, int cnt);
 
 };
 
