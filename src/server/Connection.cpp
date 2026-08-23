@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 16:08:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 17:22:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ ssize_t	Connection::pollout(void)
 		
 		if (err < 0)
 		{
-			WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 			return (err);
 		}
 		if (err == 0)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 14:30:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 17:23:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int Server::init(void)
 
 	err = this->ini_evt(EPOLLIN);
 
-	WSLOG(LVL_INFO, TGT_SERV, "listening on port: ", this->port);
+	WsLog::_(LVL_MAIN, TGT_SERV, "listening on port: ", this->port);
 	return (err);
 }
 

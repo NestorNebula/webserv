@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test.cpp                                           :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 09:43:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 17:23:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ int main (int argc, char ** argv, char **envp)
         switch(argv[2][0])
         {
         case '0':
-           WsLog::tgt = TGT_NONE;
+           WsLog::lvl = LVL_MAIN;
+           WsLog::tgt = TGT_ALL;
            break;
         case 'k':
            WsLog::tgt = TGT_KD;
