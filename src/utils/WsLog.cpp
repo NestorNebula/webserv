@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 08:01:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:17:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,23 +351,27 @@ void    WsLog::kd(void)
         | TGT_RSRC_STAT
         // | TGT_RSRC_WAIT
     ;
-    
-    // WsLog::tgt = TGT_KD;
-    // TGT_FCGI;
-    // WsLog::tgt = TGT_EPOLL_EVT | TGT_CONN;
-    //  | TGT_RSRC_STAT | TGT_RSRC_WAIT;
-
-    // WsLog::lvl = LVL_INFO;
-    // WsLog::tgt = TGT_ALL;
 }
 
-// Lots of writes to stderr can confuse socket communication by causing I/O blocking, buffer saturation, and timing disruptions in the application event loop. When a program spams error logs, it starves network tasks of CPU time and resources.
+// Lots of writes to stderr can confuse socket communication by causing 
+// I/O blocking, buffer saturation, and timing disruptions in the application event loop. 
+// When a program spams error logs, it starves network tasks of CPU time and resources.
 
-// While the CPU waits for stderr to clear, it cannot read from or write to the network socket
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket
 
 
-// Why Logging Interferes with SocketsBlocking I/O: Writing to stderr often blocks execution if the destination stream (like a terminal or a slow log file) cannot process data instantly. While the CPU waits for stderr to clear, it cannot read from or write to the network socket.
+// Why Logging Interferes with SocketsBlocking I/O: 
+// Writing to stderr often blocks execution 
+// if the destination stream (like a terminal or a slow log file) cannot process data instantly. 
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket.
 
-// Buffer Backpressure: If stderr fills up operating system pipes, the process pauses. This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
+// Buffer Backpressure: 
+// If stderr fills up operating system pipes, the process pauses. 
+// This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
 
-// Event Loop Starvation: In single-threaded event loops (like Node.js or Python asyncio), synchronous or heavy logging operations monopolize the thread. The application fails to poll socket descriptors, delaying packet reads and handshakes.
+// Event Loop Starvation: 
+// In single-threaded event loops (like Node.js or Python asyncio), 
+// synchronous or heavy logging operations monopolize the thread. 
+// The application fails to poll socket descriptors, delaying packet reads and handshakes.

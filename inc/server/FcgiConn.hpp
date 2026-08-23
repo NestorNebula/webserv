@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 10:20:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:52:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ public:
 	FcgiConn() {}
 	~FcgiConn() {}
 	
-	static int		make_sock(const char * sock_path);
+	static int		make_sock(std::string & sock_path);
 	
 	FcgiMsgData		data; 
 	std::string		req;

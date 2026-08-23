@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 09:17:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:01:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ FcgiPipe::~FcgiPipe()
 	}
 }
 
-// static int to = 0;
 bool	FcgiPipe::timeo(time_t now)
 {
 	if (this->lact == 0)
@@ -52,19 +51,21 @@ bool	FcgiPipe::timeo(time_t now)
 	if ((this->lact + CGI_TIMEOUT) > now)
 		return (false);
 
-	this->lact = now; // do not call again
+	this->lact = now;
 	this->mod_evt(-EPOLLOUT);
 	
-	WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());
-
-	if (this->rsrc && this->conn)
+	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());
+	if (this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : rsrc ", conn->get_fd());
-
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+	}
+	
+	if (this->rsrc)
+	{
 		if (rsrc->done == RSRC_DONE_IO)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : done");
+			WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : done");
 			return (false);
 		}
 		
@@ -73,20 +74,20 @@ bool	FcgiPipe::timeo(time_t now)
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
 		this->conn->set_err(504);
 	}
 	else
 	{
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : ???? ");
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ");
 	}
 	return (false);
 #if 0
 	if (this->rsrc && this->conn)
 	{
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
 		WSCOL(WSL_RED);
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : rsrc ", this->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : rsrc ", this->get_fd());
 
 try {
 // conn . has set error .. 
@@ -95,17 +96,17 @@ try {
 		if (req.hasHeaders())
 		{
 			WSCOL(WSL_RED);
-			WSLOG(LVL_TMP, TGT_FCGI, "req : has headers");
+			WSLOG(LVL_DBG, TGT_FCGI, "req : has headers");
 		}
 		if (req.hasBody())
 		{
 			WSCOL(WSL_RED);
-			WSLOG(LVL_TMP, TGT_FCGI, "req : has body");
+			WSLOG(LVL_DBG, TGT_FCGI, "req : has body");
 		}	
 		if (req.isComplete())
 		{
 			WSCOL(WSL_RED);
-			WSLOG(LVL_TMP, TGT_FCGI, "req : complete"); // , ++to); // 1500 (!)
+			WSLOG(LVL_DBG, TGT_FCGI, "req : complete"); // , ++to); // 1500 (!)
 			// sess body .. could be in between
 #if 1
 			// if (this == this->rsrc->ip)
@@ -130,7 +131,7 @@ try {
 catch(const std::exception& e)
 {
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_TMP, TGT_FCGI, "TIMEO\n", e.what());
+	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO\n", e.what());
 }
 		// error .. should not wait 
 		rsrc->set_done(RSRC_DONE_ERR);
@@ -139,7 +140,7 @@ catch(const std::exception& e)
 	else if (this->conn)
 	{
 		WSCOL(WSL_RED);
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : conn ", this->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", this->get_fd());
 		this->conn->set_err(504); // Gateway Timeout
 	}
 	else
@@ -147,7 +148,7 @@ catch(const std::exception& e)
 		// how do we get here .. 
 		// lact nnt re-set
 		WSCOL(WSL_RED);
-		WSLOG(LVL_TMP, TGT_FCGI, "TIMEO : ???? ", this->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ", this->get_fd());
 	}
 	return (true);
 #endif
@@ -300,7 +301,7 @@ int		FcgiPipe::rdhup(void)
 	if (this->fcgi.req.size())
 	{
 		WSCOL(WSL_RED);
-		WSLOG(LVL_TMP, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
+		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: req.size() ", this->fcgi.req.size());
 		return (0);
 	}
 	

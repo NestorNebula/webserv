@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 08:11:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:58:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@
 
 int FcgiConn::uid = 1;
 
-int FcgiConn::make_sock(const char *sock_path)
+int FcgiConn::make_sock(std::string &sock_path)
 {
 	struct sockaddr_un fpm;
 	fpm.sun_family = AF_UNIX;
-	strcpy(fpm.sun_path, sock_path);
+	ft_memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -122,15 +122,9 @@ int FcgiConn::req_init(CgiEnv * env)
 	char proto[] = "HTTP/1.1";
 	msg.add_param("SERVER_PROTOCOL", proto);
 
-	// validate
-
-	// REQUEST_URI : how did HttpServer build it 
-	// DOCUMENT_ROOT
-
 	std::map<std::string, std::string>::iterator kvit = env->kv.begin();
 	while (kvit != env->kv.end())
 	{
-
 		// char * tok = strtok(req->cook, "; ");
 		// while( tok != NULL )
 		// {
@@ -173,16 +167,6 @@ void FcgiConn::req_body(std::string & buf)
 
 // A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
 
-/*
-The start line of an HTTP response, called the status line, contains the following information:
-
-    The protocol version, usually HTTP/1.1.
-
-    A status code, indicating success or failure of the request. Common status codes are 200, 404, or 302
-
-    A status text. A brief, purely informational, textual description of the status code to help a human understand the HTTP message.
-*/
-
 int FcgiConn::rsp_data(char * buf, int cnt)
 {
 	switch(data.typ)
@@ -224,14 +208,12 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 		}
 		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: done");
 		chk += rsp_data(chk, data.len);
-		chk += data.pad; // not 100% CERTAIN we have enough for this
+		chk += data.pad;
 	}
 
 	while (data.len == 0 && chk < end)
 	{
-		// if ((end - chk) < 8)
-			// we're fucked
-
+		// if ((end - chk) < 8) {}
 		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: rest ", end - chk);
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
@@ -257,8 +239,8 @@ int FcgiConn::rsp_recv(char * buf, int siz)
     		continue;
 		}
 		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: partial");
-		chk += 8; // ATTN : 
-		chk += rsp_data(chk, (end - chk)); // negative (?)
+		chk += 8; // ATTN : (chk > end)
+		chk += rsp_data(chk, (end - chk));
     }
 	WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: complete");
     return 0;

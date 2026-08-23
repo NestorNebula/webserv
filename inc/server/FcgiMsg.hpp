@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/21 17:15:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:19:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,26 +43,6 @@ public:
 	void zero();
 };
 
-	// can lose this
-enum
-{
-	P_SERVER_PROTOCOL,
-	P_REQUEST_METHOD,
-	P_SCRIPT_FILENAME,
-	P_CONTENT_TYPE,
-	P_QUERY_STRING,
-	P_CONTENT_LENGTH,
-	P_HTTP_ACCEPT,
-	P_MIME_TYPE,
-	P_SERVER_ADDR,
-	P_REQUEST_URI,
-	P_SERVER_PORT,
-	P_HTTP_COOKIE,
-	P_HTTP_HOST,
-	P_HTTPS,
-	P_DOCUMENT_ROOT,
-	P_REMOTE_ADDR
-};
 
 class FcgiMsg
 {

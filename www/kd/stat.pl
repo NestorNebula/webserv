@@ -3,6 +3,6 @@ use strict;
 use warnings;
 use CGI;
 
-print("Status: 606\r\n\r\n");
-print("six-oh-six");
+print("Status: 203\r\n\r\n");
+print("two-oh-three");
 

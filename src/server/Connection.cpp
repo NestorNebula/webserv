@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 09:11:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:50:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ Connection::~Connection()
 		if (this->res_cgi)
 		{
 			this->res_cgi->conn_closed();
-			delete (this->res_cgi); // (~) Connection
+			delete (this->res_cgi);
 		}
 	}
 	catch(const std::exception& e)
@@ -63,11 +63,7 @@ bool	Connection::timeo(time_t now)
 		return (false);
 		
 	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_CONN, "TIMEO : conn ", this->get_fd());
-	// why not (?)
-	// bad cleanup
-	// if (this->res_cgi)	
-	// 	this->res_cgi->conn_closed(); 
+	WSLOG(LVL_DBG, TGT_CONN, "TIMEO : conn ", this->get_fd());
 	this->set_err(408); // Request Timeout 
 	return (true);
 }
@@ -93,69 +89,68 @@ int	Connection::set_err(int e)
 
 ssize_t	Connection::pollin(void)
 {
-try
-{
-	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-	// sess.log_next();
-	
 	ssize_t	err;
 
-	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
-	err = this->recv();
-	if (err < 0)
+	try
 	{
-		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv", err);
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
+		// sess.log_next();
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
+		err = this->recv();
+		if (err < 0)
+		{
+			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv", err);
+			return (err);
+		}
+		if (err == 0) 
+		{
+			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
+			this->mod_evt(EPOLLOUT); 
+			return (0);
+		}
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
+
+		// sess.log_next();
+		switch(sess.nextAction())
+		{
+		case Session::RDSOCK:
+		case Session::DOCGI:
+			sess.write(this->ibuf, err);
+			break;
+		case Session::CLOSE:
+			return (-1);
+		default:
+			break;
+		}
+		
+		switch (sess.nextAction()) 
+		{
+		case Session::DOCGI:
+			if (this->exec_cgi() < 0)
+			{
+				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
+				return (0); // send error
+			}
+			this->res_cgi->push_body();
+			break;
+		case Session::WRSOCK:
+			this->req_cnt++;
+			this->mod_evt(EPOLLOUT);
+			break;
+		case Session::RDSOCK:
+			break;
+		case Session::KPALIVE:
+			return (-1);
+		case Session::CLOSE:
+			return (-1);
+		}
 		return (err);
 	}
-	if (err == 0) 
+	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-		this->mod_evt(EPOLLOUT); 
-		return (0);
+		WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
+		this->set_err(404);
 	}
-	WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
-
-	// sess.log_next();
-	switch(sess.nextAction())
-	{
-	case Session::RDSOCK:
-	case Session::DOCGI:
-		sess.write(this->ibuf, err);
-		break;
-	case Session::CLOSE:
-		return (-1);
-	default:
-		break;
-	}
-	
-	switch (sess.nextAction()) 
-	{
-	case Session::DOCGI:
-		if (this->exec_cgi() < 0)
-		{
-			WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
-			return (0); // send error
-		}
-		this->res_cgi->push_body();
-		break;
-	case Session::WRSOCK:
-		this->req_cnt++;
-		this->mod_evt(EPOLLOUT);
-		break;
-	case Session::RDSOCK:
-		break;
-	case Session::KPALIVE:
-		return (-1);
-	case Session::CLOSE:
-		return (-1);
-	}
-	return (err);
-}
-catch(const std::exception& e)
-{
-	WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
-	this->set_err(404);
-}
 	return (0);
 }
 
@@ -167,121 +162,113 @@ catch(const std::exception& e)
 
 ssize_t	Connection::pollout(void)
 {
-try
-{
-	WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
-	
 	ssize_t	err = 0;
-	
-	// sess.log_next();
-	if (sess.nextAction() == Session::DOCGI)
+	try
 	{
-		// should never get this 
-		// if (this->error)
-		// 	return (0);
-		ResourceCgi *res = this->res_cgi;
-		if (res == NULL)
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
+		// sess.log_next();
+
+		if (sess.nextAction() == Session::DOCGI)
 		{
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
-			return (-1);
+			ResourceCgi *res = this->res_cgi;
+			if (res == NULL)
+			{
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (NULL)");
+				return (-1);
+			}
+			switch (res->status())
+			{
+			case RSP_COMPLETE:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+				return (-1);
+			case RSP_WAIT_HEAD:
+			case RSP_WAIT_BODY:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
+				this->mod_evt(-EPOLLOUT);
+				return (0);
+			case RSP_ERROR:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (error)");
+				return (0);
+			default:
+				break;
+			}
+
+			std::string & RESP = res->get_resp();
+			
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send: ", this->get_fd());
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
+			err = this->send(RESP);
 		}
-		switch (res->status())
+		else
 		{
-		case RSP_COMPLETE:
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
-			return (-1);
-		case RSP_WAIT_HEAD:
-		case RSP_WAIT_BODY:
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
+			switch (sess.nextAction())
+			{
+			case Session::CLOSE:
+				return (-1);
+			case Session::WRSOCK:
+			default:
+				std::string & RESP = sess.get_resp();
+				if (RESP.size())
+				{
+					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+					WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+					err = this->send(RESP);
+				}
+			}
+		}
+		
+		if (err < 0)
+		{
+			WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
+			return (err);
+		}
+		if (err == 0)
+		{
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
+			return (0);
+		}
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
+		
+		// sess.log_next();
+		switch (sess.nextAction())
+		{
+		case Session::KPALIVE:
+			this->reset();
 			this->mod_evt(-EPOLLOUT);
-			return (0);
-		case RSP_ERROR:
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (error)");
-			return (0);
+			return (-1);
+		case Session::CLOSE:
+			return (-1);
 		default:
 			break;
 		}
-
-		std::string & RESP = res->get_resp();
-		
-		WSLOG(LVL_DBG, TGT_CONN_SEND, "send: ", this->get_fd());
-		WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-		// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-		// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
-		err = this->send(RESP);
-	}
-	else
-	{
-		switch (sess.nextAction())
-		{
-		case Session::CLOSE:
-			return (-1);
-		case Session::WRSOCK:
-		default:
-			std::string & RESP = sess.get_resp();
-			if (RESP.size())
-			{
-				WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-				WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-				// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-				// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
-				err = this->send(RESP);
-			}
-		}
-	}
-	
-	if (err < 0)
-	{
-		WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
 		return (err);
 	}
-	if (err == 0)
+	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
-		return (0);
+		WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
+		this->set_err(404);
 	}
-	WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
-	
-	// sess.log_next();
-	switch (sess.nextAction())
-	{
-	case Session::KPALIVE:
-		this->reset();
-		this->mod_evt(-EPOLLOUT);
-		return (-1);
-	case Session::CLOSE:
-		return (-1);
-	default:
-		break;
-	}
-	return (err);
-}
-catch(const std::exception& e)
-{
-	WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
-	this->set_err(404);
-}
 	return (0);
 }
 
 int	Connection::rdhup(void)
 {
-	WSCOL(WSL_GREEN);
 	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
 	this->mod_evt(EPOLLOUT);
-	// return (0); // may need error (?)
 	return (-1);
 }
 
 int	Connection::hup(void)
 {
 	WSLOG(LVL_DBG, TGT_CONN, "hup!");
-	if (this->res_cgi == NULL)
-		return (-1);
-	this->res_cgi->conn_closed();
+	if (this->res_cgi)
+		this->res_cgi->conn_closed();
 	return (-1);
 }
-
 
 void	Connection::reset(void)
 {
@@ -396,18 +383,11 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-// char cwd[PATH_MAX];
 		const char **envp = cgienv->gen();
-
-		// WSCOL(WSL_RED);
-		// WSLOG(LVL_DBG, TGT_CGI, "exec: ", cgienv->args[0]);
-		// WSCOL(WSL_RED);
-		// WSLOG(LVL_DBG, TGT_CGI, "path: ", cgienv->args[1]);
 
 		pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
-		// REQUIRE (!)
 		if (cwd.size())
 		{
 			// WSCOL(WSL_GREEN);

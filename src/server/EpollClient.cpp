@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/22 14:14:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:54:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ int	EpollClient::event(struct epoll_event *e)
 		else if (err < 0)
 			return (err);
 	}	
-	if (e->events & EPOLLRDHUP) // ugh
+	if (e->events & EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
 		return (this->hup());
