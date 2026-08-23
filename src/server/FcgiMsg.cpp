@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 11:30:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 10:59:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ void FcgiMsgData::zero()
 
 
 #if 0
-
-
 https://fastcgi-archives.github.io/FastCGI_Specification.html
 
     The Responder application receives CGI/1.1 environment variables from the Web server over FCGI_PARAMS.
@@ -44,8 +42,6 @@ https://fastcgi-archives.github.io/FastCGI_Specification.html
 A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
 
 SO : send the WHOLE request (headers included)
-
-
 #endif
 
 FcgiMsg::FcgiMsg()
@@ -61,90 +57,46 @@ void FcgiMsg::new_params(unsigned short req)
 	this->begin(); // (BEGIN_REQUEST, RESPONDER)
 	set_req(req);  // head.requestId
 
-	buf.push(&head, 8);
-	buf.push(&body, 8); // body.role
+	buf.push(&head, FCGI_HEADER_LEN);
+	buf.push(&body, FCGI_HEADER_LEN); // body.role
 
 	pHed = buf.end; // remember where to insert FCGI_PARAMS
-	buf.skip(8);
+	buf.skip(FCGI_HEADER_LEN);
 	pBeg = buf.end; // for calculating length of FCGI_PARAMS
 }
 
-const char * p_name[] =
-{
-	"SERVER_PROTOCOL",
-	"REQUEST_METHOD",
-	"SCRIPT_FILENAME",
-	"CONTENT_TYPE",
-	"QUERY_STRING",
-	"CONTENT_LENGTH",
-	"HTTP_ACCEPT",
-	"MIME_TYPE",
-	"SERVER_ADDR",
-	"REQUEST_URI",
-	"SERVER_PORT",
-	"HTTP_COOKIE",
-	"HTTP_HOST",
-	"HTTPS",
-	"DOCUMENT_ROOT",
-	"REMOTE_ADDR"
-	// "SCRIPT_NAME",
-	// "REDIRECT_STATUS",
-	// "HTTP_REFERER",
-	// "HTTP_USER_AGENT"
-	// "HTTP_TRANSFER_ENCODING"
-	// "HTTP_ACCEPT_ENCODING"
-	// "HTTP_ACCEPT_LANGUAGE"
-	// "HTTP_CONNECTION"
-	// "SERVER_NAME"
-	// "SERVER_SOFTWARE"
-	// "GATEWAY_INTERFACE"  "CGI/1.0"
-};
-
-// buf.fcgi() : keylen, vallen, key, val
+// MsgBuf::fcgi() : keylen, vallen, key, val
 // push fcgi-formatted key/val pair onto buf
 // kLen, vLen, kStr, vStr
-void FcgiMsg::add_param(const char * key, char * val)
+void FcgiMsg::add_param(const char * key, const char * val)
 {
 	buf.fcgi(key, val);
 }
 
-void FcgiMsg::add_param(int p_key, char * val)
-{
-	buf.fcgi(p_name[p_key], val);
-}
-
 void FcgiMsg::add_param(const char * key, int val)
 {
-	char vStr[32];
-	sprintf(vStr, "%i", val);
-
-	buf.fcgi(key, vStr);
+	std::string vStr = num_2_str(val);
+	buf.fcgi(key, vStr.c_str());
 }
-
-// void FcgiMsg::add_param(int p_key, int val)
-// {
-// 	add_param(p_name[p_key], val);
-// }
 
 void FcgiMsg::end_params(void)
 {
 	this->make_head(FCGI_PARAMS, buf.end - pBeg);
-
-	// insert params header with proper content-length
-	memcpy(buf.buf + pHed, this, 8); // this->hed
+		// insert params header with proper content-length
+	ft_memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
 	buf.zero(this->head.paddingLength);
 
 	this->make_head(FCGI_PARAMS, 0);
-	buf.push(this, 8);
+	buf.push(this, FCGI_HEADER_LEN);
 }
 
-void FcgiMsg::add_stdin(char * data, int dSiz)
+void FcgiMsg::add_stdin(const char * data, int dSiz)
 {
-	const int dMax = 8192; // 
+	const int dMax = 8192 << 1;
 	while (dSiz > dMax)
 	{
 		this->make_head(FCGI_STDIN, dMax);
-		buf.push(this, 8);
+		buf.push(this, FCGI_HEADER_LEN);
 		buf.push(data, dMax);
 
 		data += dMax;
@@ -153,20 +105,18 @@ void FcgiMsg::add_stdin(char * data, int dSiz)
 	if (dSiz)
 	{
 		this->make_head(FCGI_STDIN, dSiz);
-		buf.push(this, 8);
+		buf.push(this, FCGI_HEADER_LEN);
 		buf.push(data, dSiz);
-		buf.zero(this->head.paddingLength);
-		// padding (?)
-		// buf.zero()
+		buf.zero(this->head.paddingLength); // IMPORTANT
 	}
 }
 
 void FcgiMsg::end_stdin(void)
 {
-	WsLog::color(WSL_RED);
-	WsLog::_(LVL_DBG, TGT_FCGI, "END STDIN");
+	WSCOL(WSL_RED);
+	WSLOG(LVL_DBG, TGT_FCGI, "END STDIN");
 	this->make_head(FCGI_STDIN, 0);
-	buf.push(this, 8);
+	buf.push(this, FCGI_HEADER_LEN);
 }
 
 
@@ -174,7 +124,7 @@ void FcgiMsg::begin()
 {
 	this->zero();
 	head.type = FCGI_BEGIN_REQUEST;
-	set_len(8); // FCGI_BEGIN_REQUEST (body)
+	set_len(FCGI_HEADER_LEN); // FCGI_BEGIN_REQUEST (body)
 	set_role(FCGI_RESPONDER);
 }
 
@@ -183,12 +133,12 @@ void FcgiMsg::make_head(unsigned char typ, unsigned short len)
 	this->zero();
 	head.type = typ;
 	set_len(len);
-	set_pad(len); // could be in (set_len)
+	set_pad(len);
 }
 
 int FcgiMsg::full_size()
 {
-	return 8 + this->get_len() + this->head.paddingLength;
+	return FCGI_HEADER_LEN + this->get_len() + this->head.paddingLength;
 }
 
 
@@ -228,7 +178,7 @@ unsigned short FcgiMsg::get_role()
 }
 void FcgiMsg::zero()
 {
-	head.version = 0x01;
+	head.version = FCGI_VERSION_1; // 0x1
 	head.type = 0;
 
 	set_req(0);
@@ -239,7 +189,7 @@ void FcgiMsg::zero()
 
 	set_role(0);
 	body.flags = 0;
-	memset(body.reserved, 0, 5);
+	ft_memset(body.reserved, 0, 5);
 }
 
 void FcgiMsg::info()
@@ -263,20 +213,3 @@ void FcgiMsg::data(FcgiMsgData * data)
 	data->role = this->get_role();
 
 }
-
-#if 0 
-void FcgiMsg::dump(int cnt)
-{
-	unsigned char * chk = (unsigned char*) this;
-    fprintf(stderr, "%02x ", chk[0]);
-    for (int i=1 ; i < cnt; i++)
-    {
-        if (!(i % 16))
-            fprintf(stderr, "\n");
-        else if (!(i % 8))
-            fprintf(stderr, " ");
-        fprintf(stderr, "%02x ", chk[i]);
-    }
-    fprintf(stderr, "\n\n");
-}
-#endif

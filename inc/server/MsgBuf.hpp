@@ -6,26 +6,21 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/13 14:39:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:07:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MSG_BUF_HPP
-#define MSG_BUF_HPP
+# define MSG_BUF_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-// DOC_OPT/src
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <arpa/inet.h>
 
+# include "libft.hpp"
+# include "WsLog.hpp"
 
-#ifdef __WIN32__
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
-
-#include "WsLog.hpp"
 
 class MsgBuf
 {
@@ -45,7 +40,6 @@ public:
         if (this->buf)
             free(this->buf);
     }
-    // memset
     void zero()
     {
         this->siz = 0;
@@ -75,11 +69,11 @@ public:
         this->avail(s);
         this->end += s;
     }
-    void push(void * v, int s)
+    void push(const void * v, int s)
     {
         this->avail(s);
 
-        memcpy(this->tail(), v, s);
+        ft_memcpy(this->tail(), v, s);
 
         this->end += s;
     }
@@ -87,10 +81,10 @@ public:
     {
         this->avail(cnt);
 
-        memset(this->tail(), 0, cnt);
+        ft_memset(this->tail(), 0, cnt);
         this->end += cnt;
     }
-    void fcgi(const char * key, char * val)
+    void fcgi(const char * key, const char * val)
     {
         int k = strlen(key);
         int v = strlen(val);
@@ -111,11 +105,11 @@ php-fpm fastcgi.c
 
         if (k >= 128)
         {
-            WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "keylen ", k);
+            WSCOL(WSL_RED);
+            WSLOG(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
-            memcpy(tgt, &k, sizeof(int));
+            ft_memcpy(tgt, &k, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -127,11 +121,11 @@ php-fpm fastcgi.c
         if (v >= 128)
         {
 
-            WsLog::color(WSL_RED);
-            WsLog::_(LVL_DBG, TGT_FCGI, "vallen ", k);
+            WSCOL(WSL_RED);
+            WSLOG(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
-            memcpy(tgt, &v, sizeof(int));
+            ft_memcpy(tgt, &v, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -140,8 +134,13 @@ php-fpm fastcgi.c
             *tgt++ = v;
             z     += sizeof(char);
         }
-// WEBSERV : ATTN illegal function
-        sprintf(tgt, "%s%s", key, val);
+        // sprintf(tgt, "%s%s", key, val);
+        const char *src = key;
+        while (*src)
+            *tgt++ = *src++;
+        src = val;
+        while (*src)
+            *tgt++ = *src++;
 
         this->end += z;
     }
@@ -160,8 +159,6 @@ php-fpm fastcgi.c
             unsigned int ava = this->normal(); // copy to head (?)
             if (n <= ava)
                 return ava;
-            
-            // fprintf(stderr, "AVAIL (%i) : normalize FAILED\n", n);
         }
 
         this->siz = this->end + n;
@@ -169,7 +166,7 @@ php-fpm fastcgi.c
         unsigned char * tmp = (unsigned char*) malloc(this->siz);
         if (this->buf)
         {
-            memcpy(tmp, this->head(), this->size());
+            ft_memcpy(tmp, this->head(), this->size());
             this->end = this->size();
             this->beg = 0;
             free(this->buf);
@@ -198,14 +195,12 @@ php-fpm fastcgi.c
 
         if (this->beg < pad)
         {
-            // fprintf(stderr, "MsgBuf normal beg %i pad %i\n", this->beg, pad);
             // shift RIGHT .. ugh
         }
         // actually -- we can always normalize
         // just not always in one copy
         if (this->size() > (this->beg - pad))
         {
-            // fprintf(stderr, "MsgBuf - normal FAILED\n");
             unsigned int full_size = this->size();
             int copy_size = this->beg - pad;
             unsigned char * src = this->head();
@@ -213,7 +208,7 @@ php-fpm fastcgi.c
 
             do
             {
-                memcpy(dst, src, copy_size);
+                ft_memcpy(dst, src, copy_size);
                 src += copy_size;
                 dst += copy_size;
                 this->beg += copy_size;
@@ -225,8 +220,7 @@ php-fpm fastcgi.c
             this->end = full_size + pad;
             return this->avail();
         }
-        // fprintf(stderr, "NORMAL\n");
-        memcpy(this->buf + pad, this->head(), this->size());
+        ft_memcpy(this->buf + pad, this->head(), this->size());
         this->end = this->size() + pad;
         this->beg = pad;
 
