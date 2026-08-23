@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:01:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 20:33:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,7 @@ int		FcgiPipe::rdhup(void)
 	
 	if (this->rsrc == NULL)
 		return (-1);
+		
 	rsrc->set_done(RSRC_DONE_IP);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
 

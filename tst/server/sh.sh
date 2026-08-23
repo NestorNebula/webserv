@@ -110,20 +110,24 @@ if [ "$1" == "u" ]; then
 	ls -l $WWW/p*
 
 	FILES=
-	# FILES+="Kanan.mp3 "
+	FILES+="Kanan.mp3 "
 	FILES+="tiny.jpg "
-	# FILES+="mid.jpg "
-	# FILES+="earth.jpg "
-	# FILES+="e4.jpg "
+	FILES+="mid.jpg "
+	FILES+="earth.jpg "
+	FILES+="e4.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
-		# curl -X POST http://localhost:8082/php/ul.php -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/pl/ul.pl -i \
-		# 	-F file=@www/files/$FILE
-		# echo ; echo ; echo
+# WORK HERE 
+# FCGI : not 100%
+# END STDIN .. still has (left)
+
+		curl -X POST http://localhost:8082/php/ul.php -i \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
+		curl -X POST http://localhost:8082/pl/ul.pl -i \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
 		curl -X POST http://localhost:8082/py/ul.py -i \
 			-F file=@$WWW/files/$FILE
 
