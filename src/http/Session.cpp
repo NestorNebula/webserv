@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 10:53:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/23 11:34:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 }
 
 Request &Session::getRequest() {
-  // throwIfNotAction(DOCGI);
+  throwIfNotAction(DOCGI);
   return _request;
 }
 
@@ -297,25 +297,12 @@ void Session::handleResource() {
       setResponseStatus(500);
       delete _resource;
       _resource = NULL;
-// #kd - ctrl-c
       WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
     }
   }
 }
-  // ctrl-c .. sets error .. 
-  // and that does fucked up shit 
-// ==24817==    by 0x11D93C: Session::prepareErrorResource() (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x11D459: Session::handleResource() (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x11C204: Session::setError(unsigned int) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x12BAA7: Connection::set_err(int) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x133F4E: ResourceCgi::set_err(int) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x13574F: ResourcePiped::wait(int) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x135CAA: ResourcePiped::rem(EpollClient*) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x12CE26: Connection::cgi_rem(EpollClient*) (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-// ==24817==    by 0x131BA7: CgiPipe::~CgiPipe() (in /media/kdonlon/data/Documents/42/webserv/git/tst/server/test)
-
 
 void Session::prepareErrorResource() {
   std::map<std::string, std::string> errPages =
@@ -375,6 +362,7 @@ void Session::handleUpload() {
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
+// #kd
     char buf[STREAM_READ_SIZ];
     while (bodyStream->read(buf, STREAM_READ_SIZ))
       ofs.write(buf, bodyStream->gcount());
