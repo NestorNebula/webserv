@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:45:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:26:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ void	ResourceCgi::chk_rsp_len(void)
 	}
 	size_t clen = (resp.size() - pos - 4);
 
-	clen_str = std::string("\r\nContent-Length:") + num_2_str(clen);
+	clen_str = std::string("\r\nContent-Length:") + toString(clen);
 		// consider adding keep-alive
 	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 	

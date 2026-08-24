@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:46:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 17:27:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,6 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 	return (err);
 }
 
-
 // The server is in no way obligated to send end-of-file 
 // after the script reads CONTENT_LENGTH bytes. 
 
@@ -228,6 +227,8 @@ ssize_t	FcgiPipe::pollout(void)
 	WSLOG(LVL_DBG, TGT_FCGI, "sent: ", err);
 	WSLOG(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
 
+	// wait until entire body has been sent ...
+	// dangerous (?)
 	// this->mod_evt(EPOLLIN);
 	return (0);
 }
@@ -327,9 +328,11 @@ int		FcgiPipe::rdhup(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
 		return (0);
 	}
-	WSCOL(WSL_RED);
-	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
-	return (-1);
+	// got here on small READ SIZE
+	// out + rdhup .. but no (resp) yet .. 
+	// WSCOL(WSL_RED);
+	// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
+	return (0);
 }
 
 int		FcgiPipe::hup(void)
