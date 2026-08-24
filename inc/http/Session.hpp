@@ -65,6 +65,11 @@ public:
   // Read data from the Session Response. Corresponds to WRSOCK Action.
   Stream::streamsize read(char *buf, Stream::streamsize bufsize);
 
+  // Read data from the Session Response and append it to the Response string.
+  // Return a reference to the Response string.
+  // Should only be called on WRSOCK action.
+  std::string &getResponse();
+
   // Set an error code for the current Session and prepare the appropriate
   // content. Callable whatever the current action is. Keep in mind that it will
   // erase the current Session Resource in case action is already WRSOCK.
@@ -110,4 +115,6 @@ private:
   void setResponseStatus(Response::StatusCode code);
 
   Stream::streamsize _sent;
+
+  std::string _responseStr;
 };
