@@ -393,7 +393,7 @@ void Session::handleResponse() {
   WSLOG(LVL_INFO, TGT_SESS, "Preparing Session Response");
   // Add Response details and missing fields
   if (!_request.hasVersion() || !isValidVersion(_request.getVersion()))
-    _response.setVersion("HTTP/1.1");
+    _response.setVersion("HTTP/1.0");
   else
     _response.setVersion(_request.getVersion());
   if (!_response.getCode()) {
