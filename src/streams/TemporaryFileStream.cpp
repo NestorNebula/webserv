@@ -12,6 +12,7 @@
 
 #include "TemporaryFileStream.hpp"
 #include "http_utils.hpp"
+#include "SizeDefs.hpp"
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -30,10 +31,9 @@ TemporaryFileStream::TemporaryFileStream(Stream &stream) {
     WSLOG(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
     return;
   }
-  static const streamsize maxReadSize = 4096; 
-  char buf[maxReadSize];
+  char buf[STREAM_READ_SIZ];
   while (stream && stream.tellg() < stream.size()) {
-    streamsize readSize = std::min(stream.size() - stream.tellg(), maxReadSize);
+    streamsize readSize = std::min(stream.size() - stream.tellg(), static_cast<streamsize>(STREAM_READ_SIZ));
     stream.read(buf, readSize);
     write(buf, stream.gcount());
   }
