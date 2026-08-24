@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:24:31 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:22:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:49:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,7 @@ void StaticResource::generate() {
   std::fstream *fs = new std::fstream(_filepath.c_str());
   _stream = new Stream(fs);
   _state = fs->is_open() ? DONE : FAIL;
-  if (_state == FAIL)
-  {
+  if (_state == FAIL) {
     WSLOG(LVL_WARN, TGT_STAT_RES, "Failed to open ", _filepath);
   }
 }

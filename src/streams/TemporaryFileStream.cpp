@@ -6,12 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 11:12:28 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 17:44:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:43:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "TemporaryFileStream.hpp"
 #include "http_utils.hpp"
+#include "SizeDefs.hpp"
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -30,15 +31,13 @@ TemporaryFileStream::TemporaryFileStream(Stream &stream) {
     WSLOG(LVL_WARN, TGT_TMP_STRM, "Trying to initialize TemporaryFileStream with non-good stream. Aborting");
     return;
   }
-  static const streamsize maxReadSize = 4096; 
-  char buf[maxReadSize];
+  char buf[STREAM_READ_SIZ];
   while (stream && stream.tellg() < stream.size()) {
-    streamsize readSize = std::min(stream.size() - stream.tellg(), maxReadSize);
+    streamsize readSize = std::min(stream.size() - stream.tellg(), static_cast<streamsize>(STREAM_READ_SIZ));
     stream.read(buf, readSize);
     write(buf, stream.gcount());
   }
-  if (!stream || !*this)
-  {
+  if (!stream || !*this) {
     WSLOG(LVL_WARN, TGT_TMP_STRM, "TemporaryFileStream couldn't be properly initialized from Stream");
   }
 }

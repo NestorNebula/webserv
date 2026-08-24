@@ -17,4 +17,5 @@ compile_commands.json
 
 pycgi/__pycache__/*
 
+demo
 webserv

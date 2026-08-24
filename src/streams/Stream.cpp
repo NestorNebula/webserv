@@ -6,10 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 14:33:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:43:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "SizeDefs.hpp"
 #include "Stream.hpp"
 #include <algorithm>
 
@@ -146,14 +147,12 @@ Stream::streamsize Stream::size() {
 }
 
 Stream &Stream::read(std::string &s) {
-// #kd - STREAM_READ_SIZ
-  static const streamsize maxReadSize = STREAM_READ_SIZ;
   const streamsize available = this->size() - this->tellg();
   if (available <= 0)
     return *this;
 
-  const streamsize readSize = std::min(available, maxReadSize);
-  char buf[maxReadSize];
+  const streamsize readSize = std::min(available, static_cast<streamsize>(STREAM_READ_SIZ));
+  char buf[STREAM_READ_SIZ];
   this->read(buf, readSize);
   s.append(buf, this->gcount());
   return *this;

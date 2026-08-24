@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/12 09:10:36 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:24:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:49:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ void BuiltinResource::generate() {
   buildHTMLFromCode();
   if (_state == DEFAULT)
     _state = _stream->good() ? DONE : FAIL;
-  if (_state != DONE)
-  {
+  if (_state != DONE) {
     WSLOG(LVL_WARN, TGT_BUI_RES, "BuiltinResource error for code ", _code);
   }
 }

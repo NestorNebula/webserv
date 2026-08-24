@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:23:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:49:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ void DirectoryResource::generate() {
   if (_dir)
     buildList();
   _state = (_dir != NULL && _stream->good()) ? DONE : FAIL;
-  if (_state != DONE)
-  {
+  if (_state != DONE) {
     WSLOG(LVL_WARN, TGT_DIR_RES, "Directory listing error for: ", _dirpath);
   }
 }

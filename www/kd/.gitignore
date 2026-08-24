@@ -1,4 +1,5 @@
-uploads
 php/upload-*
 pl/upload-*
 py/upload-*
+uploads
+uploads/*

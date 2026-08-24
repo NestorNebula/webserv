@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 15:28:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:52:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ public:
   // Read data from the Session Response. Corresponds to WRSOCK Action.
   Stream::streamsize read(char *buf, Stream::streamsize bufsize);
 
+  // Read data from the Session Response and append it to the Response string.
+  // Return a reference to the Response string.
+  // Should only be called on WRSOCK action.
+  std::string &getResponse();
+
   // Set an error code for the current Session and prepare the appropriate
   // content. Callable whatever the current action is. Keep in mind that it will
   // erase the current Session Resource in case action is already WRSOCK.
@@ -112,19 +117,6 @@ private:
   void setResponseStatus(Response::StatusCode code);
 
   Stream::streamsize _sent;
-  
-// #kd - Session::resp 
-  std::string resp;
-public:
-// #kd - Session::resp 
-  std::string &getResponse(void)
-  {
-    if (resp.size())
-      return (resp);
-    char buf[RSP_READ_SIZ];
-    int err = this->read(buf, RSP_READ_SIZ);
-    if (err > 0)
-      resp.append(buf, err);
-    return (resp);
-  }
+
+  std::string _responseStr;
 };
