@@ -1,4 +1,4 @@
 <?
 
-I suck
-?>
+What happens now (?)
+?
