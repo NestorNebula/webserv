@@ -234,7 +234,7 @@ void Session::validateOperation() {
   if (_response.getCode())
     return;
   if (_next == DOCGI) {
-    if (!isAccessibleFile(_resourcePath, X_OK))
+    if (!isAccessibleFile(_resourcePath, F_OK | R_OK))
       return setResponseStatus(403);
     return;
   }
