@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:46:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:18:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:12:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 # include <map>
 # include <vector>
 # include <sstream>
-
-# include <libft.hpp>
 
 # include "FilePath.hpp"
 # include "Session.hpp"
