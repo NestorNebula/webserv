@@ -21,11 +21,11 @@ public:
   DirectoryResource(const std::string &dirpath)
       : _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())),
         _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_DIR_RES,
+    WSLOG(LVL_DBG, TGT_DIR_RES,
              "DirectoryResource constructor for: ", dirpath);
   }
   ~DirectoryResource() {
-    WsLog::_(LVL_DBG, TGT_DIR_RES,
+    WSLOG(LVL_DBG, TGT_DIR_RES,
              "DirectoryResource destructor for: ", _dirpath);
     if (_dir)
       closedir(_dir);

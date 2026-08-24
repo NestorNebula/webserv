@@ -19,11 +19,11 @@ class BuiltinResource : public Resource {
 public:
   BuiltinResource(Response::StatusCode code)
       : _code(code), _state(DEFAULT), _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_BUI_RES, "BuiltinResource constructor for code ",
+    WSLOG(LVL_DBG, TGT_BUI_RES, "BuiltinResource constructor for code ",
              code);
   }
   ~BuiltinResource() {
-    WsLog::_(LVL_DBG, TGT_BUI_RES, "BuiltinResource destructor for code ",
+    WSLOG(LVL_DBG, TGT_BUI_RES, "BuiltinResource destructor for code ",
              _code);
     delete _stream;
   }

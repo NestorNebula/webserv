@@ -14,7 +14,7 @@
 #include <algorithm>
 
 void Stream::adoptStream(std::iostream *stream, streampos g, streampos p) {
-  WsLog::_(LVL_DBG, TGT_STRM, "Stream adopting new stream");
+  WSLOG(LVL_DBG, TGT_STRM, "Stream adopting new stream");
   delete _stream;
   _stream = stream;
   _g = g;
@@ -159,7 +159,7 @@ Stream &Stream::read(std::string &s) {
 }
 
 std::string Stream::str() {
-  WsLog::_(LVL_INFO, TGT_STRM, "calling str() method on Stream");
+  WSLOG(LVL_INFO, TGT_STRM, "calling str() method on Stream");
   if (!*this)
     return std::string();
   std::string s;
