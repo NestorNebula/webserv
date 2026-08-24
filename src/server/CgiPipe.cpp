@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 14:15:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 13:55:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ CgiPipe::~CgiPipe()
 	{
 		if (this->conn)
 		{
-			WSLOG(LVL_DBG, TGT_CGI, " (~) conn_fd ", this->conn->get_fd());
+			WSLOG(LVL_DBG, TGT_CGI, "     conn_fd ", this->conn->get_fd());
 			this->conn->cgi_rem(this);
 		}
 		if (this->rsrc)
@@ -63,6 +63,32 @@ bool	CgiPipe::timeo(time_t now)
 	{
 		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
 	}
+
+// FCGI
+	if (this->rsrc)
+	{
+		if (rsrc->done == RSRC_DONE_IO)
+		{
+			WSCOL(WSL_GREEN);
+			WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : done");
+			return (false);
+		}
+		
+		rsrc->set_done(RSRC_DONE_ERR);
+		this->rsrc->set_err(504);  // CGI_ERR : gateway timeout
+	}
+	else if (this->conn)
+	{
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		this->conn->set_err(504); // CGI_ERR : gateway timeout
+	}
+	else
+	{
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ");
+		this->mod_evt(EPOLLOUT);
+	}
+	return (false);
+#if 0
 	if (this->rsrc && this->conn)
 	{
 		if (this == this->rsrc->ip)
@@ -73,6 +99,7 @@ bool	CgiPipe::timeo(time_t now)
 		{
 			WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe (op)");
 		}
+
 
 try {
 		Session &sess = conn->sess;
@@ -96,12 +123,12 @@ catch(const std::exception& e)
 	WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO\n", e.what());
 }
 		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(504); 
+		this->rsrc->set_err(504); // CGI_ERR : gateway timeout 
 	}
 	else if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(504);
+		this->conn->set_err(504); // CGI_ERR : gateway timeout
 	}
 	else
 	{
@@ -110,6 +137,9 @@ catch(const std::exception& e)
 
 	
 	return (false);
+#endif
+
+
 #if 0
 	if (this->rsrc && this->conn)
 	{
@@ -180,6 +210,8 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "send"); // conn: ", this->conn->get_fd());
+
 	switch(rsrc->get_req_body())
 	{
 	case REQ_WAIT_HEAD:
@@ -216,15 +248,16 @@ ssize_t	CgiPipe::pollout(void)
 
 ssize_t	CgiPipe::pollin(void)
 {
+	ssize_t	err = 0;
+	
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
-	WSLOG(LVL_DBG, TGT_CGI_RECV, "conn: ", this->conn->get_fd());
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv"); // conn: ", this->conn->get_fd());
 	
-	ssize_t	err = 0;
 	
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);

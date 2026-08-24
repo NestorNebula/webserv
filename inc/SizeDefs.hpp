@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 20:16:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 13:50:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define SIZE_DEFS_HPP
 
 
-# define DEF_BUF_SIZ 4096
+# define DEF_BUF_SIZ 8192
 
 // MUST BE : > (8) for FCGI	
 // #nh says we can keep these
@@ -45,11 +45,12 @@
 # endif
 
 # ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 60
+#  define CGI_TIMEOUT 1
 # endif
 
 
 # ifndef RES_CGI_WAIT_COMPLETE
+    // .. except if content-length ... 
 #  define RES_CGI_WAIT_COMPLETE 0
 # endif
 

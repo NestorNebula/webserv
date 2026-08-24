@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 14:35:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 14:30:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,28 +127,4 @@ public:
       resp.append(buf, err);
     return (resp);
   }
-// #kd - log_next
-  void  log_next(void)
-  {
-    WSCOL(WSL_YELLOW);
-    switch(this->nextAction())
-    {
-    case Session::RDSOCK:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
-      break;
-    case Session::DOCGI:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
-      break;
-    case Session::WRSOCK:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
-      break;
-    case Session::CLOSE:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
-      break;
-    case Session::KPALIVE:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
-      break;
-    }
-  }
-
 };

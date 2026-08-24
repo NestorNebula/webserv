@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:07:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 10:08:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ public:
     {
         this->avail(s);
 
-        ft_memcpy(this->tail(), v, s);
+        // ft_memcpy(this->tail(), v, s);
+        std::memcpy(this->tail(), v, s);
 
         this->end += s;
     }
@@ -81,7 +82,8 @@ public:
     {
         this->avail(cnt);
 
-        ft_memset(this->tail(), 0, cnt);
+        // ft_memset(this->tail(), 0, cnt);
+        std::memset(this->tail(), 0, cnt);
         this->end += cnt;
     }
     void fcgi(const char * key, const char * val)
@@ -109,7 +111,8 @@ php-fpm fastcgi.c
             WSLOG(LVL_DBG, TGT_FCGI, "keylen ", k);
             k |= 1 << 31;
             k  = htonl(k);
-            ft_memcpy(tgt, &k, sizeof(int));
+            // ft_memcpy(tgt, &k, sizeof(int));
+            std::memcpy(tgt, &k, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -125,7 +128,8 @@ php-fpm fastcgi.c
             WSLOG(LVL_DBG, TGT_FCGI, "vallen ", k);
             v |= 1 << 31;
             v  = htonl(v);
-            ft_memcpy(tgt, &v, sizeof(int));
+            // ft_memcpy(tgt, &v, sizeof(int));
+            std::memcpy(tgt, &v, sizeof(int));
             tgt += sizeof(int);
             z   += sizeof(int);
         }
@@ -166,7 +170,8 @@ php-fpm fastcgi.c
         unsigned char * tmp = (unsigned char*) malloc(this->siz);
         if (this->buf)
         {
-            ft_memcpy(tmp, this->head(), this->size());
+            // ft_memcpy(tmp, this->head(), this->size());
+            std::memcpy(tmp, this->head(), this->size());
             this->end = this->size();
             this->beg = 0;
             free(this->buf);
@@ -208,7 +213,8 @@ php-fpm fastcgi.c
 
             do
             {
-                ft_memcpy(dst, src, copy_size);
+                // ft_memcpy(dst, src, copy_size);
+                std::memcpy(dst, src, copy_size);
                 src += copy_size;
                 dst += copy_size;
                 this->beg += copy_size;
@@ -220,7 +226,8 @@ php-fpm fastcgi.c
             this->end = full_size + pad;
             return this->avail();
         }
-        ft_memcpy(this->buf + pad, this->head(), this->size());
+        // ft_memcpy(this->buf + pad, this->head(), this->size());
+        std::memcpy(this->buf + pad, this->head(), this->size());
         this->end = this->size() + pad;
         this->beg = pad;
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:59:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 10:09:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,8 @@ void FcgiMsg::end_params(void)
 {
 	this->make_head(FCGI_PARAMS, buf.end - pBeg);
 		// insert params header with proper content-length
-	ft_memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
+	// ft_memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
+	std::memcpy(buf.buf + pHed, this, FCGI_HEADER_LEN);
 	buf.zero(this->head.paddingLength);
 
 	this->make_head(FCGI_PARAMS, 0);
@@ -189,7 +190,8 @@ void FcgiMsg::zero()
 
 	set_role(0);
 	body.flags = 0;
-	ft_memset(body.reserved, 0, 5);
+	// ft_memset(body.reserved, 0, 5);
+	std::memset(body.reserved, 0, 5);
 }
 
 void FcgiMsg::info()
