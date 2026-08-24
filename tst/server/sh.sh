@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=4
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -42,15 +42,16 @@ if [[ "$1" =~ "p" ]]; then
 fi
 
 if [[ "$1" =~ "y" ]]; then
-	siege http://localhost:8082/test.py --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# siege http://localhost:8082/test.py --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/python.sh --internet --verbose --reps=$R --concurrent=$C  -b
 	echo
 fi
 
 if [[ "$1" =~ "l" ]]; then
-	siege http://localhost:8082/test.pl --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# siege http://localhost:8082/test.pl --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	siege -f urls/perl.sh --internet --verbose --reps=$R --concurrent=$C  -b
 	echo
 fi
-
 
 if [[ "$1" =~ "f" ]]; then
 	siege -f urls/fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
