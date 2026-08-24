@@ -107,6 +107,16 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
   return r;
 }
 
+std::string &Session::getResponse() {
+  throwIfNotAction(WRSOCK);
+
+  char buf[RSP_READ_SIZ];
+  Stream::streamsize r = read(buf, RSP_READ_SIZ);
+  if (r > 0)
+    _responseStr.append(buf, r);
+  return _responseStr;
+}
+
 void Session::setError(Response::StatusCode code) {
   try {
     setResponseStatus(code);
