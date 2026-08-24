@@ -15,6 +15,7 @@
 #include "DirectoryResource.hpp"
 #include "HttpMethod.hpp"
 #include "Request.hpp"
+#include "SizeDefs.hpp"
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
@@ -24,10 +25,6 @@
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
-
-#ifndef BUFSIZE
-#define BUFSIZE 4096
-#endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete())
@@ -359,8 +356,8 @@ void Session::handleUpload() {
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
-    char buf[BUFSIZE];
-    while (bodyStream->read(buf, BUFSIZE))
+    char buf[STREAM_READ_SIZ];
+    while (bodyStream->read(buf, STREAM_READ_SIZ))
       ofs.write(buf, bodyStream->gcount());
     if (bodyStream->eof() && bodyStream->gcount())
       ofs.write(buf, bodyStream->gcount());
