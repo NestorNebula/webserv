@@ -23,10 +23,10 @@
 class Request {
 public:
   Request() : _state(EMPTY), _body(NULL), _bodySize(0) {
-    WsLog::_(LVL_DBG, TGT_REQ, "Request constructor");
+    WSLOG(LVL_DBG, TGT_REQ, "Request constructor");
   }
   ~Request() {
-    WsLog::_(LVL_DBG, TGT_REQ, "Request destructor");
+    WSLOG(LVL_DBG, TGT_REQ, "Request destructor");
     delete _body;
   }
 

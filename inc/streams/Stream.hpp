@@ -18,12 +18,12 @@
 class Stream {
 public:
   Stream() : _stream(NULL), _g(0), _p(0), _gcount(0) {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream constructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream constructor");
   }
   Stream(std::iostream *stream, std::streampos g = 0, std::streampos p = 0)
       : _stream(stream), _g(g), _p(p), _gcount(0) {}
   virtual ~Stream() {
-    WsLog::_(LVL_DBG, TGT_STRM, "Stream destructor");
+    WSLOG(LVL_DBG, TGT_STRM, "Stream destructor");
     delete _stream;
   }
 
