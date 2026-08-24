@@ -19,11 +19,11 @@ class StaticResource : public Resource {
 public:
   StaticResource(const std::string &filepath)
       : _filepath(filepath), _state(DEFAULT), _stream(NULL) {
-    WsLog::_(LVL_DBG, TGT_STAT_RES,
+    WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource constructor for: ", filepath);
   }
   ~StaticResource() {
-    WsLog::_(LVL_DBG, TGT_STAT_RES,
+    WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource destructor for: ", _filepath);
     delete _stream;
   }

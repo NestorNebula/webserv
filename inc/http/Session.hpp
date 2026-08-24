@@ -24,11 +24,11 @@ public:
   Session(ServerConfig &server)
       : _next(RDSOCK), _server(server), _route(NULL), _resource(NULL),
         _keepalive(false), _sent(0) {
-    WsLog::_(LVL_DBG, TGT_SESS, "Session constructor");
+    WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
     delete _resource;
-    WsLog::_(LVL_DBG, TGT_SESS, "Session destructor");
+    WSLOG(LVL_DBG, TGT_SESS, "Session destructor");
   }
 
   // Action to do from Network
