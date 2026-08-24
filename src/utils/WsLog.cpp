@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:42:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:57:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,6 @@ static const std::string tgt_str[] =
     "body  : ",
     "rsrc  : ",
     "fcgi  : ",
-    
-    "req   : ",
-    "res   : ",
-    "resp  : ",
-    "strm  : ",
-    "sess  : "
-};
-    "fcgi  : ",
-    
     "req   : ",
     "res   : ",
     "resp  : ",
@@ -323,6 +314,7 @@ bakwht='\e[47m'   # White
 txtrst='\e[0m'    # Text Reset
 
 #endif
+
 void    WsLog::nh(void)
 {
     WsLog::lvl = LVL_ALL;
@@ -395,8 +387,6 @@ void    WsLog::kd(void)
 // In single-threaded event loops (like Node.js or Python asyncio), 
 // synchronous or heavy logging operations monopolize the thread. 
 // The application fails to poll socket descriptors, delaying packet reads and handshakes.
-
-}
 
 // Lots of writes to stderr can confuse socket communication by causing 
 // I/O blocking, buffer saturation, and timing disruptions in the application event loop. 

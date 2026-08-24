@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 15:43:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:01:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,6 @@ std::string getStatusReason(Response::StatusCode code) {
   std::map<int, std::string>::const_iterator reason = reasons.find(code);
   if (reason != reasons.end())
     return reason->second;
-// #kd - default reason (exception should have been caught)
   return std::string("Unknown Reason");
 }
 
