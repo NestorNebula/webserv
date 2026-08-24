@@ -136,6 +136,8 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[431] = "Request Header Fields Too Large";
     reasons[500] = "Internal Server Error";
     reasons[501] = "Not Implemented";
+    reasons[502] = "Bad Gateway";
+    reasons[504] = "Gateway Timeout";
     reasons[505] = "HTTP Version Not Supported";
   }
   std::map<int, std::string>::const_iterator reason = reasons.find(code);
