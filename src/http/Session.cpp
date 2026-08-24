@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 13:09:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:50:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "DirectoryResource.hpp"
 #include "HttpMethod.hpp"
 #include "Request.hpp"
+#include "SizeDefs.hpp"
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
@@ -24,11 +25,6 @@
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
-
-// #kd - moved to SizeDefs.hpp
-// #ifndef BUFSIZE
-// #define BUFSIZE 4096
-// #endif
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete())
@@ -109,6 +105,18 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
       setError(500);
   }
   return r;
+}
+
+std::string &Session::getResponse() {
+  throwIfNotAction(WRSOCK);
+
+  if (!_responseStr.size()) {
+    char buf[RSP_READ_SIZ];
+    Stream::streamsize r = read(buf, RSP_READ_SIZ);
+    if (r > 0)
+      _responseStr.append(buf, r);
+  }
+  return _responseStr;
 }
 
 void Session::setError(Response::StatusCode code) {
@@ -238,8 +246,6 @@ void Session::validateOperation() {
   if (_response.getCode())
     return;
   if (_next == DOCGI) {
-    // if (!isAccessibleFile(_resourcePath, X_OK))
-// #kd : .cgi file does not need to be executable
     if (!isAccessibleFile(_resourcePath, F_OK | R_OK))
       return setResponseStatus(403);
     return;
@@ -362,7 +368,6 @@ void Session::handleUpload() {
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
-// #kd - STREAM_READ_SIZ
     char buf[STREAM_READ_SIZ];
     while (bodyStream->read(buf, STREAM_READ_SIZ))
       ofs.write(buf, bodyStream->gcount());
@@ -400,7 +405,7 @@ void Session::handleResponse() {
   WSLOG(LVL_INFO, TGT_SESS, "Preparing Session Response");
   // Add Response details and missing fields
   if (!_request.hasVersion() || !isValidVersion(_request.getVersion()))
-    _response.setVersion("HTTP/1.1");
+    _response.setVersion("HTTP/1.0");
   else
     _response.setVersion(_request.getVersion());
   if (!_response.getCode()) {

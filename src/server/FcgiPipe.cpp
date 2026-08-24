@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 13:49:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:46:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,76 @@ bool	FcgiPipe::timeo(time_t now)
 		this->mod_evt(EPOLLOUT);
 	}
 	return (false);
+#if 0
+	if (this->rsrc && this->conn)
+	{
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSCOL(WSL_RED);
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : rsrc ", this->get_fd());
+
+try {
+// conn . has set error .. 
+		Session &sess = conn->sess;
+		Request &req  = sess.getRequest(); // Wrong Action on Session
+		if (req.hasHeaders())
+		{
+			WSCOL(WSL_RED);
+			WSLOG(LVL_DBG, TGT_FCGI, "req : has headers");
+		}
+		if (req.hasBody())
+		{
+			WSCOL(WSL_RED);
+			WSLOG(LVL_DBG, TGT_FCGI, "req : has body");
+		}	
+		if (req.isComplete())
+		{
+			WSCOL(WSL_RED);
+			WSLOG(LVL_DBG, TGT_FCGI, "req : complete"); // , ++to); // 1500 (!)
+			// sess body .. could be in between
+#if 1
+			// if (this == this->rsrc->ip)
+
+// not sure what I was trying to do here ... 
+// or .. leftover from CgiPIpe
+			{
+				this->lact = now;
+				this->mod_evt(-EPOLLOUT);
+// so .. timeout .. on an event we are not waiting for (?)
+// not the same as cgi pipe ... 
+				// this->rsrc->rem(this); // Wrong action on session
+// EX: main() : Wrong action on Session
+// pure virtual method called
+// terminate called without an active exception
+
+				return (false); // do not such this down (?)
+			}
+#endif
+		}
+}
+catch(const std::exception& e)
+{
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO\n", e.what());
+}
+		// error .. should not wait 
+		rsrc->set_done(RSRC_DONE_ERR);
+		this->rsrc->set_err(504); // Gateway Timeout
+	}
+	else if (this->conn)
+	{
+		WSCOL(WSL_RED);
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", this->get_fd());
+		this->conn->set_err(504); // Gateway Timeout
+	}
+	else
+	{
+		// how do we get here .. 
+		// lact nnt re-set
+		WSCOL(WSL_RED);
+		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ", this->get_fd());
+	}
+	return (true);
+#endif
 }
 
 int		FcgiPipe::init(CgiEnv * cgienv)

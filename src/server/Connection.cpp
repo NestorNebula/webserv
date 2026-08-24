@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:28:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:48:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -381,6 +381,7 @@ int	Connection::exec_cgi(void)
 	if ((cgienv->lang == CGI_PHP) &&
 		!this->serv.get_conf().fcgi_sock.empty())
 	{
+		WSLOG(LVL_DBG, TGT_CGI, "FCGI_SOCK");
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
 		
