@@ -22,7 +22,7 @@ void Request::append(const std::string &data) {
     WSLOG(LVL_WARN, TGT_REQ, "Sending data to closed request");
     return;
   }
-  WSLOG(LVL_INFO, TGT_REQ, "Request received data: ", data);
+  //WSLOG(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
     std::string::size_type eol(_raw.find("\r\n"));
