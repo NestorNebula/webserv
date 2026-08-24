@@ -35,7 +35,6 @@ FILES = \
 	utils/WsLog.cpp \
 	utils/helpers.cpp \
 	utils/http_utils.cpp \
-	utils/libft.cpp \
 	utils/FilePath.cpp \
 	http/Headers.cpp \
 	http/Request.cpp \
