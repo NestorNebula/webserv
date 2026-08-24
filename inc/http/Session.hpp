@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 14:30:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:28:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ private:
   std::string resp;
 public:
 // #kd - Session::resp 
-  std::string &get_resp(void)
+  std::string &getResponse(void)
   {
     if (resp.size())
       return (resp);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 14:31:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 15:28:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 			case Session::WRSOCK:
 			default:
-				std::string & RESP = sess.get_resp();
+				std::string & RESP = sess.getResponse();
 				if (RESP.size())
 				{
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
