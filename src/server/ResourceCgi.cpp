@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 18:09:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 12:20:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	this->resp.append(buf, siz);
 	// ah -- continually flushing
 	// good place to "see" WAIT_COMPLETE
-	WSLOG(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
+	// WSLOG(LVL_DBG, TGT_RSRC, "resp: ", resp.size());
 
 	WSLOG(LVL_NONE, TGT_RSRC, "resp");
 	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
@@ -97,7 +97,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 		return (RSRC_RESP_INIT);
 		
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp);	
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp);	
 	this->hed = 1;
 	
 // REQUIRE (?) Content-Type (?)

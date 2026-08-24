@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 14:33:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 13:44:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,7 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[501] = "Not Implemented";
 // #kd - error list
     reasons[502] = "Bad Gateway";
+    reasons[503] = "Service Unavailable";
     reasons[504] = "Gateway Timeout";
     reasons[505] = "HTTP Version Not Supported";
   }

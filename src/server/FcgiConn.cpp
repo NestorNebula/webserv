@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 12:24:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 10:35:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ int FcgiConn::make_sock(std::string &sock_path)
 {
 	struct sockaddr_un fpm;
 	fpm.sun_family = AF_UNIX;
-	ft_memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
+	// ft_memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
+	std::memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -34,7 +35,7 @@ int FcgiConn::make_sock(std::string &sock_path)
     if (err < 0)
 	{
 		close(fd);
-		WSLOG(LVL_DBG, TGT_FCGI, "connect");
+		WSLOG(LVL_DBG, TGT_FCGI, "connect: failed");
 		return (err);
 	}
     return (fd);

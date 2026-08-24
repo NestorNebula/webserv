@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 18:04:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 14:31:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,29 @@ int	Connection::set_err(int e)
 	return (-1);
 }
 
+
+static void sess_log_next(Session &sess)
+{
+    WSCOL(WSL_YELLOW);
+    switch(sess.nextAction())
+    {
+    case Session::RDSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
+      break;
+    case Session::DOCGI:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
+      break;
+    case Session::WRSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
+      break;
+    case Session::CLOSE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
+      break;
+    case Session::KPALIVE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
+      break;
+    }
+}
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -102,7 +125,7 @@ ssize_t	Connection::pollin(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-		// sess.log_next();
+		sess_log_next(sess);
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
 		err = this->recv();
 		if (err < 0)
@@ -118,7 +141,7 @@ ssize_t	Connection::pollin(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-		// sess.log_next();
+		sess_log_next(sess);
 		switch(sess.nextAction())
 		{
 		case Session::RDSOCK:
@@ -139,6 +162,7 @@ ssize_t	Connection::pollin(void)
 				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 				return (0); // send error
 			}
+			
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
@@ -159,7 +183,7 @@ ssize_t	Connection::pollin(void)
 	catch(const std::exception& e)
 	{
 		WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
-		this->set_err(404);
+		this->set_err(404); // File Not Found
 	}
 	return (0);
 }
@@ -176,7 +200,8 @@ ssize_t	Connection::pollout(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
-		// sess.log_next();
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+		sess_log_next(sess);
 
 		if (sess.nextAction() == Session::DOCGI)
 		{
@@ -205,7 +230,6 @@ ssize_t	Connection::pollout(void)
 
 			std::string & RESP = res->get_resp();
 			
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "send: ", this->get_fd());
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
@@ -243,7 +267,7 @@ ssize_t	Connection::pollout(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		
-		// sess.log_next();
+		sess_log_next(sess);
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
@@ -263,7 +287,7 @@ ssize_t	Connection::pollout(void)
 	catch(const std::exception& e)
 	{
 		WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
-		this->set_err(404);
+		this->set_err(404); // File Not Found
 	}
 	return (0);
 }
@@ -357,7 +381,6 @@ int	Connection::exec_cgi(void)
 	if ((cgienv->lang == CGI_PHP) &&
 		!this->serv.get_conf().fcgi_sock.empty())
 	{
-		WSLOG(LVL_DBG, TGT_CGI, "FCGI_SOCK");
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
 		
@@ -432,7 +455,7 @@ int	Connection::exec_cgi(void)
 	if (err < 0)
 	{
 		delete (pcgi); // conn : cgi FAIL
-		return (this->set_err(503)); // CGI_ERR
+		return (this->set_err(503)); // CGI_ERR - Service Unavailable
 	}
 	this->res_cgi = pcgi;
 	return (err);

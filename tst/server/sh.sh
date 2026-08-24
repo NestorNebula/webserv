@@ -111,11 +111,11 @@ if [ "$1" == "u" ]; then
 	ls -l $WWW/p*
 
 	FILES=
+	# FILES+="tiny.jpg "
+	# FILES+="mid.jpg "
+	# FILES+="earth.jpg "
+	# FILES+="e4.jpg "
 	FILES+="Kanan.mp3 "
-	FILES+="tiny.jpg "
-	FILES+="mid.jpg "
-	FILES+="earth.jpg "
-	FILES+="e4.jpg "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -126,20 +126,20 @@ if [ "$1" == "u" ]; then
 		curl -X POST http://localhost:8082/php/ul.php -i \
 			-F file=@$WWW/files/$FILE
 		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/py/ul.py -i \
-			-F file=@$WWW/files/$FILE
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/py/ul.py -i \
+		# 	-F file=@$WWW/files/$FILE
 
 
 		# curl -X POST http://localhost:8082/uploads/FILE -i \
 		# 	-F file=@$WWW/files/$FILE
 
-		curl -X POST http://localhost:8082/uploads/$FILE -i \
-			-H "Content-Type:application/octet-stream" \
-			--data-binary @$WWW/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/uploads/$FILE -i \
+		# 	-H "Content-Type:application/octet-stream" \
+		# 	--data-binary @$WWW/files/$FILE
+		# echo ; echo ; echo
 	done
 
 	ls -l $WWW/p*
@@ -153,7 +153,7 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-curl -X POST 'http://localhost:8082/test.py?g1=QUERYSHIT' -i \
+curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
@@ -186,11 +186,6 @@ exit 0
 # 	-d @wtf.txt
 # echo
 # exit 0
-
-
-curl -X POST 'http://localhost:8082/ka.php?g1=QUERYSHIT' -i \
-	-d "p1=post-one&p2=post-two"
-echo
 
 exit 0
 
