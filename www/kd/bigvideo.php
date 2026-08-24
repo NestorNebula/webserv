@@ -2,7 +2,7 @@
     header('Content-Type: video/x-matroska');
 
 // bad file : PROVOKE run-on (timeout)
-    $path = '/home/kdonlon/Videos/toxc.mp4';
+    $path = '/home/kdonlon/Videos/ultra.mp4';
     $fsiz = filesize($path);
     header('Content-Length: ' . $fsiz);
 

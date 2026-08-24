@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:51:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:27:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define RESOURCE_CGI_HPP
 
 # include "SizeDefs.hpp"
+# include "helpers.hpp"
 # include "Connection.hpp"
 
 enum
