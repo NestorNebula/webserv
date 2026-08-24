@@ -57,6 +57,7 @@ public:
   }
   // Number of characters that are still to be consumed from the body
   Stream::streamsize availableBody() const;
+  bool keepalive() const;
   void clear();
 
 private:
