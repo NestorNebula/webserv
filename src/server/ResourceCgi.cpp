@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 09:00:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 09:17:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,7 @@ void	ResourceCgi::chk_rsp_len(void)
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 // KEEP_ALIVE
 		resp.insert(pos, kastr);
@@ -151,10 +152,12 @@ void	ResourceCgi::chk_rsp_len(void)
 
 	clen_str = std::string("\r\nContent-Length:") + toString(clen);
 		// consider adding keep-alive
+	WSCOL(WSL_GREEN);
 	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 	
 	resp.insert(pos, clen_str);
-	// if (KPALIVE) && !(Connection: close)
+// attn : do not over-ride (Connection: close)
+// KEEP_ALIVE
 	resp.insert(pos, kastr);
 }
 
