@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:26:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 09:00:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,9 @@ Session
 	if (stat_str.size())
 	{
 		// HTTP/1.1 STATUS [Status Message]
+// WEBSERV : this->set_err()
 		stat_hed = std::string("HTTP/1.0 ") + stat_str + "\r\n";
+
 	}
 	else
 	{
@@ -140,9 +142,8 @@ void	ResourceCgi::chk_rsp_len(void)
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
-			// consider adding keep-alive
 		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
-		// if (KPALIVE)
+// KEEP_ALIVE
 		resp.insert(pos, kastr);
 		return;
 	}

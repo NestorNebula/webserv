@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:51:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 07:51:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,22 +69,23 @@ typedef long unsigned int log_tgt;
 # define TGT_CGI_HEAD	(1UL << 12)
 # define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND)
 # define TGT_CGI_ENV	(1UL << 13)
+# define TGT_CGI_ERR	(1UL << 14)
 
-# define TGT_RSRC		(1UL << 14)
-# define TGT_RSRC_INFO	(1UL << 15)
-# define TGT_RSRC_WAIT	(1UL << 16)
-# define TGT_RSRC_STAT	(1UL << 17)
+# define TGT_RSRC		(1UL << 15)
+# define TGT_RSRC_INFO	(1UL << 16)
+# define TGT_RSRC_WAIT	(1UL << 17)
+# define TGT_RSRC_STAT	(1UL << 18)
 
-# define TGT_SERV		(1UL << 18)
-# define TGT_MAIN		(1UL << 19)
+# define TGT_SERV		(1UL << 19)
+# define TGT_MAIN		(1UL << 20)
 
 // ATTN : poaching .. (sorry, noah)
-# define TGT_HEAD		(1UL << 20)
-# define TGT_BODY		(1UL << 21)
-# define TGT_FCGI		(1UL << 22)
-# define TGT_FCGI_PARSE (1UL << 23)
+# define TGT_HEAD		(1UL << 21)
+# define TGT_BODY		(1UL << 22)
+# define TGT_FCGI		(1UL << 23)
+# define TGT_FCGI_PARSE (1UL << 24)
 
-# define TGT_SERV_ALL	((1UL << 24) - 1)
+# define TGT_SERV_ALL	((1UL << 25) - 1)
 
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 16:00:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 08:58:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,12 +78,13 @@ public:
 
   // Reset session state and clears all its data
   void reset();
-
+// #kd - set keep-alive 
+  Action _next;
 private:
   Session(const Session &);
   Session &operator=(const Session &);
 
-  Action _next;
+  // Action _next;
 
   ServerConfig &_server;
   RouteConfig *_route;

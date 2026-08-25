@@ -1,6 +1,6 @@
-http://127.0.0.1:8080/ka.php
-http://127.0.0.1:8081/ka.php
-http://127.0.0.1:8082/ka.php
+# http://127.0.0.1:8080/ka.php
+# http://127.0.0.1:8081/ka.php
+# http://127.0.0.1:8082/ka.php
 
 # http://127.0.0.1:8080/ka.py
 # http://127.0.0.1:8081/ka.py
@@ -44,5 +44,14 @@ http://127.0.0.1:8082/ka.php
 # http://127.0.0.1:8080/stat.php
 # http://127.0.0.1:8081/stat.php
 # http://127.0.0.1:8082/stat.php
+
+
+
+
+http://127.0.0.1:8082/ka.php
+
+# http://127.0.0.1:8082/files/earth.jpg
+# http://127.0.0.1:8082/files/e4.jpg
+# http://127.0.0.1:8082/files/Kanan.mp3
 
 

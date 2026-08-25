@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:26:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 08:45:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	std::string path_rel = conf.root + info.scriptPath;
 	script.parse(path_rel);
 
+	WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
 			// this should have been checked before
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
@@ -100,14 +101,18 @@ int     CgiEnv::from_conn(Connection & conn)
 		lang = CGI_PYTHON;
 			// this should have been checked before
 		
+			// not actually required at HOME 
 		// if (conf.pycgi_dir.empty())
-		// 	return (conn.set_err(403)); // Forbidden
+		// 	return (conn.set_err(403));
 
 			// this could be fixed at startup
-		std::string pyrel = conf.root + conf.pycgi_dir;
-		FilePath pypath(pyrel);
-		
-		this->add("PYTHONPATH", pypath.path.c_str());
+		// UNCLEAR : 
+		if (conf.pycgi_dir.size())
+		{
+			std::string pyrel = conf.root + conf.pycgi_dir;
+			FilePath pypath(pyrel);
+			this->add("PYTHONPATH", pypath.path.c_str());
+		}
 	}
 	else if (script.fext == std::string(".pl"))
 	{
