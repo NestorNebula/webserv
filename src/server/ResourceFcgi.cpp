@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 09:03:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 19:31:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,11 @@ int	ResourceFcgi::status(void)
 #if RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);
-#endif
 // KEEP_ALIVE
+		// if (something)
 		return (RSP_KPALIVE);
-		// return (RSP_COMPLETE); 
+#endif
+		return (RSP_COMPLETE); 
 	}
 	// STILL RUNNING
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
