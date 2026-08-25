@@ -495,6 +495,27 @@ void Session::setResponseHeaders() {
   }
   // ...
 
+  // Set-Cookie
+  if (_request.getMethod() == METHOD_GET && _response.getCode() == 200) {
+    std::string cookieName = "wstimecookie";
+    std::time_t now = std::time(NULL);
+    std::ostringstream oss;
+    bool update = false;
+    if (_request.hasHeader("Cookie")) {
+      std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
+      if (std::count(cookie.begin(), cookie.end(), '|') == 1) {
+        std::string::size_type pos = cookie.find('|');
+        if (pos != 0 && pos != cookie.size() - 1) {
+          oss << cookieName << '=' << cookie.substr(0, pos) << '|' << now;
+          update = true;
+        }
+      }
+    }
+    if (!update)
+      oss << cookieName << '=' << now << '|' << now;
+    headers.insert("Set-Cookie", oss.str());
+  }
+
   _response.addHeaders(headers.begin(), headers.end());
 }
 
