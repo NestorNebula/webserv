@@ -18,7 +18,7 @@ if [[ "$1" =~ "x" ]]; then
 	exit 0
 fi
 
-CONF=demo/config.conf
+CONF=www/kd/config.conf
 tput reset
 if [[ "$1" =~ "v" ]]; then
 	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./webserv "$CONF" 0

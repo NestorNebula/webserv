@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:44:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 09:04:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,10 @@ int	ResourcePiped::status(void)
         if (this->resp.size())
             return (1);
 #endif
-		return (RSP_COMPLETE);
+// KEEP_ALIVE
+		// where is chk_rsp_len : wait
+		return (RSP_KPALIVE);
+		// return (RSP_COMPLETE);
 	}
 	
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");

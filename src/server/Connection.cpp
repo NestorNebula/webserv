@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:48:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 09:04:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -215,7 +215,16 @@ ssize_t	Connection::pollout(void)
 			{
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+// may set keep-alive 
 				return (-1);
+// KEEP_ALIVE
+			case RSP_KPALIVE:
+				// sess._next = Session::KPALIVE;
+				this->reset();
+				// this->mod_evt(-EPOLLOUT);
+				// unless we sent back error ...
+				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
@@ -424,7 +433,8 @@ int	Connection::exec_cgi(void)
 		}
 		const char **envp = cgienv->gen();
 
-		pipes.dup_err();
+		// if (!(WsLog::tgt & TGT_CGI_ERR))	
+			pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())

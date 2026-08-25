@@ -6,19 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:57:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 08:31:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WsLog.hpp"
-
-#include "Epoll.hpp"
-#include "Server.hpp"
-#include "Connection.hpp"
-#include "ConfigParser.hpp"
 #include "FilePath.hpp"
-
-#include <deque>
+#include "ConfigParser.hpp"
+#include "Epoll.hpp"
 
 int main (int argc, char ** argv, char **envp)
 {   
@@ -38,7 +33,7 @@ int main (int argc, char ** argv, char **envp)
         {
         case '0':
            WsLog::lvl = LVL_MAIN;
-           WsLog::tgt = TGT_ALL;
+           WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
            WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_FCGI_PARSE);

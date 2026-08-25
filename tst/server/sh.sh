@@ -31,10 +31,10 @@ if [[ "$1" =~ "h" ]]; then
 	echo
 fi
 
-# if [[ "$1" =~ "k" ]]; then
-# 	siege -f urls/ka.sh -R ./urls/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
-# 	echo
-# fi
+if [[ "$1" =~ "k" ]]; then
+	siege -f urls/ka.sh -R ./urls/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
 
 if [[ "$1" =~ "p" ]]; then
 	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C  -b
@@ -111,10 +111,10 @@ if [ "$1" == "u" ]; then
 	ls -l $WWW/p*
 
 	FILES=
-	# FILES+="tiny.jpg "
-	# FILES+="mid.jpg "
-	# FILES+="earth.jpg "
-	# FILES+="e4.jpg "
+	FILES+="tiny.jpg "
+	FILES+="mid.jpg "
+	FILES+="earth.jpg "
+	FILES+="e4.jpg "
 	FILES+="Kanan.mp3 "
 
 	for FILE in $FILES; do
@@ -123,9 +123,9 @@ if [ "$1" == "u" ]; then
 # FCGI : not 100%
 # END STDIN .. still has (left)
 
-		curl -X POST http://localhost:8082/php/ul.php -i \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/php/ul.php -i \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
 		# curl -X POST http://localhost:8082/pl/ul.pl -i \
 		# 	-F file=@$WWW/files/$FILE
 		# echo ; echo ; echo
@@ -136,10 +136,10 @@ if [ "$1" == "u" ]; then
 		# curl -X POST http://localhost:8082/uploads/FILE -i \
 		# 	-F file=@$WWW/files/$FILE
 
-		# curl -X POST http://localhost:8082/uploads/$FILE -i \
-		# 	-H "Content-Type:application/octet-stream" \
-		# 	--data-binary @$WWW/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/uploads/$FILE -i \
+			-H "Content-Type:application/octet-stream" \
+			--data-binary @$WWW/files/$FILE
+		echo ; echo ; echo
 	done
 
 	ls -l $WWW/p*
@@ -152,6 +152,13 @@ fi
 if [ "$1" ]; then
 	exit 0
 fi
+
+
+
+# curl -X GET 'http://localhost:8082/'
+# echo
+# exit 0
+
 
 curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
