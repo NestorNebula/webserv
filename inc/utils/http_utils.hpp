@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   http_utils.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 11:26:48 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:06:30 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Response.hpp"
-#include "ServerConfig.hpp"
+#include "http/Response.hpp"
+#include "parsing/ServerConfig.hpp"
 #include "unistd.h"
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config);

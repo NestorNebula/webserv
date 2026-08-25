@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   helpers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 14:32:45 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:05:35 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "helpers.hpp"
+#include "utils/helpers.hpp"
 #include <cctype>
 #include <cerrno>
 #include <cstdlib>

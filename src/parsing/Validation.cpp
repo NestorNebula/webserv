@@ -6,11 +6,12 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/10 13:40:58 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/24 18:25:07 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigParser.hpp"
+#include "parsing/ConfigParser.hpp"
+#include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
@@ -153,6 +154,8 @@ void	ConfigParser::validateServerConfig(const ServerConfig& server)
 		validateDirExists(server.root, "server root");
 	if (server.upload && !server.upload_dir.empty())
 		validateDirExists(server.upload_dir, "server upload_dir");
+	if (!server.pycgi_dir.empty())
+        validateDirExists(server.pycgi_dir, "server pycgi_dir");
 
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = server.error_pages.begin(); it != server.error_pages.end(); ++it)
@@ -184,7 +187,11 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
-		if (access(it->second.c_str(), X_OK) != 0)
+		if (it->second.empty() || it->second[0] != '/')
+			throw	ConfigException("CGI executable must be an absolute path: "
+				+ it->second);
+		WsLog::_(LVL_DBG, TGT_VALIDATE, "Checking CGI executable: ", it->second);
+		if (access(it->second.c_str(), F_OK | R_OK) != 0)
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");
 	}
@@ -192,8 +199,9 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 
 void	ConfigParser::validateDirExists(const std::string& path, const std::string& context)
 {
-	struct stat	info;
+	WsLog::_(LVL_DBG, TGT_VALIDATE, "Checking directory exists: ", path);
 
+	struct stat	info;
 	if (stat(path.c_str(), &info) != 0)
 		throw	ConfigException(context + ": directory does not exist: " + path);
 	if (!S_ISDIR(info.st_mode))
