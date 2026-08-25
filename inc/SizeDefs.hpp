@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 08:50:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 19:28:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@
 
 
 # ifndef RES_CGI_WAIT_COMPLETE
-    // .. except if content-length ... 
-#  define RES_CGI_WAIT_COMPLETE 1
+    // .. except if content-length > xxx
+#  define RES_CGI_WAIT_COMPLETE 0
 # endif
 
 
