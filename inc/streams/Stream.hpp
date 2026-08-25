@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Stream.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:33:17 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:07:41 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "WsLog.hpp"
+#include "utils/WsLog.hpp"
 #include <iostream>
 
 class Stream {
