@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:08:55 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:25:51 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:07:55 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Headers.hpp"
-#include "Resource.hpp"
-#include "WsLog.hpp"
+#include "resources/Resource.hpp"
+#include "utils/WsLog.hpp"
 
 class Response {
 public:

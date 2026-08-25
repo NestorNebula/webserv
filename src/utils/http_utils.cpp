@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   http_utils.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 11:54:20 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:05:53 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "http_utils.hpp"
-#include "helpers.hpp"
+#include "utils/http_utils.hpp"
+#include "utils/http_utils.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
 

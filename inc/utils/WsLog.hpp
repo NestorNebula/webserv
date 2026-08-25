@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WsLog.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:06:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:45:07 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 
 # if NOLOG
 #  define WSLOG(...)
-#  define WSCOL(...) 
+#  define WSCOL(...)
 #else
 #  define WSLOG WsLog::_
 #  define WSCOL WsLog::color
@@ -107,7 +107,13 @@ typedef long unsigned int log_tgt;
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
+// PARSING TGTs using 1UL << 41 to 1UL << 60
+# define TGT_CONFIG     (1UL << 41)
+# define TGT_PARSER     (1UL << 42)
+# define TGT_LEXER      (1UL << 43)
+# define TGT_VALIDATE   (1UL << 44)
 
+# define TGT_PARSE_ALL  (TGT_CONFIG | TGT_PARSER | TGT_LEXER | TGT_VALIDATE)
 
 # define TGT_MAX		(1UL << 63)
 # define TGT_ALL		(TGT_MAX - 1UL)
@@ -129,7 +135,7 @@ private:
 
 public:
 	static log_lvl  	lvl;
-	static log_tgt  	tgt; 
+	static log_tgt  	tgt;
 	static std::string	col;
 
 	static void color(int c);
