@@ -574,6 +574,7 @@ void Session::setResponseHeaders() {
     }
     if (!update)
       oss << cookieName << '=' << now << '|' << now;
+    oss << "; Path=/";
     headers.insert("Set-Cookie", oss.str());
   }
 
