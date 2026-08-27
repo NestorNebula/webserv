@@ -49,3 +49,5 @@ std::string encodeURI(const std::string &uri);
 std::string normalizeURI(const std::string &uri);
 
 std::string getCookie(const std::string &cookies, const std::string &key);
+
+void header_key(std::string &s);
