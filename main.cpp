@@ -3,33 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:05:57 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/27 08:23:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WsLog.hpp"
-
-#include "Epoll.hpp"
-#include "Server.hpp"
-#include "Connection.hpp"
-#include "ConfigParser.hpp"
 #include "FilePath.hpp"
-
-#include <deque>
+#include "ConfigParser.hpp"
+#include "Epoll.hpp"
 
 int main (int argc, char ** argv, char **envp)
-{
-
+{   
+    
     WsLog::kd();
     // WsLog::nh();
     // WsLog::mm();
 
     if (argc < 2)
     {
-        std::cerr << "usage: demo <config>\n";
+        std::cerr << "usage: webserv <config>\n";
         return 0;
     }
     if (argc > 2)
@@ -37,10 +32,11 @@ int main (int argc, char ** argv, char **envp)
         switch(argv[2][0])
         {
         case '0':
-           WsLog::tgt = TGT_NONE;
+           WsLog::lvl = LVL_MAIN;
+           WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
-           WsLog::tgt = TGT_KD;
+           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_FCGI_PARSE);
            break;
         case 'a':
            WsLog::tgt = TGT_ALL; //  & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
@@ -54,19 +50,19 @@ int main (int argc, char ** argv, char **envp)
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't detect working directory");
         return (0);
     }
-    if (!setWorkingDirectory(argv[1], conf_root))
+    if (!setWorkingDirectory(argv[1], conf_root)) 
     {
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't setup working directory");
         return 0;
     }
-
+    
 // #kd - conf_file_root
     ConfigParser parser(conf_root);
-    try
+    try 
     {
         parser.parseFile(getConfigFileName(argv[1]));
-    }
-    catch (std::exception &e)
+    } 
+    catch (std::exception &e) 
     {
         WSLOG(LVL_ERR, TGT_MAIN, "ex: main\n", e.what());
         return 0;
@@ -76,11 +72,11 @@ int main (int argc, char ** argv, char **envp)
 
     int     err = 0;
     Epoll   *ep = NULL;
-
+    
     try
     {
         ep = new Epoll(envp);
-
+       
         err = ep->serve(servers);
         if (err)
           err = ep->loop();
