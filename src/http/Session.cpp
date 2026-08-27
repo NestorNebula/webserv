@@ -176,6 +176,11 @@ std::string &Session::getResponse() {
 }
 
 void Session::setError(Response::StatusCode code) {
+  if (_sent != 0) {
+    _next = CLOSE;
+    return;
+  }
+
   try {
     _response.clear();
     setResponseStatus(code);
