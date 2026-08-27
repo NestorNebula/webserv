@@ -177,6 +177,7 @@ std::string &Session::getResponse() {
 
 void Session::setError(Response::StatusCode code) {
   try {
+    _response.clear();
     setResponseStatus(code);
     handleResource();
     handleResponse();
