@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   http_utils.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 17:06:30 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/27 08:13:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "http/Response.hpp"
 #include "parsing/ServerConfig.hpp"
+#include "helpers.hpp"
 #include "unistd.h"
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config);
