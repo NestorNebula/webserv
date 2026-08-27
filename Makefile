@@ -15,6 +15,7 @@ LIB_DIR=.
 CFLAGS+=-I . \
 	-I $(INC_DIR) \
 	-I $(INC_DIR)/server \
+	-I $(INC_DIR)/parsing \
 	-I $(INC_DIR)/utils \
 	-I $(INC_DIR)/http \
 	-I $(INC_DIR)/streams \
