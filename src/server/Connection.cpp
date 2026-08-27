@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 19:33:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 08:15:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,7 +221,8 @@ ssize_t	Connection::pollout(void)
 // KEEP_ALIVE
 			case RSP_KPALIVE:
 				// w/o : wrong action on session
-				sess._next = Session::KPALIVE;
+// #kd - ATTN : need access to (_next)
+				// sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...

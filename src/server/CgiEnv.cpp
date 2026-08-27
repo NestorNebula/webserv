@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/27 07:58:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 08:08:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,10 @@ CgiEnv::~CgiEnv()
 void	CgiEnv::add(const char *key, const char *val)
 {
 	this->kv[ std::string(key) ] = std::string(val);
-	this->kv[ std::string(key) ] = std::string(val);
 }
 
 void	CgiEnv::add(const char *key, int n)
 {
-	this->kv[ std::string (key) ] = toString(n);
 	this->kv[ std::string (key) ] = toString(n);
 }
 
