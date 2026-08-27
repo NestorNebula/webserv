@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:20:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 09:03:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define RESOURCE_CGI_HPP
 
 # include "SizeDefs.hpp"
+# include "helpers.hpp"
 # include "Connection.hpp"
 
 enum
@@ -45,7 +46,8 @@ enum
 	RSP_WAIT_HEAD = (-1),
 	RSP_WAIT_BODY = (-2),
 	RSP_COMPLETE = (-3),
-	RSP_ERROR = (-4)
+	RSP_KPALIVE = (-4),
+	RSP_ERROR = (-5)
 };
 
 class ResourceCgi

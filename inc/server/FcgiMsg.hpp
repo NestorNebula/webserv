@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:19:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:29:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <iostream>
+# include "helpers.hpp"
 
 # include "FcgiDefs.hpp"
 # include "MsgBuf.hpp"

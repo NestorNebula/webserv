@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:12:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 19:31:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,11 @@ int	ResourceFcgi::status(void)
 #if RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);
+// KEEP_ALIVE
+		// if (something)
+		return (RSP_KPALIVE);
 #endif
-		return (RSP_COMPLETE); // RSP_COMPLETE
+		return (RSP_COMPLETE); 
 	}
 	// STILL RUNNING
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
@@ -85,6 +88,7 @@ int	ResourceFcgi::wait(int opt)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
 #if RES_CGI_WAIT_COMPLETE
+// KEEP_ALIVE
 		this->chk_rsp_len();
 #endif
 		this->set_done(RSRC_FLUSHING);
@@ -120,16 +124,13 @@ int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
 		// should have been checked before calling
 	if (conn->serv.get_conf().fcgi_sock.empty())
 	{
-		WSLOG(LVL_DBG, TGT_CGI, "fcgi_sock: empty");
+		WSLOG(LVL_DBG, TGT_FCGI, "fcgi_sock: empty");
 		return (-1);
 	}
 	
 	int fd = FcgiConn::make_sock(conn->serv.get_conf().fcgi_sock);
 	if (fd < 0)
-	{
-		WSLOG(LVL_DBG, TGT_CGI, "fcgi_sock: FAIL");
 		return (-1);
-	}
 	
 	this->fcgi = new FcgiPipe(ep, fd, conn, this);
 	err = this->fcgi->init(cgienv);
