@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CMD=php
+if [[  "$1" ]]; then
+	CMD=$1
+fi
+
+watch -n1 "ps ax -o user,pid,cmd | grep $CMD"
