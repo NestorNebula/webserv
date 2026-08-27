@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/21 10:27:00 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 17:46:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 07:58:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,6 @@ std::string trim(std::string s, std::string set, bool beg, bool end) {
   if (startIndex == std::string::npos || endIndex == std::string::npos)
     return std::string();
   return std::string(s, startIndex, endIndex - startIndex + 1);
-}
-
-void header_key(std::string &s) {
-  for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
-  {
-      if (*it == '-')
-        (*it = '_');
-      else
-        *it = std::toupper(static_cast<unsigned char>(*it));
-  }
 }
 
 void capitalize(std::string &s) {

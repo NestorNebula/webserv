@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 08:45:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 07:58:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,18 @@ void	CgiEnv::add(const char *key, int n)
 std::string & CgiEnv::get(const char *key)
 {
 	return (this->kv[ std::string (key) ]);
+}
+
+
+static void header_key(std::string &s) 
+{
+	for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
+	{
+		if (*it == '-')
+			(*it = '_');
+		else
+			*it = std::toupper(static_cast<unsigned char>(*it));
+	}
 }
 
 int     CgiEnv::from_conn(Connection & conn)

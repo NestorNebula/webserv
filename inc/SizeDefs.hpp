@@ -6,12 +6,27 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 19:28:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 07:57:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SIZE_DEFS_HPP
 # define SIZE_DEFS_HPP
+
+# ifndef CONN_TIMEOUT
+#  define CONN_TIMEOUT 60
+# endif
+
+# ifndef CGI_TIMEOUT
+#  define CGI_TIMEOUT 60
+# endif
+
+
+# ifndef RES_CGI_WAIT_COMPLETE
+    // .. except if content-length > xxx
+#  define RES_CGI_WAIT_COMPLETE 0
+# endif
+
 
 # define DEF_BUF_SIZ 8192
 
@@ -35,27 +50,6 @@
 #  define RSP_READ_SIZ (DEF_BUF_SIZ)
 # endif
 
-
-
-# ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 60
-# endif
-
-# ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 60
-# endif
-
-
-# ifndef RES_CGI_WAIT_COMPLETE
-    // .. except if content-length > xxx
-#  define RES_CGI_WAIT_COMPLETE 0
-# endif
-
-
-// git fetch --all                                   # Get the latest code
-// git checkout -b my-single-change upstream/master  # Create new branch based on upstream/master
-// git cherry-pick b50b2e7                           # Cherry pick the commit you want
-// git push -u origin my-single-change               # Push your changes to the remote branch
 #endif
 
 
