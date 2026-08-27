@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:10:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:26:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void FcgiMsg::add_param(const char * key, const char * val)
 
 void FcgiMsg::add_param(const char * key, int val)
 {
-	std::string vStr = num_2_str(val);
+	std::string vStr = toString(val);
 	buf.fcgi(key, vStr.c_str());
 }
 

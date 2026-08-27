@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:11:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/24 16:02:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int FcgiConn::make_sock(std::string &sock_path)
     if (err < 0)
 	{
 		close(fd);
-		WSLOG(LVL_DBG, TGT_FCGI, "connect");
+		WSLOG(LVL_DBG, TGT_FCGI, "connect: failed");
 		return (err);
 	}
     return (fd);

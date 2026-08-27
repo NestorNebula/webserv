@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:55:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 07:58:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,25 @@ void	CgiEnv::add(const char *key, const char *val)
 
 void	CgiEnv::add(const char *key, int n)
 {
-	this->kv[ std::string (key) ] = num_2_str(n);
-	this->kv[ std::string (key) ] = num_2_str(n);
+	this->kv[ std::string (key) ] = toString(n);
+	this->kv[ std::string (key) ] = toString(n);
 }
 
 std::string & CgiEnv::get(const char *key)
 {
 	return (this->kv[ std::string (key) ]);
+}
+
+
+static void header_key(std::string &s) 
+{
+	for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
+	{
+		if (*it == '-')
+			(*it = '_');
+		else
+			*it = std::toupper(static_cast<unsigned char>(*it));
+	}
 }
 
 int     CgiEnv::from_conn(Connection & conn)
@@ -74,6 +86,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	std::string path_rel = conf.root + info.scriptPath;
 	script.parse(path_rel);
 
+	WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
 			// this should have been checked before
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
@@ -99,13 +112,19 @@ int     CgiEnv::from_conn(Connection & conn)
 	{
 		lang = CGI_PYTHON;
 			// this should have been checked before
-		if (conf.pycgi_dir.empty())
-			return (conn.set_err(403)); // Forbidden
-			// this could be fixed at startup
-		std::string pyrel = conf.root + conf.pycgi_dir;
-		FilePath pypath(pyrel);
 		
-		this->add("PYTHONPATH", pypath.path.c_str());
+			// not actually required at HOME 
+		// if (conf.pycgi_dir.empty())
+		// 	return (conn.set_err(403));
+
+			// this could be fixed at startup
+		// UNCLEAR : 
+		if (conf.pycgi_dir.size())
+		{
+			std::string pyrel = conf.root + conf.pycgi_dir;
+			FilePath pypath(pyrel);
+			this->add("PYTHONPATH", pypath.path.c_str());
+		}
 	}
 	else if (script.fext == std::string(".pl"))
 	{

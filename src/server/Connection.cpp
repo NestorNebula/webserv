@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 16:28:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/25 19:33:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 Connection::~Connection()
 {
 	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+// KEEP_ALIVE
 	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
@@ -52,6 +53,13 @@ Connection::~Connection()
 		WSLOG(LVL_DBG, TGT_CONN, " (~) Connection\n", e.what());
 	}
 }
+
+// A "connection reset by peer" error (TCP RST packet) means the remote host, firewall, or proxy closed the network connection abruptly. To resolve it, you must identify whether the issue is caused by misconfigured timeouts, aggressive firewalls, stale connection pools, or application code crashes
+
+// the error is the one that shows up after the TCP connection was established. The SYN succeeded, the SYN-ACK succeeded, the ACK succeeded, data flowed, and then the RST appeared.
+
+// socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1))
+
 
 bool	Connection::timeo(time_t now)
 {
@@ -88,6 +96,29 @@ int	Connection::set_err(int e)
 	return (-1);
 }
 
+
+static void sess_log_next(Session &sess)
+{
+    WSCOL(WSL_YELLOW);
+    switch(sess.nextAction())
+    {
+    case Session::RDSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
+      break;
+    case Session::DOCGI:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
+      break;
+    case Session::WRSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
+      break;
+    case Session::CLOSE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
+      break;
+    case Session::KPALIVE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
+      break;
+    }
+}
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -95,7 +126,7 @@ ssize_t	Connection::pollin(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-		// sess.log_next();
+		sess_log_next(sess);
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
 		err = this->recv();
 		if (err < 0)
@@ -111,7 +142,7 @@ ssize_t	Connection::pollin(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-		// sess.log_next();
+		sess_log_next(sess);
 		switch(sess.nextAction())
 		{
 		case Session::RDSOCK:
@@ -132,6 +163,7 @@ ssize_t	Connection::pollin(void)
 				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 				return (0); // send error
 			}
+			
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
@@ -141,7 +173,9 @@ ssize_t	Connection::pollin(void)
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
-			return (-1);
+			// return (-1);
+			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			return (0);
 		case Session::CLOSE:
 			return (-1);
 		}
@@ -150,7 +184,7 @@ ssize_t	Connection::pollin(void)
 	catch(const std::exception& e)
 	{
 		WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
-		this->set_err(404);
+		this->set_err(404); // File Not Found
 	}
 	return (0);
 }
@@ -167,7 +201,8 @@ ssize_t	Connection::pollout(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
-		// sess.log_next();
+		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
+		sess_log_next(sess);
 
 		if (sess.nextAction() == Session::DOCGI)
 		{
@@ -181,7 +216,17 @@ ssize_t	Connection::pollout(void)
 			{
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
+// may set keep-alive 
 				return (-1);
+// KEEP_ALIVE
+			case RSP_KPALIVE:
+				// w/o : wrong action on session
+				sess._next = Session::KPALIVE;
+				this->reset();
+				// this->mod_evt(-EPOLLOUT);
+				// unless we sent back error ...
+				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
@@ -196,7 +241,6 @@ ssize_t	Connection::pollout(void)
 
 			std::string & RESP = res->get_resp();
 			
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "send: ", this->get_fd());
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
@@ -210,7 +254,7 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 			case Session::WRSOCK:
 			default:
-				std::string & RESP = sess.get_resp();
+				std::string & RESP = sess.getResponse();
 				if (RESP.size())
 				{
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
@@ -224,7 +268,7 @@ ssize_t	Connection::pollout(void)
 		
 		if (err < 0)
 		{
-			WsLog::_errno(LVL_ERR, TGT_CONN_SEND, "send");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 			return (err);
 		}
 		if (err == 0)
@@ -234,13 +278,16 @@ ssize_t	Connection::pollout(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		
-		// sess.log_next();
+		sess_log_next(sess);
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
 			this->reset();
-			this->mod_evt(-EPOLLOUT);
-			return (-1);
+			// this->mod_evt(-EPOLLOUT);
+			// unless we sent back error ...
+			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			return (0);
+			// return (-1);
 		case Session::CLOSE:
 			return (-1);
 		default:
@@ -251,7 +298,7 @@ ssize_t	Connection::pollout(void)
 	catch(const std::exception& e)
 	{
 		WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
-		this->set_err(404);
+		this->set_err(404); // File Not Found
 	}
 	return (0);
 }
@@ -388,7 +435,8 @@ int	Connection::exec_cgi(void)
 		}
 		const char **envp = cgienv->gen();
 
-		pipes.dup_err();
+		// if (!(WsLog::tgt & TGT_CGI_ERR))	
+			pipes.dup_err();
 
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
@@ -420,7 +468,7 @@ int	Connection::exec_cgi(void)
 	if (err < 0)
 	{
 		delete (pcgi); // conn : cgi FAIL
-		return (this->set_err(503)); // CGI_ERR
+		return (this->set_err(503)); // CGI_ERR - Service Unavailable
 	}
 	this->res_cgi = pcgi;
 	return (err);
