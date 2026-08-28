@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/28 08:39:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 11:06:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,16 @@ public:
     WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
-    delete _resource;
+    try
+    {
+      /* code */
+      delete _resource;
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what() << '\n';
+    }
+    
     WSLOG(LVL_DBG, TGT_SESS, "Session destructor");
   }
 
