@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 18:03:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:38:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ class ConfigParser {
 		std::vector<Token>			_tokens;
 		size_t						_pos;
 		std::vector<ServerConfig>	_servers;
-// #kd - conf_file_root
 		const std::string			_conf_file_root;
 
 		/* Parser Tools */
@@ -67,7 +66,6 @@ class ConfigParser {
 
 		
 	public:
-// #kd - conf_file_root
 		ConfigParser(const std::string &conf_file_root);
 		~ConfigParser();
 

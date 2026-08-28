@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/23 14:34:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:39:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,10 +153,6 @@ void	ConfigParser::validateServerConfig(const ServerConfig& server)
 		validateDirExists(server.root, "server root");
 	if (server.upload && !server.upload_dir.empty())
 		validateDirExists(server.upload_dir, "server upload_dir");
-// #kd - it's okay if the socket does not exist at startup -- we fall back on php-cgi
-	// if (!server.fcgi_sock.empty())
-	// 	validateFileExists(server.fcgi_sock, "server fcgi_sock");
-// #kd - perhaps turn OFF (python) for this server / route
 	if (!server.pycgi_dir.empty())
 		validateDirExists(server.pycgi_dir, "server pycgi_dir");
 
@@ -192,7 +188,6 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
 		// if (access(it->second.c_str(), X_OK) != 0)
-// #kd : .cgi file does not need to be executable
 		if (access(it->second.c_str(), F_OK | R_OK) != 0)
 			throw	ConfigException("CGI executable not found or not executable: "
 				+ it->second + " (for extension " + it->first + ")");

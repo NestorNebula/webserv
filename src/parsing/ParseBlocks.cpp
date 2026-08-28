@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 09:55:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:38:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,16 +149,13 @@ void	ConfigParser::parseServer()
 		server.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("root"))
 		// server.root = directives["root"];
-// #kd - conf_file_root
 		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);
 	if (directives.count("upload_dir"))
 		server.upload_dir = directives["upload_dir"];
-// #kd - fcgi_sock
 	if (directives.count("fcgi_sock"))
 		server.fcgi_sock = directives["fcgi_sock"];
-// #kd - pycgi_dir
 	if (directives.count("pycgi_dir"))
 		server.pycgi_dir = directives["pycgi_dir"];
 		
