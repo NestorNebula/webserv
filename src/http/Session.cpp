@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/25 09:19:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 09:58:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,16 @@
 #include <sys/stat.h>
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
-  if (_request.isComplete())
+  if (_request.isComplete() || (_next != RDSOCK && _next != DOCGI)) {
+    std::ostringstream oss;
+    oss << "Session::write called while Request is complete and Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::write should be called for non-complete Request "
+      << "in RDSOCK/DOCGI mode. Nothing written";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
     throwIfNotAction(RDSOCK);
+    return -1;
+  }
 
   try {
     _request.append(std::string(buf, count));
@@ -44,12 +52,32 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 }
 
 Request &Session::getRequest() {
-  throwIfNotAction(DOCGI);
+  if (_next != DOCGI) {
+    std::ostringstream oss;
+    oss << "Session::getRequest called while Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::getRequest should only be called in DOCGI mode. "
+      << "Returning raw request";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
+    return _request;
+  }
+
   return _request;
 }
 
 Session::CgiInfo Session::getCgiInfo() const {
-  throwIfNotAction(DOCGI);
+  if (_next != DOCGI) {
+    std::ostringstream oss;
+    oss << "Session::getCgiInfo called while Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::getCgiInfro should only be called in DOCGI mode. "
+      << "Returning empty CgiInfo structure";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
+    return CgiInfo();
+  }
+
   CgiInfo info;
 
   info.scriptPath = _resourcePath;
@@ -60,7 +88,17 @@ Session::CgiInfo Session::getCgiInfo() const {
 }
 
 void Session::setCgiResource(Resource *cgiResource) {
-  throwIfNotAction(DOCGI);
+  if (_next != DOCGI) {
+    std::ostringstream oss;
+    oss << "Session::setCgiResource called while Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::setCgiResource should only be called in DOCGI mode. "
+      << "Resource left intact";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
+    return;
+  }
+
   delete _resource;
   _resource = cgiResource;
   WSLOG(LVL_INFO, TGT_SESS, "Session received CGI resource");
@@ -68,7 +106,16 @@ void Session::setCgiResource(Resource *cgiResource) {
 }
 
 Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
-  throwIfNotAction(WRSOCK);
+  if (_next != WRSOCK) {
+    std::ostringstream oss;
+    oss << "Session::read called while Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::read should only be called in WRSOCK mode. "
+      << "Nothing read";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(WRSOCK);
+    return -1;
+  }
 
   Stream::streamsize r = 0;
 
@@ -108,7 +155,16 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 }
 
 std::string &Session::getResponse() {
-  throwIfNotAction(WRSOCK);
+  if (_next != WRSOCK) {
+    std::ostringstream oss;
+    oss << "Session::getResponse called while Session is in "
+      << Session::actionToStr(_next)
+      << "\nSession::getResponse should only be called in WRSOCK mode. "
+      << "Returning Response string without further reading";
+    WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(WRSOCK);
+    return _responseStr;
+  }
 
   if (!_responseStr.size()) {
     char buf[RSP_READ_SIZ];
@@ -120,7 +176,13 @@ std::string &Session::getResponse() {
 }
 
 void Session::setError(Response::StatusCode code) {
+  if (_sent != 0) {
+    _next = CLOSE;
+    return;
+  }
+
   try {
+    _response.clear();
     setResponseStatus(code);
     handleResource();
     handleResponse();
@@ -135,7 +197,11 @@ void Session::setError(Response::StatusCode code) {
 }
 
 void Session::reset() {
-  throwIfNotAction(KPALIVE);
+  std::ostringstream oss;
+  oss << "Session::reset called while Session is in "
+    << Session::actionToStr(_next)
+    << "\nProceed to Session reset";
+  WSLOG(LVL_INFO, TGT_SESS_WR, oss.str());
 
   _sent = 0;
 
@@ -493,10 +559,54 @@ void Session::setResponseHeaders() {
                    allowed.begin(), methodToString);
     headers.insert("Allow", join(allowed));
   }
+  // ...
+
+  // Set-Cookie
+  if (_request.getMethod() == METHOD_GET && _response.getCode() == 200) {
+    std::string cookieName = "wstimecookie";
+    std::time_t now = std::time(NULL);
+    std::ostringstream oss;
+    bool update = false;
+    if (_request.hasHeader("Cookie")) {
+      std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
+      if (std::count(cookie.begin(), cookie.end(), '|') == 1) {
+        std::string::size_type pos = cookie.find('|');
+        if (pos != 0 && pos != cookie.size() - 1) {
+          bool err;
+          long firstVisit = getLong(cookie.substr(0, pos), &err, 0);
+          oss << cookieName << '=' << (err ? now : firstVisit) << '|' << now;
+          update = true;
+        }
+      }
+    }
+    if (!update)
+      oss << cookieName << '=' << now << '|' << now;
+    oss << "; Path=/";
+    headers.insert("Set-Cookie", oss.str());
+  }
+
   _response.addHeaders(headers.begin(), headers.end());
 }
 
 void Session::setResponseStatus(Response::StatusCode code) {
   _response.setCode(code);
   _response.setReason(getStatusReason(code));
+}
+
+const std::string &Session::actionToStr(Action action) {
+  static std::map<Action, std::string> actions;
+  static std::string empty("");
+
+  if (actions.empty()) {
+    actions[RDSOCK] = "RDSOCK";
+    actions[DOCGI] = "DOCGI";
+    actions[WRSOCK] = "WRSOCK";
+    actions[CLOSE] = "CLOSE";
+    actions[KPALIVE] = "KPALIVE";
+  }
+
+  std::map<Action, std::string>::const_iterator a = actions.find(action);
+  if (a == actions.end())
+    return empty;
+  return a->second;
 }

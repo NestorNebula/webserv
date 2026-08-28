@@ -11,8 +11,9 @@
 /* ************************************************************************** */
 
 #include "utils/http_utils.hpp"
-#include "utils/http_utils.hpp"
+#include "helpers.hpp"
 #include <sys/stat.h>
+#include <algorithm>
 #include <unistd.h>
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config) {
@@ -281,4 +282,19 @@ std::string normalizeURI(const std::string &uri) {
   if (!endSlash)
     normalized.erase(normalized.size() - 1);
   return normalized;
+}
+
+std::string getCookie(const std::string &cookies, const std::string &key) {
+  std::vector<std::string> splitCookies(split(cookies, "; "));
+  std::string val;
+
+  for (std::vector<std::string>::const_iterator it = splitCookies.begin(), ite = splitCookies.end(); val.empty() && it != ite; it++) {
+    std::string cookie = *it;
+    if (std::count(cookie.begin(), cookie.end(), '=') == 1) {
+      std::string::size_type pos = cookie.find('=');
+      if (pos != 0 && pos != cookie.size() - 1 && cookie.substr(0, pos) == key)
+        val = cookie.substr(pos + 1);
+    }
+  }
+  return val;
 }
