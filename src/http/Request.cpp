@@ -210,6 +210,14 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
   _raw.erase(0, eol + 2);
 }
 
+bool Request::keepalive() const {
+  if (!hasVersion() || !isValidVersion(_version))
+    return false;
+  if (hasHeader("Connection") && _headers.find("Connection")->second == "keep-alive")
+    return true;
+  return _version == "HTTP/1.1";
+}
+
 Stream::streamsize Request::availableBody() const {
   if (!hasBody())
     return (0);

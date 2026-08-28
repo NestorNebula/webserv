@@ -97,6 +97,7 @@ private:
   bool _keepalive;
 
   void throwIfNotAction(Action action) const;
+  static const std::string &actionToStr(Action action);
   void manageSession();
 
   void handleRequest();
