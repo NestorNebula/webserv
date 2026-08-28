@@ -6,15 +6,17 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 13:08:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/22 13:25:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:42:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Response.hpp"
-#include "ServerConfig.hpp"
+#include "http/Response.hpp"
+#include "parsing/ServerConfig.hpp"
 #include "unistd.h"
+// #kd
+#include "helpers.hpp"
 
 bool isAllowedMethod(HttpMethod method, RouteConfig &config);
 

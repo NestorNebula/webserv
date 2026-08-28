@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 07:51:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:43:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,13 @@ typedef long unsigned int log_tgt;
 # define LVL_WARN	(1UL << 4)
 # define LVL_TMP	(1UL << 5)
 # define LVL_MAX	(1UL << 6)
+# define LVL_MAIN   (1UL << 0)
+# define LVL_INFO  	(1UL << 1)
+# define LVL_DBG	(1UL << 2)
+# define LVL_ERR	(1UL << 3)
+# define LVL_WARN	(1UL << 4)
+# define LVL_TMP	(1UL << 5)
+# define LVL_MAX	(1UL << 6)
 # define LVL_ALL	(LVL_MAX - 1)
 
 
@@ -70,12 +77,19 @@ typedef long unsigned int log_tgt;
 # define TGT_CGI		(TGT_CGI_RECV | TGT_CGI_SEND)
 # define TGT_CGI_ENV	(1UL << 13)
 # define TGT_CGI_ERR	(1UL << 14)
+# define TGT_CGI_ERR	(1UL << 14)
 
 # define TGT_RSRC		(1UL << 15)
 # define TGT_RSRC_INFO	(1UL << 16)
 # define TGT_RSRC_WAIT	(1UL << 17)
 # define TGT_RSRC_STAT	(1UL << 18)
+# define TGT_RSRC		(1UL << 15)
+# define TGT_RSRC_INFO	(1UL << 16)
+# define TGT_RSRC_WAIT	(1UL << 17)
+# define TGT_RSRC_STAT	(1UL << 18)
 
+# define TGT_SERV		(1UL << 19)
+# define TGT_MAIN		(1UL << 20)
 # define TGT_SERV		(1UL << 19)
 # define TGT_MAIN		(1UL << 20)
 
@@ -84,7 +98,12 @@ typedef long unsigned int log_tgt;
 # define TGT_BODY		(1UL << 22)
 # define TGT_FCGI		(1UL << 23)
 # define TGT_FCGI_PARSE (1UL << 24)
+# define TGT_HEAD		(1UL << 21)
+# define TGT_BODY		(1UL << 22)
+# define TGT_FCGI		(1UL << 23)
+# define TGT_FCGI_PARSE (1UL << 24)
 
+# define TGT_SERV_ALL	((1UL << 25) - 1)
 # define TGT_SERV_ALL	((1UL << 25) - 1)
 
 
@@ -109,6 +128,13 @@ typedef long unsigned int log_tgt;
 
 # define TGT_HTTP		(TGT_REQ | TGT_RES | TGT_RESP | TGT_STRM | TGT_SESS)
 
+// PARSING TGTs using 1UL << 41 to 1UL << 60
+# define TGT_CONFIG     (1UL << 41)
+# define TGT_PARSER     (1UL << 42)
+# define TGT_LEXER      (1UL << 43)
+# define TGT_VALIDATE   (1UL << 44)
+
+# define TGT_PARSE_ALL  (TGT_CONFIG | TGT_PARSER | TGT_LEXER | TGT_VALIDATE)
 
 
 # define TGT_MAX		(1UL << 63)

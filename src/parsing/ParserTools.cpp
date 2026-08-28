@@ -6,11 +6,11 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:17:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/07/03 12:54:24 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/24 17:05:05 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigParser.hpp"
+#include "parsing/ConfigParser.hpp"
 #include <sstream>
 
 Token	ConfigParser::peek()
