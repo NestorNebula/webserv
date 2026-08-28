@@ -573,7 +573,9 @@ void Session::setResponseHeaders() {
       if (std::count(cookie.begin(), cookie.end(), '|') == 1) {
         std::string::size_type pos = cookie.find('|');
         if (pos != 0 && pos != cookie.size() - 1) {
-          oss << cookieName << '=' << cookie.substr(0, pos) << '|' << now;
+          bool err;
+          long firstVisit = getLong(cookie.substr(0, pos), &err, 0);
+          oss << cookieName << '=' << (err ? now : firstVisit) << '|' << now;
           update = true;
         }
       }
