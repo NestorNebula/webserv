@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 08:31:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:38:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ int main (int argc, char ** argv, char **envp)
            break;
         }
     }
-// #kd - conf_file_root
     std::string conf_root;
     if (env_pwd(envp, conf_root))
     {
@@ -56,7 +55,6 @@ int main (int argc, char ** argv, char **envp)
         return 0;
     }
     
-// #kd - conf_file_root
     ConfigParser parser(conf_root);
     try 
     {

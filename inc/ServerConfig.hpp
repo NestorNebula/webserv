@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/25 19:34:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:38:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,7 @@ struct ServerConfig {
 	std::string					root;
 	bool						upload;
 	std::string					upload_dir;
-// #kd - fcgi_sock
 	std::string					fcgi_sock;
-// #kd - pycgi_dir
 	std::string					pycgi_dir;
 
 	std::set<HttpMethod>		methods;
