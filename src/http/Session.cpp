@@ -27,7 +27,6 @@
 #include <sys/stat.h>
 
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
-  // throwIfNotAction(RDSOCK);
   if (_request.isComplete() || (_next != RDSOCK && _next != DOCGI)) {
     std::ostringstream oss;
     oss << "Session::write called while Request is complete and Session is in "
@@ -35,6 +34,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
       << "\nSession::write should be called for non-complete Request "
       << "in RDSOCK/DOCGI mode. Nothing written";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(RDSOCK);
     return -1;
   }
 
@@ -52,7 +52,6 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
 }
 
 Request &Session::getRequest() {
-  // throwIfNotAction(DOCGI);
   if (_next != DOCGI) {
     std::ostringstream oss;
     oss << "Session::getRequest called while Session is in "
@@ -60,6 +59,7 @@ Request &Session::getRequest() {
       << "\nSession::getRequest should only be called in DOCGI mode. "
       << "Returning raw request";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
     return _request;
   }
 
@@ -67,7 +67,6 @@ Request &Session::getRequest() {
 }
 
 Session::CgiInfo Session::getCgiInfo() const {
-  // throwIfNotAction(DOCGI);
   if (_next != DOCGI) {
     std::ostringstream oss;
     oss << "Session::getCgiInfo called while Session is in "
@@ -75,6 +74,7 @@ Session::CgiInfo Session::getCgiInfo() const {
       << "\nSession::getCgiInfro should only be called in DOCGI mode. "
       << "Returning empty CgiInfo structure";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
     return CgiInfo();
   }
 
@@ -88,7 +88,6 @@ Session::CgiInfo Session::getCgiInfo() const {
 }
 
 void Session::setCgiResource(Resource *cgiResource) {
-  // throwIfNotAction(DOCGI);
   if (_next != DOCGI) {
     std::ostringstream oss;
     oss << "Session::setCgiResource called while Session is in "
@@ -96,6 +95,7 @@ void Session::setCgiResource(Resource *cgiResource) {
       << "\nSession::setCgiResource should only be called in DOCGI mode. "
       << "Resource left intact";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(DOCGI);
     return;
   }
 
@@ -106,7 +106,6 @@ void Session::setCgiResource(Resource *cgiResource) {
 }
 
 Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
-  // throwIfNotAction(WRSOCK);
   if (_next != WRSOCK) {
     std::ostringstream oss;
     oss << "Session::read called while Session is in "
@@ -114,6 +113,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
       << "\nSession::read should only be called in WRSOCK mode. "
       << "Nothing read";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(WRSOCK);
     return -1;
   }
 
@@ -155,7 +155,6 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
 }
 
 std::string &Session::getResponse() {
-  // throwIfNotAction(WRSOCK);
   if (_next != WRSOCK) {
     std::ostringstream oss;
     oss << "Session::getResponse called while Session is in "
@@ -163,6 +162,7 @@ std::string &Session::getResponse() {
       << "\nSession::getResponse should only be called in WRSOCK mode. "
       << "Returning Response string without further reading";
     WSLOG(LVL_ERR, TGT_SESS_WR, oss.str());
+    throwIfNotAction(WRSOCK);
     return _responseStr;
   }
 
@@ -197,7 +197,6 @@ void Session::setError(Response::StatusCode code) {
 }
 
 void Session::reset() {
-  // throwIfNotAction(KPALIVE);
   std::ostringstream oss;
   oss << "Session::reset called while Session is in "
     << Session::actionToStr(_next)
