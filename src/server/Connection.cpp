@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/27 08:23:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 11:03:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,9 +90,16 @@ int	Connection::set_err(int e)
 		return (-1);
 	}
 	WSLOG(LVL_DBG, TGT_CONN, "err:  ", e);
-	this->error = e; // why not (?)
-	this->sess.setError(e);
-	this->mod_evt(EPOLLOUT);
+	try
+	{
+		this->error = e; // why not (?)
+		this->sess.setError(e);
+		this->mod_evt(EPOLLOUT);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 	return (-1);
 }
 
@@ -163,7 +170,6 @@ ssize_t	Connection::pollin(void)
 				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 				return (0); // send error
 			}
-			
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
@@ -221,8 +227,7 @@ ssize_t	Connection::pollout(void)
 // KEEP_ALIVE
 			case RSP_KPALIVE:
 				// w/o : wrong action on session
-// #kd - ATTN : need access to (_next)
-				// sess._next = Session::KPALIVE;
+				sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...

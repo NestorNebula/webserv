@@ -20,20 +20,21 @@
         echo("\nFILE\n");
         echo ($_FILES['file']['name']) . PHP_EOL;
             // partial -- 
-            // can't close CONN until FCGI has flushed its body
+            // can't close CONN until FCGI has flushed its body .. 
         switch ($_FILES['file']['error']) {
             case UPLOAD_ERR_OK:
+                echo "Success\n";
                 break;
             case UPLOAD_ERR_NO_FILE:
-                echo ('No file sent.');
+                echo "No file\n";
                 break;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
-                echo ('Exceeded filesize limit.');
+                echo "Exceeded filesize limit\n";
                 break;
-            // case UPLOAD_ERR_NO_TMP_DIR:
-            //     echo ("No tmp dir.");
-            //     break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                echo "No tmp dirrectory\n";
+                break;
             default:
                 echo "Unknown error " . $_FILES['file']['error'];
                 break;
@@ -66,7 +67,8 @@
         // warning only 
         // SO : MUST wait for ENTIRE REPONSE .. before SENDING 
         // conn .. cannot send .. until rsrc is COMPLETE 
-        exit (2);
+        echo "failed\n";
+        // exit (2);
     }
     echo getcwd();
 
