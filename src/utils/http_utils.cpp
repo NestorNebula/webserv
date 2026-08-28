@@ -6,12 +6,12 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 16:01:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:51:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "http_utils.hpp"
-#include "helpers.hpp"
+#include "utils/http_utils.hpp"
+#include "utils/http_utils.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
 

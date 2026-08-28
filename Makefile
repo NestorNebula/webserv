@@ -15,6 +15,7 @@ LIB_DIR=.
 CFLAGS+=-I . \
 	-I $(INC_DIR) \
 	-I $(INC_DIR)/server \
+	-I $(INC_DIR)/parsing \
 	-I $(INC_DIR)/utils \
 	-I $(INC_DIR)/http \
 	-I $(INC_DIR)/streams \
@@ -62,9 +63,9 @@ FILES = \
 	parsing/ParseBlocks.cpp \
 	parsing/ParserTools.cpp \
 	parsing/Tokenizer.cpp \
-	parsing/Validation.cpp 
+	parsing/Validation.cpp
 
-TPP = 
+TPP =
 
 SRCS = $(addprefix $(SRC_DIR)/, $(FILES))
 OBJS = $(addprefix $(OBJ_DIR)/, $(FILES:.cpp=.o)) \
@@ -88,20 +89,20 @@ all: $(NAME)
 $(NAME): $(OBJS) $(TPP)
 	$(CC) $(DEFS) $(CFLAGS) $(LFLAGS) $(OBJS) $(LIBS) -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp
 	@$(MKDIR) $(dir $@)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
-	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@ 
+	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.cpp 
+$(OBJ_DIR)/%.o: %.cpp
 	@$(MKDIR) $(dir $@)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
-	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@ 
-	
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp 
+	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@$(MKDIR) $(dir $@)
 	@echo "$(<F)$(\t)=>$(\t)$(@F)"
-	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@ 
+	@$(CC) $(DEFS) $(CFLAGS) -c $< -o $@
 
 clean:
 	@$(RMDIR) $(OBJ_DIR)

@@ -6,15 +6,15 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:08:55 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 03:20:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:41:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Headers.hpp"
-#include "Resource.hpp"
-#include "WsLog.hpp"
+#include "resources/Resource.hpp"
+#include "utils/WsLog.hpp"
 
 class Response {
 public:

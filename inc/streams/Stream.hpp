@@ -6,14 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 09:53:43 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/21 14:14:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:42:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "WsLog.hpp"
-#include "SizeDefs.hpp"
+#include "utils/WsLog.hpp"
 #include <iostream>
 
 class Stream {

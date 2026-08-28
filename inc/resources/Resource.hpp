@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 11:16:46 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/24 15:47:10 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/08/24 17:06:59 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Stream.hpp"
+#include "streams/Stream.hpp"
 
 class Resource {
 public:

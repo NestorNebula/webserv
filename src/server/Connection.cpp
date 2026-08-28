@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/25 19:33:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:51:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,6 @@ ssize_t	Connection::pollin(void)
 				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 				return (0); // send error
 			}
-			
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:

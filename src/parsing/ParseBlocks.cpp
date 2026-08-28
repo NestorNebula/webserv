@@ -6,12 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/28 08:38:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:44:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigParser.hpp"
-#include "ParserUtils.hpp"
+#include "parsing/ConfigParser.hpp"
+#include "parsing/ParserUtils.hpp"
+#include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
 
@@ -66,6 +67,7 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 			route.cgi[ext] = it->second;
 		}
 	}
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed route: ", route.path);
 	current_server.routes.push_back(route);
 }
 
@@ -105,6 +107,7 @@ void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives
 
 	if (value.empty())
 		throw	ConfigException("Empty value for directive: " + full_key);
+	WsLog::_(LVL_DBG, TGT_PARSER, "Directive parsed: ", full_key);
 	directives_map[full_key] = value;
 	if (peek().type == TOKEN_NEWLINE)
 		consume();
@@ -148,7 +151,6 @@ void	ConfigParser::parseServer()
 	if (directives.count("max_body_size"))
 		server.max_body_size = parseSize(directives["max_body_size"]);
 	if (directives.count("root"))
-		// server.root = directives["root"];
 		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);
@@ -163,6 +165,10 @@ void	ConfigParser::parseServer()
 		server.methods = parseMethods(directives["methods"]);
 	if (directives.count("index"))
 		server.index = splitList(directives["index"]);
+	if (directives.count("fcgi_sock"))
+    	server.fcgi_sock = directives["fcgi_sock"];
+	if (directives.count("pycgi_dir"))
+   		server.pycgi_dir = directives["pycgi_dir"];
 
 	// Extraction of error pages
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
@@ -195,6 +201,7 @@ void	ConfigParser::parseServer()
 	}
 
 	validateServerConfig(server);
+	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed server on port ", server.port);
 	_servers.push_back(server);
 }
 

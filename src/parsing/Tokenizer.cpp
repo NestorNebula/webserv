@@ -6,11 +6,12 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:15:36 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/14 13:03:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 08:44:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigParser.hpp"
+#include "parsing/ConfigParser.hpp"
+#include "utils/WsLog.hpp"
 
 #define SPACE		' '
 #define TAB			'\t'
@@ -122,4 +123,6 @@ void	ConfigParser::tokenize(const std::string& content)
 	eof.value = EOFILE;
 	eof.line = line;
 	_tokens.push_back(eof);
+	WsLog::_(LVL_DBG, TGT_LEXER, "Tokenize config, token count: ",
+		static_cast<int>(_tokens.size()));
 }
