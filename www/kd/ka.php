@@ -1,8 +1,8 @@
 <?php
 
 header('Content-type: text/plain');
-header('Connection: close');
-header('Content-Length: 12');
+// header('Connection: close');
+header('Content-Length: 13');
 
 ?>
-I'm not
+I'm not dead.
