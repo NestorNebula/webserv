@@ -55,6 +55,7 @@ public:
       throw std::logic_error("accessing null body Stream");
     return _body;
   }
+  std::string::size_type getBodySize() const { return _bodySize; }
   // Number of characters that are still to be consumed from the body
   Stream::streamsize availableBody() const;
   bool keepalive() const;
