@@ -296,12 +296,3 @@ std::string getCookie(const std::string &cookies, const std::string &key) {
   }
   return val;
 }
-
-void header_key(std::string &s) {
-  for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) {
-    if (*it == '-')
-      (*it = '_');
-    else
-      *it = std::toupper(static_cast<unsigned char>(*it));
-  }
-}
