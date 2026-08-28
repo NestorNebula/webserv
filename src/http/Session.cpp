@@ -269,9 +269,7 @@ void Session::preValidateRequest() {
     return setResponseStatus(505);
   if (_request.hasMethod() && _request.getMethod() == METHOD_UNKNOWN)
     return setResponseStatus(501);
-  if (_request.hasBody() &&
-      static_cast<unsigned int>(_request.getBody()->size()) >
-          _server.max_body_size)
+  if (_request.hasBody() && _request.getBodySize() > _server.max_body_size)
     return setResponseStatus(413);
   WSLOG(LVL_INFO, TGT_SESS, "Session Request pre-validation successful");
 }
