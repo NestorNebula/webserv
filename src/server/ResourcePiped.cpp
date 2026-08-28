@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 10:19:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/28 10:45:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ ResourcePiped::~ResourcePiped()
 	WSLOG(LVL_DBG, TGT_RSRC, "stat: " , this->stat);
 	WSLOG(LVL_DBG, TGT_RSRC, "pid : " , this->pid);
 	
-	// try
-	// {	
+	try
+	{	
 		this->conn_closed();
 		this->conn = NULL;
 		this->wait(WNOHANG);
@@ -30,11 +30,11 @@ ResourcePiped::~ResourcePiped()
 			kill(this->pid, SIGKILL);
 			this->wait(0); // do not set error
 		}
-	// }
-	// catch(const std::exception& e)
-	// {
-	// 	WSLOG(LVL_DBG, TGT_CGI, " (~) ResourceCgi\n", e.what());
-	// }
+	}
+	catch(const std::exception& e)
+	{
+		WSLOG(LVL_DBG, TGT_CGI, " (~) ResourceCgi\n", e.what());
+	}
 }
 
 void	ResourcePiped::conn_closed(void)
