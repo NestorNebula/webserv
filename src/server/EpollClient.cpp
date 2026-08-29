@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 11:53:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:33:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,9 +139,14 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 	ssize_t err;
 	
 	WSLOG(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
+	WSLOG(LVL_DBG, TGT_EPC_SEND, " fd : ", this->fd);
 
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
+
+	// FCGI : END_STDING .. SIGPIPE (!)
+	// if (fcntl(this->fd, F_GETFD) < 0)
+	// 	WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "FCNTL");
 
 	err = write(this->fd, buf, siz);
 

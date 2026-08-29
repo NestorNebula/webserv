@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 11:52:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:13:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,9 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-// KEEP_ALIVE : LVL_TMP
-	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+// KEEP_ALIVE - LVL_TMP
+	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -230,15 +230,13 @@ ssize_t	Connection::pollout(void)
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
 				return (-1);
-#if 1 // KEEP_ALIVE
+// KEEP_ALIVE
 			case RSP_KPALIVE:
-				// sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
 				return (0);
-#endif
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
@@ -450,10 +448,20 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
+		pipes.dup_err();
+		if (err < 0)
+		{
+			pipes.shutdown();
+			delete (cgienv);
+			delete (this->ep);
+			exit(1);
+		}
+
+		
 		const char **envp = cgienv->gen();
 
 		// if (!(WsLog::tgt & TGT_CGI_ERR))	
-			pipes.dup_err();
+		
 
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
@@ -484,6 +492,20 @@ int	Connection::exec_cgi(void)
 	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
+// conn  : php :  pipe
+// rsrc  : init:  PIPE
+// rsrc  : dup (pipes)
+// error : Too many open files
+// rsrc  :  (~) ResourceCgi
+// rsrc  : stat: [-1]
+// rsrc  : pid : [70593]
+// rsrc  : pid : [70593]
+// rsrc  : xit : [-1]
+// rsrc  : stat: [-1]
+// cgi   : open (/dev/null)
+// error : Too many open files
+
+		pipes.shutdown();
 		delete (pcgi); // conn : cgi FAIL
 		return (this->set_err(503)); // CGI_ERR - Service Unavailable
 	}

@@ -21,7 +21,7 @@ fi
 CONF=www/kd/config.conf
 tput reset
 if [[ "$1" =~ "v" ]]; then
-	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./webserv "$CONF" 0
+	valgrind -s --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./webserv "$CONF" k
 elif [[ "$1" =~ "g" ]]; then
 	gdb --args ./webserv "$CONF" 0
 else

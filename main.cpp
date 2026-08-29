@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 08:40:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:23:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ int main (int argc, char ** argv, char **envp)
     if (argc < 2)
     {
         std::cerr << "usage: webserv <config>\n";
-        std::cerr << "usage: webserv <config>\n";
         return 0;
     }
     if (argc > 2)
@@ -37,15 +36,12 @@ int main (int argc, char ** argv, char **envp)
         case '0':
            WsLog::lvl = LVL_MAIN;
            WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
-           WsLog::lvl = LVL_MAIN;
-           WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
            WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_FCGI_PARSE);
-           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_FCGI_PARSE);
            break;
         case 'a':
-           WsLog::tgt = TGT_ALL; //  & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
+           WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA | TGT_CONN | TGT_CGI | TGT_FCGI_PARSE);
            break;
         }
     }

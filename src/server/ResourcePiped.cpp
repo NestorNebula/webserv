@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 11:49:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 18:06:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,6 @@ int	ResourcePiped::status(void)
 		return (RSP_WAIT_HEAD);
 	}
 
-		// if !wait complete .. 
-		// size will be (0) here anyway
 #if !RES_CGI_WAIT_COMPLETE
 	if (this->resp.size())
 		return (1);
@@ -115,9 +113,12 @@ int	ResourcePiped::wait(int opt)
 		return (this->stat);
 	}
 	if (opt && (this->ip || this->op))
+	{
+		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: nohang i/o");
 		return (this->stat); // (-1) : still active
-	
-	err = waitpid(this->pid, &this->stat, 0);
+	}
+	// aha : opt (!)
+	err = waitpid(this->pid, &this->stat, opt);
 	
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);
@@ -150,18 +151,12 @@ int	ResourcePiped::wait(int opt)
 	{
 		WSLOG(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
-	if (this->stat > 0)
+	// hm : forced-wait .. should not set error (?)
+	if ((this->stat > 0) || (this->hed == 0))
 		this->set_err(500);
-	if (!this->hed)
-		this->set_err(500);
-		
 #if RES_CGI_WAIT_COMPLETE
 	else
-	{
-		// assumes we have not FLUSHED response 
-		// should have been done in chk_rsp_hed
-		// this->chk_rsp_len(); // only on wait complete
-	}
+		this->chk_rsp_len();
 #endif
 	this->pid = 0;
 	return (this->stat);
