@@ -356,6 +356,8 @@ void Session::handleResource() {
       break;
     }
   }
+  if (!_resource && _response.getCode() >= 400)
+    prepareErrorResource();
   if (!_resource && _response.getCode() != 204)
     _resource = new BuiltinResource(_response.getCode());
   // Generate Resource
