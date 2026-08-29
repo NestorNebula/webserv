@@ -1,6 +1,6 @@
 <?php
 
-    $path = './files/e4.jpg';
+    $path = './files/earth.jpg';
     $fsiz = filesize($path);
     
     header('Content-Type: image/jpg');

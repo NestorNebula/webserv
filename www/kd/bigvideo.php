@@ -6,7 +6,8 @@
     $fsiz = filesize($path);
     // WOW
     // no content-length => no memory problems (siege)
-    header('Content-Length: ' . $fsiz);
+    // FCGI
+    // header('Content-Length: ' . $fsiz);
 
     $fp = fopen($path, "rb");
 
