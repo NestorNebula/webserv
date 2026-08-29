@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 10:34:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 11:49:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ int	ResourcePiped::status(void)
 		return (RSP_WAIT_HEAD);
 	}
 
+		// if !wait complete .. 
+		// size will be (0) here anyway
 #if !RES_CGI_WAIT_COMPLETE
 	if (this->resp.size())
 		return (1);
@@ -77,10 +79,10 @@ int	ResourcePiped::status(void)
 		if (this->error)
 		    return (RSP_ERROR);
 			
-#if RES_CGI_WAIT_COMPLETE
+// #if 1 // RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);
-#endif
+// #endif
 		if (this->ka)
 			return (RSP_KPALIVE);
 		return (RSP_COMPLETE); 
@@ -150,10 +152,15 @@ int	ResourcePiped::wait(int opt)
 	}
 	if (this->stat > 0)
 		this->set_err(500);
+	if (!this->hed)
+		this->set_err(500);
+		
 #if RES_CGI_WAIT_COMPLETE
 	else
 	{
-		this->chk_rsp_len();
+		// assumes we have not FLUSHED response 
+		// should have been done in chk_rsp_hed
+		// this->chk_rsp_len(); // only on wait complete
 	}
 #endif
 	this->pid = 0;

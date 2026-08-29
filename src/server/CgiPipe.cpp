@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 11:02:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 11:46:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,7 +257,6 @@ ssize_t	CgiPipe::pollin(void)
 		return (-1);
 
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv"); // conn: ", this->conn->get_fd());
-	
 	
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
