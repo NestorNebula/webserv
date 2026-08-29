@@ -160,9 +160,6 @@ fi
 # exit 0
 
 
-curl -X GET 'http://localhost:8082/vidds/?g1=QUERYSHIT' -i 
-echo
-exit 0
 
 curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"

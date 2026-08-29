@@ -55,14 +55,17 @@
 # http://127.0.0.1:8082/ka.pl
 # http://127.0.0.1:8082/stat.pl
 
-# http://127.0.0.1:8082/test.py
+# -- strange no close .. a keep-alive thing (?)
+http://127.0.0.1:8082/test.py
+http://127.0.0.1:8082/test.pl
+http://127.0.0.1:8082/test.php
 # http://127.0.0.1:8082/ka.py
 # http://127.0.0.1:8082/stat.py
 
 # PHP ONLY
 
-http://127.0.0.1:8082/test.php
-http://127.0.0.1:8082/ka.php
+# http://127.0.0.1:8082/test.php
+# http://127.0.0.1:8082/ka.php
 
 # http://127.0.0.1:8082/stat.php
 
