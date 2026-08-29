@@ -2,8 +2,10 @@
     header('Content-Type: video/x-matroska');
 
 // bad file : PROVOKE run-on (timeout)
-    $path = '/home/kdonlon/Videos/ultra.mp4';
+    $path = '/home/kdonlon/Videos/dff.mp4';
     $fsiz = filesize($path);
+    // WOW
+    // no content-length => no memory problems (siege)
     header('Content-Length: ' . $fsiz);
 
     $fp = fopen($path, "rb");

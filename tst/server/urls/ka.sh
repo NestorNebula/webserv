@@ -48,9 +48,9 @@
 
 
 
-# http://127.0.0.1:8082/test.php
+http://127.0.0.1:8082/test.php
 http://127.0.0.1:8082/ka.php
-# http://127.0.0.1:8082/bigimage.php
+http://127.0.0.1:8082/bigimage.php
 
 http://127.0.0.1:8082/files/earth.jpg
 # http://127.0.0.1:8082/files/e4.jpg

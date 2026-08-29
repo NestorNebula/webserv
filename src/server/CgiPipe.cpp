@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:29:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 22:29:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ bool	CgiPipe::timeo(time_t now)
 		return (false);
 	if ((this->lact + CGI_TIMEOUT) > now)
 		return (false);
-	
 
 	this->lact = now;
 	
@@ -64,7 +63,6 @@ bool	CgiPipe::timeo(time_t now)
 		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
 	}
 
-// FCGI
 	if (this->rsrc)
 	{
 		if (rsrc->done == RSRC_DONE_IO)
@@ -88,113 +86,6 @@ bool	CgiPipe::timeo(time_t now)
 		this->mod_evt(EPOLLOUT);
 	}
 	return (false);
-#if 0
-	if (this->rsrc && this->conn)
-	{
-		if (this == this->rsrc->ip)
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe (ip)");
-		}
-		else if (this == this->rsrc->op)
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe (op)");
-		}
-
-
-try {
-		Session &sess = conn->sess;
-		Request &req  = sess.getRequest();
-		if (req.hasHeaders())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has headers");
-		}
-		if (req.hasBody())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has body");
-		}
-		if (req.isComplete())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : complete");
-		}
-}
-catch(const std::exception& e)
-{
-	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO\n", e.what());
-}
-		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(504); // CGI_ERR : gateway timeout 
-	}
-	else if (this->conn)
-	{
-		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(504); // CGI_ERR : gateway timeout
-	}
-	else
-	{
-		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : ???? ");
-	}
-
-	
-	return (false);
-#endif
-
-
-#if 0
-	if (this->rsrc && this->conn)
-	{
-		// MOSTLY (ip) .. but .. 
-		if (this == this->rsrc->ip)
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "pipe: TIMEO (ip)"); // biguadio.php can get blocky
-		}
-		else if (this == this->rsrc->op)
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "pipe: TIMEO (op)");
-		}
-			
-#if 1 // Exceptions suck
-		Session &sess = conn->sess;
-		Request &req  = sess.getRequest();
-		if (req.hasHeaders())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has headers");
-		}
-		if (req.hasBody())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : has body");
-		}
-		if (req.isComplete())
-		{
-			WSLOG(LVL_DBG, TGT_CGI_SEND, "req : complete"); // , ++to); // 1500 (!)
-			if (this == this->rsrc->ip)
-			{
-// timeout on IP is allowed .. 
-// though .. it SHOULD have been shut down
-// when the request was fully sent to it
-				// expected .. if delivering large file 
-				this->lact = now;
-				// this->mod_evt(-EPOLLOUT);
-				// this->rsrc->rem(this);
-				return (false);
-			}
-		}
-#endif
-		this->rsrc->set_err(504); // Gateway Timeout
-	}
-	else if (this->conn)
-	{
-		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn");
-		this->conn->set_err(504); // Gateway Timeout
-	}
-	else
-	{
-		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : ????");
-		// (conn) does not exist !
-		// this->conn->set_err(504); // Gateway Timeout
-	}
-	return (true);
-#endif
 }
 
 // The server is in no way obligated to send end-of-file 
