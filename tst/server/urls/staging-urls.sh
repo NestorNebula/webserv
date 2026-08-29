@@ -42,27 +42,28 @@ http://127.0.0.1:8082/ka.pl
 # http://127.0.0.1:8081/stat.php
 http://127.0.0.1:8082/stat.php
 
-http://127.0.0.1:8082/vids/dff.mp4
+# (siege) MEMORY PROBLEM
+# http://127.0.0.1:8082/vids/dff.mp4
 
 
 # http://127.0.0.1:8080/bigimage.php
 # http://127.0.0.1:8081/bigimage.php
-# http://127.0.0.1:8082/bigimage.php
+http://127.0.0.1:8082/bigimage.php
 
 
 # http://127.0.0.1:8080/bigaudio.php
 # http://127.0.0.1:8081/bigaudio.php
-# http://127.0.0.1:8082/bigaudio.php
+http://127.0.0.1:8082/bigaudio.php
 
 
 
 
-# http://127.0.0.1:8082/files/earth.jpg
-# http://127.0.0.1:8082/files/Kanan.mp3
+http://127.0.0.1:8082/files/earth.jpg
+http://127.0.0.1:8082/files/Kanan.mp3
 
 
-# http://127.0.0.1:8080/about.html
-# http://127.0.0.1:8080/contact.html
-# http://127.0.0.1:8080/index.html
+http://127.0.0.1:8082/html/about.html
+http://127.0.0.1:8082/html/contact.html
+http://127.0.0.1:8082/html/index.html
 
 
