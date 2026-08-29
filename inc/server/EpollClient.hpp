@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:29:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:34:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ public:
 
 	int					get_fd  (void) const;
 	struct epoll_event	*get_evt(void);
-	epc_typ				get_typ(void);
 	epc_typ				get_typ(void);
     std::string 		typ_str (void);
 	

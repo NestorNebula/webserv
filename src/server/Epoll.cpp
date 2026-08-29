@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:30:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:35:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,36 +90,36 @@ Epoll::~Epoll()
 
 void	Epoll::cleanup()
 {
-	std::set<EpollClient*>::iterator it;
+	// std::set<EpollClient*>::iterator it;
 
-	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
-	const int	*typ = cli_typ;
+	// const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
+	// const int	*typ = cli_typ;
 	
-	while (*typ != -1)
-	{
-		it = this->clients.begin();
-		while (it != this->clients.end())
-		{
-			if ( (*it)->get_typ() == *typ)
-			{
-				try 
-				{	
-					delete (*it);
-				}
-				catch(const std::exception& e)
-				{
-					WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
-				}		
-				this->clients.erase(it++);
-			}
-			else
-			{
-				++it;
-			}
-		}
-		typ++;
-	}
-	it = this->clients.begin();
+	// while (*typ != -1)
+	// {
+	// 	it = this->clients.begin();
+	// 	while (it != this->clients.end())
+	// 	{
+	// 		if ( (*it)->get_typ() == *typ)
+	// 		{
+	// 			try 
+	// 			{	
+	// 				delete (*it);
+	// 			}
+	// 			catch(const std::exception& e)
+	// 			{
+	// 				WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
+	// 			}		
+	// 			this->clients.erase(it++);
+	// 		}
+	// 		else
+	// 		{
+	// 			++it;
+	// 		}
+	// 	}
+	// 	typ++;
+	// }
+	// it = this->clients.begin();
 	std::set<EpollClient*>::iterator it;
 
 	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
