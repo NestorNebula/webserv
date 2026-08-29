@@ -378,12 +378,11 @@ void Session::prepareErrorResource() {
   std::map<std::string, std::string> errPages =
       !_route ? _server.error_pages : _route->error_pages;
   std::string codeStr = toString(_response.getCode());
-  std::string errPage =
-      joinPaths(_server.root, errPages.find(codeStr) != errPages.end()
+  std::string errPage = (errPages.find(codeStr) != errPages.end()
                                   ? errPages[codeStr]
                                   : errPages["default"]);
   if (!isAccessibleFile(errPage, R_OK))
-    errPage = joinPaths(_server.root, errPages["default"]);
+    errPage = errPages["default"];
   delete _resource;
   WSLOG(LVL_INFO, TGT_SESS, "Generating Error page Resource using ",
            errPage);
