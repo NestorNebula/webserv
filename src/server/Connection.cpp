@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 20:11:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:29:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,16 @@ int	Connection::set_err(int e)
 		return (-1);
 	}
 	WSLOG(LVL_DBG, TGT_CONN, "err:  ", e);
+	try
+	{
+		this->error = e; // why not (?)
+		this->sess.setError(e);
+		this->mod_evt(EPOLLOUT);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 	try
 	{
 		this->error = e; // why not (?)

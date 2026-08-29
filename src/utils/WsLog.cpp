@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 17:06:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:31:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,17 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[10]);
     if (tgt & TGT_FCGI)
         return (tgt_str[11]);
+
+    if (tgt & (TGT_REQ))
+        return (tgt_str[12]);
+    if (tgt & (TGT_RES))
+        return (tgt_str[13]);
+    if (tgt & (TGT_RESP))
+        return (tgt_str[14]);
+    if (tgt & (TGT_STRM))
+        return (tgt_str[15]);
+    if (tgt & (TGT_SESS))
+        return (tgt_str[16]);
 
     if (tgt & (TGT_REQ))
         return (tgt_str[12]);
@@ -327,6 +338,7 @@ txtrst='\e[0m'    # Text Reset
 #endif
 
 
+
 void    WsLog::nh(void)
 {
     WsLog::lvl = LVL_ALL;
@@ -336,6 +348,7 @@ void    WsLog::nh(void)
 void    WsLog::kd(void)
 {
     WsLog::lvl = LVL_NONE
+        | LVL_MAIN
         | LVL_MAIN
         | LVL_MAIN
         | LVL_ERR
@@ -355,10 +368,12 @@ void    WsLog::kd(void)
         
         // | TGT_CONN
         // | TGT_CONN
+        // | TGT_CONN
         // | TGT_CONN_RECV
         // | TGT_CONN_SEND
         // | TGT_CONN_DATA
 
+        // | TGT_CGI
         // | TGT_CGI
         // | TGT_CGI
         // | TGT_CGI_RECV
@@ -366,6 +381,7 @@ void    WsLog::kd(void)
         // | TGT_CGI_DATA
         // | TGT_CGI_HEAD
 
+        // | TGT_FCGI
         // | TGT_FCGI
         // | TGT_FCGI
         
@@ -380,6 +396,29 @@ void    WsLog::kd(void)
         // | TGT_RSRC_WAIT
     ;
 }
+
+// Lots of writes to stderr can confuse socket communication by causing 
+// I/O blocking, buffer saturation, and timing disruptions in the application event loop. 
+// When a program spams error logs, it starves network tasks of CPU time and resources.
+
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket
+
+
+// Why Logging Interferes with SocketsBlocking I/O: 
+// Writing to stderr often blocks execution 
+// if the destination stream (like a terminal or a slow log file) cannot process data instantly. 
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket.
+
+// Buffer Backpressure: 
+// If stderr fills up operating system pipes, the process pauses. 
+// This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
+
+// Event Loop Starvation: 
+// In single-threaded event loops (like Node.js or Python asyncio), 
+// synchronous or heavy logging operations monopolize the thread. 
+// The application fails to poll socket descriptors, delaying packet reads and handshakes.
 
 // Lots of writes to stderr can confuse socket communication by causing 
 // I/O blocking, buffer saturation, and timing disruptions in the application event loop. 
