@@ -543,12 +543,13 @@ void Session::setResponseHeaders() {
       location = location + '?' + _request.getQuery();
     headers.insert("Location", location);
   } else if (_response.getCode() == 201) {
-    std::string location(_route->path);
-    location = joinPaths(location, _route->upload_dir);
-    location =
-        joinPaths(location, _request.getURL().substr(_route->path.size()));
-    location = normalizeURI(location);
-    headers.insert("Location", encodeURI(location));
+    std::string location = findLocation(
+        joinPaths(_route->upload_dir, _request.getURL().substr(_route->path.size())),
+        _server);
+    if (!location.empty()) {
+      location = normalizeURI(location);
+      headers.insert("Location", encodeURI(location));
+    }
   }
 
   // Allow
