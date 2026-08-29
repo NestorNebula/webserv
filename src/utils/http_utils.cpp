@@ -296,3 +296,16 @@ std::string getCookie(const std::string &cookies, const std::string &key) {
   }
   return val;
 }
+
+std::string findLocation(const std::string &resourcePath, const ServerConfig &server) {
+  for (std::vector<RouteConfig>::const_iterator it = server.routes.begin(), ite = server.routes.end();
+      it != ite; it++) {
+    if (resourcePath.compare(0, it->root.size(), it->root) == 0 &&
+        (resourcePath.size() == it->root.size() || resourcePath[it->root.size()] == '/'))
+      return joinPaths(it->path, resourcePath.substr(it->root.size()));
+  }
+  if (resourcePath.compare(0, server.root.size(), server.root) == 0 &&
+      (resourcePath.size() == server.root.size() || resourcePath[server.root.size()] == '/'))
+    return joinPaths("/", resourcePath.substr(server.root.size()));
+  return std::string();
+}
