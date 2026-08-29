@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:30:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:34:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,11 +194,6 @@ int	EpollClient::get_fd  (void) const
 struct epoll_event	*EpollClient::get_evt(void)
 {
 	return (&this->evt);
-}
-
-epc_typ	EpollClient::get_typ(void)
-{
-	return (this->typ);
 }
 
 
