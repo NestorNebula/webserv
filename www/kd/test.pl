@@ -14,7 +14,7 @@ my $p2 = $cgi->param('p2');
 
 my $f = $cgi->param('file');
 
-print("Content-Type: text/plain\r\n\r\n");
+# print("Content-Type: text/plain\r\n\r\n");
 print("Perl : hello, world!\n");
 
 

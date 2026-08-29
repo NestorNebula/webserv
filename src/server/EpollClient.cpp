@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 08:51:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 11:53:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,14 +95,6 @@ int	EpollClient::event(struct epoll_event *e)
 		this->hup();
 		return (-1);
 	}
-	if (e->events & EPOLLIN)
-	{
-		err = this->pollin();
-		if (err >= 0)
-			this->lact = time(&this->lact);
-		else if (err < 0)
-			return (err);
-	}
 	if (e->events & EPOLLOUT)
 	{
 		err = this->pollout();
@@ -111,6 +103,14 @@ int	EpollClient::event(struct epoll_event *e)
 		else if (err < 0)
 			return (err);
 	}	
+	if (e->events & EPOLLIN)
+	{
+		err = this->pollin();
+		if (err >= 0)
+			this->lact = time(&this->lact);
+		else if (err < 0)
+			return (err);
+	}
 	if (e->events & EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 10:37:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 11:48:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,10 +55,12 @@ int	ResourceFcgi::status(void)
 		if (this->error)
 			return (RSP_ERROR);
 			
-#if RES_CGI_WAIT_COMPLETE
+		// if !wait complete .. 
+		// size will be (0) here anyway
+// #if 1 // RES_CGI_WAIT_COMPLETE
         if (this->resp.size())
             return (1);
-#endif
+// #endif
 		if (this->ka)
 			return (RSP_KPALIVE);
 		return (RSP_COMPLETE); 
@@ -86,8 +88,7 @@ int	ResourceFcgi::wait(int opt)
 	if (this->done == RSRC_DONE_IO)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
-#if 1 // RES_CGI_WAIT_COMPLETE
-		// seems like we should ALWAYS do this 
+#if 1 // RES_CGI_WAIT_COMPLETE // why problem
 		// this->chk_rsp_len();
 #endif
 		this->set_done(RSRC_FLUSHING);

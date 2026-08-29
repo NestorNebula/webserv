@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 10:37:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 11:52:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,12 @@ static void sess_log_next(Session &sess)
       break;
     }
 }
+
+// sess  : Session::write called while Request is complete and Session is in DOCGI
+// Session::write should be called for non-complete Request in RDSOCK/DOCGI mode. Nothing written
+
+// did we git in/out
+
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -226,6 +232,7 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 #if 1 // KEEP_ALIVE
 			case RSP_KPALIVE:
+				// sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...
