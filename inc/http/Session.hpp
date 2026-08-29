@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/28 11:06:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/05 14:19:24 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
-#include "SizeDefs.hpp"
 
 class Session {
 public:
@@ -28,16 +27,7 @@ public:
     WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
-    try
-    {
-      /* code */
-      delete _resource;
-    }
-    catch(const std::exception& e)
-    {
-      std::cerr << e.what() << '\n';
-    }
-    
+    delete _resource;
     WSLOG(LVL_DBG, TGT_SESS, "Session destructor");
   }
 
@@ -87,13 +77,12 @@ public:
 
   // Reset session state and clears all its data
   void reset();
-// #kd - set keep-alive 
-  Action _next;
+
 private:
   Session(const Session &);
   Session &operator=(const Session &);
 
-  // Action _next;
+  Action _next;
 
   ServerConfig &_server;
   RouteConfig *_route;

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 11:46:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:20:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,9 @@ ssize_t	FcgiPipe::pollout(void)
 	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	fcgi.req_body(rsrc->body);
 
+	// crash -- on FCGI STOP ...
 	err = this->send(fcgi.req);
+	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI, "send");

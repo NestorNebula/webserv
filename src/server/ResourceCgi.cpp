@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 11:49:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 17:31:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ int	ResourceCgi::get_req_body(void)
 
 	if (body.size())
 		return (1);
-		
+
 	if (!req.hasHeaders())
 		return (REQ_WAIT_HEAD);
-		
+
 	if (!req.hasBody())
 	{
 		if (req.isComplete())
@@ -53,14 +53,14 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 
 	WSLOG(LVL_NONE, TGT_RSRC, "resp");
 	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
-	
+
 	return (this->chk_rsp_hed());
 }
 
 static bool	icmp(char a, char b)
 {
 	return std::tolower(static_cast<unsigned char>(a)) ==
-		std::tolower(static_cast<unsigned char>(b));		
+		std::tolower(static_cast<unsigned char>(b));
 }
 
 static std::string hedval_str(std::string & str, const char *key)
@@ -76,10 +76,10 @@ static std::string hedval_str(std::string & str, const char *key)
         return (val);
     if (it != str.begin() && *(it-1) != '\n')
         return (val);
-        
+
     std::stringstream	line(str.substr(it - str.begin()));
     line >> kstr >> val;
-	
+
 	std::transform(val.begin(), val.end(), val.begin(), ::tolower);
     return (val);
 
@@ -92,38 +92,45 @@ int		ResourceCgi::chk_rsp_hed(void)
 		conn->mod_evt(EPOLLOUT);
 #endif
 		return (RSRC_RESP_BODY);
-	}	
-	
+	}
+
+
+// this is where we MIGHT force wait complete
+// if we do not have content-length
 	size_t	pos = resp.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
-	// std::string hed = resp.substr(0, pos + 4);
-		
+
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp);	
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
 	this->hed = 1;
-	
+
 // REQUIRE (?) Content-Type (?)
+
+// cooler : separate head/body .. HEAD request
+// we could then re-construct head
+// replacing Connection:
+
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
-	
-// KEEP_ALIVE -- attention must be paid
-	// if conn == keep-alive 
-	// and we do NOT have content-length
-	// we have a problem
-	// if conn == close
-	// set this->ka to FALSE -- no matter what
-	// if conn empty
-	// add keep-live IF we have content-length AND this->ka
-
-#if !RES_CGI_WAIT_COMPLETE // -- chk_rsp_hed
-	// how did FCGI overcome this (?) ignored by siege (?)
-	std::string conn_close("Connection: close\r\n");
-	resp.insert(0, conn_close);
+	if (clen_str.size() && this->ka)
+	{
+		WSCOL(WSL_GREEN);
+		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  keep-alive");
+		std::string kastr = std::string("Connection: Keep-Alive\r\n");
+		resp.insert(0, kastr);
+	}
+	else
+	{
+#if !RES_CGI_WAIT_COMPLETE
+		WSCOL(WSL_RED);
+		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
+		std::string conn_close("Connection: close\r\n");
+		resp.insert(0, conn_close);
+		this->ka = false;
 #endif
-
-
+	}
 
 	std::string stat_hed;
 	std::string stat_str = hedval_str(resp, "Status");
@@ -139,55 +146,56 @@ int		ResourceCgi::chk_rsp_hed(void)
 		stat_hed = std::string("HTTP/1.0 200 OK\r\n");
 	}
 	resp.insert(0, stat_hed);
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", this->resp);	
+
+	pos = resp.find("\r\n\r\n");
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp.substr(0, pos));
 	return (RSRC_RESP_HEAD);
 }
 
-// only makes sense for WAIT_COMPLETE
+// RES_CGI_WAIT_COMPLETE
 void	ResourceCgi::chk_rsp_len(void)
 {
-
-	// wow .. what if we started FLUSHING (?)
-	// ASSUMES : we have not flushed
-	// WAIT_COMPLETE
-	// which -- I wanted DYNAMIC
+	if (this->hed == 0)
+		return;
 	size_t	pos = resp.find("\r\n\r\n");
-	// std::string hed = resp.substr(0, pos + 4);
-	
-	std::string kastr = std::string("\r\nConnection: Keep-Alive");
 
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN\n", resp.substr(0, pos));
 	
-// chk_rsp_hed should have handled this check
 
+	// should already know this stuff
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
-		// we should have this from rsp_Hed
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
-
-// KEEP_ALIVE
-// attn : do not over-ride (Connection: close)
-		if (this->ka)
-			resp.insert(pos, kastr);
+		WSLOG(LVL_DBG, TGT_CGI_HEAD, "have content-length\n", clen_str);
 		return;
 	}
 
-	
-// if WAIT_COMPLETE 
-	// we know content length
 	size_t clen = (resp.size() - pos - 4);
 
 	clen_str = std::string("\r\nContent-Length:") + toString(clen);
-		// consider adding keep-alive
-	WSCOL(WSL_GREEN);
-	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 	
+	WSCOL(WSL_GREEN);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  content-length ", clen_str);
+
 	resp.insert(pos, clen_str);
 // KEEP_ALIVE
-// attn : do not over-ride (Connection: close)
 	if (this->ka)
+	{
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  keep-alive");
+		std::string kastr = std::string("\r\nConnection: Keep-Alive");
 		resp.insert(pos, kastr);
+	}
+	else
+	{
+		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
+		std::string conn_close("\r\nConnection: close");
+		resp.insert(pos, conn_close);
+	}
+	pos = resp.find("\r\n\r\n");
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
 }
 
 int	ResourceCgi::set_err(int e)

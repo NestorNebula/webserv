@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 09:37:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:33:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,13 @@ static void sigint_handler(int signo)
 
     stop = 1;
 }
-// static void sigpipe_handler(int signo)
-// {
-//     (void)signo;
+static void sigpipe_handler(int signo)
+{
+    (void)signo;
 	
-// 	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-// 	WSLOG(LVL_ERR, TGT_EPOLL, "SIGPIPE");
-// }
+	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
+	WSLOG(LVL_ERR, TGT_EPOLL, "SIGPIPE");
+}
 
 static const char *evt_name[] =
 {
@@ -79,7 +79,7 @@ Epoll::Epoll (char ** & _envp) : epfd(-1), ecnt(0), envp(_envp)
 	if (this->epfd < 0)
 		throw (std::runtime_error("Epoll : bad create"));
 	signal(SIGINT, sigint_handler);
-	// signal(SIGPIPE, sigpipe_handler);
+	signal(SIGPIPE, sigpipe_handler);
 };
 
 Epoll::~Epoll()

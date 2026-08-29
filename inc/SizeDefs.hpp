@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 09:33:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 19:36:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define SIZE_DEFS_HPP
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 4
+#  define CONN_TIMEOUT 60
 # endif
 
 # ifndef CGI_TIMEOUT
