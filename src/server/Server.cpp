@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 11:15:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 09:33:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ ssize_t	Server::pollin(void)
 	if (conn_fd < 0)
 	{
 		WsLog::_errno(LVL_DBG, TGT_SERV, "accept");
+		WsLog::_(LVL_ERR, TGT_SERV,      "epoll: ", this->ep->num_cli());
 		return (0);
 	}	
 	err = sock_non_block(conn_fd);

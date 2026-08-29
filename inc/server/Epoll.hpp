@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 14:45:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 08:54:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ public:
 	void	cleanup(void);
 	
 	int		serve(const std::vector<ServerConfig> &serv_list);
+
+	size_t	num_cli(void) { return (this->clients.size()); }
 	
 private:
 	int						epfd;
