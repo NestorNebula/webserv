@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:41:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 22:29:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,7 @@ bool	Connection::timeo(time_t now)
 		
 	WSCOL(WSL_RED);
 	WSLOG(LVL_DBG, TGT_CONN, "TIMEO : conn ", this->get_fd());
-	this->set_err(408); // Request Timeout 
-	// NEEDS TO CLOSE CONNECTION
+	this->set_err(408); // Request Timeout -- not necessarily
 	return (true);
 }
 
