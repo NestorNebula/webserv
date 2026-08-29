@@ -226,8 +226,6 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				// w/o : wrong action on session
-				sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...
