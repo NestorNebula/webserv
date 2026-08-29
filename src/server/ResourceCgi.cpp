@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 17:31:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:18:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 		return (RSRC_RESP_INIT);
 
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
 	this->hed = 1;
 
 // REQUIRE (?) Content-Type (?)
@@ -147,8 +147,8 @@ int		ResourceCgi::chk_rsp_hed(void)
 	}
 	resp.insert(0, stat_hed);
 
-	pos = resp.find("\r\n\r\n");
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp.substr(0, pos));
+	// pos = resp.find("\r\n\r\n");
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp.substr(0, pos));
 	return (RSRC_RESP_HEAD);
 }
 

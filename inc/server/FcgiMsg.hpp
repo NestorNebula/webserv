@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:29:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:37:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ private:
 public:
 	FCGI_Header           head;
 	FCGI_BeginRequestBody body;
+	// FCGI_EndRequestBody
 
 	MsgBuf        buf;
 	unsigned int pHed; // offset of FCGI_PARAMS header

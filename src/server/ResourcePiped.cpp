@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 18:06:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:17:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,8 @@ int	ResourcePiped::wait(int opt)
 		return (this->stat); // (-1) : still active
 	}
 	// aha : opt (!)
+	if ((this->ip == NULL) && (this->op == NULL))
+		opt = 0; // dangerous (?)
 	err = waitpid(this->pid, &this->stat, opt);
 	
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
@@ -152,8 +154,10 @@ int	ResourcePiped::wait(int opt)
 		WSLOG(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
 	// hm : forced-wait .. should not set error (?)
-	if ((this->stat > 0) || (this->hed == 0))
+	// if ((this->stat > 0) || (this->hed == 0))
+	if (this->hed == 0) // allow exit to terminate
 		this->set_err(500);
+	
 #if RES_CGI_WAIT_COMPLETE
 	else
 		this->chk_rsp_len();

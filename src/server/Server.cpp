@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 09:33:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 21:01:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 
 Server::~Server()
 {
-	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
-	WSLOG(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
+	WSLOG(LVL_TMP, TGT_SERV, " (~) Server");
+	WSLOG(LVL_TMP, TGT_SERV, "accepted: ", acc_cnt);
 };
 
 int Server::init(void)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 18:26:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:53:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,11 +177,13 @@ int FcgiConn::rsp_data(char * buf, int cnt)
 		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
 		break;
 	case FCGI_END_REQUEST:
+// After sending all its stdout and stderr data, the Responder application sends a FCGI_END_REQUEST record. The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE and the appStatus component to the status code that the CGI program would have returned via the exit system call.
 		WSLOG(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
 		WSLOG(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);
 		// should have (8) bytes of FCGI_EndRequestBody
 		break;
 	case FCGI_STDOUT:
+		// WSLOG(LVL_DBG, TGT_FCGI, "stdout\n", std::string(buf));
 		rsp.append(buf, cnt);
 		break;
 	default:
@@ -224,6 +226,13 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 		{
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
+			// // FCGI_EndRequestBody
+			// char *body = (chk + FCGI_HEADER_LEN);
+			// int *app_stat = (int*) body;
+			// char prot_stat = body[4];
+			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat A ", *app_stat);
+			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat P ", prot_stat);
+
 			return (2);
 		}
 

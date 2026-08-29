@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 19:18:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:51:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ void FcgiMsg::end_stdin(void)
 
 void FcgiMsg::begin()
 {
+	// make_head(FCGI_BEGIN_REQUEST, FCGI_HEADER_LEN) 
 	this->zero();
 	head.type = FCGI_BEGIN_REQUEST;
 	set_len(FCGI_HEADER_LEN); // FCGI_BEGIN_REQUEST (body)

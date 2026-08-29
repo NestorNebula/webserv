@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 16:38:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:59:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,19 @@ int	ResourceFcgi::status(void)
 		return (RSP_ERROR);
 	}
 		
-	if (!this->hed && this->fcgi)
+	if (!this->hed) //  && this->fcgi)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
-		this->fcgi->mod_evt(EPOLLOUT);	
-		return (RSP_WAIT_HEAD);
+		if (this->fcgi)
+		{
+			this->fcgi->mod_evt(EPOLLOUT);	
+			return (RSP_WAIT_HEAD);
+		}
+		else
+		{
+			this->set_err(500);
+			return (RSP_ERROR);
+		}
 	}
 
 #if !RES_CGI_WAIT_COMPLETE

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 08:50:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:17:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 	// that a later reattempt at connection succeeds.
 	
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 256
+#  define SERV_BACKLOG 512
 # endif
 
 class Server : public EpollClient

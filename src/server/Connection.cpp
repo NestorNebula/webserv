@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 19:13:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 20:11:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,6 +440,7 @@ int	Connection::exec_cgi(void)
 	}	
 	if (pid == 0)
 	{
+		// if ((pipes.dup_io() < 0) || (pipes.dup_err() < 0))
 		err = pipes.dup_io();
 		if (err < 0)
 		{
