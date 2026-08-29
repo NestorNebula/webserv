@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 13:48:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 10:31:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ public:
 	ResourceCgi(void) :  
 		done(0),
 		error(0),
+		ka(false),
 		hed(0),
 		conn(NULL)
 	{}
@@ -77,10 +78,10 @@ public:
 	std::string		resp; // CGI  Output
 	int				done;
 	int				error;
+	bool			ka;
 	
 protected:
 	int				hed;
-	
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
 	

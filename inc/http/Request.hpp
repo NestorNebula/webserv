@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/23 14:35:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/05 14:41:26 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "HttpMethod.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
-#include "SizeDefs.hpp"
 
 #define MAX_BODY_SIZE (64 * 1024)
 #define MAX_HEADERS_SIZE (8 * 1024)
@@ -60,6 +59,7 @@ public:
   Stream::streamsize availableBody() const;
   bool keepalive() const;
   void clear();
+
 private:
   Request(const Request &);
   Request &operator=(const Request &);

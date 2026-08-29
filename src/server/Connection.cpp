@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 11:03:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 10:37:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,9 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-// KEEP_ALIVE
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+// KEEP_ALIVE : LVL_TMP
+	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -167,6 +167,7 @@ ssize_t	Connection::pollin(void)
 		case Session::DOCGI:
 			if (this->exec_cgi() < 0)
 			{
+				WSCOL(WSL_RED);
 				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
 				return (0); // send error
 			}
@@ -222,17 +223,15 @@ ssize_t	Connection::pollout(void)
 			{
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
-// may set keep-alive 
 				return (-1);
-// KEEP_ALIVE
+#if 1 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				// w/o : wrong action on session
-				sess._next = Session::KPALIVE;
 				this->reset();
 				// this->mod_evt(-EPOLLOUT);
 				// unless we sent back error ...
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
 				return (0);
+#endif
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  no data");
@@ -392,7 +391,7 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (-1);
+		return (this->set_err(500)); // CGI_ERR - Internal Server Error
 	}
 
 	if ((cgienv->lang == CGI_PHP) &&
@@ -409,6 +408,7 @@ int	Connection::exec_cgi(void)
 			WSLOG(LVL_DBG, TGT_CONN, "php :  fcgi");			
 			delete (cgienv);
 			this->res_cgi = fcgi;
+			this->res_cgi->ka = this->sess.getRequest().keepalive();
 			return (err);
 		}
 		delete (fcgi);
@@ -421,13 +421,17 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
+		WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
+		return (this->set_err(500)); // CGI_ERR - Internal Server Error
 	}
+	
 	pid_t pid = fork();
 	if (pid < 0)
 	{
 		delete (cgienv);
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		return (this->set_err(500)); // CGI_ERR - Internal Server Error
+		
 	}	
 	if (pid == 0)
 	{
@@ -477,5 +481,7 @@ int	Connection::exec_cgi(void)
 		return (this->set_err(503)); // CGI_ERR - Service Unavailable
 	}
 	this->res_cgi = pcgi;
+	
+	this->res_cgi->ka = this->sess.getRequest().keepalive();
 	return (err);
 }

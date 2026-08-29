@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 10:23:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/29 10:33:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,11 @@ void	ResourceCgi::chk_rsp_len(void)
 	{
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
+
 // KEEP_ALIVE
-		resp.insert(pos, kastr);
+// attn : do not over-ride (Connection: close)
+		if (this->ka)
+			resp.insert(pos, kastr);
 		return;
 	}
 	size_t clen = (resp.size() - pos - 4);
@@ -156,9 +159,10 @@ void	ResourceCgi::chk_rsp_len(void)
 	WSLOG(LVL_DBG, TGT_CGI, "clen: ", clen_str);
 	
 	resp.insert(pos, clen_str);
-// attn : do not over-ride (Connection: close)
 // KEEP_ALIVE
-	resp.insert(pos, kastr);
+// attn : do not over-ride (Connection: close)
+	if (this->ka)
+		resp.insert(pos, kastr);
 }
 
 int	ResourceCgi::set_err(int e)
