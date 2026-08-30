@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 11:19:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 20:29:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	EpollClient(_ep, EPC_CONN, _fd), 
 	sess(_serv.get_conf()),
 	serv(_serv), 
+	retry_cgi(0),
 	res_cgi(NULL),
 	req_cnt(0)
 {
@@ -67,6 +68,31 @@ bool	Connection::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
+		
+// RETRY_CGI
+	if (retry_cgi && ((this->lact + CGI_RETRY) < now))
+	{
+		this->lact = now;
+		WSCOL(WSL_RED);
+		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
+		if (this->exec_cgi() < 0)
+		{
+			WSCOL(WSL_RED);
+			WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
+			if (retry_cgi++ == 10)
+			{
+				this->set_err(510); // CGI_ERR
+			}
+			return (0);
+		}
+		WSCOL(WSL_GREEN);
+		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
+		this->retry_cgi = 0;
+		// Q: danger of recv == 0 (?)
+		this->mod_evt(EPOLLIN);
+		return (0);
+	}
+
 	if ((this->lact + CONN_TIMEOUT) > now)
 		return (false);
 		
@@ -145,6 +171,8 @@ ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
 
+
+	// sock_wait / cgi_retry (!)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
@@ -183,7 +211,21 @@ ssize_t	Connection::pollin(void)
 			if (this->exec_cgi() < 0)
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
+				WSLOG(LVL_TMP, TGT_CONN, "cgi : exec ", this->fd);
+// RETRY_CGI
+				this->mod_evt(0); // -EPOLLIN);
+				retry_cgi++;
+				return (0);
+				
+				// next call to POLLIN (?)
+				// wait (1s) (?)
+				// turn off POLLIN .. for a time (?)
+				// use TIMEO (!) YES -- called on EVERY CLIENT
+				// could retry -- (Too many open files)
+				// a certain number of times
+				// but : how can we be sure to get back here (?)
+				// should .. 
+				// sock_wait
 				return (0); // send error
 			}
 			this->res_cgi->push_body();
@@ -411,20 +453,21 @@ int	Connection::exec_cgi(void)
 	if ((cgienv->lang == CGI_PHP) &&
 		!this->serv.get_conf().fcgi_sock.empty())
 	{
-		WSLOG(LVL_DBG, TGT_CGI, "FCGI_SOCK");
+		// check actual file (!) status -- access
 		ResourceFcgi * fcgi = new ResourceFcgi;
 		err = fcgi->init(this->ep, cgienv, this);
-		
-		WSLOG(LVL_DBG, TGT_CONN, "php : ", err);
 		if (err == 0)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_DBG, TGT_CONN, "php :  fcgi");			
+			WSLOG(LVL_DBG, TGT_RSRC, "init:  FCGI");
 			delete (cgienv);
 			this->res_cgi = fcgi;
 			this->res_cgi->ka = this->sess.getRequest().keepalive();
 			return (err);
 		}
+		// fail .. because socket file gone (?)
+		// or : Too many open files .. 
+		// should not bother to try (pipe)
 		delete (fcgi);
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
@@ -436,7 +479,9 @@ int	Connection::exec_cgi(void)
 	{
 		delete (cgienv);
 		WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
-		return (this->set_err(500)); // CGI_ERR - Internal Server Error
+		// return (this->set_err(500)); // CGI_ERR - Internal Server Error
+// RETRY_CGI
+		return (-2);
 	}
 	
 	pid_t pid = fork();
@@ -444,7 +489,9 @@ int	Connection::exec_cgi(void)
 	{
 		delete (cgienv);
 		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
-		return (this->set_err(500)); // CGI_ERR - Internal Server Error
+		// return (this->set_err(500)); // CGI_ERR - Internal Server Error
+// RETRY_CGI
+		return (-2);
 		
 	}	
 	if (pid == 0)
@@ -502,22 +549,11 @@ int	Connection::exec_cgi(void)
 	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
-// conn  : php :  pipe
-// rsrc  : init:  PIPE
-// rsrc  : dup (pipes)
-// error : Too many open files
-// rsrc  :  (~) ResourceCgi
-// rsrc  : stat: [-1]
-// rsrc  : pid : [70593]
-// rsrc  : pid : [70593]
-// rsrc  : xit : [-1]
-// rsrc  : stat: [-1]
-// cgi   : open (/dev/null)
-// error : Too many open files
-
 		pipes.shutdown();
-		delete (pcgi); // conn : cgi FAIL
-		return (this->set_err(503)); // CGI_ERR - Service Unavailable
+		delete (pcgi); // conn : cgi FAIL -- should (kill) process
+		// return (this->set_err(503)); // CGI_ERR - Service Unavailable
+// RETRY_CGI
+		return (-2);
 	}
 	this->res_cgi = pcgi;
 	
