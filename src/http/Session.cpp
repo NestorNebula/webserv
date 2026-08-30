@@ -509,7 +509,8 @@ void Session::setResponseHeaders() {
     else
       headers.insert("Content-Type", getMimeType(_resourcePath));
     headers.insert("Content-Length", toString(_resource->stream().size()));
-  }
+  } else if (_response.getCode() != 204)
+    headers.insert("Content-Length", "0");
 
   // Connection
   if (_keepalive)
