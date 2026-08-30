@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 10:30:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 11:12:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,10 +255,10 @@ int		FcgiPipe::rdhup(void)
 	if (rsrc->set_done(0) == -1)
 		return (-1);
 
-	if (this->rsrc->resp.size())
+	if (this->rsrc->resp_data()) // resp.size())
 	{
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
+		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size()); // resp_data
 		// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp\n", this->rsrc->resp);
 
 		WSCOL(WSL_YELLOW);
