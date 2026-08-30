@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 10:13:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 11:31:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include "SizeDefs.hpp"
 # include "helpers.hpp"
 # include "Connection.hpp"
+# include "TemporaryFileStream.hpp"
 
 enum
 {
@@ -59,14 +60,25 @@ public:
 		ka(false),
 		hed(0),
 		wait_comp(true),
+		tfs(NULL),
 		conn(NULL)
 	{}
-	virtual ~ResourceCgi() {};
+	virtual ~ResourceCgi()
+	{
+		if (this->tfs)
+		{
+			WSCOL(WSL_YELLOW);
+			WSLOG(LVL_DBG, TGT_RSRC, "dele: temp file");
+			delete (this->tfs);
+		}
+	};
 
 	int				get_req_body(void);
 	
 	int				recv_data(char *buf, int siz);
-	std::string &	get_resp(void) { return (this->resp); }
+	bool			resp_data(void);
+	
+	std::string &	get_resp(void);
 	int				set_err(int e);
 	int				set_done(int d);
 	
@@ -88,6 +100,7 @@ protected:
 	void			chk_rsp_len(void);
 	
 private:
+	TemporaryFileStream * tfs;
 	int				chk_rsp_hed(void);
 	
 protected:

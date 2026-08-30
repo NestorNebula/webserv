@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 10:18:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 11:19:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ int	ResourcePiped::status(void)
 	}
 
 // #if !RES_CGI_WAIT_COMPLETE
-	if (!this->wait_comp && this->resp.size())
+	if (!this->wait_comp && this->resp_data()) // resp.size()) // resp_data
 		return (1);
 // #endif
 	if (this->wait(WNOHANG) != -1)
@@ -78,8 +78,11 @@ int	ResourcePiped::status(void)
 		    return (RSP_ERROR);
 			
 // #if 1 // RES_CGI_WAIT_COMPLETE
-        if (this->resp.size())
+        if (this->resp_data()) // resp.size()) // resp_data
+		{
+			WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (have data)");
             return (1);
+		}
 // #endif
 		if (this->ka)
 			return (RSP_KPALIVE);

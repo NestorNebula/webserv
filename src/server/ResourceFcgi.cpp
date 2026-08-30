@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 10:16:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 11:23:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int	ResourceFcgi::status(void)
 	}
 
 // #if !RES_CGI_WAIT_COMPLETE
-	if (!this->wait_comp && this->resp.size())
+	if (!this->wait_comp && this->resp_data()) // resp.size())
 		return (1);
 // #endif
 	
@@ -64,7 +64,7 @@ int	ResourceFcgi::status(void)
 			return (RSP_ERROR);
 			
 // #if 1 // RES_CGI_WAIT_COMPLETE
-        if (this->resp.size())
+        if (this->resp_data()) // resp.size()) // resp_data()
             return (1);
 // #endif
 		if (this->ka)
