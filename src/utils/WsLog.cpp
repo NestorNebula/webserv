@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 22:30:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 20:16:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,15 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
     WsLog::op(stream);
 }
 
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, std::string str, ssize_t j)
+{
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return;
+
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << msg << "[" << i << "] " << str << " [" << j << "]";
+    WsLog::op(stream);
+}
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str)
 {

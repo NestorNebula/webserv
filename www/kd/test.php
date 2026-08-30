@@ -11,7 +11,7 @@
     echo getcwd();
     // gets through FCGI
     // Q: ignore exit status ... 
-    exit (11);
+    // exit (11);
 
 
 // WRITE_FILE
