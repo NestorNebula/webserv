@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:29:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:13:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ public:
 		error(0),
 		ka(false),
 		hed(0),
+		wait_comp(true),
 		conn(NULL)
 	{}
 	virtual ~ResourceCgi() {};
@@ -82,6 +83,7 @@ public:
 	
 protected:
 	int				hed;
+	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
 	

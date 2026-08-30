@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 22:30:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:30:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,9 +192,10 @@ ssize_t	FcgiPipe::pollin(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
 		rsrc->set_done(RSRC_DONE_OP);
-#if RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
+// moved to set_done
+// #if RES_CGI_WAIT_COMPLETE
+// 		conn->mod_evt(EPOLLOUT);
+// #endif
 		return (0);
 	}
 	
@@ -209,15 +210,17 @@ ssize_t	FcgiPipe::pollin(void)
 	case RSRC_RESP_INIT:
 		break;
 	case RSRC_RESP_ERR:
-		conn->set_err(rsrc->error);
+		this->mod_evt(-EPOLLIN);
+		// conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
 		break;
 	case RSRC_RESP_BODY:
 	default:
-#if !RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
+// this should have been done in Resource::recv_data
+// #if !RES_CGI_WAIT_COMPLETE
+// 		conn->mod_evt(EPOLLOUT);
+// #endif
 		break;
 	}
 	

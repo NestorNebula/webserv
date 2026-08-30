@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 22:29:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:29:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,9 +160,10 @@ ssize_t	CgiPipe::pollin(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
-#if RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
+// moved to set_done
+// #if RES_CGI_WAIT_COMPLETE
+// 		conn->mod_evt(EPOLLOUT);
+// #endif
 		return (-1);
 	}
 	
@@ -171,15 +172,17 @@ ssize_t	CgiPipe::pollin(void)
 	case RSRC_RESP_INIT:
 		break;
 	case RSRC_RESP_ERR:
-		conn->set_err(rsrc->error);
+		this->mod_evt(-EPOLLIN);
+		// conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
 		break;
 	case RSRC_RESP_BODY:
 	default:
-#if !RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
+// this should have been done in Resource::recv_data
+// #if !RES_CGI_WAIT_COMPLETE
+// 		conn->mod_evt(EPOLLOUT);
+// #endif
 		break;
 	}
 	return (err);

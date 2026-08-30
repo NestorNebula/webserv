@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 22:27:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:30:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,19 +84,36 @@ static std::string hedval_str(std::string & str, const char *key)
     return (val);
 
 }
+
+// called by : recv_data
 int		ResourceCgi::chk_rsp_hed(void)
 {
 	if (this->hed)
 	{
-#if !RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
+// #if !RES_CGI_WAIT_COMPLETE
+		if (this->wait_comp)
+		{
+			// check resp size
+			if (this->resp.size() > 2000000)
+			{
+				WSLOG(LVL_TMP, TGT_RSRC, "wait_comp: too big");
+				this->set_err(503); // CGI_ERR : file_size
+				return (RSRC_RESP_ERR);
+			}
+		}
+		else
+		{
+			conn->mod_evt(EPOLLOUT);
+		}
+// #endif
 		return (RSRC_RESP_BODY);
 	}
 
 
 // this is where we MIGHT force wait complete
 // if we do not have content-length
+
+
 	size_t	pos = resp.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
@@ -111,9 +128,15 @@ int		ResourceCgi::chk_rsp_hed(void)
 // we could then re-construct head
 // replacing Connection:
 
+// this is where we should SET WAIT_COMPLETE
+
+
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
+	if (clen_str.size())
+		this->wait_comp = false;
+		
 	if (clen_str.size() && this->ka)
 	{
 		WSCOL(WSL_GREEN);
@@ -121,15 +144,15 @@ int		ResourceCgi::chk_rsp_hed(void)
 		std::string kastr = std::string("Connection: Keep-Alive\r\n");
 		resp.insert(0, kastr);
 	}
-	else
+	else if (!this->wait_comp)
 	{
-#if !RES_CGI_WAIT_COMPLETE
+// #if !RES_CGI_WAIT_COMPLETE
 		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
 		resp.insert(0, conn_close);
 		this->ka = false;
-#endif
+// #endif
 	}
 
 	std::string stat_hed;
@@ -161,7 +184,6 @@ void	ResourceCgi::chk_rsp_len(void)
 
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN\n", resp.substr(0, pos));
 	
-
 	// should already know this stuff
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
@@ -211,6 +233,11 @@ int	ResourceCgi::set_done(int d)
 	this->done |= d;
 	if (this->done & RSRC_DONE_ERR)
 		return (-1);
+	if (this->done & RSRC_DONE_OP)
+	{
+// RES_CGI_WAIT_COMPLETE
+		conn->mod_evt(EPOLLOUT);
+	}
 	if ((this->done & RSRC_DONE_IO) == RSRC_DONE_IO)
 		return (-1);
 	return (0);
