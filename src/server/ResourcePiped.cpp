@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 22:31:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:18:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,10 +67,10 @@ int	ResourcePiped::status(void)
 		return (RSP_WAIT_HEAD);
 	}
 
-#if !RES_CGI_WAIT_COMPLETE
-	if (this->resp.size())
+// #if !RES_CGI_WAIT_COMPLETE
+	if (!this->wait_comp && this->resp.size())
 		return (1);
-#endif
+// #endif
 	if (this->wait(WNOHANG) != -1)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
@@ -158,10 +158,10 @@ int	ResourcePiped::wait(int opt)
 	if (this->hed == 0) // allow exit to terminate
 		this->set_err(500);
 	
-#if RES_CGI_WAIT_COMPLETE
-	else
+// #if RES_CGI_WAIT_COMPLETE
+	else if (this->wait_comp)
 		this->chk_rsp_len();
-#endif
+// #endif
 	this->pid = 0;
 	return (this->stat);
 }

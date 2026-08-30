@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:30:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 10:16:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,10 @@ int	ResourceFcgi::status(void)
 		}
 	}
 
-#if !RES_CGI_WAIT_COMPLETE
-	if (this->resp.size())
+// #if !RES_CGI_WAIT_COMPLETE
+	if (!this->wait_comp && this->resp.size())
 		return (1);
-#endif
+// #endif
 	
 	if (this->wait(0) != -1) // exited -- different for fcgi
 	// if (this->done == RSRC_DONE_IO)
@@ -99,9 +99,10 @@ int	ResourceFcgi::wait(int opt)
 			this->set_err(500);
 			return (0);
 		}
-#if RES_CGI_WAIT_COMPLETE
-		this->chk_rsp_len();
-#endif
+// #if RES_CGI_WAIT_COMPLETE
+		if (this->wait_comp)
+			this->chk_rsp_len();
+// #endif
 		this->set_done(RSRC_FLUSHING);
 		return (0);
 	}
