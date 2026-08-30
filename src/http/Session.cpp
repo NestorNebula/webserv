@@ -269,8 +269,6 @@ void Session::preValidateRequest() {
     return setResponseStatus(505);
   if (_request.hasMethod() && _request.getMethod() == METHOD_UNKNOWN)
     return setResponseStatus(501);
-  if (_request.hasBody() && _request.getBodySize() > _server.max_body_size)
-    return setResponseStatus(413);
   WSLOG(LVL_INFO, TGT_SESS, "Session Request pre-validation successful");
 }
 
@@ -293,6 +291,8 @@ void Session::resolveResource() {
   if (!_route)
     return setResponseStatus(404);
   WSLOG(LVL_INFO, TGT_SESS, "Request route found: ", _route->path);
+  if (_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+    return setResponseStatus(413);
   if (!_route->redirect.empty())
     return setResponseStatus(301);
   if (!isAllowedMethod(_request.getMethod(), *_route))
