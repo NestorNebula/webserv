@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 11:19:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:53:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,9 @@ int	ResourcePiped::wait(int opt)
 
 	if (err == 0)
 		return (this->stat); // WNOHANG => no change => (-1)
+		
+	this->pid = 0;
+	
 	if (err < 0)
 		WsLog::_errno(LVL_ERR, TGT_RSRC, "waitpid");
 	if (WIFEXITED(stat))
@@ -151,6 +154,8 @@ int	ResourcePiped::wait(int opt)
 		this->sig = WTERMSIG(stat);
 		WSLOG(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WSLOG(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
+		this->set_err(500);
+		return (this->stat);
 	}
 	else
 	{
@@ -160,12 +165,10 @@ int	ResourcePiped::wait(int opt)
 	// if ((this->stat > 0) || (this->hed == 0))
 	if (this->hed == 0) // allow exit to terminate
 		this->set_err(500);
-	
 // #if RES_CGI_WAIT_COMPLETE
 	else if (this->wait_comp)
 		this->chk_rsp_len();
 // #endif
-	this->pid = 0;
 	return (this->stat);
 }
 
@@ -216,6 +219,7 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 {
 	int	err;
 	
+	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
 	
 	this->pid = _pid;

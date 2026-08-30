@@ -1,15 +1,3 @@
-#!/bin/bash
-
-
-if [ -z "$1" ];then
-	echo "usage : ./generr.sh CODE Error Message > CODE.html"
-	exit
-fi
-
-CODE=$1
-shift
-
-cat << EOF
 <!doctype html>
 <html lang="en">
 
@@ -28,10 +16,8 @@ cat << EOF
 	</header>
 	<main>
 		<section id="error-section">
-EOF
-	echo "<h1>$CODE</h1>"
-	echo "<h2>$@</h2>"
-cat << EOF
+<h1>431</h1>
+<h2>Request Header Fields Too Large</h2>
 		</section>
 	</main>
 	<footer>
@@ -44,4 +30,3 @@ cat << EOF
 </body>
 
 </html>
-EOF
