@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 17:04:59 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/30 14:46:38 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,18 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	consume();
 	Token	pathToken = expect(TOKEN_WORD);
 	route.path = pathToken.value;
+
+	for (size_t i = 0 ; i < current_server.routes.size() ; ++i)
+	{
+		if (current_server.routes[i].path == route.path)
+		{
+			std::stringstream ss;
+			ss << "Duplicate route path found: '" << route.path
+			   << "' at line " << pathToken.line;
+			throw ConfigException(ss.str());
+		}
+	}
+
 	expect(TOKEN_LBRACE);
 	skipNewlines();
 	while (peek().type != TOKEN_RBRACE && peek().type != TOKEN_EOF)
