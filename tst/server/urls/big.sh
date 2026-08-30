@@ -1,8 +1,8 @@
 
-# http://127.0.0.1:8082/bigimage.php
+http://127.0.0.1:8082/bigimage.php
 
-# http://127.0.0.1:8082/bigaudio.php
-# http://127.0.0.1:8082/files/Kanan.mp3
+http://127.0.0.1:8082/bigaudio.php
+http://127.0.0.1:8082/files/Kanan.mp3
 
 
 # http://127.0.0.1:8082/vids/dff.mp4
