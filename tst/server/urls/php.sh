@@ -68,8 +68,8 @@
 
 # http://127.0.0.1:8082/exit.php
 
-# http://127.0.0.1:8082/bigimage.php
-http://127.0.0.1:8082/bigaudio.php
+http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8082/bigaudio.php
 
 # http://127.0.0.1:8082/files/earth.jpg
 # http://127.0.0.1:8082/files/e4.jpg

@@ -1,10 +1,11 @@
 <?php
 
-    $path = './files/earth.jpg';
+    $path = './files/e4.jpg';
     $fsiz = filesize($path);
     
     header('Content-Type: image/jpg');
-    header('Content-Length: ' . $fsiz);
+    // header('Content-Length: ' . $fsiz);
+// 177450
 
     $fp = fopen($path, "rb");
 
