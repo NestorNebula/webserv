@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:29:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/30 20:50:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,14 +73,14 @@ bool	Connection::timeo(time_t now)
 	if (retry_cgi && ((this->lact + CGI_RETRY) < now))
 	{
 		this->lact = now;
-		WSCOL(WSL_RED);
+		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
-			WSCOL(WSL_RED);
-			WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
 			if (retry_cgi++ == 10)
 			{
+				WSCOL(WSL_RED);
+				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
 				this->set_err(510); // CGI_ERR
 			}
 			return (0);
