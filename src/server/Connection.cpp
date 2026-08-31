@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:01:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:22:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,8 @@ Connection::~Connection()
 // wait_comp .. OR .. CHUNKED .. is required
 // (FINAL) GOAL -- 
 // keep-alive / wait_comp clean
-	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
