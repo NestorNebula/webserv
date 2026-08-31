@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 16:08:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:01:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,10 +190,16 @@ int		ResourceCgi::chk_rsp_hed(void)
 
 // this is where we should SET WAIT_COMPLETE
 
+// CONSIDER : CHUNKED (!) .. if 
+// no content-length
+// OR 
+// content->length TOO LONG
+
 
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
+	// WITHOUT : wait_comp
 	// if (clen_str.size())
 	// 	this->wait_comp = false;
 		

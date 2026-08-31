@@ -2,7 +2,7 @@
 
 tput reset
 
-C=250
+C=255
 R=4
 
 while getopts "c:r:" o; do
