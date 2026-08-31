@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParseBlocks.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/28 08:44:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:22:26 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,18 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	consume();
 	Token	pathToken = expect(TOKEN_WORD);
 	route.path = pathToken.value;
+
+	for (size_t i = 0 ; i < current_server.routes.size() ; ++i)
+	{
+		if (current_server.routes[i].path == route.path)
+		{
+			std::stringstream ss;
+			ss << "Duplicate route path found: '" << route.path
+			   << "' at line " << pathToken.line;
+			throw ConfigException(ss.str());
+		}
+	}
+
 	expect(TOKEN_LBRACE);
 	skipNewlines();
 	while (peek().type != TOKEN_RBRACE && peek().type != TOKEN_EOF)
@@ -150,17 +162,14 @@ void	ConfigParser::parseServer()
 	}
 	if (directives.count("max_body_size"))
 		server.max_body_size = parseSize(directives["max_body_size"]);
+	else
+		throw	ConfigException("Server is missing required 'max_body_size' directive.");
 	if (directives.count("root"))
 		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);
 	if (directives.count("upload_dir"))
 		server.upload_dir = directives["upload_dir"];
-	if (directives.count("fcgi_sock"))
-		server.fcgi_sock = directives["fcgi_sock"];
-	if (directives.count("pycgi_dir"))
-		server.pycgi_dir = directives["pycgi_dir"];
-		
 	if (directives.count("methods"))
 		server.methods = parseMethods(directives["methods"]);
 	if (directives.count("index"))
