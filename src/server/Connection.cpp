@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:22:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:39:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,12 +38,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-// KEEP_ALIVE - LVL_TMP
-// wait_comp .. OR .. CHUNKED .. is required
-// (FINAL) GOAL -- 
-// keep-alive / wait_comp clean
 	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
 	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+// KEEP_ALIVE : check req_cnt
+	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -214,7 +213,7 @@ ssize_t	Connection::pollin(void)
 		case Session::DOCGI:
 			if (this->exec_cgi() < 0)
 			{
-				WSCOL(WSL_RED);
+				WSCOL(WSL_CYAN);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "exec failed", retry_cgi);
 // RETRY_CGI
 				this->mod_evt(0); // -EPOLLIN);
@@ -288,8 +287,7 @@ ssize_t	Connection::pollout(void)
 // KEEP_ALIVE
 			case RSP_KPALIVE:
 				this->reset();
-				// this->mod_evt(-EPOLLOUT);
-				// unless we sent back error ...
+				// this->mod_evt(-EPOLLOUT); // unless we need to send error (?)
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
 				return (0);
 			case RSP_WAIT_HEAD:
@@ -469,6 +467,7 @@ int	Connection::exec_cgi(void)
 			WSLOG(LVL_DBG, TGT_RSRC, "init:  FCGI");
 			delete (cgienv);
 			this->res_cgi = fcgi;
+// KEEP_ALIVE : set from Request (fcgi)
 			this->res_cgi->ka = this->sess.getRequest().keepalive();
 			return (err);
 		}
@@ -564,7 +563,7 @@ int	Connection::exec_cgi(void)
 		return (-2);
 	}
 	this->res_cgi = pcgi;
-	
+// KEEP_ALIVE : set from Request (cgi)
 	this->res_cgi->ka = this->sess.getRequest().keepalive();
 	return (err);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:01:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:44:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,9 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	if (this->hed)
 	{
 // #if !RES_CGI_WAIT_COMPLETE
+
+// recv_data .. if (wait_comp), don't let the (resp) buffer get too large ... 
+
 		if (this->wait_comp)
 		{
 			// check resp size
@@ -132,6 +135,8 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 			conn->mod_evt(EPOLLOUT);
 		}
 // #endif
+
+
 		return (RSRC_RESP_BODY);
 	}
 	return (this->chk_rsp_hed());
@@ -199,10 +204,15 @@ int		ResourceCgi::chk_rsp_hed(void)
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
+// rsp_head 
+
+// do not wait for complete .. if CGI returns content-length
+// better : content-length too big -- should be CHUNKED .. but worry about that later
 	// WITHOUT : wait_comp
 	// if (clen_str.size())
 	// 	this->wait_comp = false;
 		
+// KEEP_ALIVE : rsp_hed .. add if CGI returned (content-length)
 	if (clen_str.size() && this->ka)
 	{
 		WSCOL(WSL_GREEN);
@@ -210,6 +220,8 @@ int		ResourceCgi::chk_rsp_hed(void)
 		std::string kastr = std::string("Connection: Keep-Alive\r\n");
 		resp.insert(0, kastr);
 	}
+// WAIT_COMP
+// rsp_hed .. no content-length, not waiting until complete ; must CLOSE
 	else if (!this->wait_comp)
 	{
 // #if !RES_CGI_WAIT_COMPLETE
@@ -217,6 +229,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
 		resp.insert(0, conn_close);
+// KEEP_ALIVE : NOT wait_comp - force connection : close
 		this->ka = false;
 // #endif
 	}
@@ -277,7 +290,8 @@ void	ResourceCgi::chk_rsp_len(void)
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  content-length ", clen_str);
 
 	resp.insert(pos, clen_str);
-// KEEP_ALIVE
+// KEEP_ALIVE - have complete response, add keep-alive header
+// KEEP_ALIVE - assumes wait_comp (?)
 	if (this->ka)
 	{
 		WSCOL(WSL_YELLOW);
