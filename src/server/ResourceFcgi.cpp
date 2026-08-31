@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 18:15:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 09:33:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,24 +128,14 @@ void    ResourceFcgi::push_body(void)
 	if (this->fcgi)
 		this->fcgi->mod_evt(EPOLLOUT);
 }
-int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn)
+int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn, std::string &sock_path)
 {	
-	int err;
-
-	WSLOG(LVL_DBG, TGT_RSRC, "init:  FCGI");
-		// should have been checked before calling
-	if (conn->serv.get_conf().fcgi_sock.empty())
-	{
-		WSLOG(LVL_DBG, TGT_FCGI, "fcgi_sock: empty");
-		return (-1);
-	}
-	
-	int fd = FcgiConn::make_sock(conn->serv.get_conf().fcgi_sock);
+	int fd = FcgiConn::make_sock(sock_path);
 	if (fd < 0)
 		return (-1);
 	
 	this->fcgi = new FcgiPipe(ep, fd, conn, this);
-	err = this->fcgi->init(cgienv);
+	int err = this->fcgi->init(cgienv);
 	if (err < 0)
 	{
 		delete (this->fcgi);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:04:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:04:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ ssize_t	Server::pollin(void)
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 	{
+// this can get noisy
 		// WsLog::_errno(LVL_DBG, TGT_SERV, "accept");
 		// WsLog::_(LVL_ERR, TGT_SERV,      "epoll: ", this->ep->num_cli());
 		return (0);

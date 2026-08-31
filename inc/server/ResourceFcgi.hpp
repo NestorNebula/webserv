@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:11:49 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:20:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 09:24:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ public:
 	ResourceFcgi(void) : ResourceCgi(), fcgi(NULL) {}
 	~ResourceFcgi();
 
-	int			init(Epoll *ep, CgiEnv *cgienv, Connection *conn);
+	int			init(Epoll *ep, CgiEnv *cgienv, Connection *conn, std::string &sock_path);
 
 	void        push_body(void);
 	int			status(void);

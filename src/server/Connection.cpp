@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:50:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:33:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,16 +68,13 @@ bool	Connection::timeo(time_t now)
 		return (false);
 	if (now < this->lact)
 		return (false);
-		
-// RETRY_CGI
-	if (retry_cgi && ((this->lact + CGI_RETRY) < now))
+	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL) < now))
 	{
 		this->lact = now;
-		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
+// RETRY_CGI
 		if (this->exec_cgi() < 0)
 		{
-			if (retry_cgi++ == 10)
+			if (retry_cgi++ == CGI_RETRY_COUNT)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
@@ -85,6 +82,7 @@ bool	Connection::timeo(time_t now)
 			}
 			return (0);
 		}
+		// success
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
 		this->retry_cgi = 0;
@@ -211,7 +209,7 @@ ssize_t	Connection::pollin(void)
 			if (this->exec_cgi() < 0)
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_TMP, TGT_CONN, "cgi : exec ", this->fd);
+				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "exec failed", retry_cgi);
 // RETRY_CGI
 				this->mod_evt(0); // -EPOLLIN);
 				retry_cgi++;
@@ -450,12 +448,15 @@ int	Connection::exec_cgi(void)
 		return (this->set_err(500)); // CGI_ERR - Internal Server Error
 	}
 
-	if ((cgienv->lang == CGI_PHP) &&
-		!this->serv.get_conf().fcgi_sock.empty())
+	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
+	if (
+		(cgienv->lang == CGI_PHP) &&
+		!fcgi_sock.empty() && 
+		!access(fcgi_sock.c_str(), R_OK | W_OK)	
+	)
 	{
-		// check actual file (!) status -- access
 		ResourceFcgi * fcgi = new ResourceFcgi;
-		err = fcgi->init(this->ep, cgienv, this);
+		err = fcgi->init(this->ep, cgienv, this, fcgi_sock);
 		if (err == 0)
 		{
 			WSCOL(WSL_GREEN);
@@ -465,10 +466,11 @@ int	Connection::exec_cgi(void)
 			this->res_cgi->ka = this->sess.getRequest().keepalive();
 			return (err);
 		}
-		// fail .. because socket file gone (?)
-		// or : Too many open files .. 
-		// should not bother to try (pipe)
 		delete (fcgi);
+		// we know the SOCK exists .. so .. 
+		// ASSUMES : fail = "Too many open files"
+		// do not bother to try PHP
+		return(-2);
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
