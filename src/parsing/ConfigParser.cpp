@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/31 11:02:44 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:22:44 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,6 @@ void	ConfigParser::parseFile(const std::string& filename)
 	WsLog::_(LVL_INFO, TGT_CONFIG, "Configuration parsed successfully, servers: ",
 		static_cast<int>(_servers.size()));
 }
-
-
 
 bool	parseOnOff(const std::string& value)
 {

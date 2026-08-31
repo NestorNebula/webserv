@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/30 14:46:38 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:22:26 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,8 @@ void	ConfigParser::parseServer()
 	}
 	if (directives.count("max_body_size"))
 		server.max_body_size = parseSize(directives["max_body_size"]);
+	else
+		throw	ConfigException("Server is missing required 'max_body_size' directive.");
 	if (directives.count("root"))
 		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
