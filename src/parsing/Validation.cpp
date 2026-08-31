@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 18:25:07 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:24:27 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,8 @@ void	ConfigParser::validateServerConfig(const ServerConfig& server)
 		throw	ConfigException("Server is missing required 'listen' directive.");
 	if (server.error_pages.find("default") == server.error_pages.end())
 		throw	ConfigException("Server is missing required 'error_page default' directive.");
+	if (server.index.empty())
+		throw	ConfigException("Server is missing required 'index' directive.");
 	if (server.upload && server.upload_dir.empty())
 		throw	ConfigException("Server has upload enabled but no 'upload_dir'.");
 
@@ -170,6 +172,8 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		throw	ConfigException("Route '" + route.path + "' has no 'root' (and none to inherit).");
 	if (route.methods.empty())
 		throw	ConfigException("Route '" + route.path + "' has no 'methods' (and none to inherit).");
+	if (route.index.empty())
+		throw	ConfigException("Route '" + route.path + "' has no 'index' (and none to inherit).");
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
 
@@ -187,6 +191,9 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
+		if (it->first == ".py" && route.pycgi_dir.empty())
+			throw	ConfigException("CGI for .py is defined but 'pycgi_dir' is missing in route: "
+				+ route.path);
 		if (it->second.empty() || it->second[0] != '/')
 			throw	ConfigException("CGI executable must be an absolute path: "
 				+ it->second);
