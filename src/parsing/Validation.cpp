@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 18:25:07 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:04:33 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,9 @@ void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
+		if (it->first == ".py" && route.pycgi_dir.empty())
+			throw	ConfigException("CGI for .py is defined but 'pycgi_dir' is missing in route: "
+				+ route.path);
 		if (it->second.empty() || it->second[0] != '/')
 			throw	ConfigException("CGI executable must be an absolute path: "
 				+ it->second);

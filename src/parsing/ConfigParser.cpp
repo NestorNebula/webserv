@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 17:04:45 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/08/31 11:02:44 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 #include <fstream>
 #include <sstream>
 
-RouteConfig::RouteConfig() : autoindex(false), upload(false), max_body_size (0) {}
+RouteConfig::RouteConfig() : autoindex(false), upload(false), max_body_size (0), pycgi_dir("")  {}
 
-ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(0)
+ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(0), pycgi_dir("")
 {
 	host = "127.0.0.1";
 }
