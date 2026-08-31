@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 19:53:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:48:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ int	ResourcePiped::status(void)
 	}
 
 // #if !RES_CGI_WAIT_COMPLETE
+	// have data, not waiting for complete
+	// caller may flush RESP
 	if (!this->wait_comp && this->resp_data()) // resp.size()) // resp_data
 		return (1);
 // #endif

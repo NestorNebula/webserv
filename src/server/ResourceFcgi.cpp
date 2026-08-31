@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 09:33:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:48:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ int	ResourceFcgi::status(void)
 	}
 
 // #if !RES_CGI_WAIT_COMPLETE
+	// have data, not waiting for complete
+	// caller may flush RESP
 	if (!this->wait_comp && this->resp_data()) // resp.size())
 		return (1);
 // #endif
@@ -63,7 +65,12 @@ int	ResourceFcgi::status(void)
 		if (this->error)
 			return (RSP_ERROR);
 			
+		// truly done : should we be calling
+		// chk_rsp_len here (?)
+		// cgi does this in wait (!)
+		// we do this in wait as well 
 // #if 1 // RES_CGI_WAIT_COMPLETE
+		// truly complete .. but data to be flushed
         if (this->resp_data()) // resp.size()) // resp_data()
             return (1);
 // #endif
@@ -100,6 +107,7 @@ int	ResourceFcgi::wait(int opt)
 			return (0);
 		}
 // #if RES_CGI_WAIT_COMPLETE
+		// truly complete .. if wait_comp, check for setting content-length and keep-alive headers if necessary
 		if (this->wait_comp)
 			this->chk_rsp_len();
 // #endif
