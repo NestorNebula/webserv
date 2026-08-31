@@ -20,6 +20,11 @@ if [[ "$1" =~ "s" ]]; then
 	echo
 fi
 
+if [[ "$1" =~ "n" ]]; then
+	siege -f urls/noa.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	echo
+fi
+
 if [[ "$1" =~ "b" ]]; then
 	siege -f urls/big.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
@@ -112,10 +117,10 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	FILES+="tiny.jpg "
-	FILES+="mid.jpg "
-	FILES+="earth.jpg "
-	FILES+="e4.jpg "
-	FILES+="Kanan.mp3 "
+	# FILES+="mid.jpg "
+	# FILES+="earth.jpg "
+	# FILES+="e4.jpg "
+	# FILES+="Kanan.mp3 "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -123,20 +128,20 @@ if [ "$1" == "u" ]; then
 # FCGI : not 100%
 # END STDIN .. still has (left)
 
-		curl -X POST http://localhost:8082/php/ul.php -i \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/py/ul.py -i \
-			-F file=@$WWW/files/$FILE
+		# curl -X POST http://localhost:8082/php/ul.php -i \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/pl/ul.pl -i \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/py/ul.py -i \
+		# 	-F file=@$WWW/files/$FILE
 
 
 		# curl -X POST http://localhost:8082/uploads/FILE -i \
 		# 	-F file=@$WWW/files/$FILE
 
-		curl -X POST http://localhost:8082/uploads/$FILE -i \
+		curl -X POST http://localhost:8080/uploads/$FILE -i \
 			-H "Content-Type:application/octet-stream" \
 			--data-binary @$WWW/files/$FILE
 		echo ; echo ; echo
@@ -153,15 +158,13 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-
-
 # curl -X GET 'http://localhost:8082/'
 # echo
 # exit 0
 
 
 
-curl -X POST 'http://localhost:8082/bigimage.php?g1=QUERYSHIT' -i \
+curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

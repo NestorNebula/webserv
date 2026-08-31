@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 12:42:35 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/24 16:01:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/06/24 16:14:06 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,23 +62,6 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 }
 
 bool Response::isReady() const {
-  if (_version.empty())
-  {
-    WSLOG(LVL_ERR, TGT_RESP, "ready: version empty");
-  }
-  if (!_code)
-  {
-    WSLOG(LVL_ERR, TGT_RESP, "ready: code == 0");
-  }
-  if (_reason.empty())
-  {
-    WSLOG(LVL_ERR, TGT_RESP, "ready: reason empty");
-  }
-  if (_resource && !hasBody())
-  {
-    WSLOG(LVL_ERR, TGT_RESP, "ready: rsrc without body");
-  }
-
   return !_version.empty() && _code && !_reason.empty() &&
          (!_resource || hasBody());
 }
