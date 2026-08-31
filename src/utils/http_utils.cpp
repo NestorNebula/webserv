@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/08/28 08:51:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/27 08:23:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,12 +141,10 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[504] = "Gateway Timeout";
     reasons[505] = "HTTP Version Not Supported";
   }
-
-
   std::map<int, std::string>::const_iterator reason = reasons.find(code);
   if (reason != reasons.end())
     return reason->second;
-  return std::string("Unknown Reason");
+  return std::string();
 }
 
 std::string getMimeType(const std::string &path) {
