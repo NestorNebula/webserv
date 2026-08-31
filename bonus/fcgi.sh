@@ -70,12 +70,14 @@ if [ "$1" == "start" ]; then
     echo "starting : php-fpm as systemd --user service"
     systemctl --user daemon-reload 
     systemctl --user start php-fpm.service
+    ./pwatch
     exit 0
 fi
 
 if [ "$1" == "stop" ]; then
     echo "stopping : php-fpm as systemd --user service"
     systemctl --user stop php-fpm.service
+    ./pwatch
     exit 0
 fi
 

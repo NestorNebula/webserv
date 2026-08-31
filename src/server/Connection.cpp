@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 11:33:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/08/31 12:01:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 Connection::~Connection()
 {
 // KEEP_ALIVE - LVL_TMP
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+// wait_comp .. OR .. CHUNKED .. is required
+// (FINAL) GOAL -- 
+// keep-alive / wait_comp clean
+	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -72,8 +75,11 @@ bool	Connection::timeo(time_t now)
 	{
 		this->lact = now;
 // RETRY_CGI
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
+			// failure
 			if (retry_cgi++ == CGI_RETRY_COUNT)
 			{
 				WSCOL(WSL_RED);
