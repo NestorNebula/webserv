@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:16:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:49:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 
     switch (msg_lvl)
     {
-    case LVL_ERR:
+    // case LVL_ERR: // HIDE_ERRORS
     case LVL_TMP:
         skip = false;
         break;
@@ -192,6 +192,8 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
     (void) msg_lvl;
+    // HIDE_ERRORS
+    return (-1);
     
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";

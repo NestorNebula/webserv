@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/01 10:54:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 18:39:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
     manageSession();
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-    setError(500);
+    setError(601); // #kd
   }
   return count;
 }
@@ -149,7 +149,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
     if (_response.getCode() == 500)
       _next = CLOSE;
     else
-      setError(500);
+      setError(602); // #kd
   }
   return r;
 }
@@ -189,8 +189,13 @@ void Session::setError(Response::StatusCode code) {
     _next = WRSOCK;
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-    if (code != 500)
-      setError(500);
+// #kd - this is very confusing .. 
+// without : better,but "Incomplete reponse"
+    if (code != 606)
+    {
+      // fail on low-file-limit 
+      setError(606); // CGI_ERR
+    }
     else
       _next = CLOSE;
   }
@@ -366,7 +371,7 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
-      setResponseStatus(500);
+      setResponseStatus(608); // CGI_ERR
       delete _resource;
       _resource = NULL;
       WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
@@ -431,7 +436,7 @@ void Session::handleUpload() {
     return setResponseStatus(403);
   std::ofstream ofs(uploadFile.c_str());
   if (!ofs.is_open())
-    return setResponseStatus(500);
+    return setResponseStatus(607); // CGI_ERR
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
@@ -444,7 +449,7 @@ void Session::handleUpload() {
       WSLOG(LVL_ERR, TGT_SESS, "Error during file upload, aborting");
       ofs.close();
       std::remove(uploadFile.c_str());
-      return setResponseStatus(500);
+      return setResponseStatus(609); // CGI_ERR
     }
   }
   ofs.close();

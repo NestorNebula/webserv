@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:08:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 14:03:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ public:
 		hed(0),
 // RES_CGI_WAIT_COMPLETE
 		wait_comp(false),
+		failed(false),
 		tfs(NULL),
 		conn(NULL)
 	{}
@@ -100,6 +101,7 @@ protected:
 	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
+	bool			failed;
 	
 private:
 	TemporaryFileStream * tfs;

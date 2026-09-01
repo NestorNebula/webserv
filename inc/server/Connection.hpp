@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:28:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 13:35:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,9 @@ private:
 	void			reset(void);
 	
 // RETRY_CGI
+public:
 	int					retry_cgi;
+private:
 	ResourceCgi			*res_cgi;
 	int					exec_cgi(void);
 	

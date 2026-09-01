@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=6
+R=4
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -42,7 +42,7 @@ if [[ "$1" =~ "k" ]]; then
 fi
 
 if [[ "$1" =~ "p" ]]; then
-	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C  -b
+	siege -f urls/php.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
@@ -164,7 +164,7 @@ fi
 
 
 
-curl -X POST 'http://localhost:8082/test.php?g1=QUERYSHIT' -i \
+curl -X GET 'http://localhost:8082/test.py?g1=QUERYSHIT' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

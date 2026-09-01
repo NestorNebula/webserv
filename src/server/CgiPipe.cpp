@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 08:51:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 18:01:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 #include "Connection.hpp"
 #include "Server.hpp"
 #include "Request.hpp"
-
-
 
 CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) : 
 	EpollClient(_ep, EPC_CGI, _fd), 
@@ -28,6 +26,7 @@ CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc
 
 CgiPipe::~CgiPipe()
 {
+	fd_close(&this->fd);
 	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe ", this->fd);
 	try 
 	{
@@ -125,7 +124,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_SEND, "send");
-		return (this->rsrc->set_err(500)); // Internal Server Error
+		return (this->rsrc->set_err(611)); // CGI_ERR Internal Server Error
 	}
 	if (err == 0)
 	{
@@ -154,7 +153,7 @@ ssize_t	CgiPipe::pollin(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
-		return (this->rsrc->set_err(500)); // Internal Server Error
+		return (this->rsrc->set_err(611)); // CGI_ERR // Internal Server Error
 	}
 	if (err == 0)
 	{
@@ -212,13 +211,6 @@ void	CgiPipe::rsrc_closed(void)
 
 
 
-static	void fd_close(int *fd)
-{
-	if (*fd == -1)
-		return;
-	close(*fd);
-	*fd = -1;
-}
 
 cgi_pipes::cgi_pipes (void)
 {

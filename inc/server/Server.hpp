@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 17:23:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 18:50:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,10 @@
 #  define SERV_PAUSE 1
 # endif
 
+# ifndef SPARE_FD
+#  define SPARE_FD 2
+# endif
+
 
 class Server : public EpollClient
 {
@@ -59,6 +63,7 @@ public:
 	unsigned short		get_port(void)	const;
 	ServerConfig		&get_conf() { return (this->conf); }
 	
+	void				set_paused(void);
 private:
 
 	int					accept_conn(void);
@@ -66,12 +71,15 @@ private:
 	struct sockaddr_in	addr;
 	unsigned short		port;
 	
-	int					init(void);
-	int					acc_cnt;
-	int					acc_err;
-	int					acc_fail;
-	int					spare_fd;
-	bool				paused;
+	int		init(void);
+	int		acc_cnt;
+	int		acc_err;
+	int		acc_fail;
+	bool	paused;
+
+	int		spare_fd[SPARE_FD];
+	int		sfd_open(void);
+	void	sfd_close(void);
 };
 
 #endif

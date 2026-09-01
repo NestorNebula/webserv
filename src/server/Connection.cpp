@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:39:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 18:51:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ Connection::~Connection()
 
 // socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1))
 
-
 bool	Connection::timeo(time_t now)
 {
 	if (this->lact == 0)
@@ -79,11 +78,14 @@ bool	Connection::timeo(time_t now)
 		if (this->exec_cgi() < 0)
 		{
 			// failure
+// there's a moment when everyone is re-trying,
+// but no one is flushing
+// no fd are "opening up" .. 
 			if (retry_cgi++ == CGI_RETRY_COUNT)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
-				this->set_err(510); // CGI_ERR
+				this->set_err(610); // CGI_ERR
 			}
 			return (0);
 		}
@@ -118,6 +120,8 @@ int	Connection::set_err(int e)
 		return (-1);
 	}
 	WSLOG(LVL_DBG, TGT_CONN, "err:  ", e);
+	// if (retry_cgi) // dangerous (?)
+	// 	return (0);
 	try
 	{
 		this->error = e; // why not (?)
@@ -216,6 +220,8 @@ ssize_t	Connection::pollin(void)
 				WSCOL(WSL_CYAN);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "exec failed", retry_cgi);
 // RETRY_CGI
+				
+				this->serv.set_paused();
 				this->mod_evt(0); // -EPOLLIN);
 				retry_cgi++;
 				return (0);
@@ -240,8 +246,9 @@ ssize_t	Connection::pollin(void)
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
-			// return (-1);
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			return (-1);
+			WSCOL(WSL_PURPLE);
+			WSLOG(LVL_TMP, TGT_CONN, "keep-alive (ip)");
 			return (0);
 		case Session::CLOSE:
 			return (-1);
@@ -286,9 +293,15 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				this->reset();
+				return (-1);
+				this->reset(); // should not matter
 				// this->mod_evt(-EPOLLOUT); // unless we need to send error (?)
+				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				// fucking open files
+				// when siege was not expecting it to be
+// okay -- now I've lost something in the other bullshit
+				return (-1);
 				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
@@ -348,8 +361,12 @@ ssize_t	Connection::pollout(void)
 			this->reset();
 			// this->mod_evt(-EPOLLOUT);
 			// unless we sent back error ...
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
-			return (0);
+			WSCOL(WSL_PURPLE);
+			// firefox .. 
+			WSLOG(LVL_TMP, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			
+			return (-1);
+			// return (0);
 			// return (-1);
 		case Session::CLOSE:
 			return (-1);
@@ -449,7 +466,7 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (this->set_err(500)); // CGI_ERR - Internal Server Error
+		return (this->set_err(601)); // CGI_ERR - Internal Server Error
 	}
 
 	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;

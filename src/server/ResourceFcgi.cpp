@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:48:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 19:06:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	ResourceFcgi::status(void)
 		}
 		else
 		{
-			this->set_err(500);
+			this->set_err(602); // CGI_ERR
 			return (RSP_ERROR);
 		}
 	}
@@ -98,12 +98,17 @@ int	ResourceFcgi::wait(int opt)
 		// WSLOG(LVL_DBG, TGT_FCGI, "wait:  (flush)");
 		return (0);
 	}
+// !!!
+// uncertain : 
+// more apt to have failed transactions 
+// with no error 
+// when major nofile attacks
 	if (this->done == RSRC_DONE_IO)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
 		if (this->hed == 0)
 		{
-			this->set_err(500);
+			this->set_err(603); // CGI_ERR
 			return (0);
 		}
 // #if RES_CGI_WAIT_COMPLETE

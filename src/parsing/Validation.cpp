@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/01 11:13:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:23:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,8 +177,8 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
 // #kd
-	if (!route.pycgi_dir.empty())
-        validateDirExists(route.pycgi_dir, "server pycgi_dir");
+	// if (!route.pycgi_dir.empty())
+    //     validateDirExists(route.pycgi_dir, "server pycgi_dir");
 
 	validateDirExists(route.root, "route '" + route.path + "' root");
 	if (route.upload && !route.upload_dir.empty())
@@ -189,12 +189,12 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		validateFileExists(it->second, "route '" + route.path + "' error_page " + it->first);
 }
 
-void	ConfigParser::validateCGIExecutables(const RouteConfig& route)
+void	ConfigParser::validateCGIExecutables(const RouteConfig& route, const ServerConfig &server)
 {
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
-		if (it->first == ".py" && route.pycgi_dir.empty())
+		if (it->first == ".py" && server.pycgi_dir.empty())
 			throw	ConfigException("CGI for .py is defined but 'pycgi_dir' is missing in route: "
 				+ route.path);
 		if (it->second.empty() || it->second[0] != '/')
