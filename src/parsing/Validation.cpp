@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Validation.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/31 11:24:27 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/01 11:13:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,9 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		throw	ConfigException("Route '" + route.path + "' has no 'index' (and none to inherit).");
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
+// #kd
+	if (!route.pycgi_dir.empty())
+        validateDirExists(route.pycgi_dir, "server pycgi_dir");
 
 	validateDirExists(route.root, "route '" + route.path + "' root");
 	if (route.upload && !route.upload_dir.empty())
