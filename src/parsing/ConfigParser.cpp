@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/31 11:22:44 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:09:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <fstream>
 #include <sstream>
 
-RouteConfig::RouteConfig() : autoindex(false), upload(false), max_body_size (0), pycgi_dir("")  {}
+RouteConfig::RouteConfig() : autoindex(false), upload(false), max_body_size (0)  {}
 
 ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(0), pycgi_dir("")
 {

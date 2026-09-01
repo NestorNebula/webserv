@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 12:54:00 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 16:36:50 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:08:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class ConfigParser {
 		/* Validation */
 		void	validateServerConfig(const ServerConfig& server);
 		void	validateRouteConfig(const RouteConfig& route);
-		void	validateCGIExecutables(const RouteConfig& route);
+		void	validateCGIExecutables(const RouteConfig& route, const ServerConfig &server);
 		void	validateDirExists(const std::string& path, const std::string& context);
 		void	validateFileExists(const std::string& path, const std::string& context);
 

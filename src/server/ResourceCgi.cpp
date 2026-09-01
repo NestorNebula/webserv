@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:44:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 16:29:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 	// 	this->wait_comp = false;
 		
 // KEEP_ALIVE : rsp_hed .. add if CGI returned (content-length)
-	if (clen_str.size() && this->ka)
+	if (false) // clen_str.size() && this->ka)
 	{
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  keep-alive");
@@ -222,10 +222,10 @@ int		ResourceCgi::chk_rsp_hed(void)
 	}
 // WAIT_COMP
 // rsp_hed .. no content-length, not waiting until complete ; must CLOSE
-	else if (!this->wait_comp)
+	else if (true) // !this->wait_comp)
 	{
 // #if !RES_CGI_WAIT_COMPLETE
-		WSCOL(WSL_RED);
+		// WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
 		resp.insert(0, conn_close);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:45 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 11:16:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 18:01:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,4 +34,12 @@ std::string addr_2_str(struct sockaddr_in *addr)
     ss << (int) a[0] << "." << (int) a[1] << "."<< (int) a[2] << "."<< (int) a[3] << ":" << ntohs(addr->sin_port);
     
     return (ss.str());
+}
+
+void fd_close(int *fd)
+{
+	if (*fd == -1)
+		return;
+	close(*fd);
+	*fd = -1;
 }

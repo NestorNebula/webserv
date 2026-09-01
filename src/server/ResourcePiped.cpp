@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 12:48:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 16:13:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 ResourcePiped::~ResourcePiped()
 {
-	WSLOG(LVL_DBG, TGT_RSRC, " (~) ResourceCgi");
+	WSLOG(LVL_DBG, TGT_RSRC, " (~) ResourcePiped");
 	WSLOG(LVL_DBG, TGT_RSRC, "stat: " , this->stat);
 	WSLOG(LVL_DBG, TGT_RSRC, "pid : " , this->pid);
 	
@@ -22,18 +22,22 @@ ResourcePiped::~ResourcePiped()
 	{	
 		this->conn_closed();
 		this->conn = NULL;
-		this->wait(WNOHANG);
+		if (!this->failed)
+			this->wait(WNOHANG);
 		if (this->stat == -1 && this->pid)
 		{
 			WSCOL(WSL_RED);
 			WSLOG(LVL_DBG, TGT_RSRC, "kill");
 			kill(this->pid, SIGKILL);
-			this->wait(0); // do not set error (?)
+			// if (this->failed)
+			// 	this->wait(WNOHANG);
+			// else 
+				this->wait(0); // do not set error (?)
 		}
 	}
 	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CGI, " (~) ResourceCgi\n", e.what());
+		WSLOG(LVL_DBG, TGT_CGI, " (~) ResourcePiped\n", e.what());
 	}
 }
 
@@ -41,13 +45,14 @@ void	ResourcePiped::conn_closed(void)
 {
 	if (this->ip)
 	{
-		WSLOG(LVL_DBG, TGT_RSRC, "conn-closed : ip");
+		WSLOG(LVL_DBG, TGT_RSRC, "rsrc-closed : ip");
 		this->ip->rsrc_closed();
+		// are these not falling over properly (?)
 		this->ip->mod_evt(EPOLLOUT);
 	}
 	if (this->op)
 	{
-		WSLOG(LVL_DBG, TGT_RSRC, "conn-closed : op");
+		WSLOG(LVL_DBG, TGT_RSRC, "rsrc-closed : op");
 		this->op->rsrc_closed();
 		this->op->mod_evt(EPOLLIN);
 	}
@@ -106,25 +111,91 @@ int	ResourcePiped::wait(int opt)
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "xit : ", this->xit);
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "stat: ", this->stat);
 
+
+	// hed check .. to set error (?)
+	// may be done .. but deleted .. 
+	// which seems to lead to timeout .. 
+
+// what is NEW : we delete a FAILED (nofile) resource PREMATURELY
+	
+// still get a hang .. when deleting from conn
+// not closed (?)
+// waiting too long to close (fd) ?
+// 
 	if (this->stat != -1)
 	{
-		WSLOG(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
+		WSLOG(LVL_DBG, TGT_RSRC_INFO, "STAT: ", this->stat);
 		return (this->stat);
 	}
 	if (this->pid == 0)
 	{
 		WSCOL(WSL_RED);
-		WSLOG(LVL_DBG, TGT_RSRC_INFO, "done: ", this->stat);
+		WSLOG(LVL_DBG, TGT_RSRC_INFO, "PID : ", this->stat);
 		return (this->stat);
 	}
+
 	if (opt && (this->ip || this->op))
 	{
-		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: nohang i/o");
+		// feels like we get a pause here sometimes .. 
+		// may be killing (?)
+		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: nohang i/o ", this->failed);
+		// seems to hold -- might be .. data
 		return (this->stat); // (-1) : still active
 	}
 	// aha : opt (!)
 	if ((this->ip == NULL) && (this->op == NULL))
-		opt = 0; // dangerous (?)
+	{
+		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: null i/o ", this->failed);
+			// a lot of this, actually
+	// are we getting this on a delete
+	// when OPEN FILES failed (?)
+
+
+	// Connection deleting .. 
+// 	rsrc  : wait: null i/o
+// rsrc  : dup (pipes)
+// error : Too many open files
+// rsrc  :  (~) ResourcePiped
+// rsrc  : stat: [-1]
+// rsrc  : pid : [303523]
+// rsrc  : wait: null i/o
+
+
+// we failed
+// cgi is launched
+// conn deletes RESOURCE
+// pipes are still activate
+// WAIT .. will wait forever 
+// have not killed 
+// first delete / no-hang call
+// with both null
+// waits forver
+// without KILL
+
+// TRY : close ip/op and let die (?)
+// but : we do not have acess to those here 
+
+// basic behavior NEEDS THIS 
+// some clients (ip/op) are still floating around (?)
+
+// set on REM
+
+// was this linked to keep-alive (?)
+		opt = 0;
+		
+// when did we REALLY need this (?)
+// something about ... FILE FAIL -- delete ...
+// and we're stuck waiting 
+		if (false) // !this->conn)
+		{
+			// very heavy -- holds things up
+			// when DELETE ON FAIL (!)
+			WSCOL(WSL_RED);
+			WSLOG(LVL_TMP, TGT_RSRC, "kill");
+			kill(this->pid, SIGKILL);
+			opt = 0; // dangerous (?) // wait on something that should be killed (?)
+		}
+	}
 	err = waitpid(this->pid, &this->stat, opt);
 	
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
@@ -156,7 +227,7 @@ int	ResourcePiped::wait(int opt)
 		this->sig = WTERMSIG(stat);
 		WSLOG(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WSLOG(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
-		this->set_err(500);
+		this->set_err(604); // CGI_ERR
 		return (this->stat);
 	}
 	else
@@ -165,8 +236,24 @@ int	ResourcePiped::wait(int opt)
 	}
 	// hm : forced-wait .. should not set error (?)
 	// if ((this->stat > 0) || (this->hed == 0))
-	if (this->hed == 0) // allow exit to terminate
-		this->set_err(500);
+	// stat test -- more retry fails 
+	// more timeouts 
+	if (this->stat == 0 && this->hed == 0) // allow exit to terminate
+	// if (this->hed == 0)
+	{
+		// a lot on client close
+		// the fail on low-file-limit 
+		// killed (?)
+		// deleting -- before retry (?)
+		WSLOG(LVL_TMP, TGT_RSRC, "error: 605");
+		WSLOG(LVL_TMP, TGT_RSRC, "stat : ", stat);
+		WSLOG(LVL_TMP, TGT_RSRC, "req:\n", this->body);
+		WSLOG(LVL_TMP, TGT_RSRC, "rsp:\n", this->resp);
+
+		// not if RETRY
+		if (this->conn && !this->conn->retry_cgi)
+			this->set_err(605); // CGI_ERR
+	}
 // #if RES_CGI_WAIT_COMPLETE
 	else if (this->wait_comp)
 		this->chk_rsp_len();
@@ -182,7 +269,8 @@ int	ResourcePiped::rem(EpollClient *epc)
 
 	if (epc == this->ip)
 	{
-		WSLOG(LVL_INFO, TGT_RSRC, "rem : (ip)");
+		// WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_RSRC, "rem : (ip)");
 		err = 1;
 		this->ip = NULL;
 		if (this->op)
@@ -193,15 +281,17 @@ int	ResourcePiped::rem(EpollClient *epc)
 	}
 	else if (epc == this->op)
 	{
-		WSLOG(LVL_INFO, TGT_RSRC, "rem : (op)");
+		// WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_RSRC, "rem : (op)");
 		err = 2;
 		this->op = NULL;
 	}
 	if ((this->ip == NULL) && (this->op == NULL))
 	{
-		WSLOG(LVL_INFO, TGT_RSRC, "rem : (done)");
+		// WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_RSRC, "rem : (done)");
 		err = 3;
-		this->wait(WNOHANG);
+		this->wait(0); // WNOHANG);
 	}	
 	return (err);
 }
@@ -228,11 +318,15 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)
+	{
+		// or : set_failed triggers (kill)
+		this->failed = true;
 		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
-
+	}
 	int cgifd_op = dup(pipes->p2[0]);
 	if (cgifd_op < 0)
 	{
+		this->failed = true;
 		close(cgifd_ip);
 		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
 	}	
@@ -241,6 +335,7 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	err = this->ip->ini_evt(EPOLLOUT);
 	if (err < 0)
 	{
+		this->failed = true;
 		close(cgifd_ip);
 		close(cgifd_op);
 		return (err);
@@ -251,6 +346,7 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	// err = this->op->ini_evt(EPOLLIN);
 	if (err < 0)
 	{
+		this->failed = true;
 		close(cgifd_ip);
 		close(cgifd_op);
 		return (err);

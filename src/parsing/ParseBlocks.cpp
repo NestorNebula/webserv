@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/01 11:13:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:10:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,8 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	if (directives.count("redirect"))
 		route.redirect = directives["redirect"];
 // #kd
-	if (directives.count("pycgi_dir"))
-   		route.pycgi_dir = directives["pycgi_dir"];
+	// if (directives.count("pycgi_dir"))
+   	// 	route.pycgi_dir = directives["pycgi_dir"];
 
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
@@ -212,7 +212,7 @@ void	ConfigParser::parseServer()
 				server.routes[i].error_pages[ite->first] = ite->second;
 		}
 		validateRouteConfig(server.routes[i]);
-		validateCGIExecutables(server.routes[i]);
+		validateCGIExecutables(server.routes[i], server);
 	}
 
 	validateServerConfig(server);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 11:50:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:43:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,11 @@
 #  define CGI_RETRY_INTERVAL 1
 # endif
 
+// We can get into a loop here ... 
+// what .. conns fill ALL (fd)
+// so impossible to create CGI to flush 
 # ifndef CGI_RETRY_COUNT
-#  define CGI_RETRY_COUNT 10
+#  define CGI_RETRY_COUNT 5
 # endif
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 19:29:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:50:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,9 +267,49 @@ struct epoll_event	*Epoll::get_evt(int idx)
 	return (this->evts + idx);
 }
 
+void	Epoll::cli_info(void)
+{
+	std::set<EpollClient*>::iterator it;
+	WSLOG(LVL_TMP, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
 
+	int epc_serv = 0;
+	int epc_conn = 0;
+	int epc_cgi  = 0;
+	int epc_fcgi = 0;
+	if (this->clients.size() > 3)
+	{
+		it = this->clients.begin();
+		while (it != this->clients.end())
+		{
+			// std::cerr << (*it)->typ_str() << " ";
+			switch((*it)->get_typ())
+			{
+			case EPC_SERV:
+				epc_serv++;
+				break;
+			case EPC_CONN:
+				epc_conn++;
+				break;
+			case EPC_CGI:
+				epc_cgi++;
+				break;
+			case EPC_FCGI:
+				epc_fcgi++;
+				break;
+			default:
+				break;
+			}
+			it++;
+		}
+		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "serv: ", epc_serv);
+		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "conn: ", epc_conn);
+		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
+		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
+	}
+}
 int	Epoll::exec(void)
 {
+	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
@@ -288,6 +328,17 @@ void	Epoll::check_timeo(void)
 	
 	std::set<EpollClient*>::iterator it;
 	
+	// if (this->clients.size() > 3)
+	// {
+	// 	it = this->clients.begin();
+	// 	while (it != this->clients.end())
+	// 	{
+	// 		std::cerr << (*it)->typ_str() << " ";
+	// 		it++;
+	// 	}
+	// 	std::cerr << "\n";
+	// }
+		
 	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
