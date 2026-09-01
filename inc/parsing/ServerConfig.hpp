@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 16:36:51 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/01 10:56:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ struct ServerConfig {
 
 	std::string pycgi_dir;
 	std::string fcgi_sock;
+// #kd
+	std::string def_err;
 
 	ServerConfig();
 };
