@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 11:46:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:23:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,11 @@
 #  define SERV_BACKLOG 512
 # endif
 
+# ifndef SERV_PAUSE
+#  define SERV_PAUSE 1
+# endif
+
+
 class Server : public EpollClient
 {
 private:
@@ -55,12 +60,18 @@ public:
 	ServerConfig		&get_conf() { return (this->conf); }
 	
 private:
+
+	int					accept_conn(void);
 	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;
 	
 	int					init(void);
 	int					acc_cnt;
+	int					acc_err;
+	int					acc_fail;
+	int					spare_fd;
+	bool				paused;
 };
 
 #endif

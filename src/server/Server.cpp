@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/31 11:04:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/01 17:36:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,11 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	EpollClient(_ep, EPC_SERV, -1), 
 	conf(_conf),
 	port(p),
-	acc_cnt(0)
+	acc_cnt(0),
+	acc_err(0),
+	acc_fail(0),
+	spare_fd(-1),
+	paused(false)
 {
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
@@ -29,8 +33,12 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 
 Server::~Server()
 {
-	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
-	WSLOG(LVL_DBG, TGT_SERV, "accepted: ", acc_cnt);
+	WSLOG(LVL_TMP, TGT_SERV, " (~) Server");
+	WSLOG(LVL_TMP, TGT_SERV, "acc cnt : ", acc_cnt);
+	WSLOG(LVL_TMP, TGT_SERV, "acc err : ", acc_err);
+	WSLOG(LVL_TMP, TGT_SERV, "acc fail: ", acc_fail);
+	if (this->spare_fd != -1)
+		close(this->spare_fd);
 };
 
 int Server::init(void)
@@ -42,6 +50,10 @@ int Server::init(void)
 		WSLOG(LVL_ERR, TGT_SERV, "bad port");
 		return (-1);
 	}
+	
+	this->spare_fd = open("/dev/null", O_RDONLY);
+	if (this->spare_fd < 0)
+		return (WsLog::_errno(LVL_ERR, TGT_SERV, "spare_fd"));
 	
 	this->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->fd < 0)
@@ -70,21 +82,59 @@ int Server::init(void)
 	return (err);
 }
 
-ssize_t	Server::pollin(void)
+int	Server::accept_conn(void)
 {
-	ssize_t				err;
+	int					conn_fd;
 	struct sockaddr_in	conn_addr;
 	socklen_t			conn_asiz = sizeof(conn_addr);
-	int					conn_fd;
-
+	
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 	{
-// this can get noisy
-		// WsLog::_errno(LVL_DBG, TGT_SERV, "accept");
-		// WsLog::_(LVL_ERR, TGT_SERV,      "epoll: ", this->ep->num_cli());
-		return (0);
+		acc_err++;
+		
+		WSCOL(WSL_RED);
+		WSLOG(LVL_ERR, TGT_SERV, "pause");
+		switch(errno)
+		{
+		case EMFILE:
+			WSLOG(LVL_ERR, TGT_SERV, "EMFILE");
+			break;
+		case ENFILE:
+			WSLOG(LVL_ERR, TGT_SERV, "ENFILE");
+			break;
+		default:
+			break;
+		}
+		
+		this->mod_evt(-EPOLLIN);
+		this->paused = true;
+		close(this->spare_fd);
+		this->spare_fd = -1;
+		
+		conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
+		if (conn_fd < 0)
+		{
+			acc_fail++;
+			WSCOL(WSL_RED);
+			WSLOG(LVL_ERR, TGT_SERV, "FAILED!");
+		}
+		else
+		{
+			WSCOL(WSL_GREEN);
+			WSLOG(LVL_ERR, TGT_SERV, "accepted!");
+		}
 	}	
+	return (conn_fd);
+}
+ssize_t	Server::pollin(void)
+{
+	ssize_t	err;
+	int		conn_fd;
+	
+	conn_fd = this->accept_conn();
+	if (conn_fd < 0)
+		return (0);
 	err = sock_non_block(conn_fd);
 	if (err < 0)
 	{
@@ -101,7 +151,7 @@ ssize_t	Server::pollin(void)
 		delete (c);
 		return (0);
 	}
-	c->set_addr(&conn_addr);
+	// c->set_addr(&conn_addr);
 
 	this->acc_cnt++;
 	return (0);
@@ -122,8 +172,37 @@ int	Server::hup(void)
 	return (0);
 }
 
-bool	Server::timeo  (time_t)
+bool	Server::timeo  (time_t now)
 {
+	if (this->lact == 0)
+		return (false);
+	if (now < this->lact)
+		return (false);
+
+	if (!this->paused)
+		return (false);
+	if ((this->lact + SERV_PAUSE) > now)
+		return (false);
+
+	if (this->spare_fd >= 0)
+	{
+		close(this->spare_fd);
+		this->spare_fd = -1;
+	}
+	this->spare_fd = open("/dev/null", O_RDONLY);
+	if (this->spare_fd < 0)
+	{
+		WSCOL(WSL_PURPLE);
+		WSLOG(LVL_TMP, TGT_SERV, "stay paused");
+		this->ep->cli_info();
+		return (false);
+	}
+
+	WSCOL(WSL_GREEN);
+	WSLOG(LVL_ERR, TGT_SERV, "resume(!)");
+
+	this->paused = false;
+	this->mod_evt(EPOLLIN);
 	return (false);
 }
 
