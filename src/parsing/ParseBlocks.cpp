@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParseBlocks.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/31 11:22:26 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/01 10:56:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
+
+// #kd
+#include <fstream>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {
@@ -210,6 +213,20 @@ void	ConfigParser::parseServer()
 	}
 
 	validateServerConfig(server);
+
+// #kd
+#if 1
+	std::map<std::string, std::string>::const_iterator	it;
+	it = server.error_pages.find("default");		
+	std::ifstream rd(it->second.c_str());
+	if (rd)
+	{
+		std::stringstream tmp;
+		tmp << rd.rdbuf();
+		server.def_err = tmp.str();
+	}
+#endif
+
 	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed server on port ", server.port);
 	_servers.push_back(server);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StaticResource.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:02:21 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/01 10:56:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ public:
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource constructor for: ", filepath);
   }
-  ~StaticResource() {
+  virtual ~StaticResource() {
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource destructor for: ", _filepath);
     delete _stream;
@@ -33,7 +33,7 @@ public:
   virtual bool failed() const { return _state == FAIL; }
   virtual Stream &stream();
 
-private:
+protected:
   typedef enum eInternalState {
     DEFAULT,
     DONE,
@@ -46,4 +46,28 @@ private:
   std::string _filepath;
   InternalState _state;
   Stream *_stream;
+};
+
+// #kd
+class ErrorResource : public StaticResource {
+public:
+  ErrorResource(const std::string &filepath, const std::string &def_str) : StaticResource(filepath), _def_str(def_str)  {
+    WSLOG(LVL_DBG, TGT_STAT_RES,
+             "ErroResource constructor for: ", filepath);
+    }
+  ~ErrorResource() {}
+  void generate()
+  {
+    StaticResource::generate();
+    if (!_stream || _state != DONE)
+    {
+      if (_stream)
+        delete (_stream);
+      std::stringstream * sstr = new std::stringstream(_def_str);
+      _stream = new Stream(sstr);
+      _state = DONE;
+    }
+  }
+private:
+  const std::string & _def_str;
 };

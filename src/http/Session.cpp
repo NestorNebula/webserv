@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 15:24:58 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/01 10:54:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,7 +389,8 @@ void Session::prepareErrorResource() {
   delete _resource;
   WSLOG(LVL_INFO, TGT_SESS, "Generating Error page Resource using ",
            errPage);
-  _resource = new StaticResource(errPage);
+// #kd
+  _resource = new ErrorResource(errPage, _server.def_err);
   _resourcePath = errPage;
 }
 
