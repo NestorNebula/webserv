@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 12:09:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:01:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	// WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 // KEEP_ALIVE : check req_cnt
-	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -260,9 +260,9 @@ ssize_t	Connection::pollin(void)
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
-			return (-1);
 			WSCOL(WSL_PURPLE);
 			WSLOG(LVL_TMP, TGT_CONN, "keep-alive (ip)");
+			// no reset here (?)
 			return (0);
 		case Session::CLOSE:
 			return (-1);
@@ -307,15 +307,9 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				// return (-1);
-				this->reset(); // should not matter
-				// this->mod_evt(-EPOLLOUT); // unless we need to send error (?)
+				this->reset();
 				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
-				// fucking open files
-				// when siege was not expecting it to be
-// okay -- now I've lost something in the other bullshit
-				return (-1);
 				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
@@ -372,16 +366,10 @@ ssize_t	Connection::pollout(void)
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
-			this->reset();
-			// this->mod_evt(-EPOLLOUT);
-			// unless we sent back error ...
 			WSCOL(WSL_PURPLE);
-			// firefox .. 
 			WSLOG(LVL_TMP, TGT_CONN, "keep-alive (op) ", this->req_cnt);
-			
-			return (-1);
-			// return (0);
-			// return (-1);
+			this->reset();
+			return (0);
 		case Session::CLOSE:
 			return (-1);
 		default:
