@@ -50,15 +50,14 @@
 
 
 
-# seems to pose problems with low file limit
-http://127.0.0.1:8082/test.pl
-http://127.0.0.1:8082/ka.pl
-http://127.0.0.1:8082/stat.pl
+# http://127.0.0.1:8082/test.pl
+# http://127.0.0.1:8082/ka.pl
+# http://127.0.0.1:8082/stat.pl
 
 # -- strange no close .. a keep-alive thing (?)
-# http://127.0.0.1:8082/test.py
-# http://127.0.0.1:8082/ka.py
-# http://127.0.0.1:8082/stat.py
+http://127.0.0.1:8082/test.py
+http://127.0.0.1:8082/ka.py
+http://127.0.0.1:8082/stat.py
 
 # PHP ONLY
 
@@ -74,8 +73,8 @@ http://127.0.0.1:8081/stat.php
 # http://127.0.0.1:8082/stat.php
 # http://127.0.0.1:8082/exit.php
 
-http://127.0.0.1:8082/bigimage.php
-http://127.0.0.1:8082/bigaudio.php
+# http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8082/bigaudio.php
 
 # http://127.0.0.1:8082/files/earth.jpg
 # http://127.0.0.1:8082/files/e4.jpg

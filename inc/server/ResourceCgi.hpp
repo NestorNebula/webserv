@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:07:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:07:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ public:
 		error(0),
 		ka(false),
 		hed(0),
-// RES_CGI_WAIT_COMPLETE
 		wait_comp(false),
 		failed(false),
 		conn(NULL)
@@ -87,8 +86,7 @@ public:
 	bool			ka;
 	
 protected:
-	int				hed;
-// RES_CGI_WAIT_COMPLETE
+	int				hed; // what else did we want here (?)
 	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);

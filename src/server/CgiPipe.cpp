@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:05:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:58:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,15 +141,16 @@ ssize_t	CgiPipe::pollin(void)
 	ssize_t	err = 0;
 	
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
+	
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv"); // conn: ", this->conn->get_fd());
-	
+	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv");
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
+	
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
@@ -159,10 +160,6 @@ ssize_t	CgiPipe::pollin(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
-// moved to set_done
-// #if RES_CGI_WAIT_COMPLETE
-// 		conn->mod_evt(EPOLLOUT);
-// #endif
 		return (-1);
 	}
 	
@@ -172,16 +169,11 @@ ssize_t	CgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_ERR:
 		this->mod_evt(-EPOLLIN);
-		// conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
 		break;
 	case RSRC_RESP_BODY:
 	default:
-// this should have been done in Resource::recv_data
-// #if !RES_CGI_WAIT_COMPLETE
-// 		conn->mod_evt(EPOLLOUT);
-// #endif
 		break;
 	}
 	return (err);
@@ -203,6 +195,7 @@ int		CgiPipe::hup(void)
 
 void	CgiPipe::rsrc_closed(void)
 { 
+	// mod_evt (?)
 	this->conn = NULL;
 	this->rsrc = NULL;
 }
