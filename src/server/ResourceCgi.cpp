@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:06:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:15:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,97 +44,29 @@ int	ResourceCgi::get_req_body(void)
 
 std::string & ResourceCgi::get_resp(void)
 {
-	if (this->resp.size())
-		return (this->resp);
-	if (this->tfs)
-	{
-		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_RSRC, "tfs : read");
-		this->tfs->read(this->resp);
-
-		if (this->tfs->eof())
-		{
-			WSCOL(WSL_YELLOW);
-			WSLOG(LVL_TMP, TGT_RSRC, "tfs : EOF");
-			delete (this->tfs);
-			this->tfs = NULL;
-		}
-	}
-
 	return (this->resp);
 }
 bool	ResourceCgi::resp_data(void)
 {
 	if (this->resp.size())
 		return (true);
-	if (this->tfs && !this->tfs->eof())
-		return (true);
 	return (false);
 
 }
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
-	if (this->tfs)
-	{
-		// WSCOL(WSL_YELLOW);
-		// WSLOG(LVL_TMP, TGT_RSRC, "tfs : write");
-		tfs->write(buf, siz);
-	}
-	else
-	{
-		this->resp.append(buf, siz);
-	}
-
+	// add CHHUNKED here 
+	this->resp.append(buf, siz);
+	
 	WSLOG(LVL_NONE, TGT_RSRC, "resp");
 	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
 
 	if (this->hed)
 	{
 // #if !RES_CGI_WAIT_COMPLETE
-
-// recv_data .. if (wait_comp), don't let the (resp) buffer get too large ... 
-
-		if (this->wait_comp)
-		{
-			// check resp size
-			if (tfs == NULL && this->resp.size() > 2000000)
-			{
-				WSCOL(WSL_YELLOW);
-				WSLOG(LVL_TMP, TGT_RSRC, "resp: temp file");
-// When Nginx talks to a backend handler (like a FastCGI server), it saves the response data into internal memory buffers before sending it to the client. If the response is larger than the assigned buffer space, Nginx writes the extra data into a temporary file on the disk.
-
-// so .. even large content-length
-// would want a temp file 
-// always buffer : 
-// BUT : 
-// write-to-file IF 
-	// content-length > MAX
-	// OR
-	// content-length NOT DEFINED
-				try
-				{
-					this->tfs = new TemporaryFileStream;
-				}
-				catch(const std::exception& e)
-				{
-					std::cerr << e.what() << '\n';
-				
-					WSLOG(LVL_DBG, TGT_RSRC, "wait_comp: too big");
-					this->set_err(503); // CGI_ERR : file_size
-					return (RSRC_RESP_ERR);
-
-					// OR : kill wait_comp
-					// 
-				}
-			}
-		}
-		else
-		{
+		if (!this->wait_comp)
 			conn->mod_evt(EPOLLOUT);
-		}
 // #endif
-
-
 		return (RSRC_RESP_BODY);
 	}
 	return (this->chk_rsp_hed());
@@ -274,13 +206,6 @@ void	ResourceCgi::chk_rsp_len(void)
 
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: resp ", clen);
-	if (this->tfs)
-	{
-		WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: tfs  ", this->tfs->size());
-		clen += this->tfs->size();
-		// right value here ..
-		// two extra bytes sent
-	}
 
 	clen_str = std::string("\r\nContent-Length:") + toString(clen);
 	

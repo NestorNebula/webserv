@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:06:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:07:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,18 +62,9 @@ public:
 // RES_CGI_WAIT_COMPLETE
 		wait_comp(false),
 		failed(false),
-		tfs(NULL),
 		conn(NULL)
 	{}
-	virtual ~ResourceCgi()
-	{
-		if (this->tfs)
-		{
-			WSCOL(WSL_YELLOW);
-			WSLOG(LVL_DBG, TGT_RSRC, "dele: temp file");
-			delete (this->tfs);
-		}
-	};
+	virtual ~ResourceCgi() {}
 
 	int				get_req_body(void);
 	
@@ -104,8 +95,6 @@ protected:
 	bool			failed;
 	
 private:
-
-	TemporaryFileStream * tfs;
 	int				chk_rsp_hed(void);
 	
 protected:
