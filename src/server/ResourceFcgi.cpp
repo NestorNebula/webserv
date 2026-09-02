@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 12:13:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:07:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int	ResourceFcgi::status(void)
 			WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (have data)");
             return (1);
 		}
-		if (this->ka)
+		if (this->ka) // DONE
 			return (RSP_KPALIVE);
 		return (RSP_COMPLETE); 
 	}
@@ -75,6 +75,7 @@ int	ResourceFcgi::status(void)
 		this->fcgi->mod_evt(EPOLLIN);
 	return (RSP_WAIT_BODY); 
 }
+
 int	ResourceFcgi::wait(int opt)
 {
 	(void)opt;

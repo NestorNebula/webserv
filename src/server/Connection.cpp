@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:01:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:03:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,9 +307,9 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				this->reset();
 				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				this->reset();
 				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:

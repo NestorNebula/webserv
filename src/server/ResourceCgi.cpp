@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 17:59:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:59:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ int	ResourceCgi::get_req_body(void)
 
 std::string & ResourceCgi::get_resp(void)
 {
+	// separate head .. for HEAD
 	return (this->resp);
 }
+
 bool	ResourceCgi::resp_data(void)
 {
 	if (this->resp.size())
@@ -116,25 +118,6 @@ static std::string hedval_str(std::string & str, const char *key)
 // parse_rsp_hed ... 
 // build .. from passed headers
 
-int		ResourceCgi::chk_rsp_hed(void)
-{
-	size_t	pos = resp.find("\r\n\r\n");
-	if (pos == std::string::npos)
-		return (RSRC_RESP_INIT);
-
-// this is where we MIGHT force wait complete
-// if we do not have content-length
-
-// also : REBUILD HEAD (?)
-	// never over-ride (?)
-	
-
-
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
-	this->hed = 1;
-
-// REQUIRE (?) Content-Type (?)
 
 // cooler : separate head/body .. HEAD request
 // we could then re-construct head
@@ -148,30 +131,41 @@ int		ResourceCgi::chk_rsp_hed(void)
 // content->length TOO LONG
 
 
+int		ResourceCgi::chk_rsp_hed(void)
+{
+	size_t	pos = resp.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (RSRC_RESP_INIT);
+
+	this->hed = 1;
+	
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
+
+	std::string stat_str = hedval_str(resp, "Status");
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
-// rsp_head 
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat: ", stat_str);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "conn: ", conn_str);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: ", clen_str);
 
-// do not wait for complete .. if CGI returns content-length
-// better : content-length too big -- should be CHUNKED .. but worry about that later
-	// WITHOUT : wait_comp
+// because .. true by default (?)
 	// if (clen_str.size())
 	// 	this->wait_comp = false;
 		
 // KEEP_ALIVE : rsp_hed .. add if CGI returned (content-length)
 	if (false) // clen_str.size() && this->ka)
 	{
+		// and : connection not already set -- 
+		// which a CGI script should never do .. 
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  keep-alive");
 		std::string kastr = std::string("Connection: Keep-Alive\r\n");
 		resp.insert(0, kastr);
 	}
-// WAIT_COMP
-// rsp_hed .. no content-length, not waiting until complete ; must CLOSE
 	else if (true) // !this->wait_comp)
 	{
-
 		// WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
@@ -181,7 +175,6 @@ int		ResourceCgi::chk_rsp_hed(void)
 	}
 
 	std::string stat_hed;
-	std::string stat_str = hedval_str(resp, "Status");
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat:  ", stat_str);
 	if (stat_str.size())
 	{
@@ -203,6 +196,9 @@ int		ResourceCgi::chk_rsp_hed(void)
 
 
 // very important part of wait_comp
+// only called if wait_comp
+// which we only set when ... 
+// so .. we assume .. no content-length was provided
 void	ResourceCgi::chk_rsp_len(void)
 {
 	if (this->hed == 0)
@@ -212,8 +208,6 @@ void	ResourceCgi::chk_rsp_len(void)
 
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN\n", resp.substr(0, pos));
 	
-	// should already know this stuff
-	// from chk_rsp_hed
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
@@ -222,6 +216,7 @@ void	ResourceCgi::chk_rsp_len(void)
 		return;
 	}
 
+// insert  REAL CLEN 
 	size_t clen = (resp.size() - pos - 4);
 
 	WSCOL(WSL_YELLOW);
@@ -233,6 +228,9 @@ void	ResourceCgi::chk_rsp_len(void)
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  content-length ", clen_str);
 
 	resp.insert(pos, clen_str);
+
+
+// keep-alive : what was (already?) set in chk_rsp_hed
 // KEEP_ALIVE - have complete response, add keep-alive header
 // KEEP_ALIVE - assumes wait_comp (?)
 	if (this->ka)
@@ -249,7 +247,7 @@ void	ResourceCgi::chk_rsp_len(void)
 		resp.insert(pos, conn_close);
 	}
 	pos = resp.find("\r\n\r\n");
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "DONE");
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
 }
 

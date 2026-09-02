@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 12:14:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:04:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ int	ResourcePiped::status(void)
 			WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (have data)");
             return (1);
 		}
-		if (this->ka)
+		if (this->ka) // DONE
 			return (RSP_KPALIVE);
 		return (RSP_COMPLETE); 
 	}
