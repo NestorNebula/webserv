@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 10:57:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:01:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,6 @@
 #  define CGI_RETRY_COUNT 10
 # endif
 
-
-# ifndef RES_CGI_WAIT_COMPLETE
-    // .. except if content-length > xxx
-#  define RES_CGI_WAIT_COMPLETE 0
-# endif
 
 # define DEF_BUF_SIZ 8192
 

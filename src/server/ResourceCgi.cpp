@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:15:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:16:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ bool	ResourceCgi::resp_data(void)
 	return (false);
 
 }
+
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
 	// add CHHUNKED here 
@@ -63,10 +64,8 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 
 	if (this->hed)
 	{
-// #if !RES_CGI_WAIT_COMPLETE
 		if (!this->wait_comp)
 			conn->mod_evt(EPOLLOUT);
-// #endif
 		return (RSRC_RESP_BODY);
 	}
 	return (this->chk_rsp_hed());
@@ -100,18 +99,28 @@ static std::string hedval_str(std::string & str, const char *key)
 
 }
 
+
+// WAIT_COMP WORK HERE 
 // called by : recv_data
+// CLARIFY : the rules for
+	// keep-alive 
+
+// parse_rsp_hed ... 
+// build .. from passed headers
+
 int		ResourceCgi::chk_rsp_hed(void)
 {
-
+	size_t	pos = resp.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (RSRC_RESP_INIT);
 
 // this is where we MIGHT force wait complete
 // if we do not have content-length
 
+// also : REBUILD HEAD (?)
+	// never over-ride (?)
+	
 
-	size_t	pos = resp.find("\r\n\r\n");
-	if (pos == std::string::npos)
-		return (RSRC_RESP_INIT);
 
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
@@ -154,14 +163,13 @@ int		ResourceCgi::chk_rsp_hed(void)
 // rsp_hed .. no content-length, not waiting until complete ; must CLOSE
 	else if (true) // !this->wait_comp)
 	{
-// #if !RES_CGI_WAIT_COMPLETE
+
 		// WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
 		resp.insert(0, conn_close);
 // KEEP_ALIVE : NOT wait_comp - force connection : close
 		this->ka = false;
-// #endif
 	}
 
 	std::string stat_hed;
@@ -184,16 +192,20 @@ int		ResourceCgi::chk_rsp_hed(void)
 	return (RSRC_RESP_HEAD);
 }
 
-// RES_CGI_WAIT_COMPLETE
+
+
+// very important part of wait_comp
 void	ResourceCgi::chk_rsp_len(void)
 {
 	if (this->hed == 0)
 		return;
+		
 	size_t	pos = resp.find("\r\n\r\n");
 
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN\n", resp.substr(0, pos));
 	
 	// should already know this stuff
+	// from chk_rsp_hed
 	std::string clen_str = hedval_str(resp, "Content-Length");
 	if (clen_str.size())
 	{
@@ -247,10 +259,7 @@ int	ResourceCgi::set_done(int d)
 	if (this->done & RSRC_DONE_ERR)
 		return (-1);
 	if (this->done & RSRC_DONE_OP)
-	{
-// RES_CGI_WAIT_COMPLETE
 		conn->mod_evt(EPOLLOUT);
-	}
 	if ((this->done & RSRC_DONE_IO) == RSRC_DONE_IO)
 		return (-1);
 	return (0);

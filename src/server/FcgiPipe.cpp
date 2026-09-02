@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 13:12:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:14:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,16 +102,16 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 
 ssize_t	FcgiPipe::pollout(void)
 {
-	ssize_t	err;
-	
 	WSLOG(LVL_DBG, TGT_FCGI, "send:  POLLOUT");
+
+	ssize_t	err;
 	
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
 		
-	WSLOG(LVL_DBG, TGT_FCGI, "send"); // conn: ", this->conn->get_fd());
+	WSLOG(LVL_DBG, TGT_FCGI, "send");
 		
 	switch(rsrc->get_req_body())
 	{
@@ -123,8 +123,10 @@ ssize_t	FcgiPipe::pollout(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
-	case REQ_COMPLETE: // still need to send END_STDIN
+	case REQ_COMPLETE: 
 		// WSLOG(LVL_DBG, TGT_FCGI, "req      : complete");
+		// may still need to send END_STDIN
+		
 	default:
 		break;
 	}
@@ -134,14 +136,13 @@ ssize_t	FcgiPipe::pollout(void)
 		rsrc->set_done(RSRC_DONE_IP);
 		this->mod_evt(-EPOLLOUT);
 		this->mod_evt(EPOLLIN);
-		// return (0);
 	}
 	
-	WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
-	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	fcgi.req_body(rsrc->body);
 
-	// crash -- on FCGI STOP ...
+	
 	err = this->send(fcgi.req);
 	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	if (err < 0)
@@ -158,10 +159,6 @@ ssize_t	FcgiPipe::pollout(void)
 	}
 	WSLOG(LVL_DBG, TGT_FCGI, "sent: ", err);
 	WSLOG(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
-
-	// wait until entire body has been sent ...
-	// dangerous (?)
-	// this->mod_evt(EPOLLIN);
 	return (0);
 }
 
@@ -176,8 +173,7 @@ ssize_t	FcgiPipe::pollin(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WSLOG(LVL_DBG, TGT_FCGI, "recv"); // conn: ", this->conn->get_fd());
-	
+	WSLOG(LVL_DBG, TGT_FCGI, "recv");
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_FCGI, "recv: ", err);
 
@@ -189,13 +185,9 @@ ssize_t	FcgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "recv:  ZERO");
-		WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
-		WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
+		// WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
+		// WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
 		rsrc->set_done(RSRC_DONE_OP);
-// moved to set_done
-// #if RES_CGI_WAIT_COMPLETE
-// 		conn->mod_evt(EPOLLOUT);
-// #endif
 		return (0);
 	}
 	
@@ -211,16 +203,11 @@ ssize_t	FcgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_ERR:
 		this->mod_evt(-EPOLLIN);
-		// conn->set_err(rsrc->error);
 		break;
 	case RSRC_RESP_HEAD:
 		break;
 	case RSRC_RESP_BODY:
 	default:
-// this should have been done in Resource::recv_data
-// #if !RES_CGI_WAIT_COMPLETE
-// 		conn->mod_evt(EPOLLOUT);
-// #endif
 		break;
 	}
 	
@@ -235,7 +222,8 @@ int		FcgiPipe::rdhup(void)
 	
 	if (this->rsrc == NULL)
 		return (-1);
-		
+	
+// this is where we betray our complete lack of mastery of what is going on here.
 	rsrc->set_done(RSRC_DONE_IP);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
 
@@ -255,10 +243,10 @@ int		FcgiPipe::rdhup(void)
 	if (rsrc->set_done(0) == -1)
 		return (-1);
 
-	if (this->rsrc->resp_data()) // resp.size())
+	if (this->rsrc->resp_data()) 
 	{
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size()); // resp_data
+		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
 		// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp\n", this->rsrc->resp);
 
 		WSCOL(WSL_YELLOW);
@@ -267,8 +255,8 @@ int		FcgiPipe::rdhup(void)
 	}
 	// got here on small READ SIZE
 	// out + rdhup .. but no (resp) yet .. 
-	// WSCOL(WSL_RED);
-	// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
+	WSCOL(WSL_RED);
+	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
 	return (0);
 }
 
