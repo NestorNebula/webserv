@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 17:59:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 22:22:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,8 @@ ssize_t	CgiPipe::pollin(void)
 	}
 	if (err == 0)
 	{
-		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_TMP, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
 // CHUNKED - are we guaranteed to get here .. to send last chunk (?)
 		return (-1);
@@ -189,6 +190,7 @@ int		CgiPipe::rdhup(void)
 
 int		CgiPipe::hup(void)
 {
+	// may signal end of data 
 	if (this->rsrc)
 		rsrc->set_done(RSRC_DONE_IP | RSRC_DONE_OP);
 	return (-1);
