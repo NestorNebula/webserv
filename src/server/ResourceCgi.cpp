@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 10:52:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:06:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,13 @@ int	ResourceCgi::get_req_body(void)
 		return (REQ_WAIT_BODY);
 	}
 
-	Stream * rbody = req.getBody();
+	Stream *rbody = req.getBody();
 
     char buf[REQ_READ_SIZ];
     ssize_t err = rbody->readsome(buf, REQ_READ_SIZ);
-    // WSLOG(LVL_DBG, TGT_CGI, "SOME: ", err);
 	if (err <= 0)
 		return (REQ_COMPLETE);
     body.append(buf, err);
-    // WSLOG(LVL_DBG, TGT_CGI, "body: ", body.size());
 	return (body.size());
 }
 
@@ -50,8 +48,8 @@ std::string & ResourceCgi::get_resp(void)
 		return (this->resp);
 	if (this->tfs)
 	{
-		// WSCOL(WSL_YELLOW);
-		// WSLOG(LVL_TMP, TGT_RSRC, "tfs : read");
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_TMP, TGT_RSRC, "tfs : read");
 		this->tfs->read(this->resp);
 
 		if (this->tfs->eof())
