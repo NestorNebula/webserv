@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 17:49:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 08:30:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,13 +109,19 @@ static const std::string &tgt_prefix(log_tgt tgt)
     return (tgt_str[0]);
 }
 
+#ifndef HIDE_ERRORS
+# define HIDE_ERRORS 0
+#endif
+
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
     bool skip = true;
 
     switch (msg_lvl)
     {
-    // case LVL_ERR: // HIDE_ERRORS
+#if !HIDE_ERRORS
+    case LVL_ERR:
+#endif
     case LVL_TMP:
         skip = false;
         break;
@@ -192,9 +198,9 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
     (void) msg_lvl;
-    // HIDE_ERRORS
+#if HIDE_ERRORS
     return (-1);
-    
+#endif
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);

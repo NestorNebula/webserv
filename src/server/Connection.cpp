@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:51:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:57:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,17 @@ bool	Connection::timeo(time_t now)
 			// failure
 // there's a moment when everyone is re-trying,
 // but no one is flushing
-// no fd are "opening up" .. 
-			if (retry_cgi++ == CGI_RETRY_COUNT)
+// no fd are "opening up" ..
+#if 0
+			if (this->ep->cli_info() == 0)
+			{
+				// shit -- everyone waiting is going to do this 
+				// AND : we definitely do not have the (fd) to open an ERROR PAGE 
+				this->set_err(622);
+				return (0);
+			}
+#endif
+			if (retry_cgi++ >= CGI_RETRY_COUNT)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "retry", retry_cgi);
@@ -145,7 +154,7 @@ int	Connection::set_err(int e)
 	return (-1);
 }
 
-
+#if 0
 static void sess_log_next(Session &sess)
 {
     WSCOL(WSL_YELLOW);
@@ -168,7 +177,7 @@ static void sess_log_next(Session &sess)
       break;
     }
 }
-
+#endif 
 // sess  : Session::write called while Request is complete and Session is in DOCGI
 // Session::write should be called for non-complete Request in RDSOCK/DOCGI mode. Nothing written
 
@@ -183,7 +192,7 @@ ssize_t	Connection::pollin(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
 		err = this->recv();
 		if (err < 0)
@@ -199,7 +208,7 @@ ssize_t	Connection::pollin(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		switch(sess.nextAction())
 		{
 		case Session::RDSOCK:
@@ -215,15 +224,20 @@ ssize_t	Connection::pollin(void)
 		switch (sess.nextAction()) 
 		{
 		case Session::DOCGI:
-			if (this->exec_cgi() < 0)
+			err = this->exec_cgi();
+			if (err < 0)
 			{
 				WSCOL(WSL_CYAN);
 				WSLOG(LVL_TMP, TGT_CONN, "cgi : ", this->fd, "exec failed", retry_cgi);
 // RETRY_CGI
 				
-				this->serv.set_paused();
-				this->mod_evt(0); // -EPOLLIN);
-				retry_cgi++;
+				// this->serv.set_paused();
+
+				if (err == SYSCALL_ERR)
+				{
+					this->mod_evt(0); // -EPOLLIN);
+					retry_cgi++;
+				}
 				return (0);
 				
 				// next call to POLLIN (?)
@@ -276,7 +290,7 @@ ssize_t	Connection::pollout(void)
 	{
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-		sess_log_next(sess);
+		// sess_log_next(sess);
 
 		if (sess.nextAction() == Session::DOCGI)
 		{
@@ -293,7 +307,7 @@ ssize_t	Connection::pollout(void)
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				return (-1);
+				// return (-1);
 				this->reset(); // should not matter
 				// this->mod_evt(-EPOLLOUT); // unless we need to send error (?)
 				WSCOL(WSL_PURPLE);
@@ -354,7 +368,7 @@ ssize_t	Connection::pollout(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
@@ -492,20 +506,24 @@ int	Connection::exec_cgi(void)
 		// we know the SOCK exists .. so .. 
 		// ASSUMES : fail = "Too many open files"
 		// do not bother to try PHP
-		return(-2);
+		return(SYSCALL_ERR);
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
 	}
 
 	cgi_pipes	pipes;
 
+
+// dup HERE (?) 
+// so we know if execve might fail (?)
+// perl : creates files (!)
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
 		WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
 		// return (this->set_err(500)); // CGI_ERR - Internal Server Error
 // RETRY_CGI
-		return (-2);
+		return (SYSCALL_ERR);
 	}
 	
 	pid_t pid = fork();
@@ -515,7 +533,7 @@ int	Connection::exec_cgi(void)
 		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
 		// return (this->set_err(500)); // CGI_ERR - Internal Server Error
 // RETRY_CGI
-		return (-2);
+		return (SYSCALL_ERR);
 		
 	}	
 	if (pid == 0)
@@ -577,10 +595,18 @@ int	Connection::exec_cgi(void)
 		delete (pcgi); // conn : cgi FAIL -- should (kill) process
 		// return (this->set_err(503)); // CGI_ERR - Service Unavailable
 // RETRY_CGI
-		return (-2);
+		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
 // KEEP_ALIVE : set from Request (cgi)
 	this->res_cgi->ka = this->sess.getRequest().keepalive();
 	return (err);
 }
+
+
+// Can't locate parent.pm:   /usr/lib/x86_64-linux-gnu/perl-base/parent.pm: Too many open files at /usr/share/perl5/CGI/Util.pm line 2.
+// BEGIN failed--compilation aborted at /usr/share/perl5/CGI/Util.pm line 2.
+// Compilation failed in require at /usr/share/perl5/CGI.pm line 12.
+// BEGIN failed--compilation aborted at /usr/share/perl5/CGI.pm line 12.
+// Compilation failed in require at test.pl line 5.
+// BEGIN failed--compilation aborted at test.pl line 5.

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 16:13:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:37:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ int	ResourcePiped::status(void)
             return (1);
 		}
 // #endif
+		
 		if (this->ka)
 			return (RSP_KPALIVE);
 		return (RSP_COMPLETE); 
@@ -225,7 +226,9 @@ int	ResourcePiped::wait(int opt)
 	else if (WIFSIGNALED(stat))
 	{
 		this->sig = WTERMSIG(stat);
+		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
+		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
 		this->set_err(604); // CGI_ERR
 		return (this->stat);
@@ -238,20 +241,20 @@ int	ResourcePiped::wait(int opt)
 	// if ((this->stat > 0) || (this->hed == 0))
 	// stat test -- more retry fails 
 	// more timeouts 
-	if (this->stat == 0 && this->hed == 0) // allow exit to terminate
-	// if (this->hed == 0)
+	// if (this->stat == 0 && this->hed == 0) // allow exit to terminate
+	if (this->hed == 0) // true fail 
 	{
 		// a lot on client close
 		// the fail on low-file-limit 
 		// killed (?)
 		// deleting -- before retry (?)
-		WSLOG(LVL_TMP, TGT_RSRC, "error: 605");
+		WSLOG(LVL_TMP, TGT_RSRC, "wait : error: 605");
 		WSLOG(LVL_TMP, TGT_RSRC, "stat : ", stat);
-		WSLOG(LVL_TMP, TGT_RSRC, "req:\n", this->body);
-		WSLOG(LVL_TMP, TGT_RSRC, "rsp:\n", this->resp);
+		// WSLOG(LVL_DBG, TGT_RSRC, "req:\n", this->body);
+		// WSLOG(LVL_DBG, TGT_RSRC, "rsp:\n", this->resp);
 
-		// not if RETRY
-		if (this->conn && !this->conn->retry_cgi)
+		// not if RETRY -- (0) ? 
+		if (this->stat || (this->conn && !this->conn->retry_cgi))
 			this->set_err(605); // CGI_ERR
 	}
 // #if RES_CGI_WAIT_COMPLETE
@@ -310,7 +313,7 @@ void    ResourcePiped::push_body(void)
 int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
 {
 	int	err;
-	
+
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
 	
@@ -330,7 +333,7 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 		close(cgifd_ip);
 		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
 	}	
-	
+
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
 	err = this->ip->ini_evt(EPOLLOUT);
 	if (err < 0)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/30 20:05:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 08:17:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ typedef long unsigned int log_tgt;
 # define TGT_FCGI		(1UL << 23)
 # define TGT_FCGI_PARSE (1UL << 24)
 
-# define TGT_SERV_ALL	((1UL << 25) - 1)
 # define TGT_SERV_ALL	((1UL << 25) - 1)
 
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:50:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:44:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ public:
 	void				set_paused(void);
 private:
 
-	int					accept_conn(void);
+	int					accept_conn(struct sockaddr_in *addr);
 	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;

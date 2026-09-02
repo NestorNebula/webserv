@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 17:50:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:11:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,7 +267,7 @@ struct epoll_event	*Epoll::get_evt(int idx)
 	return (this->evts + idx);
 }
 
-void	Epoll::cli_info(void)
+int	Epoll::cli_info(void)
 {
 	std::set<EpollClient*>::iterator it;
 	WSLOG(LVL_TMP, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
@@ -281,7 +281,6 @@ void	Epoll::cli_info(void)
 		it = this->clients.begin();
 		while (it != this->clients.end())
 		{
-			// std::cerr << (*it)->typ_str() << " ";
 			switch((*it)->get_typ())
 			{
 			case EPC_SERV:
@@ -306,6 +305,7 @@ void	Epoll::cli_info(void)
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
 	}
+	return (epc_cgi + epc_fcgi);
 }
 int	Epoll::exec(void)
 {

@@ -158,14 +158,14 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-# curl -X GET 'http://localhost:8082/'
+# curl -X GET 'http://localhost:8082/html/contact.html' -i
 # echo
 # exit 0
 
 
 
-curl -X GET 'http://localhost:8082/test.py?g1=QUERYSHIT' -i \
-	-d "p1=post-one&p2=post-two"
+curl -X GET 'http://localhost:8082/test.pl?g1=QUERYSHIT&g2=both' -i \
+	-d "p1=siege-post-one&p2=siege-post-two"
 echo
 exit 0
 
