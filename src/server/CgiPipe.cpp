@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:01:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:03:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WSLOG(LVL_DBG, TGT_CGI_SEND, "send"); // conn: ", this->conn->get_fd());
+	WSLOG(LVL_DBG, TGT_CGI_SEND, "send");
 
 	switch(rsrc->get_req_body())
 	{

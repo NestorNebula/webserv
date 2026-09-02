@@ -9,7 +9,10 @@ my $cgi = CGI->new;
 my $g1 = $cgi->param('g1');
 my $g2 = $cgi->param('g2');
 
+# ATTN (!) compilation errors (!)
+# so .. I DO need to check return status
 my $p1 = $cgi->param('p1');
+#?? "default"
 my $p2 = $cgi->param('p2');
 
 my $f = $cgi->param('file');

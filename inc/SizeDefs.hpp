@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 17:43:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:57:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 // what .. conns fill ALL (fd)
 // so impossible to create CGI to flush 
 # ifndef CGI_RETRY_COUNT
-#  define CGI_RETRY_COUNT 5
+#  define CGI_RETRY_COUNT 10
 # endif
 
 
@@ -58,6 +58,11 @@
 
 # ifndef RSP_READ_SIZ
 #  define RSP_READ_SIZ (DEF_BUF_SIZ)
+# endif
+
+
+# ifndef SYSCALL_ERR
+#  define SYSCALL_ERR (-2)
 # endif
 
 #endif

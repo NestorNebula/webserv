@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:49:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 10:45:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,34 +109,32 @@ void	Server::set_paused(void)
 	this->mod_evt(-EPOLLIN);
 }
 
-int	Server::accept_conn(void)
+int	Server::accept_conn(struct sockaddr_in *addr)
 {
 	int					conn_fd;
-	struct sockaddr_in	conn_addr;
-	socklen_t			conn_asiz = sizeof(conn_addr);
+	socklen_t			conn_asiz = sizeof(struct sockaddr_in);
 	
-	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
+	conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
 	if (conn_fd < 0)
 	{
 		acc_err++;
-		
+#if 0
 		switch(errno)
 		{
 		case EMFILE:
-			WSLOG(LVL_ERR, TGT_SERV, "EMFILE");
+			WSLOG(LVL_DBG, TGT_SERV, "EMFILE");
 			break;
 		case ENFILE:
-			WSLOG(LVL_ERR, TGT_SERV, "ENFILE");
+			WSLOG(LVL_DBG, TGT_SERV, "ENFILE");
 			break;
 		default:
 			break;
 		}
-		
+#endif
 		this->set_paused();
-
 		this->sfd_close();
 		
-		conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
+		conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
 		if (conn_fd < 0)
 		{
 			acc_fail++;
@@ -155,9 +153,10 @@ ssize_t	Server::pollin(void)
 {
 	ssize_t	err;
 	int		conn_fd;
+	struct sockaddr_in	conn_addr;
 	
 	this->acc_cnt++;
-	conn_fd = this->accept_conn();
+	conn_fd = this->accept_conn(&conn_addr);
 	if (conn_fd < 0)
 		return (0);
 	err = sock_non_block(conn_fd);
@@ -176,7 +175,7 @@ ssize_t	Server::pollin(void)
 		delete (c);
 		return (0);
 	}
-	// c->set_addr(&conn_addr);
+	c->set_addr(&conn_addr);
 	return (0);
 }
 
