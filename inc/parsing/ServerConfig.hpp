@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/24 16:36:51 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:01:50 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ struct ServerConfig {
 	std::string					root;
 	bool						upload;
 	std::string					upload_dir;
+	std::string					conf_file_root;
 	std::set<HttpMethod>		methods;
 	std::vector<std::string>	index;
 

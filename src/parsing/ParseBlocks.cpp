@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/08/31 11:22:26 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:24:43 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		route.upload_dir = directives["upload_dir"];
 	if (directives.count("redirect"))
 		route.redirect = directives["redirect"];
-
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
 	{
@@ -128,6 +127,8 @@ void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives
 void	ConfigParser::parseServer()
 {
 	ServerConfig	server;
+
+	server.conf_file_root = this->_conf_file_root;
 
 	std::map<std::string, std::string>	directives;
 	std::set<std::string>				seen_directives;
@@ -206,7 +207,7 @@ void	ConfigParser::parseServer()
 				server.routes[i].error_pages[ite->first] = ite->second;
 		}
 		validateRouteConfig(server.routes[i]);
-		validateCGIExecutables(server.routes[i]);
+		validateCGIExecutables(server.routes[i], server);
 	}
 
 	validateServerConfig(server);
