@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParseBlocks.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/01 17:10:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:24:43 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 #include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
-
-// #kd
-#include <fstream>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {
@@ -67,10 +64,6 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 		route.upload_dir = directives["upload_dir"];
 	if (directives.count("redirect"))
 		route.redirect = directives["redirect"];
-// #kd
-	// if (directives.count("pycgi_dir"))
-   	// 	route.pycgi_dir = directives["pycgi_dir"];
-
 	for (std::map<std::string, std::string>::iterator it = directives.begin();
 		it != directives.end(); ++it)
 	{
@@ -134,6 +127,8 @@ void	ConfigParser::parseDirective(std::map<std::string, std::string>& directives
 void	ConfigParser::parseServer()
 {
 	ServerConfig	server;
+
+	server.conf_file_root = this->_conf_file_root;
 
 	std::map<std::string, std::string>	directives;
 	std::set<std::string>				seen_directives;
@@ -216,20 +211,6 @@ void	ConfigParser::parseServer()
 	}
 
 	validateServerConfig(server);
-
-// #kd
-#if 1
-	std::map<std::string, std::string>::const_iterator	it;
-	it = server.error_pages.find("default");		
-	std::ifstream rd(it->second.c_str());
-	if (rd)
-	{
-		std::stringstream tmp;
-		tmp << rd.rdbuf();
-		server.def_err = tmp.str();
-	}
-#endif
-
 	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed server on port ", server.port);
 	_servers.push_back(server);
 }

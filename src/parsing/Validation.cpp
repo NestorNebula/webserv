@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Validation.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 15:35:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/01 17:23:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 12:24:37 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,9 +176,6 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		throw	ConfigException("Route '" + route.path + "' has no 'index' (and none to inherit).");
 	if (route.upload && route.upload_dir.empty())
 		throw	ConfigException("Route '" + route.path + "' has upload route enabled but no 'upload_dir'.");
-// #kd
-	// if (!route.pycgi_dir.empty())
-    //     validateDirExists(route.pycgi_dir, "server pycgi_dir");
 
 	validateDirExists(route.root, "route '" + route.path + "' root");
 	if (route.upload && !route.upload_dir.empty())
@@ -189,14 +186,13 @@ void	ConfigParser::validateRouteConfig(const RouteConfig& route)
 		validateFileExists(it->second, "route '" + route.path + "' error_page " + it->first);
 }
 
-void	ConfigParser::validateCGIExecutables(const RouteConfig& route, const ServerConfig &server)
+void	ConfigParser::validateCGIExecutables(const RouteConfig& route, const ServerConfig& server)
 {
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = route.cgi.begin(); it != route.cgi.end(); ++it)
 	{
 		if (it->first == ".py" && server.pycgi_dir.empty())
-			throw	ConfigException("CGI for .py is defined but 'pycgi_dir' is missing in route: "
-				+ route.path);
+			throw   ConfigException("CGI for .py is defined but 'pycgi_dir' is missing in server block.");
 		if (it->second.empty() || it->second[0] != '/')
 			throw	ConfigException("CGI executable must be an absolute path: "
 				+ it->second);
