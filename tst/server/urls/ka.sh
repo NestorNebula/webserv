@@ -48,12 +48,16 @@
 
 
 
-http://127.0.0.1:8082/test.php
-http://127.0.0.1:8082/ka.php
-http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8082/test.php
+# http://127.0.0.1:8082/ka.php
+# http://127.0.0.1:8082/bigimage.php
 
 http://127.0.0.1:8082/files/earth.jpg
-# http://127.0.0.1:8082/files/e4.jpg
-# http://127.0.0.1:8082/files/Kanan.mp3
+http://127.0.0.1:8082/files/e4.jpg
+http://127.0.0.1:8082/files/Kanan.mp3
 
 
+
+http://127.0.0.1:8082/html/about.html
+http://127.0.0.1:8082/html/contact.html
+http://127.0.0.1:8082/html/index.html
