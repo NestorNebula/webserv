@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 14:03:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 11:06:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ protected:
 	bool			failed;
 	
 private:
+
 	TemporaryFileStream * tfs;
 	int				chk_rsp_hed(void);
 	
