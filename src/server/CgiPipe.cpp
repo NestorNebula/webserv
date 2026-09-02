@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:58:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 17:59:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ ssize_t	CgiPipe::pollin(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
+// CHUNKED - are we guaranteed to get here .. to send last chunk (?)
 		return (-1);
 	}
 	

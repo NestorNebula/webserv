@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 12:14:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 17:59:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,7 @@ ssize_t	FcgiPipe::pollin(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		// WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		// WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
+// CHUNKED - are we guaranteed to get here .. to send last chunk (?)
 		rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
