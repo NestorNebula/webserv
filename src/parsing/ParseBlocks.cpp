@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/02 17:37:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/02 17:40:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
+// #kd
+#include <fstream>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {
@@ -211,6 +213,20 @@ void	ConfigParser::parseServer()
 	}
 
 	validateServerConfig(server);
+
+// #kd
+#if 1
+	std::map<std::string, std::string>::const_iterator	it;
+	it = server.error_pages.find("default");		
+	std::ifstream rd(it->second.c_str());
+	if (rd)
+	{
+		std::stringstream tmp;
+		tmp << rd.rdbuf();
+		server.def_err = tmp.str();
+	}
+#endif
+
 	WsLog::_(LVL_INFO, TGT_PARSER, "Parsed server on port ", server.port);
 	_servers.push_back(server);
 }
