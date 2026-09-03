@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 12:04:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:37:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,23 +51,24 @@ bool	CgiPipe::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-	if (this->lact.before(now + CGI_TIMEOUT))  // WRONG
+	if ((this->lact + CGI_TIMEOUT).after(now))
 		return (false);
 
 	this->lact = now;
 	
-	WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : pipe ", this->get_fd());
+	WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : pipe ", this->get_fd());
 	if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_CGI_SEND, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 	}
 
 	if (this->rsrc)
 	{
+		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : rsrc ", conn->get_fd());
 		if (rsrc->done == RSRC_DONE_IO)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : done");
+			WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
 		
@@ -76,19 +77,17 @@ bool	CgiPipe::timeo(WsTime & now)
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 		this->conn->set_err(504); // CGI_ERR : gateway timeout
 	}
 	else
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ");
+		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : ???? ");
 		this->mod_evt(EPOLLOUT);
 	}
 	return (false);
 }
 
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
 ssize_t	CgiPipe::pollout(void)
 {
 	WSLOG(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
@@ -161,7 +160,6 @@ ssize_t	CgiPipe::pollin(void)
 		WSCOL(WSL_CYAN);
 		WSLOG(LVL_TMP, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
-// CHUNKED - are we guaranteed to get here .. to send last chunk (?)
 		return (-1);
 	}
 	
@@ -190,7 +188,6 @@ int		CgiPipe::rdhup(void)
 
 int		CgiPipe::hup(void)
 {
-	// may signal end of data 
 	if (this->rsrc)
 		rsrc->set_done(RSRC_DONE_IP | RSRC_DONE_OP);
 	return (-1);
@@ -227,12 +224,12 @@ int	cgi_pipes::init(void)
 	if (pipe(p1) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
 	}
 	if (pipe(p2) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe"));
+		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
 	}
 	return (0);
 }

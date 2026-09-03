@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/03 10:45:16 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 11:55:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 15:46:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,41 @@
 
 # include <ctime>
 
+// struct timeval {
+//     time_t      tv_sec;     /* seconds */
+//     suseconds_t tv_usec;    /* microseconds */
+// };
+
+# ifndef EXTRA_TIME
+#  define EXTRA_TIME 0
+# endif
+
+# if EXTRA_TIME
+typedef struct timespec wstime_t;
+# else
+typedef time_t wstime_t;
+#endif
+
+// class TimeSpec : public struct timespec
+// {
+// public:
+// };
+
 class WsTime
 {
 public:
-    time_t  t;
+    wstime_t  t;
+    
     WsTime(void)
     {
+# if EXTRA_TIME
+        this->t.tv_sec = 0;
+        this->t.tv_nsec = 0;
+#else
         this->t = 0;
+#endif
     }
-    WsTime(time_t v)
+    WsTime(wstime_t v)
     {
         this->t = v;
     }
@@ -41,7 +67,12 @@ public:
 
     void    set_now(void)
     {
+# if EXTRA_TIME
+        // gettimeofday(&t);
+        clock_gettime(CLOCK_MONOTONIC, &t);
+# else 
         std::time(&t);
+#endif
     }
     bool    not_set(void)
     {
@@ -61,7 +92,7 @@ public:
         return (this->t == that.t);
     }
 
-    bool operator == (time_t _t)
+    bool operator == (wstime_t _t)
     {
         return (this->t == _t);
     }

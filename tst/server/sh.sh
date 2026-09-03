@@ -158,13 +158,13 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-# curl -X GET 'http://localhost:8082/html/contact.html' -i
-# echo
-# exit 0
+curl -X GET 'http://localhost:8082/html/contact.html' -i
+echo
+exit 0
 
 
 
-curl -X GET 'http://localhost:8082/test.pl?g1=QUERY&g2=both' -i \
+curl -X GET 'http://localhost:8082/test.php?g1=QUERY&g2=both' -i \
 	-d "p1=siege-post-one&p2=siege-post-two"
 echo
 exit 0

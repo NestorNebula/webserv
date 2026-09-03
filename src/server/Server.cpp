@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 12:10:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 17:10:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 	acc_cnt(0),
 	acc_err(0),
 	acc_fail(0),
-	paused(false)
+	paused(0)
 {
 	this->addr.sin_family		= AF_INET;
 	this->addr.sin_addr.s_addr	= INADDR_ANY;
@@ -45,7 +45,12 @@ int	Server::sfd_open(void)
 	{
 		this->spare_fd[i] = open("/dev/null", O_RDONLY);
 		if (this->spare_fd[i] < 0)
+		{
+			WSLOG(LVL_TMP, TGT_SERV, "sfd fail: ", i);
+			sfd_close();
 			return (-1);
+			// return (i > 0) ? (0) : (-1);
+		}
 	}
 	return (0);
 }
@@ -53,7 +58,9 @@ int	Server::sfd_open(void)
 void	Server::sfd_close(void)
 {
 	for (int i=0; i < SPARE_FD; i++)
+	{
 		fd_close(this->spare_fd + i);
+	}
 }
 
 
@@ -105,16 +112,18 @@ void	Server::set_paused(void)
 	WSCOL(WSL_RED);
 	WSLOG(LVL_TMP, TGT_SERV, "pause  ...");
 	
-	this->paused = true;
+	this->paused = 1;
+	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
 }
 
-int	Server::accept_conn(struct sockaddr_in *addr)
+int	Server::accept_conn(void)
 {
 	int					conn_fd;
+	struct sockaddr_in	conn_addr;
 	socklen_t			conn_asiz = sizeof(struct sockaddr_in);
 	
-	conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
+	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 	{
 		acc_err++;
@@ -135,8 +144,14 @@ int	Server::accept_conn(struct sockaddr_in *addr)
 		// only close one .. what would the difference be (?)
 		// or .. close TWO . leave one for the Connections "extra" fd 
 		// but . it will probably get grabbed by the next accept
-		this->sfd_close();
+		// this->sfd_close();
+
+		// or : do not try to re-accept immediately .. 
+		// free (1) fd on each pause interval
+		// but do not try to accept immediately  
+		// which a cgi might use 
 		
+#if 0
 		conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
 		if (conn_fd < 0)
 		{
@@ -149,20 +164,11 @@ int	Server::accept_conn(struct sockaddr_in *addr)
 			WSCOL(WSL_GREEN);
 			WSLOG(LVL_ERR, TGT_SERV, "accepted!");
 		}
-	}	
-	return (conn_fd);
-}
-ssize_t	Server::pollin(void)
-{
-	ssize_t	err;
-	int		conn_fd;
-	struct sockaddr_in	conn_addr;
-	
-	this->acc_cnt++;
-	conn_fd = this->accept_conn(&conn_addr);
-	if (conn_fd < 0)
+#endif
 		return (0);
-	err = sock_non_block(conn_fd);
+	}	
+
+	int err = sock_non_block(conn_fd);
 	if (err < 0)
 	{
 		close(conn_fd);
@@ -179,6 +185,16 @@ ssize_t	Server::pollin(void)
 		return (0);
 	}
 	c->set_addr(&conn_addr);
+	return (conn_fd);
+}
+ssize_t	Server::pollin(void)
+{
+	int			conn_fd;
+	
+	this->acc_cnt++;
+	conn_fd = this->accept_conn();
+	if (conn_fd < 0)
+		return (0);
 	return (0);
 }
 
@@ -201,31 +217,36 @@ bool	Server::timeo  (WsTime & now)
 {
 	// if (this->lact.not_set())
 	// 	return (false);
-	// // if (now < this->lact) // after (now) (?)
 	// if (this->lact.after(now))
 	// 	return (false);
 
 	if (!this->paused)
 		return (false);
-	// if ((this->lact + SERV_PAUSE) > now)
-	// 	return (false);
-	if (this->lact.before(now + SERV_PAUSE))  // WRONG (-)
+	if ((this->lact + SERV_PAUSE).after(now))
 		return (false);
 
 	this->lact = now; 
-	this->sfd_close(); // all of them (?!)
+
+	this->sfd_close(); // all of them (?!?)
+	if (this->accept_conn() > 0)
+	{
+		WSCOL(WSL_GREEN);
+		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted!");
+	}
+	
 	if (this->sfd_open() < 0)
 	{
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV, "stay paused");
+		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "stay paused");
 		this->ep->cli_info();
 		return (false);
 	}
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_TMP, TGT_SERV, "resume (!)");
+	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!)");
 
-	this->paused = false;
+	// tell all retry-ing conn to .. retry
+	this->paused = 0;
 	this->mod_evt(EPOLLIN);
 	return (false);
 }

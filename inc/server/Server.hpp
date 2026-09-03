@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 11:48:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 19:17:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@
 # endif
 
 # ifndef SPARE_FD
-#  define SPARE_FD 2
+#  define SPARE_FD 4
 # endif
 
 
@@ -66,7 +66,7 @@ public:
 	void				set_paused(void);
 private:
 
-	int					accept_conn(struct sockaddr_in *addr);
+	int					accept_conn(void);
 	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;
@@ -75,7 +75,7 @@ private:
 	int		acc_cnt;
 	int		acc_err;
 	int		acc_fail;
-	bool	paused;
+	int		paused;
 
 	int		spare_fd[SPARE_FD];
 	int		sfd_open(void);

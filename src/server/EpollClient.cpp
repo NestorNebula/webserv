@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 11:46:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:15:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ int	EpollClient::event(struct epoll_event *e)
 {
 	int err;
 
-	// lact.set_now();
 	if (e->events & EPOLLERR)
 	{
 		this->hup();
@@ -143,10 +142,6 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
-
-	// FCGI : END_STDING .. SIGPIPE (!)
-	// if (fcntl(this->fd, F_GETFD) < 0)
-	// 	WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "FCNTL");
 
 	err = write(this->fd, buf, siz);
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 11:40:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 17:11:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,12 @@ void	Epoll::cleanup()
 	std::set<EpollClient*>::iterator it;
 
 	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
-	const int	*typ = cli_typ;
 	
+	
+// while (clients.size())
+{
+	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+	const int	*typ = cli_typ;
 	while (*typ != -1)
 	{
 		it = this->clients.begin();
@@ -108,7 +112,7 @@ void	Epoll::cleanup()
 				}
 				catch(const std::exception& e)
 				{
-					WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
+					WSLOG(LVL_TMP, TGT_EPOLL, " (~) EpollClient\n", e.what());
 				}		
 				this->clients.erase(it++);
 			}
@@ -119,7 +123,9 @@ void	Epoll::cleanup()
 		}
 		typ++;
 	}
-	
+	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+}
+#if 0
 	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
@@ -133,6 +139,7 @@ void	Epoll::cleanup()
 		}
 		this->clients.erase(it++);
 	}
+#endif
 	this->clients.clear();
 	
 	if (this->epfd != -1)
@@ -300,9 +307,13 @@ int	Epoll::cli_info(void)
 			}
 			it++;
 		}
+		WSCOL(WSL_CYAN);
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "serv: ", epc_serv);
+		WSCOL(WSL_CYAN);
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "conn: ", epc_conn);
+		WSCOL(WSL_CYAN);
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
+		WSCOL(WSL_CYAN);
 		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
 	}
 	return (epc_cgi + epc_fcgi);
@@ -312,7 +323,11 @@ int	Epoll::exec(void)
 	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
-		return (WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait"));
+	{
+		WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
+		// return (0) : bad exit (?)
+		return (-1);
+	}
 	if (this->ecnt == 0)
 		return (this->ecnt);
 	WSLOG(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->ecnt);

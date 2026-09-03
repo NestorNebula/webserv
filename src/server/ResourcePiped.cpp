@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:04:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:36:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,11 @@ int	ResourcePiped::wait(int opt)
 
 		// do not set error if we are going to retry
 		if (this->stat || (this->conn && !this->conn->retry_cgi))
+		{
+			// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "hed : ", 0);
+			// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "stat: ", stat);
 			this->set_err(605); // CGI_ERR
+		}
 	}
 	else if (this->wait_comp)
 		this->chk_rsp_len();
