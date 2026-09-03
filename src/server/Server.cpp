@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 10:45:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 12:10:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,9 @@ int	Server::accept_conn(struct sockaddr_in *addr)
 		}
 #endif
 		this->set_paused();
+		// only close one .. what would the difference be (?)
+		// or .. close TWO . leave one for the Connections "extra" fd 
+		// but . it will probably get grabbed by the next accept
 		this->sfd_close();
 		
 		conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
@@ -194,18 +197,23 @@ int	Server::hup(void)
 	return (0);
 }
 
-bool	Server::timeo  (time_t now)
+bool	Server::timeo  (WsTime & now)
 {
-	// if (this->lact == 0)
+	// if (this->lact.not_set())
 	// 	return (false);
-	// if (now < this->lact)
+	// // if (now < this->lact) // after (now) (?)
+	// if (this->lact.after(now))
 	// 	return (false);
 
 	if (!this->paused)
 		return (false);
-	if ((this->lact + SERV_PAUSE) > now)
+	// if ((this->lact + SERV_PAUSE) > now)
+	// 	return (false);
+	if (this->lact.before(now + SERV_PAUSE))  // WRONG (-)
 		return (false);
-	this->sfd_close();
+
+	this->lact = now; 
+	this->sfd_close(); // all of them (?!)
 	if (this->sfd_open() < 0)
 	{
 		WSCOL(WSL_PURPLE);

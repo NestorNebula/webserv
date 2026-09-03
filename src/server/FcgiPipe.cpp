@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:10:02 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 12:10:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,16 +42,17 @@ FcgiPipe::~FcgiPipe()
 	}
 }
 
-bool	FcgiPipe::timeo(time_t now)
+bool	FcgiPipe::timeo(WsTime & now)
 {
-	if (this->lact == 0)
+	if (this->lact.not_set())
 		return (false);
-	if (now < this->lact)
+	if (this->lact.after(now))
 		return (false);
-	if ((this->lact + CGI_TIMEOUT) > now)
+	if (this->lact.before(now + CGI_TIMEOUT)) // WRONG (-)
 		return (false);
-
+		
 	this->lact = now;
+
 	this->mod_evt(-EPOLLOUT);
 	
 	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());

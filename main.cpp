@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:58:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 11:13:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,24 @@
 #include "Epoll.hpp"
 #include "Epoll.hpp"
 
+#include "WsTime.hpp"
 int main (int argc, char ** argv, char **envp)
 {   
+    // WsTime t1;
+    // sleep(2);
+    // WsTime t2;
+
+    // std::cerr << "t1 after t2 " << t1.after(&t2) << std::endl;
+    // std::cerr << "t1 before t2 " << t1.before(&t2) << std::endl;
+
+    // t1 = t1 + 11;
+
+    // std::cerr << "t1 after t2 " << t1.after(&t2) << std::endl;
+    // std::cerr << "t1 before t2 " << t1.before(&t2) << std::endl;
+
+    // return (0);
+
+    
     WsLog::kd();
     // WsLog::nh();
     // WsLog::mm();

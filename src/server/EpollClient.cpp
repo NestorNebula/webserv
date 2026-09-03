@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 11:59:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 11:46:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 {
 	evt.events = 0;
 	evt.data.ptr = NULL;
-	lact = time(&lact);
+	lact.set_now();
 }
 
 EpollClient::~EpollClient()
@@ -89,7 +89,7 @@ int	EpollClient::event(struct epoll_event *e)
 {
 	int err;
 
-	// this->lact = time(&this->lact);
+	// lact.set_now();
 	if (e->events & EPOLLERR)
 	{
 		this->hup();
@@ -99,7 +99,7 @@ int	EpollClient::event(struct epoll_event *e)
 	{
 		err = this->pollout();
 		if (err >= 0)
-			this->lact = time(&this->lact);
+			lact.set_now();
 		else if (err < 0)
 			return (err);
 	}	
@@ -107,7 +107,7 @@ int	EpollClient::event(struct epoll_event *e)
 	{
 		err = this->pollin();
 		if (err >= 0)
-			this->lact = time(&this->lact);
+			lact.set_now();
 		else if (err < 0)
 			return (err);
 	}
