@@ -6,24 +6,24 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:45 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:01:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:37:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Socket.hpp"
+
+// SOCK_CLOEXEC
+// Set the close-on-exec (FD_CLOEXEC) flag on the new file
+// descriptor.  See the description of the O_CLOEXEC flag in
+// open(2) for reasons why this may be useful.
 
 int sock_non_block(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1)
         return (-1);
-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK); //  | O_CLOEXEC);
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK | O_CLOEXEC);
 }
-
-// SOCK_CLOEXEC
-// Set the close-on-exec (FD_CLOEXEC) flag on the new file
-// descriptor.  See the description of the O_CLOEXEC flag in
-// open(2) for reasons why this may be useful.
 
 std::string addr_2_str(struct sockaddr_in *addr)
 {
@@ -36,10 +36,12 @@ std::string addr_2_str(struct sockaddr_in *addr)
     return (ss.str());
 }
 
-void fd_close(int *fd)
+int fd_close(int *fd)
 {
 	if (*fd == -1)
-		return;
-	close(*fd);
+		return (1);
+
+	int err = close(*fd);
 	*fd = -1;
+    return (err);
 }

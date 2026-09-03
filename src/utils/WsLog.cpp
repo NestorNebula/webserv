@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 11:38:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:24:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ static const std::string tgt_str[] =
     "res   : ",
     "resp  : ",
     "strm  : ",
-    "sess  : "
+    "sess  : ",
+    "timeo : ",
+    "retry : "
 };
 
 static const std::string &tgt_prefix(log_tgt tgt)
@@ -59,7 +61,7 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[9]);
     if (tgt & (TGT_RSRC | TGT_RSRC_INFO | TGT_RSRC_WAIT | TGT_RSRC_STAT))
         return (tgt_str[10]);
-    if (tgt & TGT_FCGI)
+    if (tgt & (TGT_FCGI | TGT_FCGI_PARSE))
         return (tgt_str[11]);
 
     if (tgt & (TGT_REQ))
@@ -72,40 +74,11 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[15]);
     if (tgt & (TGT_SESS))
         return (tgt_str[16]);
-
-    if (tgt & (TGT_REQ))
-        return (tgt_str[12]);
-    if (tgt & (TGT_RES))
-        return (tgt_str[13]);
-    if (tgt & (TGT_RESP))
-        return (tgt_str[14]);
-    if (tgt & (TGT_STRM))
-        return (tgt_str[15]);
-    if (tgt & (TGT_SESS))
-        return (tgt_str[16]);
-
-    if (tgt & (TGT_REQ))
-        return (tgt_str[12]);
-    if (tgt & (TGT_RES))
-        return (tgt_str[13]);
-    if (tgt & (TGT_RESP))
-        return (tgt_str[14]);
-    if (tgt & (TGT_STRM))
-        return (tgt_str[15]);
-    if (tgt & (TGT_SESS))
-        return (tgt_str[16]);
-
-    if (tgt & (TGT_REQ))
-        return (tgt_str[12]);
-    if (tgt & (TGT_RES))
-        return (tgt_str[13]);
-    if (tgt & (TGT_RESP))
-        return (tgt_str[14]);
-    if (tgt & (TGT_STRM))
-        return (tgt_str[15]);
-    if (tgt & (TGT_SESS))
-        return (tgt_str[16]);
-
+    if (tgt & (TGT_TIMEO))
+        return (tgt_str[17]);
+    if (tgt & (TGT_RETRY))
+        return (tgt_str[18]);
+        
     return (tgt_str[0]);
 }
 

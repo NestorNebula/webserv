@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 12:10:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 14:12:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,17 +48,17 @@ bool	FcgiPipe::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-	if (this->lact.before(now + CGI_TIMEOUT)) // WRONG (-)
+	if ((this->lact + CGI_TIMEOUT).after(now))
 		return (false);
 		
 	this->lact = now;
 
 	this->mod_evt(-EPOLLOUT);
 	
-	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());
+	WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : fcgi ", this->get_fd());
 	if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 	}
 	
 	if (this->rsrc)
@@ -66,7 +66,7 @@ bool	FcgiPipe::timeo(WsTime & now)
 		if (rsrc->done == RSRC_DONE_IO)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : done");
+			WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
 		
@@ -75,12 +75,12 @@ bool	FcgiPipe::timeo(WsTime & now)
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 		this->conn->set_err(504); // CGI_ERR : gateway timeout
 	}
 	else
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ");
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : ???? ");
 		this->mod_evt(EPOLLOUT);
 	}
 	return (false);

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:23 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 18:04:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 14:00:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,6 @@
 int         sock_non_block(int fd);
 std::string addr_2_str(struct sockaddr_in * addr);
 
-void        fd_close(int *fd);
+int         fd_close(int *fd);
 
 #endif

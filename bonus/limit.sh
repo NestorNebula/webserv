@@ -1,8 +1,10 @@
 #!/bin/bash
 
+PROC=valgrind
 PROC=webserv
 
-PID=$(ps -eo pid,comm | grep webserv | awk '{print $1}')
+# PID=$(ps -eo pid,comm | grep webserv | awk '{print $1}')
+PID=$(pidof $PROC)
 
 tput reset 
 
@@ -19,6 +21,11 @@ fi
 
 if [[ "$1" == "cur" ]];then 
     ls /proc/$PID/fd | wc -l
+    exit 0
+fi
+
+if [[ "$1" == "show" ]];then 
+    ls -al /proc/$PID/fd
     exit 0
 fi
 

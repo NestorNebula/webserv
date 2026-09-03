@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/02 21:57:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:56:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class Session {
 public:
   Session(ServerConfig &server)
       : _next(RDSOCK), _server(server), _route(NULL), _resource(NULL),
-        _keepalive(false), _sent(0) {
+        _keepalive(false), _sent(0), res_tries(0) {
     WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
@@ -38,6 +38,7 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
+    RETRY,
   } Action;
 
   Action nextAction() const { return _next; }
@@ -96,8 +97,9 @@ private:
 
   void throwIfNotAction(Action action) const;
   static const std::string &actionToStr(Action action);
+  public:
   void manageSession();
-
+private:
   void handleRequest();
   void preValidateRequest();
   void validateRequest();
@@ -117,5 +119,6 @@ private:
 
   Stream::streamsize _sent;
 
+  int res_tries;
   std::string _responseStr;
 };
