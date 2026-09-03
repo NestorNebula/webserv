@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 10:44:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 11:48:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ public:
 	ssize_t				pollout(void);
 	int					rdhup  (void);
 	int					hup    (void);
-	bool				timeo  (time_t);
+	bool				timeo  (WsTime &);
 	
 	unsigned short		get_port(void)	const;
 	ServerConfig		&get_conf() { return (this->conf); }

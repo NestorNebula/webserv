@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 21:39:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 11:48:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <string>
 # include <vector>
 # include "WsLog.hpp"
+# include "WsTime.hpp"
 # include "SizeDefs.hpp"
 
 
@@ -55,11 +56,11 @@ public:
 	ssize_t			send(std::string & str);
 	ssize_t			send(std::string & str, ssize_t cnt);
 	
-	virtual ssize_t	pollin (void)   = 0;
-	virtual ssize_t pollout(void)   = 0;
-	virtual int		rdhup  (void)   = 0;
-	virtual int		hup    (void)   = 0;
-	virtual bool	timeo  (time_t) = 0;
+	virtual ssize_t	pollin (void)	  = 0;
+	virtual ssize_t pollout(void)	  = 0;
+	virtual int		rdhup  (void)	  = 0;
+	virtual int		hup    (void)	  = 0;
+	virtual bool	timeo  (WsTime &) = 0;
 
 	int					ini_evt(int e);
 	int					mod_evt(int e);
@@ -75,7 +76,7 @@ protected:
 	epc_typ				typ;
 	int					fd;
 	struct epoll_event	evt;
-	time_t				lact;
+	WsTime				lact;
 	int					error;
 };
 

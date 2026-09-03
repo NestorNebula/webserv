@@ -164,12 +164,12 @@ fi
 
 
 
-curl -X GET 'http://localhost:8082/test.pl?g1=QUERYSHIT&g2=both' -i \
+curl -X GET 'http://localhost:8082/test.pl?g1=QUERY&g2=both' -i \
 	-d "p1=siege-post-one&p2=siege-post-two"
 echo
 exit 0
 
-curl -X POST 'http://localhost:8082/stat.php?g1=QUERYSHIT' -i \
+curl -X POST 'http://localhost:8082/stat.php?g1=QUERY' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0

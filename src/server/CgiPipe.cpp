@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:22:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 12:04:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,13 +45,13 @@ CgiPipe::~CgiPipe()
 }
 
 
-bool	CgiPipe::timeo(time_t now)
+bool	CgiPipe::timeo(WsTime & now)
 {
-	if (this->lact == 0)
+	if (this->lact.not_set())
 		return (false);
-	if (now < this->lact)
+	if (this->lact.after(now))
 		return (false);
-	if ((this->lact + CGI_TIMEOUT) > now)
+	if (this->lact.before(now + CGI_TIMEOUT))  // WRONG
 		return (false);
 
 	this->lact = now;

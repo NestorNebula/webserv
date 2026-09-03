@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:03:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 12:04:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	// WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 // KEEP_ALIVE : check req_cnt
-	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
 		if (this->res_cgi)
@@ -63,12 +63,13 @@ Connection::~Connection()
 
 // socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1))
 
-bool	Connection::timeo(time_t now)
+bool	Connection::timeo(WsTime & now)
 {
-	if (this->lact == 0)
+	if (this->lact.not_set())
 		return (false);
-	if (now < this->lact)
+	if (this->lact.after(now))
 		return (false);
+ // WRONG
 	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL) < now))
 	{
 		this->lact = now;
@@ -84,7 +85,7 @@ bool	Connection::timeo(time_t now)
 #if 0
 			if (this->ep->cli_info() == 0)
 			{
-				// shit -- everyone waiting is going to do this 
+				// ugh -- everyone waiting is going to do this 
 				// AND : we definitely do not have the (fd) to open an ERROR PAGE 
 				this->set_err(622);
 				return (0);
@@ -107,7 +108,7 @@ bool	Connection::timeo(time_t now)
 		return (0);
 	}
 
-	if ((this->lact + CONN_TIMEOUT) > now)
+	if (this->lact.before(now + CONN_TIMEOUT)) // WRONG
 		return (false);
 		
 	WSCOL(WSL_RED);
@@ -238,17 +239,6 @@ ssize_t	Connection::pollin(void)
 					this->mod_evt(0); // -EPOLLIN);
 					retry_cgi++;
 				}
-				return (0);
-				
-				// next call to POLLIN (?)
-				// wait (1s) (?)
-				// turn off POLLIN .. for a time (?)
-				// use TIMEO (!) YES -- called on EVERY CLIENT
-				// could retry -- (Too many open files)
-				// a certain number of times
-				// but : how can we be sure to get back here (?)
-				// should .. 
-				// sock_wait
 				return (0); // send error
 			}
 			this->res_cgi->push_body();

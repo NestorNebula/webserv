@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   DirectoryResource.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/12 10:07:44 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/03 10:22:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 #include <dirent.h>
 #include <sstream>
 #include <stdexcept>
+
+// #kd
+#include <vector>
+#include <algorithm>
 
 void DirectoryResource::generate() {
   if (_state != DEFAULT)
@@ -36,6 +40,25 @@ Stream &DirectoryResource::stream() {
 }
 
 void DirectoryResource::buildList() {
+
+  std::vector<std::string> elem;
+  
+  dirent *dirFile;
+  while ((dirFile = readdir(_dir)) != NULL) {
+    std::string name(dirFile->d_name);
+    if (name != "." && name != "..") {
+      if (dirFile->d_type == DT_DIR)
+        name += '/';
+      elem.push_back(name);
+      // *_stream << "<li>\n"
+      //             "<a class=\"file-link\" href=\""
+      //          << name << "\">" << name
+      //          << "</a>\n"
+      //             "</li>\n";
+    }
+  }
+  std::sort(elem.begin(), elem.end());
+
   *_stream << "<!DOCTYPE html>\n"
               "<html lang=\"en\">\n"
               "<head>\n"
@@ -60,7 +83,15 @@ void DirectoryResource::buildList() {
            << "</h1>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
-
+  for (size_t k=0; k < elem.size(); k++)
+  {
+      *_stream << "<li>\n"
+                  "<a class=\"file-link\" href=\""
+               << elem[k] << "\">" << elem[k]
+               << "</a>\n"
+                  "</li>\n";    
+  }
+#if 0
   dirent *dirFile;
   while ((dirFile = readdir(_dir)) != NULL) {
     std::string name(dirFile->d_name);
@@ -74,6 +105,7 @@ void DirectoryResource::buildList() {
                   "</li>\n";
     }
   }
+#endif
   *_stream << "</ul>\n"
               "<hr>\n"
               "</section>\n"

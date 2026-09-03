@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 10:11:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 11:40:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -322,9 +322,9 @@ int	Epoll::exec(void)
 
 void	Epoll::check_timeo(void)
 {
-	time_t	n;
-	
-	n = time(&n);
+	WsTime	n;
+	n.set_now();
+	// n = time(&n);
 	
 	std::set<EpollClient*>::iterator it;
 	
