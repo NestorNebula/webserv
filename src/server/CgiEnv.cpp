@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 15:10:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 20:57:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 #include "Connection.hpp"
 #include "Server.hpp"
 #include "helpers.hpp"
-#include "http_utils.hpp"
-#include "helpers.hpp"
-#include "http_utils.hpp"
 
 CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 19:16:29 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:49:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -396,19 +396,19 @@ void	Connection::cgi_rem(EpollClient *epc)
 {
 	switch (this->res_cgi->rem(epc))
 	{
-	case 1: // (ip)
+	case RSRC_DONE_IP:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
-	case 2: // (op)
+	case RSRC_DONE_OP:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
-	case 3: // (done)
+	case RSRC_DONE_IO:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);

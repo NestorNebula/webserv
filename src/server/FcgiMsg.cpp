@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:37:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/01 12:19:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:15:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,28 +27,10 @@ void FcgiMsgData::zero()
 	pad  = 0;
 }
 
-
-#if 0
-https://fastcgi-archives.github.io/FastCGI_Specification.html
-
-    The Responder application receives CGI/1.1 environment variables from the Web server over FCGI_PARAMS.
-
-    Next the Responder application receives CGI/1.1 stdin data from the Web server over FCGI_STDIN. The application receives at most CONTENT_LENGTH bytes from this stream before receiving the end-of-stream indication. (The application receives less than CONTENT_LENGTH bytes only if the HTTP client fails to provide them, e.g. because the client crashed.)
-
-    The Responder application sends CGI/1.1 stdout data to the Web server over FCGI_STDOUT, and CGI/1.1 stderr data over FCGI_STDERR. The application sends these concurrently, not one after the other. The application must wait to finish reading FCGI_PARAMS before it begins writing FCGI_STDOUT and FCGI_STDERR, but it need not finish reading from FCGI_STDIN before it begins writing these two streams.
-
-    After sending all its stdout and stderr data, the Responder application sends a FCGI_END_REQUEST record. The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE and the appStatus component to the status code that the CGI program would have returned via the exit system call.
-
-A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
-
-SO : send the WHOLE request (headers included)
-#endif
-
 FcgiMsg::FcgiMsg()
 {
 	this->zero();
 }
-
 
 void FcgiMsg::new_params(unsigned short req)
 {
@@ -65,9 +47,6 @@ void FcgiMsg::new_params(unsigned short req)
 	pBeg = buf.end; // for calculating length of FCGI_PARAMS
 }
 
-// MsgBuf::fcgi() : keylen, vallen, key, val
-// push fcgi-formatted key/val pair onto buf
-// kLen, vLen, kStr, vStr
 void FcgiMsg::add_param(const char * key, const char * val)
 {
 	buf.fcgi(key, val);
@@ -119,7 +98,6 @@ void FcgiMsg::end_stdin(void)
 	buf.push(this, FCGI_HEADER_LEN);
 }
 
-
 void FcgiMsg::begin()
 {
 	// make_head(FCGI_BEGIN_REQUEST, FCGI_HEADER_LEN) 
@@ -142,18 +120,18 @@ int FcgiMsg::full_size()
 	return FCGI_HEADER_LEN + this->get_len() + this->head.paddingLength;
 }
 
-
-
 void FcgiMsg::set_pad(unsigned short len)
 {
 	unsigned short hi8 = (len + 7) & ~(7);
 	head.paddingLength = hi8 - len;
 }
+
 void FcgiMsg::set_req(unsigned short req)
 {
 	head.requestIdB1 = req >> 8;
 	head.requestIdB0 = req & 0xff;
 }
+
 unsigned short FcgiMsg::get_req()
 {
 	return (unsigned short) head.requestIdB1 << 8 | head.requestIdB0;
@@ -164,22 +142,26 @@ void FcgiMsg::set_len(unsigned short len)
 	head.contentLengthB1 = len >> 8;
 	head.contentLengthB0 = len & 0xff;
 }
+
 unsigned short FcgiMsg::get_len()
 {
 	return (unsigned short) head.contentLengthB1 << 8 | head.contentLengthB0;
 }
+
 void FcgiMsg::set_role(unsigned short role)
 {
 	body.roleB1 = role >> 8;
 	body.roleB0 = role & 0xff;
 }
+
 unsigned short FcgiMsg::get_role()
 {
 	return (unsigned short) body.roleB1 << 8 | body.roleB0;
 }
+
 void FcgiMsg::zero()
 {
-	head.version = FCGI_VERSION_1; // 0x1
+	head.version = FCGI_VERSION_1;
 	head.type = 0;
 
 	set_req(0);
@@ -214,3 +196,20 @@ void FcgiMsg::data(FcgiMsgData * data)
 	data->role = this->get_role();
 
 }
+
+
+#if 0
+https://fastcgi-archives.github.io/FastCGI_Specification.html
+
+    The Responder application receives CGI/1.1 environment variables from the Web server over FCGI_PARAMS.
+
+    Next the Responder application receives CGI/1.1 stdin data from the Web server over FCGI_STDIN. The application receives at most CONTENT_LENGTH bytes from this stream before receiving the end-of-stream indication. (The application receives less than CONTENT_LENGTH bytes only if the HTTP client fails to provide them, e.g. because the client crashed.)
+
+    The Responder application sends CGI/1.1 stdout data to the Web server over FCGI_STDOUT, and CGI/1.1 stderr data over FCGI_STDERR. The application sends these concurrently, not one after the other. The application must wait to finish reading FCGI_PARAMS before it begins writing FCGI_STDOUT and FCGI_STDERR, but it need not finish reading from FCGI_STDIN before it begins writing these two streams.
+
+    After sending all its stdout and stderr data, the Responder application sends a FCGI_END_REQUEST record. The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE and the appStatus component to the status code that the CGI program would have returned via the exit system call.
+
+A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
+
+SO : send the WHOLE request (headers included)
+#endif

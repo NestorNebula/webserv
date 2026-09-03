@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 19:05:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:03:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 # include <signal.h>
 # include <cerrno>
 # include <set>
+# include <vector>
 
-# include "WsLog.hpp"
 # include "ServerConfig.hpp"
 
 # ifndef EPOLL_MAX_EVT
@@ -38,11 +38,8 @@ class EpollClient;
 class Epoll
 {
 private:
-	Epoll 			   (const Epoll & that) : 
-		envp(that.envp) 
-		{}
-	Epoll & operator = (const Epoll & ) 
-		{ return (*this); }
+	Epoll 			   (const Epoll & that) : envp(that.envp) {}
+	Epoll & operator = (const Epoll & ) { return (*this); }
 
 public:
 	Epoll (char ** & _envp);
@@ -55,14 +52,11 @@ public:
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
 	
-	void	cleanup(void);
-	
 	int		serve(const std::vector<ServerConfig> &serv_list);
 
-	size_t	num_cli(void) { return (this->clients.size()); }
 	int		cli_info(void);
 
-	private:
+private:
 	int						epfd;
 	int						ecnt;
 	struct epoll_event		evts[EPOLL_MAX_EVT];
@@ -72,12 +66,13 @@ public:
 
 	char 					**&envp;
 	
-	int						exec(void);
-	struct epoll_event		*get_evt(int idx);
-	EpollClient				*get_epc(void *cli);
-	bool					has_client(EpollClient *ecp);
+	int					exec(void);
+	struct epoll_event	*get_evt(int idx);
+	EpollClient			*get_epc(void *cli);
+	bool				has_client(EpollClient *ecp);
 
-	void					check_timeo(void);
+	void	cleanup(void);
+	void	check_timeo(void);
 };
 
 #endif

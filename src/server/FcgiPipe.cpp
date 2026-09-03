@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 14:12:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:17:36 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,6 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 	return (err);
 }
 
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
-
 ssize_t	FcgiPipe::pollout(void)
 {
 	WSLOG(LVL_DBG, TGT_FCGI, "send:  POLLOUT");
@@ -127,7 +124,6 @@ ssize_t	FcgiPipe::pollout(void)
 	case REQ_COMPLETE: 
 		// WSLOG(LVL_DBG, TGT_FCGI, "req      : complete");
 		// may still need to send END_STDIN
-		
 	default:
 		break;
 	}
@@ -188,7 +184,6 @@ ssize_t	FcgiPipe::pollin(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "recv:  ZERO");
 		// WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
 		// WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
-// CHUNKED - are we guaranteed to get here .. to send last chunk (?)
 		rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
@@ -255,8 +250,6 @@ int		FcgiPipe::rdhup(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
 		return (0);
 	}
-	// got here on small READ SIZE
-	// out + rdhup .. but no (resp) yet .. 
 	WSCOL(WSL_RED);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
 	return (0);

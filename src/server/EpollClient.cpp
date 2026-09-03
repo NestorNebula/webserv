@@ -6,12 +6,27 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 18:15:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:10:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
 #include "Epoll.hpp"
+
+static const char *epc_str[] = 
+{
+	"serv",
+	"conn",
+	"cgi",
+	"fcgi",
+	NULL
+};
+
+std::string EpollClient::typ_str(void)
+{
+	return (epc_str[this->typ]);
+}
+
 
 EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
 	ep(_ep),
@@ -63,7 +78,14 @@ int	EpollClient::mod_evt(int e)
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
 	if (e == 0)
+	{
+		if (evt.events == (e | EPOLLRDHUP))
+		{
+			// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
+			return (0);
+		}
 		evt.events = e;
+	}
 	else if (e < 0)
 	{
 		e = -e;
@@ -191,22 +213,7 @@ struct epoll_event	*EpollClient::get_evt(void)
 	return (&this->evt);
 }
 
-
 epc_typ	EpollClient::get_typ(void)
 {
 	return (this->typ);
-}
-
-static const char *epc_str[] = 
-{
-	"serv",
-	"conn",
-	"cgi",
-	"fcgi",
-	NULL
-};
-
-std::string EpollClient::typ_str(void)
-{
-	return (epc_str[this->typ]);
 }
