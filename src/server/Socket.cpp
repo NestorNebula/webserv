@@ -6,16 +6,11 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:16:45 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 18:37:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:34:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Socket.hpp"
-
-// SOCK_CLOEXEC
-// Set the close-on-exec (FD_CLOEXEC) flag on the new file
-// descriptor.  See the description of the O_CLOEXEC flag in
-// open(2) for reasons why this may be useful.
 
 int sock_non_block(int fd)
 {

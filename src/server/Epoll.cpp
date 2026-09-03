@@ -6,17 +6,17 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 17:11:22 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:23:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include <vector>
 
 #include "Epoll.hpp"
 #include "EpollClient.hpp"
 
 #include "Server.hpp"
 #include "Connection.hpp"
+
+#include "WsLog.hpp"
 
 volatile sig_atomic_t stop = 0;
 
@@ -90,15 +90,12 @@ Epoll::~Epoll()
 
 void	Epoll::cleanup()
 {
-	std::set<EpollClient*>::iterator it;
+	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
-	
-	
-// while (clients.size())
-{
-	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
 	const int	*typ = cli_typ;
+
+	std::set<EpollClient*>::iterator it;
 	while (*typ != -1)
 	{
 		it = this->clients.begin();
@@ -124,22 +121,7 @@ void	Epoll::cleanup()
 		typ++;
 	}
 	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
-}
-#if 0
-	it = this->clients.begin();
-	while (it != this->clients.end())
-	{
-		try 
-		{	
-			delete (*it);
-		}
-		catch(const std::exception& e)
-		{
-			WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
-		}
-		this->clients.erase(it++);
-	}
-#endif
+
 	this->clients.clear();
 	
 	if (this->epfd != -1)
@@ -276,13 +258,14 @@ struct epoll_event	*Epoll::get_evt(int idx)
 
 int	Epoll::cli_info(void)
 {
-	std::set<EpollClient*>::iterator it;
 	WSLOG(LVL_TMP, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
-
+	
 	int epc_serv = 0;
 	int epc_conn = 0;
 	int epc_cgi  = 0;
 	int epc_fcgi = 0;
+
+	std::set<EpollClient*>::iterator it;
 	if (this->clients.size() > 3)
 	{
 		it = this->clients.begin();
@@ -318,9 +301,9 @@ int	Epoll::cli_info(void)
 	}
 	return (epc_cgi + epc_fcgi);
 }
+
 int	Epoll::exec(void)
-{
-	
+{	
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 	{
@@ -339,21 +322,8 @@ void	Epoll::check_timeo(void)
 {
 	WsTime	n;
 	n.set_now();
-	// n = time(&n);
 	
 	std::set<EpollClient*>::iterator it;
-	
-	// if (this->clients.size() > 3)
-	// {
-	// 	it = this->clients.begin();
-	// 	while (it != this->clients.end())
-	// 	{
-	// 		std::cerr << (*it)->typ_str() << " ";
-	// 		it++;
-	// 	}
-	// 	std::cerr << "\n";
-	// }
-		
 	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
@@ -422,7 +392,7 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 	int	err = 0;
 	std::vector<ServerConfig>::const_iterator it = serv_list.begin();
 	std::vector<ServerConfig>::const_iterator ite = serv_list.end();
-	for ( ;it != ite; it++)
+	for ( ; it != ite; it++)
 	{
 		try
 		{
@@ -437,24 +407,3 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 	}
 	return (err);
 }
-
-
-
-
-// It is not currently possible to reliably delete epoll items when using the same epoll set from multiple threads. After calling epoll_ctl with EPOLL_CTL_DEL, another thread might still be executing code related to an event for that epoll item (in response to epoll_wait). Therefore the deleting thread does not know when it is safe to delete resources pertaining to the associated epoll item because another thread might be using those resources. 
-
-// HM : do not delete ..CgiPipe .. until .. we are sure (cgi) is complete (?)
-// so .. keep them in the epoll .. but .. disabled
-
-// the reading application would be tied up for a long period; 
-// meanwhile, it does not service I/O events on the other file descriptors—those descriptors are starved of service by the application. 
-
-// The solution to file descriptor starvation is for the application to maintain a user-space data structure that caches the readiness of each of the file descriptors that it is monitoring. 
-
-// so .. cache as (READY) .. until .. recv/send ZERO ...
-
-// EPOLLONESHOT. If this flag is specified in the events mask for a file descriptor, then, once the file descriptor becomes ready and is returned by a call to epoll_wait(), it is disabled from further monitoring (but remains in the interest list). If the application is interested in monitoring file descriptor once more, then it must re-enable the file descriptor using the epoll_ctl(EPOLL_CTL_MOD) operation. 
-
-// A defunct or "zombie" process in Linux occurs when a child process finishes running via fork(), but its parent process does not read its exit status using a wait() system call. The process remains in the table holding its PID until reaped.
-
-

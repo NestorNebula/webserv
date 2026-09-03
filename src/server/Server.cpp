@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 17:10:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:34:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,31 +38,6 @@ Server::~Server()
 	WSLOG(LVL_TMP, TGT_SERV, "acc fail: ", acc_fail);
 	this->sfd_close();
 };
-
-int	Server::sfd_open(void)
-{
-	for (int i=0; i < SPARE_FD; i++)
-	{
-		this->spare_fd[i] = open("/dev/null", O_RDONLY);
-		if (this->spare_fd[i] < 0)
-		{
-			WSLOG(LVL_TMP, TGT_SERV, "sfd fail: ", i);
-			sfd_close();
-			return (-1);
-			// return (i > 0) ? (0) : (-1);
-		}
-	}
-	return (0);
-}
-
-void	Server::sfd_close(void)
-{
-	for (int i=0; i < SPARE_FD; i++)
-	{
-		fd_close(this->spare_fd + i);
-	}
-}
-
 
 int Server::init(void)
 {
@@ -127,44 +102,7 @@ int	Server::accept_conn(void)
 	if (conn_fd < 0)
 	{
 		acc_err++;
-#if 0
-		switch(errno)
-		{
-		case EMFILE:
-			WSLOG(LVL_DBG, TGT_SERV, "EMFILE");
-			break;
-		case ENFILE:
-			WSLOG(LVL_DBG, TGT_SERV, "ENFILE");
-			break;
-		default:
-			break;
-		}
-#endif
 		this->set_paused();
-		// only close one .. what would the difference be (?)
-		// or .. close TWO . leave one for the Connections "extra" fd 
-		// but . it will probably get grabbed by the next accept
-		// this->sfd_close();
-
-		// or : do not try to re-accept immediately .. 
-		// free (1) fd on each pause interval
-		// but do not try to accept immediately  
-		// which a cgi might use 
-		
-#if 0
-		conn_fd = accept(this->fd, (struct sockaddr*) addr, &conn_asiz);
-		if (conn_fd < 0)
-		{
-			acc_fail++;
-			WSCOL(WSL_RED);
-			WSLOG(LVL_ERR, TGT_SERV, "FAILED!");
-		}
-		else
-		{
-			WSCOL(WSL_GREEN);
-			WSLOG(LVL_ERR, TGT_SERV, "accepted!");
-		}
-#endif
 		return (0);
 	}	
 
@@ -187,12 +125,12 @@ int	Server::accept_conn(void)
 	c->set_addr(&conn_addr);
 	return (conn_fd);
 }
+
 ssize_t	Server::pollin(void)
 {
-	int			conn_fd;
-	
 	this->acc_cnt++;
-	conn_fd = this->accept_conn();
+
+	int conn_fd = this->accept_conn();
 	if (conn_fd < 0)
 		return (0);
 	return (0);
@@ -227,7 +165,7 @@ bool	Server::timeo  (WsTime & now)
 
 	this->lact = now; 
 
-	this->sfd_close(); // all of them (?!?)
+	this->sfd_close();
 	if (this->accept_conn() > 0)
 	{
 		WSCOL(WSL_GREEN);
@@ -245,7 +183,6 @@ bool	Server::timeo  (WsTime & now)
 	WSCOL(WSL_GREEN);
 	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!)");
 
-	// tell all retry-ing conn to .. retry
 	this->paused = 0;
 	this->mod_evt(EPOLLIN);
 	return (false);
@@ -255,3 +192,28 @@ unsigned short	Server::get_port(void)	const
 {
 	return (this->port);
 }
+
+int	Server::sfd_open(void)
+{
+	for (int i=0; i < SPARE_FD; i++)
+	{
+		this->spare_fd[i] = open("/dev/null", O_RDONLY);
+		if (this->spare_fd[i] < 0)
+		{
+			WSLOG(LVL_TMP, TGT_SERV, "sfd fail: ", i);
+			sfd_close();
+			return (-1);
+			// return (i > 0) ? (0) : (-1);
+		}
+	}
+	return (0);
+}
+
+void	Server::sfd_close(void)
+{
+	for (int i=0; i < SPARE_FD; i++)
+	{
+		fd_close(this->spare_fd + i);
+	}
+}
+

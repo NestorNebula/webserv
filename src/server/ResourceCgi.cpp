@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:59:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:21:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ int	ResourceCgi::get_req_body(void)
 
 std::string & ResourceCgi::get_resp(void)
 {
-	// separate head .. for HEAD
 	return (this->resp);
 }
 
@@ -55,18 +54,9 @@ bool	ResourceCgi::resp_data(void)
 	return (false);
 
 }
-// No Content-Length: You omit the Content-Length header because the total size is unknown.Transfer-Encoding Header: The server sets Transfer-Encoding: chunked.Hexadecimal Size: Each block starts with its size in hex characters, followed by a carriage return and newline (\r\n), then the data itself.Zero-Length End: The transmission ends with a size of 0 to signal completion
-
-// maybe ... force-chunk large content-lengths
-// must chunk : no content length -- if we want to keep-alive
 
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
-	// add CHUNKED here 
-	// HEX\r\n
-	// [data]\r\n
-
-	// ATTN : need to know to add END
 	this->resp.append(buf, siz);
 	
 	WSLOG(LVL_NONE, TGT_RSRC, "resp");

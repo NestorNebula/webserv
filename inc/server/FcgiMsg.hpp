@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 19:36:11 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/29 20:37:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:15:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,11 @@ private:
 	FcgiMsgData				 (const FcgiMsgData & );
 	FcgiMsgData & operator = (const FcgiMsgData & ) { return (*this); }
 public:
-	int				siz;  // full_size
-	int				len;  // msg_len
+	int				siz;  // full size
+	int				len;  // message length
 
-	int				req;  // req_id
-	int				role; // not sure when
+	int				req;  // request uid
+	int				role; // message role
 
 	unsigned char	typ;
 	unsigned char	pad;

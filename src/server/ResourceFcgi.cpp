@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:07:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:29:42 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,37 @@ ResourceFcgi::~ResourceFcgi()
 	this->conn_closed();
 }
 
+int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn, std::string &sock_path)
+{	
+	int fd = FcgiConn::make_sock(sock_path);
+	if (fd < 0)
+		return (-1);
+	
+	this->fcgi = new FcgiPipe(ep, fd, conn, this);
+	int err = this->fcgi->init(cgienv);
+	if (err < 0)
+	{
+		delete (this->fcgi);
+		this->fcgi = NULL;
+		close(fd);
+		return (err);
+	}
+	this->fcgi->ini_evt(EPOLLOUT);
+	this->conn = conn;
+	return (err);
+}
+
+void    ResourceFcgi::push_body(void)
+{
+	if (this->fcgi)
+		this->fcgi->mod_evt(EPOLLOUT);
+}
+
 void	ResourceFcgi::conn_closed(void)
 {
 	if (this->fcgi)
 		this->fcgi->rsrc_closed();
 }
-
 
 int	ResourceFcgi::status(void)
 {
@@ -57,8 +82,7 @@ int	ResourceFcgi::status(void)
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 			return (RSP_ERROR);
-			
-		// truly complete .. but data to be flushed
+
         if (this->resp_data())
 		{
 			WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (have data)");
@@ -79,6 +103,7 @@ int	ResourceFcgi::status(void)
 int	ResourceFcgi::wait(int opt)
 {
 	(void)opt;
+	
 	if (this->done & RSRC_DONE_ERR)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (error)");
@@ -87,7 +112,6 @@ int	ResourceFcgi::wait(int opt)
 	if (this->done & RSRC_FLUSHING)
 	{
 		// WSLOG(LVL_DBG, TGT_FCGI, "wait:  (flush)");
-		// if (this->resp_data())
 		return (0);
 	}
 	if (this->done == RSRC_DONE_IO)
@@ -116,33 +140,7 @@ int	ResourceFcgi::rem(EpollClient *epc)
 		// WSLOG(LVL_DBG, TGT_FCGI, "rem  ", this->done);
 		this->set_done(RSRC_DONE_IO);
 		this->fcgi = NULL;
-		err = 3;
+		err = RSRC_DONE_IO;
 	}
-	return (err);
-}
-
-void    ResourceFcgi::push_body(void)
-{
-	if (this->fcgi)
-		this->fcgi->mod_evt(EPOLLOUT);
-}
-
-int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn, std::string &sock_path)
-{	
-	int fd = FcgiConn::make_sock(sock_path);
-	if (fd < 0)
-		return (-1);
-	
-	this->fcgi = new FcgiPipe(ep, fd, conn, this);
-	int err = this->fcgi->init(cgienv);
-	if (err < 0)
-	{
-		delete (this->fcgi);
-		this->fcgi = NULL;
-		close(fd);
-		return (err);
-	}
-	this->fcgi->ini_evt(EPOLLOUT);
-	this->conn = conn;
 	return (err);
 }

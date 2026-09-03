@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 22:06:04 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:23:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,9 @@ enum
 
 class ResourceCgi
 {
+protected:
+	ResourceCgi				(const ResourceCgi & ) {}
+	ResourceCgi & operator=	(const ResourceCgi & ) { return (*this); }
 public:
 	ResourceCgi(void) :  
 		done(0),

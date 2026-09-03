@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/03 19:10:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:50:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,13 +379,17 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
+#if 1 // SESS_RETRY
 // #kd -- allow retries !
-      // setResponseStatus(500); // CGI_ERR
       _response.clear();
       res_tries++;
+      _next = RDSOCK;
+#else
+      setResponseStatus(500); // CGI_ERR
+#endif
       delete _resource;
       _resource = NULL;
-      _next = RDSOCK;
+
       WSLOG(LVL_TMP, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");

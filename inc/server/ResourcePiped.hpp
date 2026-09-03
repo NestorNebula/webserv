@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:15:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/02 11:45:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:30:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,9 @@ public:
 	int			init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn);
 	
 	void        push_body(void);
-	int			status(void);
 	void		conn_closed(void);
+	int			status(void);
 	int			wait(int opt);
-
 	int			rem(EpollClient *epc);
 
 	pid_t		pid;

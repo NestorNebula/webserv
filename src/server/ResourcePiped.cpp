@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 18:36:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:30:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,64 @@ ResourcePiped::~ResourcePiped()
 	}
 }
 
+int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
+{
+	int	err;
+
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
+	
+	this->pid = _pid;
+	
+	int cgifd_ip = dup(pipes->p1[1]);
+	if (cgifd_ip < 0)
+	{
+		this->set_failed();
+		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
+	}
+	int cgifd_op = dup(pipes->p2[0]);
+	if (cgifd_op < 0)
+	{
+		close(cgifd_ip);
+		this->set_failed();
+		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
+	}	
+
+	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
+	err = this->ip->ini_evt(EPOLLOUT);
+	if (err < 0)
+	{
+		close(cgifd_ip);
+		close(cgifd_op);
+		this->set_failed();
+		return (err);
+	}
+
+	this->op = new CgiPipe(ep, cgifd_op, conn, this);
+	// err = this->op->ini_evt(EPOLLIN);
+	if (err < 0)
+	{
+		close(cgifd_ip);
+		close(cgifd_op);
+		this->set_failed();
+		return (err);
+	}
+	this->conn = conn;
+	return (err);
+}
+
+void    ResourcePiped::push_body(void)
+{
+    if (this->ip)
+        this->ip->mod_evt(EPOLLOUT);
+}
+
 void	ResourcePiped::conn_closed(void)
 {
 	if (this->ip)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC, "rsrc-closed : ip");
 		this->ip->rsrc_closed();
-		// are these not falling over properly (?)
 		this->ip->mod_evt(EPOLLOUT);
 	}
 	if (this->op)
@@ -77,8 +128,7 @@ int	ResourcePiped::status(void)
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
 		if (this->error)
 		    return (RSP_ERROR);
-			
-		// truly complete .. but data to be flushed
+
         if (this->resp_data())
 		{
 			WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (have data)");
@@ -199,7 +249,7 @@ int	ResourcePiped::rem(EpollClient *epc)
 	{
 		// WSCOL(WSL_CYAN);
 		WSLOG(LVL_DBG, TGT_RSRC, "rem : (ip)");
-		err = 1;
+		err = RSRC_DONE_IP;
 		this->ip = NULL;
 		if (this->op)
         {
@@ -211,74 +261,21 @@ int	ResourcePiped::rem(EpollClient *epc)
 	{
 		// WSCOL(WSL_CYAN);
 		WSLOG(LVL_DBG, TGT_RSRC, "rem : (op)");
-		err = 2;
+		err = RSRC_DONE_OP;
 		this->op = NULL;
 	}
 	if ((this->ip == NULL) && (this->op == NULL))
 	{
 		// WSCOL(WSL_CYAN);
 		WSLOG(LVL_DBG, TGT_RSRC, "rem : (done)");
-		err = 3;
+		err = RSRC_DONE_IO;
 		this->wait(0);
 	}	
 	return (err);
 }
 
-void    ResourcePiped::push_body(void)
-{
-    if (this->ip)
-        this->ip->mod_evt(EPOLLOUT);
-}
-
 void    ResourcePiped::set_failed(void)
 {
 	this->failed = true;
-	// shouldn't closing the pipes be enough (?)
 	kill(this->pid, SIGKILL);
-}
-
-int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *conn)
-{
-	int	err;
-
-	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
-	
-	this->pid = _pid;
-	
-	int cgifd_ip = dup(pipes->p1[1]);
-	if (cgifd_ip < 0)
-	{
-		this->set_failed();
-		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
-	}
-	int cgifd_op = dup(pipes->p2[0]);
-	if (cgifd_op < 0)
-	{
-		close(cgifd_ip);
-		this->set_failed();
-		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
-	}	
-
-	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
-	err = this->ip->ini_evt(EPOLLOUT);
-	if (err < 0)
-	{
-		close(cgifd_ip);
-		close(cgifd_op);
-		this->set_failed();
-		return (err);
-	}
-
-	this->op = new CgiPipe(ep, cgifd_op, conn, this);
-	// err = this->op->ini_evt(EPOLLIN);
-	if (err < 0)
-	{
-		close(cgifd_ip);
-		close(cgifd_op);
-		this->set_failed();
-		return (err);
-	}
-	this->conn = conn;
-	return (err);
 }
