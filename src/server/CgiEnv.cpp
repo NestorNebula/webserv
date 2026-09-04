@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 20:57:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:19:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Connection.hpp"
 #include "Server.hpp"
 #include "helpers.hpp"
+#include "http_utils.hpp"
 
 CgiEnv::CgiEnv(void) : lang (0), res (NULL)
 {
@@ -78,7 +79,7 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 
-	std::string path_rel = conf.root + info.scriptPath;
+	std::string path_rel = joinPaths(conf.conf_file_root, info.scriptPath);
 	script.parse(path_rel);
 
 	// WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
@@ -111,7 +112,7 @@ int     CgiEnv::from_conn(Connection & conn)
 			return (conn.set_err(500));
 		}
 		lang = CGI_PYTHON;
-		std::string pyrel = conf.root + conf.pycgi_dir;
+		std::string pyrel = joinPaths(conf.conf_file_root, conf.pycgi_dir);
 		FilePath pypath(pyrel);
 		this->add("PYTHONPATH", pypath.path.c_str());
 	}
@@ -143,8 +144,8 @@ int     CgiEnv::from_conn(Connection & conn)
 		// with a 415 'Unsupported Media Type' error, where supported by the protocol.
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "missing : content-type");
 		return (conn.set_err(415)); // Unsupported Media Type
-		
 	}
+	
 	if (req.hasHeader("Content-length"))
 		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
 	
@@ -196,10 +197,9 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
+		// ATTN : fork => dup_err
 		// WSCOL(WSL_GREEN);
-		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
-		// WSCOL(WSL_GREEN);
-		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
+		// WSLOG(LVL_TMP, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}

@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=16
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -158,6 +158,24 @@ if [ "$1" ]; then
 	exit 0
 fi
 
+# My understanding of the bug and the fix is that if the data is chunked and no Content-Length is specified, Apache will add that header before it gets to PHP, so PHP will read the data. 
+
+# -H "Transfer-Encoding: chunked" 
+# curl -i -X POST -F @www/files/earth.jpg http://127.0.0.1:7777/php/ul.php
+# echo
+# exit 0
+
+# -H "Connection: keep-alive" \
+
+	# -d "p1=post-one&p2=post-two" \
+curl -X POST http://localhost:8082/body.php -i \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	 -H "Transfer-Encoding: chunked" \
+	-d @../../www/kd/infinite.php
+echo
+exit 0
+
+
 curl -X GET 'http://localhost:8082/html/contact.html' -i
 echo
 exit 0
@@ -182,21 +200,6 @@ echo ; echo ; echo
 exit 0
 # -F file=@www/files/earth.jpg
 
-
-# -H "Transfer-Encoding: chunked" 
-# curl -i -X POST -F @www/files/earth.jpg http://127.0.0.1:7777/php/ul.php
-# echo
-# exit 0
-
-# -H "Connection: keep-alive" \
-
-	# -d "p1=post-one&p2=post-two" \
-# curl -X POST http://localhost:7777/test.php -i \
-# 	-H "Content-Type: application/x-www-form-urlencoded" \
-# 	 -H "Transfer-Encoding: chunked" \
-# 	-d @wtf.txt
-# echo
-# exit 0
 
 exit 0
 

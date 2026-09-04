@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:10:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 12:50:31 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int main (int argc, char ** argv, char **envp)
            WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
-           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_CONN | TGT_FCGI | TGT_FCGI_PARSE);
+           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_CONN | TGT_FCGI_PARSE);
            break;
         case 'a':
            WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA |  TGT_CGI | TGT_FCGI_PARSE);

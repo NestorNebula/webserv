@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:03:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 11:42:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ public:
 	
 	int		serve(const std::vector<ServerConfig> &serv_list);
 
+	int		cli_cnt(int typ);
 	int		cli_info(void);
 
 private:
