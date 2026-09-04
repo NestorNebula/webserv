@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 14:14:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 17:23:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 	this->hed = 1;
 	
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
 
 	std::string stat_str = hedval_str(resp, "Status");
 	std::string conn_str = hedval_str(resp, "Connection");

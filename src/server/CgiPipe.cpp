@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 14:50:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 16:37:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,12 +228,12 @@ int	cgi_pipes::init(void)
 	if (pipe(p1) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "pipe()"));
 	}
 	if (pipe(p2) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "pipe()"));
 	}
 	return (0);
 }
@@ -243,22 +243,22 @@ int	cgi_pipes::dup_io(void)
 	if (p1[0] == -1)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup_io"));
 	}
 	if (dup2(p1[0], STDIN_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdin)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stdin)"));
 	}
 	if (p2[1] == -1)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup_io"));
 	}
 	if (dup2(p2[1], STDOUT_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdout)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stdout)"));
 	}
 	return (0);		
 }
@@ -269,12 +269,12 @@ int	cgi_pipes::dup_err(void)
 	if (dnfd < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "open (/dev/null)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "open (/dev/null)"));
 	}
 	if (dup2(dnfd, STDERR_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stderr)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stderr)"));
 	}
 	fd_close(&dnfd);
 	return (0);
