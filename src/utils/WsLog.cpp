@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 08:52:18 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 18:24:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ static const std::string tgt_str[] =
     "res   : ",
     "resp  : ",
     "strm  : ",
-    "sess  : "
+    "sess  : ",
+    "timeo : ",
+    "retry : "
 };
 
 static const std::string &tgt_prefix(log_tgt tgt)
@@ -59,7 +61,7 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[9]);
     if (tgt & (TGT_RSRC | TGT_RSRC_INFO | TGT_RSRC_WAIT | TGT_RSRC_STAT))
         return (tgt_str[10]);
-    if (tgt & TGT_FCGI)
+    if (tgt & (TGT_FCGI | TGT_FCGI_PARSE))
         return (tgt_str[11]);
 
     if (tgt & (TGT_REQ))
@@ -72,31 +74,17 @@ static const std::string &tgt_prefix(log_tgt tgt)
         return (tgt_str[15]);
     if (tgt & (TGT_SESS))
         return (tgt_str[16]);
-
-    if (tgt & (TGT_REQ))
-        return (tgt_str[12]);
-    if (tgt & (TGT_RES))
-        return (tgt_str[13]);
-    if (tgt & (TGT_RESP))
-        return (tgt_str[14]);
-    if (tgt & (TGT_STRM))
-        return (tgt_str[15]);
-    if (tgt & (TGT_SESS))
-        return (tgt_str[16]);
-
-    if (tgt & (TGT_REQ))
-        return (tgt_str[12]);
-    if (tgt & (TGT_RES))
-        return (tgt_str[13]);
-    if (tgt & (TGT_RESP))
-        return (tgt_str[14]);
-    if (tgt & (TGT_STRM))
-        return (tgt_str[15]);
-    if (tgt & (TGT_SESS))
-        return (tgt_str[16]);
-
+    if (tgt & (TGT_TIMEO))
+        return (tgt_str[17]);
+    if (tgt & (TGT_RETRY))
+        return (tgt_str[18]);
+        
     return (tgt_str[0]);
 }
+
+#ifndef HIDE_ERRORS
+# define HIDE_ERRORS 0
+#endif
 
 bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 {
@@ -104,7 +92,9 @@ bool    WsLog::nolog(log_lvl msg_lvl, log_tgt msg_tgt)
 
     switch (msg_lvl)
     {
+#if !HIDE_ERRORS
     case LVL_ERR:
+#endif
     case LVL_TMP:
         skip = false;
         break;
@@ -138,6 +128,7 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
     WsLog::op(stream);
 }
 
+
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, ssize_t j)
 {
     if (WsLog::nolog(msg_lvl, msg_tgt))
@@ -148,6 +139,15 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
     WsLog::op(stream);
 }
 
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, std::string str, ssize_t j)
+{
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return;
+
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << msg << "[" << i << "] " << str << " [" << j << "]";
+    WsLog::op(stream);
+}
 
 void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str)
 {
@@ -172,7 +172,9 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
     (void) msg_lvl;
-    
+#if HIDE_ERRORS
+    return (-1);
+#endif
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);
@@ -327,6 +329,7 @@ txtrst='\e[0m'    # Text Reset
 #endif
 
 
+
 void    WsLog::nh(void)
 {
     WsLog::lvl = LVL_ALL;
@@ -338,6 +341,7 @@ void    WsLog::kd(void)
     WsLog::lvl = LVL_NONE
         | LVL_MAIN
         | LVL_MAIN
+        | LVL_MAIN
         | LVL_ERR
         | LVL_WARN
         | LVL_INFO
@@ -345,8 +349,7 @@ void    WsLog::kd(void)
     ;
     WsLog::tgt = TGT_NONE
         // | TGT_EPOLL 
-        // | TGT_EPOLL_EVT
-        // | TGT_EPOLL_EVT
+        | TGT_EPOLL_EVT
         // | TGT_EPOLL_CTL
         
         // | TGT_EPC
@@ -356,10 +359,12 @@ void    WsLog::kd(void)
         
         // | TGT_CONN
         // | TGT_CONN
+        // | TGT_CONN
         // | TGT_CONN_RECV
         // | TGT_CONN_SEND
         // | TGT_CONN_DATA
 
+        // | TGT_CGI
         // | TGT_CGI
         // | TGT_CGI
         // | TGT_CGI_RECV
@@ -369,18 +374,42 @@ void    WsLog::kd(void)
 
         // | TGT_FCGI
         // | TGT_FCGI
+        // | TGT_FCGI
         
         | TGT_SERV
         // | TGT_MAIN
 
         // | TGT_HEAD
         // | TGT_BODY
-        | TGT_RSRC
-        | TGT_RSRC_INFO
-        | TGT_RSRC_STAT
+        // | TGT_RSRC
+        // | TGT_RSRC_INFO
+        // | TGT_RSRC_STAT
         // | TGT_RSRC_WAIT
     ;
 }
+
+// Lots of writes to stderr can confuse socket communication by causing 
+// I/O blocking, buffer saturation, and timing disruptions in the application event loop. 
+// When a program spams error logs, it starves network tasks of CPU time and resources.
+
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket
+
+
+// Why Logging Interferes with SocketsBlocking I/O: 
+// Writing to stderr often blocks execution 
+// if the destination stream (like a terminal or a slow log file) cannot process data instantly. 
+// While the CPU waits for stderr to clear, 
+// it cannot read from or write to the network socket.
+
+// Buffer Backpressure: 
+// If stderr fills up operating system pipes, the process pauses. 
+// This delay prevents the app from clearing incoming socket buffers, triggering remote timeouts.
+
+// Event Loop Starvation: 
+// In single-threaded event loops (like Node.js or Python asyncio), 
+// synchronous or heavy logging operations monopolize the thread. 
+// The application fails to poll socket descriptors, delaying packet reads and handshakes.
 
 // Lots of writes to stderr can confuse socket communication by causing 
 // I/O blocking, buffer saturation, and timing disruptions in the application event loop. 

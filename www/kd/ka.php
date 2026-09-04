@@ -2,7 +2,6 @@
 
 header('Content-type: text/plain');
 // header('Connection: close');
-header('Content-Length: 13');
-
+header('Content-Length: 22');
 ?>
-I'm not dead.
+PHP is not dead (yet).
