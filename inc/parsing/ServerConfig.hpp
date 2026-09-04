@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/02 17:22:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:20:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ struct ServerConfig {
 
 	std::string pycgi_dir;
 	std::string fcgi_sock;
-// #kd
+// #kd - Default Error String
 	std::string	def_err;
 
 	ServerConfig();

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/02 17:40:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:23:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
-// #kd
+// #kd - Default Error String
 #include <fstream>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
@@ -214,7 +214,7 @@ void	ConfigParser::parseServer()
 
 	validateServerConfig(server);
 
-// #kd
+// #kd - Default Error String
 #if 1
 	std::map<std::string, std::string>::const_iterator	it;
 	it = server.error_pages.find("default");		

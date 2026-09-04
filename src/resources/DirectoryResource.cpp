@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/03 10:22:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:24:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 
-// #kd
+// #kd - Alphabetical Directory
 #include <vector>
 #include <algorithm>
 
@@ -41,6 +41,8 @@ Stream &DirectoryResource::stream() {
 
 void DirectoryResource::buildList() {
 
+// #kd - Alphabetical Directory
+#if 1 // SORT_DIR
   std::vector<std::string> elem;
   
   dirent *dirFile;
@@ -50,14 +52,10 @@ void DirectoryResource::buildList() {
       if (dirFile->d_type == DT_DIR)
         name += '/';
       elem.push_back(name);
-      // *_stream << "<li>\n"
-      //             "<a class=\"file-link\" href=\""
-      //          << name << "\">" << name
-      //          << "</a>\n"
-      //             "</li>\n";
     }
   }
   std::sort(elem.begin(), elem.end());
+#endif
 
   *_stream << "<!DOCTYPE html>\n"
               "<html lang=\"en\">\n"
@@ -83,6 +81,9 @@ void DirectoryResource::buildList() {
            << "</h1>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
+
+// #kd - Alphabetical Directory
+#if 1 // SORT_DIR
   for (size_t k=0; k < elem.size(); k++)
   {
       *_stream << "<li>\n"
@@ -91,7 +92,7 @@ void DirectoryResource::buildList() {
                << "</a>\n"
                   "</li>\n";    
   }
-#if 0
+#else
   dirent *dirFile;
   while ((dirFile = readdir(_dir)) != NULL) {
     std::string name(dirFile->d_name);
