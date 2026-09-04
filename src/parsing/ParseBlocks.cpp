@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/02 12:24:43 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/04 18:22:22 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "utils/WsLog.hpp"
 #include <sstream>
 #include <cstdlib>
+#include <fstream>
 
 void	ConfigParser::parseRoute(ServerConfig& current_server)
 {
@@ -208,6 +209,17 @@ void	ConfigParser::parseServer()
 		}
 		validateRouteConfig(server.routes[i]);
 		validateCGIExecutables(server.routes[i], server);
+	}
+
+	std::map<std::string, std::string>::const_iterator	it;
+	it = server.error_pages.find("default");
+
+	std::ifstream	rd(it->second.c_str());
+	if (rd)
+	{
+		std::stringstream	tmp;
+		tmp << rd.rdbuf();
+		server.def_err = tmp.str();
 	}
 
 	validateServerConfig(server);

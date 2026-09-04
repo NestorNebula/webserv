@@ -39,6 +39,7 @@ struct ServerConfig {
 
 	std::string pycgi_dir;
 	std::string fcgi_sock;
+	std::string	def_err;
 
 	ServerConfig();
 };
