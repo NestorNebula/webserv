@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/03 10:01:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:20:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ protected:
   Stream *_stream;
 };
 
-// #kd
+// #kd - Default Error String
 class ErrorResource : public StaticResource {
 public:
   ErrorResource(const std::string &filepath, const std::string &def_str) : StaticResource(filepath), _def_str(def_str)  {

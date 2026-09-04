@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/03 21:50:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:48:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
     manageSession();
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-    setError(601); // #kd
+    setError(500); // #kd (601)
   }
   return count;
 }
@@ -149,7 +149,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
     if (_response.getCode() == 500)
       _next = CLOSE;
     else
-      setError(602); // #kd
+      setError(500); // #kd (602)
   }
   return r;
 }
@@ -189,12 +189,12 @@ void Session::setError(Response::StatusCode code) {
     _next = WRSOCK;
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-// #kd - this is very confusing .. 
+// #kd - uncertain why I needed this
 // without : better,but "Incomplete reponse"
-    if (code != 606)
+// something connected to : fail on low-file-limit (?)
+    if (code != 500) // #kd (606)
     {
-      // fail on low-file-limit 
-      setError(606); // CGI_ERR
+      setError(500); // #kd (606)
     }
     else
       _next = CLOSE;
@@ -226,14 +226,16 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
   switch (_next) {
   case RDSOCK:
+// #kd - Session::RETRY
   case RETRY:
     handleRequest();
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
-      if (res_tries)
+// #kd - Session::RETRY
+      if (retry_res)
       {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "manage : tries ", res_tries);
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", retry_res);
         _next = Session::RETRY;
       }
       else 
@@ -379,25 +381,25 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
-#if 1 // SESS_RETRY
-// #kd -- allow retries !
+// #kd - Session::RETRY      
+#if 1
       _response.clear();
-      res_tries++;
+      retry_res++;
       _next = RDSOCK;
 #else
       setResponseStatus(500); // CGI_ERR
 #endif
       delete _resource;
       _resource = NULL;
-
       WSLOG(LVL_TMP, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
-      if (res_tries)
+// #kd - Session::RETRY
+      if (retry_res)
       {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", res_tries);
-        res_tries = 0;
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", retry_res);
+        retry_res = 0;
       }
     }
   }
@@ -416,7 +418,7 @@ void Session::prepareErrorResource() {
   delete _resource;
   WSLOG(LVL_INFO, TGT_SESS, "Generating Error page Resource using ",
            errPage);
-// #kd
+// #kd - Default Error String
   _resource = new ErrorResource(errPage, _server.def_err);
   _resourcePath = errPage;
 }
@@ -458,7 +460,7 @@ void Session::handleUpload() {
     return setResponseStatus(403);
   std::ofstream ofs(uploadFile.c_str());
   if (!ofs.is_open())
-    return setResponseStatus(607); // CGI_ERR
+    return setResponseStatus(500); // #kd (607)
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
@@ -471,7 +473,7 @@ void Session::handleUpload() {
       WSLOG(LVL_ERR, TGT_SESS, "Error during file upload, aborting");
       ofs.close();
       std::remove(uploadFile.c_str());
-      return setResponseStatus(609); // CGI_ERR
+      return setResponseStatus(500); // #kd (609)
     }
   }
   ofs.close();
