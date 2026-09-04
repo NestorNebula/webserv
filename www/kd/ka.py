@@ -9,7 +9,6 @@ import cgitb
 
 print("Content-Type: text/plain", end="\r\n")
 print("Connection: keep-alive", end="\r\n")
-print("Content-Length: 17", end="\r\n\r\n")
+print("Content-Length: 26", end="\r\n\r\n")
 
-print ("I'm not dead yet.", end="")
-# print ("I'm not dead yet.")
+print ("PYTHON is not dead (yet).", end="")

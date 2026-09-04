@@ -3,7 +3,7 @@
 
     $path = './files/Kanan.mp3';
     $fsiz = filesize($path);
-    header('Content-Length: ' . $fsiz);
+    // header('Content-Length: ' . $fsiz);
 
     $fp = fopen($path, "rb");
 
