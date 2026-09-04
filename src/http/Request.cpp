@@ -191,6 +191,8 @@ void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
     return;
   if (bodyLine == "\r\n") {
     _state = _remainingBody == 0 ? COMPLETE : INVALID;
+    _headers.remove("Transfer-Encoding");
+    _headers.insert("Content-Length", toString(_bodySize));
     return;
   }
   if (_remainingBody == std::string::npos) {
