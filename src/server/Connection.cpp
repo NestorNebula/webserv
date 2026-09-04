@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 11:03:35 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:24:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	EpollClient(_ep, EPC_CONN, _fd), 
 	sess(_serv.get_conf()),
 	serv(_serv), 
+	retry_cgi(0),
 	res_cgi(NULL),
 	req_cnt(0)
 {
@@ -38,10 +39,13 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 Connection::~Connection()
 {
 	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-// KEEP_ALIVE
 	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+// KEEP_ALIVE : check req_cnt
+	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try 
 	{
+		this->serv.conn_closed();
 		if (this->res_cgi)
 		{
 			this->res_cgi->conn_closed();
@@ -54,26 +58,63 @@ Connection::~Connection()
 	}
 }
 
-// A "connection reset by peer" error (TCP RST packet) means the remote host, firewall, or proxy closed the network connection abruptly. To resolve it, you must identify whether the issue is caused by misconfigured timeouts, aggressive firewalls, stale connection pools, or application code crashes
-
-// the error is the one that shows up after the TCP connection was established. The SYN succeeded, the SYN-ACK succeeded, the ACK succeeded, data flowed, and then the RST appeared.
-
-// socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1))
-
-
-bool	Connection::timeo(time_t now)
+bool	Connection::timeo(WsTime & now)
 {
-	if (this->lact == 0)
+	if (this->lact.not_set())
 		return (false);
-	if (now < this->lact)
+	if (this->lact.after(now))
 		return (false);
-	if ((this->lact + CONN_TIMEOUT) > now)
+
+	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
+	{
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
+		sess.manageSession();
+		switch (sess.nextAction()) 
+		{
+		case Session::WRSOCK:
+			this->req_cnt++;
+			this->mod_evt(EPOLLOUT);
+			break;
+		default:
+			break;
+		}
+		return (false);
+	}
+	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
+	{
+		this->lact = now;
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		if (this->exec_cgi() < 0)
+		{
+			if (retry_cgi >= CGI_RETRY_COUNT)
+			{
+				WSCOL(WSL_RED);
+				WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+// if (Connection) blocks all available (fd) ..
+// we'd rather sacrifice JUST ONE ...				
+				this->set_err(504); // #kd (610)
+			}
+			retry_cgi++;
+			return (0);
+		}
+		// success
+		WSCOL(WSL_GREEN);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		this->retry_cgi = 0;
+		this->mod_evt(EPOLLIN);
+		return (0);
+	}
+
+	if ((this->lact + CONN_TIMEOUT).after(now))
 		return (false);
 		
 	WSCOL(WSL_RED);
-	WSLOG(LVL_DBG, TGT_CONN, "TIMEO : conn ", this->get_fd());
-	this->set_err(408); // Request Timeout 
-	// NEEDS TO CLOSE CONNECTION
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->get_fd());
+	// Request Timeout -- not necessarily
+	// perhaps .. only if "pollin"
+	this->set_err(408); 
 	return (true);
 }
 
@@ -103,7 +144,7 @@ int	Connection::set_err(int e)
 	return (-1);
 }
 
-
+#if 0
 static void sess_log_next(Session &sess)
 {
     WSCOL(WSL_YELLOW);
@@ -126,6 +167,8 @@ static void sess_log_next(Session &sess)
       break;
     }
 }
+#endif 
+
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -133,7 +176,7 @@ ssize_t	Connection::pollin(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
 		err = this->recv();
 		if (err < 0)
@@ -149,7 +192,7 @@ ssize_t	Connection::pollin(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		switch(sess.nextAction())
 		{
 		case Session::RDSOCK:
@@ -162,12 +205,26 @@ ssize_t	Connection::pollin(void)
 			break;
 		}
 		
+		// may have got rdhup .. but still need to retry .. 
 		switch (sess.nextAction()) 
 		{
+		case Session::RETRY:
+			WSCOL(WSL_CYAN);
+			WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "sess: RETRY");
+			this->mod_evt(0);
+			break;
 		case Session::DOCGI:
-			if (this->exec_cgi() < 0)
+			err = this->exec_cgi();
+			if (err < 0)
 			{
-				WSLOG(LVL_DBG, TGT_CONN, "exec: cgi");
+				if (err == SYSCALL_ERR)
+				{
+					WSCOL(WSL_CYAN);
+					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "exec failed", retry_cgi);
+					this->serv.set_paused();
+					retry_cgi++;
+					this->mod_evt(0);
+				}
 				return (0); // send error
 			}
 			this->res_cgi->push_body();
@@ -179,8 +236,9 @@ ssize_t	Connection::pollin(void)
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
-			// return (-1);
+			WSCOL(WSL_PURPLE);
 			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			// no reset here (?)
 			return (0);
 		case Session::CLOSE:
 			return (-1);
@@ -195,12 +253,6 @@ ssize_t	Connection::pollin(void)
 	return (0);
 }
 
-// ∗ Just remember that, for chunked requests, your server needs to un-chunk them, 
-// the CGI will expect EOF as the end of the body.
-// ∗ The same applies to the output of the CGI. 
-// If no content_length is returned from the CGI, EOF will mark the end of the returned data.
-// ∗ The CGI should be run in the correct directory for relative path file access.
-
 ssize_t	Connection::pollout(void)
 {
 	ssize_t	err = 0;
@@ -208,8 +260,7 @@ ssize_t	Connection::pollout(void)
 	{
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-		sess_log_next(sess);
-
+		// sess_log_next(sess);
 		if (sess.nextAction() == Session::DOCGI)
 		{
 			ResourceCgi *res = this->res_cgi;
@@ -222,14 +273,12 @@ ssize_t	Connection::pollout(void)
 			{
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
-// may set keep-alive 
 				return (-1);
 // KEEP_ALIVE
 			case RSP_KPALIVE:
-				this->reset();
-				// this->mod_evt(-EPOLLOUT);
-				// unless we sent back error ...
+				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				this->reset();
 				return (0);
 			case RSP_WAIT_HEAD:
 			case RSP_WAIT_BODY:
@@ -282,16 +331,14 @@ ssize_t	Connection::pollout(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 		
-		sess_log_next(sess);
+		// sess_log_next(sess);
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
-			this->reset();
-			// this->mod_evt(-EPOLLOUT);
-			// unless we sent back error ...
+			WSCOL(WSL_PURPLE);
 			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			this->reset();
 			return (0);
-			// return (-1);
 		case Session::CLOSE:
 			return (-1);
 		default:
@@ -352,19 +399,19 @@ void	Connection::cgi_rem(EpollClient *epc)
 {
 	switch (this->res_cgi->rem(epc))
 	{
-	case 1: // (ip)
+	case RSRC_DONE_IP:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (ip)   ", this->fd);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
-	case 2: // (op)
+	case RSRC_DONE_OP:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (op)   ", this->fd);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (op)   ", this->res_cgi->error);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		break;
-	case 3: // (done)
+	case RSRC_DONE_IO:
 		WSLOG(LVL_DBG, TGT_CONN, "rem cgi  : (DONE) ", this->fd);
 		WSLOG(LVL_DBG, TGT_CONN, "rem err  : (conn) ", this->error);
 		this->mod_evt(-EPOLLIN);
@@ -390,42 +437,52 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (-1);
+		return (this->set_err(500)); // #kd (601)
 	}
 
-	if ((cgienv->lang == CGI_PHP) &&
-		!this->serv.get_conf().fcgi_sock.empty())
+	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
+	if (
+		(cgienv->lang == CGI_PHP) &&
+		!fcgi_sock.empty() && 
+		!access(fcgi_sock.c_str(), R_OK | W_OK)	
+	)
 	{
-		WSLOG(LVL_DBG, TGT_CGI, "FCGI_SOCK");
 		ResourceFcgi * fcgi = new ResourceFcgi;
-		err = fcgi->init(this->ep, cgienv, this);
-		
-		WSLOG(LVL_DBG, TGT_CONN, "php : ", err);
+		err = fcgi->init(this->ep, cgienv, this, fcgi_sock);
 		if (err == 0)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_DBG, TGT_CONN, "php :  fcgi");			
+			WSLOG(LVL_DBG, TGT_CONN, "init:  FCGI");
 			delete (cgienv);
 			this->res_cgi = fcgi;
+// KEEP_ALIVE : set from Request (fcgi)
+			this->res_cgi->ka = this->sess.getRequest().keepalive();
 			return (err);
 		}
+		delete (cgienv);
 		delete (fcgi);
-		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
+		// ASSUMES : fail = "Too many open files"
+		return(SYSCALL_ERR);
 	}
 
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
+	
 	cgi_pipes	pipes;
-
+	
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "pipes.init");
+		return (SYSCALL_ERR);
 	}
+	
 	pid_t pid = fork();
 	if (pid < 0)
 	{
 		delete (cgienv);
-		return WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		return (SYSCALL_ERR);
+		
 	}	
 	if (pid == 0)
 	{
@@ -437,11 +494,16 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
+		pipes.dup_err();
+		if (err < 0)
+		{
+			pipes.shutdown();
+			delete (cgienv);
+			delete (this->ep);
+			exit(1);
+		}
+		
 		const char **envp = cgienv->gen();
-
-		// if (!(WsLog::tgt & TGT_CGI_ERR))	
-			pipes.dup_err();
-
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
 		{
@@ -471,9 +533,12 @@ int	Connection::exec_cgi(void)
 	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
-		delete (pcgi); // conn : cgi FAIL
-		return (this->set_err(503)); // CGI_ERR - Service Unavailable
+		pipes.shutdown();
+		delete (pcgi);
+		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
+// KEEP_ALIVE : set from Request (cgi)
+	this->res_cgi->ka = this->sess.getRequest().keepalive();
 	return (err);
 }

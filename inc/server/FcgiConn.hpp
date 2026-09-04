@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:14 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/23 10:52:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:13:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ public:
 	FcgiMsgData		data; 
 	std::string		req;
 	std::string		rsp;
-
 
 	int				req_init(CgiEnv *env);
 	void			req_body(const char *buf, int siz);

@@ -6,12 +6,27 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 14:00:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:10:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
 #include "Epoll.hpp"
+
+static const char *epc_str[] = 
+{
+	"serv",
+	"conn",
+	"cgi",
+	"fcgi",
+	NULL
+};
+
+std::string EpollClient::typ_str(void)
+{
+	return (epc_str[this->typ]);
+}
+
 
 EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
 	ep(_ep),
@@ -22,7 +37,7 @@ EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 {
 	evt.events = 0;
 	evt.data.ptr = NULL;
-	lact = time(&lact);
+	lact.set_now();
 }
 
 EpollClient::~EpollClient()
@@ -63,7 +78,14 @@ int	EpollClient::mod_evt(int e)
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
 	if (e == 0)
+	{
+		if (evt.events == (e | EPOLLRDHUP))
+		{
+			// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : no change");
+			return (0);
+		}
 		evt.events = e;
+	}
 	else if (e < 0)
 	{
 		e = -e;
@@ -89,28 +111,27 @@ int	EpollClient::event(struct epoll_event *e)
 {
 	int err;
 
-	// this->lact = time(&this->lact);
 	if (e->events & EPOLLERR)
 	{
 		this->hup();
 		return (-1);
 	}
-	if (e->events & EPOLLIN)
-	{
-		err = this->pollin();
-		if (err >= 0)
-			this->lact = time(&this->lact);
-		else if (err < 0)
-			return (err);
-	}
 	if (e->events & EPOLLOUT)
 	{
 		err = this->pollout();
 		if (err >= 0)
-			this->lact = time(&this->lact);
+			lact.set_now();
 		else if (err < 0)
 			return (err);
 	}	
+	if (e->events & EPOLLIN)
+	{
+		err = this->pollin();
+		if (err >= 0)
+			lact.set_now();
+		else if (err < 0)
+			return (err);
+	}
 	if (e->events & EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
@@ -139,6 +160,7 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 	ssize_t err;
 	
 	WSLOG(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
+	WSLOG(LVL_DBG, TGT_EPC_SEND, " fd : ", this->fd);
 
 	if (siz > EPC_OUT_SIZ)
 		siz = EPC_OUT_SIZ;
@@ -194,18 +216,4 @@ struct epoll_event	*EpollClient::get_evt(void)
 epc_typ	EpollClient::get_typ(void)
 {
 	return (this->typ);
-}
-
-static const char *epc_str[] = 
-{
-	"serv",
-	"conn",
-	"cgi",
-	"fcgi",
-	NULL
-};
-
-std::string EpollClient::typ_str(void)
-{
-	return (epc_str[this->typ]);
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:02:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:13:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ int FcgiConn::uid = 1;
 int FcgiConn::make_sock(std::string &sock_path)
 {
 	struct sockaddr_un fpm;
+	
 	fpm.sun_family = AF_UNIX;
 	std::memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
 
@@ -39,6 +40,154 @@ int FcgiConn::make_sock(std::string &sock_path)
 	}
     return (fd);
 }
+
+int FcgiConn::req_init(CgiEnv * env)
+{
+	data.zero();
+
+	FcgiMsg		msg;
+
+	msg.new_params(FcgiConn::uid++);
+	char proto[] = "HTTP/1.1";
+	msg.add_param("SERVER_PROTOCOL", proto);
+
+	std::map<std::string, std::string>::iterator kvit = env->kv.begin();
+	while (kvit != env->kv.end())
+	{
+		// char * tok = strtok(req->cook, "; ");
+		// while( tok != NULL )
+		// {
+			// WSLOG(LVL_DBG, TGT_FCGI, "cookie: ", tok);
+		// 	msg.add_param("HTTP_COOKIE", tok);
+		// 	tok = strtok(NULL, "; ");
+		// }
+		// msg.add_param("HTTP_COOKIE", req->cook);
+
+		// WSLOG(LVL_DBG, TGT_FCGI, "pkey:  ", (kvit->first).c_str());
+		// WSLOG(LVL_DBG, TGT_FCGI, "pval:  ", (kvit->second).c_str());
+		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
+		kvit++;
+	}
+	msg.end_params();
+	
+	req.append(msg.buf.text(), msg.buf.size());
+
+	return (0);
+}
+
+void FcgiConn::req_body(const char *buf, int siz)
+{
+	FcgiMsg		body;
+	
+	if (buf && siz)
+		body.add_stdin(buf, siz);
+	else
+		body.end_stdin();
+	
+	req.append(body.buf.text(), body.buf.size());
+}
+
+void FcgiConn::req_body(std::string & buf)
+{
+	this->req_body(buf.c_str(), buf.size());
+	buf.clear();
+}
+
+
+// A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
+
+int FcgiConn::rsp_data(char * buf, int cnt)
+{
+	switch(data.typ)
+	{
+	case FCGI_STDERR:
+		WSCOL(WSL_YELLOW);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : error");
+		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
+		break;
+	case FCGI_END_REQUEST:
+// After sending all its stdout and stderr data, 
+// the Responder application sends a FCGI_END_REQUEST record. 
+// The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE 
+// and the appStatus component to the status code that 
+// the CGI program would have returned via the exit system call.
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);
+		// should have (8) bytes of FCGI_EndRequestBody
+		break;
+	case FCGI_STDOUT:
+		// WSLOG(LVL_DBG, TGT_FCGI, "stdout\n", std::string(buf));
+		rsp.append(buf, cnt);
+		break;
+	default:
+		WSLOG(LVL_DBG, TGT_FCGI, "push data : default ", data.typ);
+		break;
+	}
+	data.len -= cnt;
+	return cnt;
+}
+
+
+int FcgiConn::rsp_recv(char * buf, int siz)
+{
+	char * chk = buf;
+	char * end = buf + siz;
+
+	WSLOG(LVL_DBG, TGT_FCGI, "recv: ", siz);
+	if (data.len)
+	{
+		if (data.len > siz)
+		{
+    		rsp_data(chk, siz);
+    		return (1);
+		}
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: done");
+		chk += rsp_data(chk, data.len);
+		chk += data.pad;
+	}
+
+	while (data.len == 0 && chk < end)
+	{
+		// if ((end - chk) < 8) {}
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: rest ", end - chk);
+
+		FcgiMsg * hed = (FcgiMsg*) chk;
+
+		hed->data(&data);
+
+		if (hed->head.type == FCGI_END_REQUEST)
+		{
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
+			// // FCGI_EndRequestBody
+			// char *body = (chk + FCGI_HEADER_LEN);
+			// int *app_stat = (int*) body;
+			// char prot_stat = body[4];
+			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat A ", *app_stat);
+			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat P ", prot_stat);
+
+			return (2);
+		}
+
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: need ", data.siz);
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: have ", end - chk);
+
+		if (data.siz <= (end - chk))
+		{
+			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: full");
+			chk += 8;
+    		chk += rsp_data(chk, data.len);
+    		chk += hed->head.paddingLength;
+    		continue;
+		}
+		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: partial");
+		chk += 8; // ATTN : (chk > end)
+		chk += rsp_data(chk, (end - chk));
+    }
+	WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: complete");
+    return 0;
+}
+
 
 #if 0
 
@@ -111,137 +260,3 @@ COMMON VARIABLES
     $uri: This variable contains the current URI with normalization applied. Since certain directives that rewrite or internally redirect can have an impact on the URI, this variable will express those changes.
 
 #endif
-
-int FcgiConn::req_init(CgiEnv * env)
-{
-	data.zero();
-
-	FcgiMsg		msg;
-
-	msg.new_params(FcgiConn::uid++);
-	char proto[] = "HTTP/1.1";
-	msg.add_param("SERVER_PROTOCOL", proto);
-
-	std::map<std::string, std::string>::iterator kvit = env->kv.begin();
-	while (kvit != env->kv.end())
-	{
-		// char * tok = strtok(req->cook, "; ");
-		// while( tok != NULL )
-		// {
-			// WSLOG(LVL_DBG, TGT_FCGI, "cookie: ", tok);
-		// 	msg.add_param("HTTP_COOKIE", tok);
-		// 	tok = strtok(NULL, "; ");
-		// }
-		// msg.add_param("HTTP_COOKIE", req->cook);
-
-		// WSLOG(LVL_DBG, TGT_FCGI, "pkey:  ", (kvit->first).c_str());
-		// WSLOG(LVL_DBG, TGT_FCGI, "pval:  ", (kvit->second).c_str());
-		msg.add_param((const char*) (kvit->first).c_str(), (char*) (kvit->second).c_str());
-		kvit++;
-	}
-	msg.end_params();
-	
-	req.append(msg.buf.text(), msg.buf.size());
-
-	return (0);
-}
-
-void FcgiConn::req_body(const char *buf, int siz)
-{
-	FcgiMsg		body;
-	
-	if (buf && siz)
-		body.add_stdin(buf, siz);
-	else
-		body.end_stdin();
-	
-	req.append(body.buf.text(), body.buf.size());
-}
-
-void FcgiConn::req_body(std::string & buf)
-{
-	this->req_body(buf.c_str(), buf.size());
-	buf.clear();
-}
-
-
-// A Responder performing an update, e.g. implementing a POST method, should compare the number of bytes received on FCGI_STDIN with CONTENT_LENGTH and abort the update if the two numbers are not equal.
-
-int FcgiConn::rsp_data(char * buf, int cnt)
-{
-	switch(data.typ)
-	{
-	case FCGI_STDERR:
-		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_FCGI, "push data : error");
-		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
-		break;
-	case FCGI_END_REQUEST:
-		WSLOG(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
-		WSLOG(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);
-		// should have (8) bytes of FCGI_EndRequestBody
-		break;
-	case FCGI_STDOUT:
-		rsp.append(buf, cnt);
-		break;
-	default:
-		WSLOG(LVL_DBG, TGT_FCGI, "push data : default ", data.typ);
-		break;
-	}
-	data.len -= cnt;
-	return cnt;
-}
-
-
-int FcgiConn::rsp_recv(char * buf, int siz)
-{
-	char * chk = buf;
-	char * end = buf + siz;
-
-	WSLOG(LVL_DBG, TGT_FCGI, "recv: ", siz);
-	if (data.len)
-	{
-		if (data.len > siz)
-		{
-    		rsp_data(chk, siz);
-    		return (1);
-		}
-		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: done");
-		chk += rsp_data(chk, data.len);
-		chk += data.pad;
-	}
-
-	while (data.len == 0 && chk < end)
-	{
-		// if ((end - chk) < 8) {}
-		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: rest ", end - chk);
-
-		FcgiMsg * hed = (FcgiMsg*) chk;
-
-		hed->data(&data);
-
-		if (hed->head.type == FCGI_END_REQUEST)
-		{
-			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
-			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
-			return (2);
-		}
-
-		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: need ", data.siz);
-		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: have ", end - chk);
-
-		if (data.siz <= (end - chk))
-		{
-			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: full");
-			chk += 8;
-    		chk += rsp_data(chk, data.len);
-    		chk += hed->head.paddingLength;
-    		continue;
-		}
-		WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: partial");
-		chk += 8; // ATTN : (chk > end)
-		chk += rsp_data(chk, (end - chk));
-    }
-	WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: complete");
-    return 0;
-}

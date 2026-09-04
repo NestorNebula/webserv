@@ -6,15 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 08:47:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:19:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiEnv.hpp"
 #include "Connection.hpp"
 #include "Server.hpp"
-#include "helpers.hpp"
-#include "http_utils.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
 
@@ -81,11 +79,11 @@ int     CgiEnv::from_conn(Connection & conn)
 	
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 
-	std::string path_rel = conf.root + info.scriptPath;
+	std::string path_rel = joinPaths(conf.conf_file_root, info.scriptPath);
 	script.parse(path_rel);
 
-	WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
-			// this should have been checked before
+	// WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
+	// this should have been checked before we got here
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
@@ -108,21 +106,15 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	else if (script.fext == std::string(".py"))
 	{
-		lang = CGI_PYTHON;
-			// this should have been checked before
-		
-			// not actually required at HOME 
-		// if (conf.pycgi_dir.empty())
-		// 	return (conn.set_err(403));
-
-			// this could be fixed at startup
-		// UNCLEAR : 
-		if (conf.pycgi_dir.size())
+		if (!conf.pycgi_dir.size())
 		{
-			std::string pyrel = conf.root + conf.pycgi_dir;
-			FilePath pypath(pyrel);
-			this->add("PYTHONPATH", pypath.path.c_str());
+			WSLOG(LVL_ERR, TGT_CGI_ENV, "bad  : pycgi_dir");
+			return (conn.set_err(500));
 		}
+		lang = CGI_PYTHON;
+		std::string pyrel = joinPaths(conf.conf_file_root, conf.pycgi_dir);
+		FilePath pypath(pyrel);
+		this->add("PYTHONPATH", pypath.path.c_str());
 	}
 	else if (script.fext == std::string(".pl"))
 	{
@@ -141,14 +133,19 @@ int     CgiEnv::from_conn(Connection & conn)
 	{
 		this->add("QUERY_STRING", req.getQuery().c_str());
 	}
-// If the output of a form is being processed, check that CONTENT_TYPE
-// is "application/x-www-form-urlencoded"
-// or "multipart/form-data".
-// If CONTENT_TYPE is blank, the script can reject the request
-// with a 415 'Unsupported Media Type' error, where supported by the
-// protocol.
-	if (req.hasHeader("Content-type"))
+	if (req.hasHeader("Content-Type"))
 		this->add("CONTENT_TYPE", headers.find("Content-type")->second.c_str());
+	else if (req.getMethod() == METHOD_POST)
+	{
+		// If the output of a form is being processed, check that CONTENT_TYPE
+		// is "application/x-www-form-urlencoded"
+		// or "multipart/form-data".
+		// If CONTENT_TYPE is blank, the script can reject the request 
+		// with a 415 'Unsupported Media Type' error, where supported by the protocol.
+		WSLOG(LVL_ERR, TGT_CGI_ENV, "missing : content-type");
+		return (conn.set_err(415)); // Unsupported Media Type
+	}
+	
 	if (req.hasHeader("Content-length"))
 		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
 	
@@ -200,10 +197,9 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
+		// ATTN : fork => dup_err
 		// WSCOL(WSL_GREEN);
-		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
-		// WSCOL(WSL_GREEN);
-		// WSLOG(LVL_DBG, TGT_CGI_ENV, "(kv) : ", it->c_str());
+		// WSLOG(LVL_TMP, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();
 		it++;
 	}

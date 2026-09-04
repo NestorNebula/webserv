@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 15:51:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 12:03:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,17 @@
 	// that a later reattempt at connection succeeds.
 	
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 256
+#  define SERV_BACKLOG 512
 # endif
+
+# ifndef SERV_PAUSE
+#  define SERV_PAUSE 1
+# endif
+
+# ifndef SPARE_FD
+#  define SPARE_FD 4
+# endif
+
 
 class Server : public EpollClient
 {
@@ -49,18 +58,30 @@ public:
 	ssize_t				pollout(void);
 	int					rdhup  (void);
 	int					hup    (void);
-	bool				timeo  (time_t);
+	bool				timeo  (WsTime &);
 	
 	unsigned short		get_port(void)	const;
 	ServerConfig		&get_conf() { return (this->conf); }
 	
+	void				set_paused(void);
+	void				conn_closed(void);
 private:
+
+	int					accept_conn(void);
 	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;
 	
-	int					init(void);
-	int					acc_cnt;
+	int		init(void);
+	int		acc_cnt;
+	int		acc_err;
+	int		acc_fail;
+	int		paused;
+
+	int		freed_fd;
+	int		spare_fd[SPARE_FD];
+	int		sfd_open(void);
+	void	sfd_close(void);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 17:27:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:16:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,22 +42,23 @@ FcgiPipe::~FcgiPipe()
 	}
 }
 
-bool	FcgiPipe::timeo(time_t now)
+bool	FcgiPipe::timeo(WsTime & now)
 {
-	if (this->lact == 0)
+	if (this->lact.not_set())
 		return (false);
-	if (now < this->lact)
+	if (this->lact.after(now))
 		return (false);
-	if ((this->lact + CGI_TIMEOUT) > now)
+	if ((this->lact + CGI_TIMEOUT).after(now))
 		return (false);
-
+		
 	this->lact = now;
+
 	this->mod_evt(-EPOLLOUT);
 	
-	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : fcgi ", this->get_fd());
+	WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : fcgi ", this->get_fd());
 	if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 	}
 	
 	if (this->rsrc)
@@ -65,7 +66,7 @@ bool	FcgiPipe::timeo(time_t now)
 		if (rsrc->done == RSRC_DONE_IO)
 		{
 			WSCOL(WSL_GREEN);
-			WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : done");
+			WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
 		
@@ -74,85 +75,15 @@ bool	FcgiPipe::timeo(time_t now)
 	}
 	else if (this->conn)
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 		this->conn->set_err(504); // CGI_ERR : gateway timeout
 	}
 	else
 	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ");
+		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : ???? ");
 		this->mod_evt(EPOLLOUT);
 	}
 	return (false);
-#if 0
-	if (this->rsrc && this->conn)
-	{
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", conn->get_fd());
-		WSCOL(WSL_RED);
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : rsrc ", this->get_fd());
-
-try {
-// conn . has set error .. 
-		Session &sess = conn->sess;
-		Request &req  = sess.getRequest(); // Wrong Action on Session
-		if (req.hasHeaders())
-		{
-			WSCOL(WSL_RED);
-			WSLOG(LVL_DBG, TGT_FCGI, "req : has headers");
-		}
-		if (req.hasBody())
-		{
-			WSCOL(WSL_RED);
-			WSLOG(LVL_DBG, TGT_FCGI, "req : has body");
-		}	
-		if (req.isComplete())
-		{
-			WSCOL(WSL_RED);
-			WSLOG(LVL_DBG, TGT_FCGI, "req : complete"); // , ++to); // 1500 (!)
-			// sess body .. could be in between
-#if 1
-			// if (this == this->rsrc->ip)
-
-// not sure what I was trying to do here ... 
-// or .. leftover from CgiPIpe
-			{
-				this->lact = now;
-				this->mod_evt(-EPOLLOUT);
-// so .. timeout .. on an event we are not waiting for (?)
-// not the same as cgi pipe ... 
-				// this->rsrc->rem(this); // Wrong action on session
-// EX: main() : Wrong action on Session
-// pure virtual method called
-// terminate called without an active exception
-
-				return (false); // do not such this down (?)
-			}
-#endif
-		}
-}
-catch(const std::exception& e)
-{
-	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_FCGI, "TIMEO\n", e.what());
-}
-		// error .. should not wait 
-		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(504); // Gateway Timeout
-	}
-	else if (this->conn)
-	{
-		WSCOL(WSL_RED);
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : conn ", this->get_fd());
-		this->conn->set_err(504); // Gateway Timeout
-	}
-	else
-	{
-		// how do we get here .. 
-		// lact nnt re-set
-		WSCOL(WSL_RED);
-		WSLOG(LVL_DBG, TGT_FCGI, "TIMEO : ???? ", this->get_fd());
-	}
-	return (true);
-#endif
 }
 
 int		FcgiPipe::init(CgiEnv * cgienv)
@@ -167,21 +98,18 @@ int		FcgiPipe::init(CgiEnv * cgienv)
 	return (err);
 }
 
-// The server is in no way obligated to send end-of-file 
-// after the script reads CONTENT_LENGTH bytes. 
-
 ssize_t	FcgiPipe::pollout(void)
 {
-	ssize_t	err;
-	
 	WSLOG(LVL_DBG, TGT_FCGI, "send:  POLLOUT");
+
+	ssize_t	err;
 	
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
 		
-	WSLOG(LVL_DBG, TGT_FCGI, "send"); // conn: ", this->conn->get_fd());
+	WSLOG(LVL_DBG, TGT_FCGI, "send");
 		
 	switch(rsrc->get_req_body())
 	{
@@ -193,8 +121,9 @@ ssize_t	FcgiPipe::pollout(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
-	case REQ_COMPLETE: // still need to send END_STDIN
+	case REQ_COMPLETE: 
 		// WSLOG(LVL_DBG, TGT_FCGI, "req      : complete");
+		// may still need to send END_STDIN
 	default:
 		break;
 	}
@@ -204,18 +133,21 @@ ssize_t	FcgiPipe::pollout(void)
 		rsrc->set_done(RSRC_DONE_IP);
 		this->mod_evt(-EPOLLOUT);
 		this->mod_evt(EPOLLIN);
-		// return (0);
 	}
 	
-	WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
-	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "body:\n", rsrc->body);
+	
 	fcgi.req_body(rsrc->body);
 
+	
 	err = this->send(fcgi.req);
+	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI, "send");
-		return (this->rsrc->set_err(500)); // Internal Server Error
+		return (this->rsrc->set_err(500)); // #kd (611)
 	}
 	if (err == 0)
 	{
@@ -226,10 +158,6 @@ ssize_t	FcgiPipe::pollout(void)
 	}
 	WSLOG(LVL_DBG, TGT_FCGI, "sent: ", err);
 	WSLOG(LVL_DBG, TGT_FCGI, "left: ", fcgi.req.size());
-
-	// wait until entire body has been sent ...
-	// dangerous (?)
-	// this->mod_evt(EPOLLIN);
 	return (0);
 }
 
@@ -244,8 +172,7 @@ ssize_t	FcgiPipe::pollin(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-	WSLOG(LVL_DBG, TGT_FCGI, "recv"); // conn: ", this->conn->get_fd());
-	
+	WSLOG(LVL_DBG, TGT_FCGI, "recv");
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_FCGI, "recv: ", err);
 
@@ -257,12 +184,9 @@ ssize_t	FcgiPipe::pollin(void)
 	if (err == 0)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "recv:  ZERO");
-		WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
-		WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
+		// WSLOG(LVL_DBG, TGT_FCGI, "req : ", this->fcgi.req.size());
+		// WSLOG(LVL_DBG, TGT_FCGI, "rsp : ", this->fcgi.rsp.size());
 		rsrc->set_done(RSRC_DONE_OP);
-#if RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
 		return (0);
 	}
 	
@@ -277,15 +201,12 @@ ssize_t	FcgiPipe::pollin(void)
 	case RSRC_RESP_INIT:
 		break;
 	case RSRC_RESP_ERR:
-		conn->set_err(rsrc->error);
+		this->mod_evt(-EPOLLIN);
 		break;
 	case RSRC_RESP_HEAD:
 		break;
 	case RSRC_RESP_BODY:
 	default:
-#if !RES_CGI_WAIT_COMPLETE
-		conn->mod_evt(EPOLLOUT);
-#endif
 		break;
 	}
 	
@@ -300,7 +221,8 @@ int		FcgiPipe::rdhup(void)
 	
 	if (this->rsrc == NULL)
 		return (-1);
-		
+	
+// this is where we betray our complete lack of mastery of what is going on here.
 	rsrc->set_done(RSRC_DONE_IP);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
 
@@ -320,18 +242,18 @@ int		FcgiPipe::rdhup(void)
 	if (rsrc->set_done(0) == -1)
 		return (-1);
 
-	if (this->rsrc->resp.size())
+	if (this->rsrc->resp_data()) 
 	{
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
+		// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp\n", this->rsrc->resp);
+
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: error ", this->rsrc->error);
 		return (0);
 	}
-	// got here on small READ SIZE
-	// out + rdhup .. but no (resp) yet .. 
-	// WSCOL(WSL_RED);
-	// WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
+	WSCOL(WSL_RED);
+	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
 	return (0);
 }
 
