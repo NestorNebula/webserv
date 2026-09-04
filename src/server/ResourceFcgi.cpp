@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:29:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:30:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int	ResourceFcgi::status(void)
 		}
 		else
 		{
-			this->set_err(602); // CGI_ERR
+			this->set_err(500); // #kd (602)
 			return (RSP_ERROR);
 		}
 	}
@@ -119,7 +119,7 @@ int	ResourceFcgi::wait(int opt)
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
 		if (this->hed == 0)
 		{
-			this->set_err(603); // CGI_ERR
+			this->set_err(500); // #kd (603)
 			return (0);
 		}
 		if (this->wait_comp)

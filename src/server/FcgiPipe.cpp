@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:17:36 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:30:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ ssize_t	FcgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI, "send");
-		return (this->rsrc->set_err(611)); // CGI_ERR // Internal Server Error
+		return (this->rsrc->set_err(500)); // #kd (611)
 	}
 	if (err == 0)
 	{

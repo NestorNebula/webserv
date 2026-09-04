@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:49:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:43:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ bool	Connection::timeo(WsTime & now)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+// if (Connection) blocks all available (fd) ..
+// we'd rather sacrifice JUST ONE ...				
 				this->set_err(610); // CGI_ERR
 			}
 			retry_cgi++;
@@ -434,7 +436,7 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (this->set_err(601)); // CGI_ERR - Internal Server Error
+		return (this->set_err(500)); // #kd (601)
 	}
 
 	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
