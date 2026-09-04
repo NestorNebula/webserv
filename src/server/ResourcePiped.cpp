@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:30:58 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:31:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ int	ResourcePiped::wait(int opt)
 		WSLOG(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "sig : ", sig);
 		WSCOL(WSL_RED);
 		WSLOG(LVL_DBG, TGT_RSRC, "sig : ", strsignal(sig));
-		this->set_err(604); // CGI_ERR
+		this->set_err(500); // #kd (604)
 		return (this->stat);
 	}
 	else
@@ -231,7 +231,7 @@ int	ResourcePiped::wait(int opt)
 		{
 			// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "hed : ", 0);
 			// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "stat: ", stat);
-			this->set_err(605); // CGI_ERR
+			this->set_err(500); // #kd (605)
 		}
 	}
 	else if (this->wait_comp)

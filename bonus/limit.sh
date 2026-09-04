@@ -35,7 +35,7 @@ fi
 
 CNT="$1"
 
-# can't make higher (!)
+# NB : can't increase without (sudo)
 
 prlimit --pid $PID --nofile=$CNT
 

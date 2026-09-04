@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/03 10:45:16 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 15:46:05 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 09:43:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,6 @@
 # define WS_TIME_HPP
 
 # include <ctime>
-
-// struct timeval {
-//     time_t      tv_sec;     /* seconds */
-//     suseconds_t tv_usec;    /* microseconds */
-// };
 
 # ifndef EXTRA_TIME
 #  define EXTRA_TIME 0
@@ -29,11 +24,6 @@ typedef struct timespec wstime_t;
 # else
 typedef time_t wstime_t;
 #endif
-
-// class TimeSpec : public struct timespec
-// {
-// public:
-// };
 
 class WsTime
 {
@@ -113,10 +103,6 @@ public:
     {
         return (this->t > that.t);
     }
-    
-// over-ride +/-
-
-private:
 };
 
 #endif
