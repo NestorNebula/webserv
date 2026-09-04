@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 09:31:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 17:01:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,14 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 	if (cgifd_ip < 0)
 	{
 		this->set_failed();
-		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_RSRC, "dup (pipes)"));
 	}
 	int cgifd_op = dup(pipes->p2[0]);
 	if (cgifd_op < 0)
 	{
 		close(cgifd_ip);
 		this->set_failed();
-		return (WsLog::_errno(LVL_ERR, TGT_RSRC, "dup (pipes)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_RSRC, "dup (pipes)"));
 	}	
 
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
@@ -188,7 +188,7 @@ int	ResourcePiped::wait(int opt)
 	this->pid = 0;
 	
 	if (err < 0)
-		WsLog::_errno(LVL_ERR, TGT_RSRC, "waitpid");
+		WsLog::_errno(LVL_SYSERR, TGT_RSRC, "waitpid");
 		
 	if (WIFEXITED(stat))
 	{

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 15:53:53 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 17:17:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,11 +111,41 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 		
 	WSCOL(WSL_RED);
-	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->get_fd());
+	WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", 
+		// this->get_fd()); 
+		evt_type(this->evt.events));
 	// Request Timeout -- not necessarily
 	// perhaps .. only if "pollin"
-	this->set_err(408); 
-	return (true);
+	// timeout .. on .. keep-alive ..
+	// which is .. waiting for more mp3 data ... 
+	// Brave 
+	// php -- still re-setting EPOLLIN
+	// keep-alive (file!) is strange here 
+// conn  : TIMEO : conn in rdhup 
+// conn  : TIMEO : conn in rdhup 
+// conn  : TIMEO : conn out rdhup 
+
+// keep-alive (?)
+// which has not sent all data .. 
+// sess._next .. 
+		// EPOLLIN is the one to test
+	// or .. if request is not complete ..
+// sess  : Session::getRequest called while Session is in WRSOCK
+// Session::getRequest should only be called in DOCGI mode. Returning raw request
+
+	// if (!this->sess.getRequest().isComplete())
+	if (this->sess.nextAction() == Session::RDSOCK)
+	{
+		this->set_err(408); 
+		return (true);
+	}
+	if (this->evt.events & EPOLLOUT)
+	{
+		this->lact = now;
+		return (false);
+	}	
+	// this->set_err(408); 
+	return (false);
 }
 
 int	Connection::set_err(int e)
@@ -240,6 +270,7 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::WRSOCK:
 			this->req_cnt++;
+			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
@@ -489,7 +520,7 @@ int	Connection::exec_cgi(void)
 	if (pid < 0)
 	{
 		delete (cgienv);
-		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		WsLog::_errno(LVL_SYSERR, TGT_CONN, "fork");
 		return (SYSCALL_ERR);
 		
 	}	
@@ -521,7 +552,7 @@ int	Connection::exec_cgi(void)
 			err = chdir(cwd.c_str());
 			if (err < 0)
 			{
-				WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir");
+				WsLog::_errno(LVL_SYSERR, TGT_CGI_ENV, "chdir");
 				pipes.shutdown();
 				delete (cgienv);
 				delete (this->ep);

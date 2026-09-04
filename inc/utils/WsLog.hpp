@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 16:28:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 16:35:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,14 +44,8 @@ typedef long unsigned int log_tgt;
 # define LVL_ERR	(1UL << 3)
 # define LVL_WARN	(1UL << 4)
 # define LVL_TMP	(1UL << 5)
-# define LVL_MAX	(1UL << 6)
-# define LVL_MAIN   (1UL << 0)
-# define LVL_INFO  	(1UL << 1)
-# define LVL_DBG	(1UL << 2)
-# define LVL_ERR	(1UL << 3)
-# define LVL_WARN	(1UL << 4)
-# define LVL_TMP	(1UL << 5)
-# define LVL_MAX	(1UL << 6)
+# define LVL_SYSERR (1UL << 6)
+# define LVL_MAX	(1UL << 7)
 # define LVL_ALL	(LVL_MAX - 1)
 
 
@@ -169,6 +163,7 @@ public:
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, std::string str, ssize_t j);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, std::string str);
 	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n);
+	static void	_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n, std::string msg);
 
 	static int	_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg);
 

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 15:50:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 17:02:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,19 +87,11 @@ void	Server::set_paused(void)
 		
 	this->paused = 1;
 
-	int	nconn = this->ep->cli_cnt(EPC_CONN);
-	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, "pause  ...  ", this->port);
-	WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", nconn);
-#if 0 // FREED_FD
-	this->freed_fd = this->ep->cli_cnt(EPC_CONN);
-
-	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, "pause  ... ", this->freed_fd);
 	
-	if (this->freed_fd > 6)
-		this->freed_fd = 6;
-#endif
+	WSCOL(WSL_RED);
+	WSLOG(LVL_TMP, TGT_SERV, this->port, "pause  ...  ");
+	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
+	
 	// the idea : cede these to a CGI that needs to get started
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
@@ -113,16 +105,6 @@ void	Server::conn_closed(void)
 
 	if (this->freed_fd > 4)
 		this->lact = this->lact - SERV_PAUSE;
-#if 0 // FREED_FD
-
-	this->freed_fd--;
-	WSCOL(WSL_PURPLE);
-	WSLOG(LVL_TMP, TGT_SERV, "close  ... ", this->freed_fd);
-	if (this->freed_fd <= 0)
-	{
-		this->lact = this->lact - SERV_PAUSE;
-	}
-#endif
 }
 
 int	Server::accept_conn(void)
@@ -198,40 +180,24 @@ bool	Server::timeo  (WsTime & now)
 		return (false);
 
 	this->lact = now; 
-
-#if 0 // FREED_FD
-	if (this->freed_fd > 0)
-	{
-		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "freed ", this->freed_fd);
-		this->ep->cli_info();
-		return (false);
-	}
-#endif
+	
 	this->sfd_close();
-	// if (this->accept_conn() > 0)
-	// {
-	// 	WSCOL(WSL_GREEN);
-	// 	WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted!");
-	// }
 	if (this->sfd_open() < 0)
 	{
-		// unable to open all spare_fds
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "stay paused ", this->port);
+		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, this->port, "stay paused");
 		this->ep->cli_info();
 		return (false);
 	}
-	// no guarantee they'll get started .. before we get the next one 
 	if (this->accept_conn() > 0)
 	{
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted! ", this->port);
+		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, this->port, "accepted!");
 	}
 	// free (3) for CGI .. 
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!) ", this->port);
+	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, this->port, "resume (!)");
 
 	this->freed_fd = 0;
 	this->paused = 0;
@@ -252,7 +218,7 @@ int	Server::sfd_open(void)
 		this->spare_fd[i] = open("/dev/null", O_RDONLY);
 		if (this->spare_fd[i] < 0)
 		{
-			WSLOG(LVL_TMP, TGT_SERV, "sfd fail: ", i);
+			WSLOG(LVL_DBG, TGT_SERV, "sfd fail: ", i);
 			sfd_close();
 			return (-1);
 			// return (i > 0) ? (0) : (-1);

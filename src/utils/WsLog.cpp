@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 18:24:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 17:03:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t n)
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "[" << n << "]";
+    stream << tgt_prefix(msg_tgt) << msg << " [" << n << "]";
     WsLog::op(stream);
 }
 
@@ -135,7 +135,7 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "[" << i << " / " << j << "]";
+    stream << tgt_prefix(msg_tgt) << msg << " [" << i << " / " << j << "]";
     WsLog::op(stream);
 }
 
@@ -145,7 +145,7 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg, ssize_t i, s
         return;
 
     std::stringstream stream;
-    stream << tgt_prefix(msg_tgt) << msg << "[" << i << "] " << str << " [" << j << "]";
+    stream << tgt_prefix(msg_tgt) << msg << " [" << i << "] " << str << " [" << j << "]";
     WsLog::op(stream);
 }
 
@@ -169,12 +169,25 @@ void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n)
     WsLog::op(stream);
 }
 
+void    WsLog::_(log_lvl msg_lvl, log_tgt msg_tgt, ssize_t n, std::string msg)
+{
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return;
+
+    std::stringstream stream;
+    stream << tgt_prefix(msg_tgt) << "[" << n << "] " << msg;
+    WsLog::op(stream);
+}
+
 int	WsLog::_errno(log_lvl msg_lvl, log_tgt msg_tgt, std::string msg)
 {
-    (void) msg_lvl;
 #if HIDE_ERRORS
     return (-1);
 #endif
+
+    if (WsLog::nolog(msg_lvl, msg_tgt))
+        return (-1);
+        
     std::stringstream stream;
     stream << tgt_prefix(msg_tgt) << msg << "\n";
     stream << "error : " << strerror(errno);
