@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:10 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/01 17:09:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 22:20:29 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ struct RouteConfig {
 	std::set<HttpMethod>		methods;
 	std::vector<std::string>	index;
 	std::string					redirect;
+// #kd - we no longer need this
 	// std::string					pycgi_dir;
 
 	std::map<std::string, std::string>	error_pages;
