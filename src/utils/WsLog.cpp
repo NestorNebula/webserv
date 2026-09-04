@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:32:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 22:40:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,8 +353,6 @@ void    WsLog::kd(void)
 {
     WsLog::lvl = LVL_NONE
         | LVL_MAIN
-        | LVL_MAIN
-        | LVL_MAIN
         | LVL_ERR
         | LVL_WARN
         | LVL_INFO
@@ -369,24 +367,17 @@ void    WsLog::kd(void)
         // | TGT_EPC_RECV
         // | TGT_EPC_SEND
         
-        
-        // | TGT_CONN
-        // | TGT_CONN
         // | TGT_CONN
         // | TGT_CONN_RECV
         // | TGT_CONN_SEND
         // | TGT_CONN_DATA
 
         // | TGT_CGI
-        // | TGT_CGI
-        // | TGT_CGI
         // | TGT_CGI_RECV
         // | TGT_CGI_SEND
         // | TGT_CGI_DATA
         // | TGT_CGI_HEAD
 
-        // | TGT_FCGI
-        // | TGT_FCGI
         // | TGT_FCGI
         
         | TGT_SERV
