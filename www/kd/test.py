@@ -21,6 +21,8 @@ p2 = form.getvalue("p2", "p2-default")
 print("Content-Type: text/plain\r\n\r\n", end="")
 print("Python : hello, world!")
 
+# exit(11)
+
 print ("\nGET VARS")
 print("g1 :", g1)
 print("g2 :", g2)

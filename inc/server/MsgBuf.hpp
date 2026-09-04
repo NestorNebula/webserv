@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:53 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/24 16:23:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:18:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ public:
 
         this->avail(z + sizeof(int) + sizeof(int));
 /*
-php-fpm fastcgi.c
         val_len = *p++;
         if (val_len >= 128) {
             val_len = ((val_len & 0x7f) << 24);
@@ -132,7 +131,7 @@ php-fpm fastcgi.c
             *tgt++ = v;
             z     += sizeof(char);
         }
-        // sprintf(tgt, "%s%s", key, val);
+        
         const char *src = key;
         while (*src)
             *tgt++ = *src++;

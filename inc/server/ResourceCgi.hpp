@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/28 13:48:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/03 21:23:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include "SizeDefs.hpp"
 # include "helpers.hpp"
 # include "Connection.hpp"
+# include "TemporaryFileStream.hpp"
 
 enum
 {
@@ -52,19 +53,27 @@ enum
 
 class ResourceCgi
 {
+protected:
+	ResourceCgi				(const ResourceCgi & ) {}
+	ResourceCgi & operator=	(const ResourceCgi & ) { return (*this); }
 public:
 	ResourceCgi(void) :  
 		done(0),
 		error(0),
+		ka(false),
 		hed(0),
+		wait_comp(false),
+		failed(false),
 		conn(NULL)
 	{}
-	virtual ~ResourceCgi() {};
+	virtual ~ResourceCgi() {}
 
 	int				get_req_body(void);
 	
 	int				recv_data(char *buf, int siz);
-	std::string &	get_resp(void) { return (this->resp); }
+	bool			resp_data(void);
+	
+	std::string &	get_resp(void);
 	int				set_err(int e);
 	int				set_done(int d);
 	
@@ -77,12 +86,14 @@ public:
 	std::string		resp; // CGI  Output
 	int				done;
 	int				error;
+	bool			ka;
 	
 protected:
-	int				hed;
-	
+	int				hed; // what else did we want here (?)
+	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
+	bool			failed;
 	
 private:
 	int				chk_rsp_hed(void);
