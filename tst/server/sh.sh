@@ -128,23 +128,22 @@ if [ "$1" == "u" ]; then
 # FCGI : not 100%
 # END STDIN .. still has (left)
 
-		# curl -X POST http://localhost:8082/php/ul.php -i \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/pl/ul.pl -i \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/py/ul.py -i \
-		# 	-F file=@$WWW/files/$FILE
-
-
-		# curl -X POST http://localhost:8082/uploads/FILE -i \
-		# 	-F file=@$WWW/files/$FILE
-
-		curl -X POST http://localhost:8080/uploads/$FILE -i \
-			-H "Content-Type:application/octet-stream" \
-			--data-binary @$WWW/files/$FILE
+		curl -X POST http://localhost:8082/php/ul.php -i \
+			-F file=@$WWW/files/$FILE
 		echo ; echo ; echo
+		curl -X POST http://localhost:8082/pl/ul.pl -i \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
+		curl -X POST http://localhost:8082/py/ul.py -i \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo ;
+		curl -X POST http://localhost:8082/uploads/FILE -i \
+			-F file=@$WWW/files/$FILE
+
+		# curl -X POST http://localhost:8080/uploads/$FILE -i \
+		# 	-H "Content-Type:application/octet-stream" \
+		# 	--data-binary @$WWW/files/$FILE
+		# echo ; echo ; echo
 	done
 
 	ls -l $WWW/p*
