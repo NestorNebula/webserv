@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:23:32 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 11:43:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,6 +256,22 @@ struct epoll_event	*Epoll::get_evt(int idx)
 	return (this->evts + idx);
 }
 
+int		Epoll::cli_cnt(int typ)
+{
+	int typ_cnt = 0;
+
+	std::set<EpollClient*>::iterator it;
+
+	it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		if ((*it)->get_typ() == typ)
+			typ_cnt++;
+		it++;
+	}
+
+	return (typ_cnt);	
+}
 int	Epoll::cli_info(void)
 {
 	WSLOG(LVL_TMP, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());

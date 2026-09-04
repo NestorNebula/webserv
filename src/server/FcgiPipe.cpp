@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 09:30:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:16:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,8 @@ ssize_t	FcgiPipe::pollout(void)
 	
 	// WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
 	// WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
+	// WSLOG(LVL_DBG, TGT_FCGI, "body:\n", rsrc->body);
+	
 	fcgi.req_body(rsrc->body);
 
 	

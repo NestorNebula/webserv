@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 09:29:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 13:17:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ ssize_t	CgiPipe::pollout(void)
 		this->mod_evt(-EPOLLOUT);
 		return (0);
 	case REQ_COMPLETE:
+		WSLOG(LVL_DBG, TGT_CGI_SEND, "body     : complete");
 		this->rsrc->rem(this);
 		rsrc->set_done(RSRC_DONE_IP);
 		return (-1);
@@ -119,6 +120,7 @@ ssize_t	CgiPipe::pollout(void)
 		break;
 	}
 
+	// WSLOG(LVL_DBG, TGT_CGI_SEND, "body:\n", rsrc->body);
 	err = this->send(rsrc->body);
 	if (err < 0)
 	{
@@ -162,6 +164,8 @@ ssize_t	CgiPipe::pollin(void)
 		rsrc->set_done(RSRC_DONE_OP);
 		return (-1);
 	}
+	// this->ibuf[err] = '\0';
+	// WSLOG(LVL_DBG, TGT_CGI_SEND, "recv:\n", std::string(ibuf));
 	
 	switch (this->rsrc->recv_data(this->ibuf, err))
 	{

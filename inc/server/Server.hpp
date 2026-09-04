@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:41:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 12:03:08 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ public:
 	ServerConfig		&get_conf() { return (this->conf); }
 	
 	void				set_paused(void);
+	void				conn_closed(void);
 private:
 
 	int					accept_conn(void);
@@ -77,6 +78,7 @@ private:
 	int		acc_fail;
 	int		paused;
 
+	int		freed_fd;
 	int		spare_fd[SPARE_FD];
 	int		sfd_open(void);
 	void	sfd_close(void);

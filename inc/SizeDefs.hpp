@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 19:04:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 11:36:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,8 @@
 # endif
 
 # ifndef CGI_RETRY_COUNT
-#  define CGI_RETRY_COUNT 10
+#  define CGI_RETRY_COUNT 5
 # endif
-
 
 # define DEF_BUF_SIZ 8192
 
