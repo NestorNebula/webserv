@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:27:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 14:14:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,8 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	WSLOG(LVL_NONE, TGT_RSRC, "resp");
 	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
 
+	// SHOULD : check against content-length header
+	// but : NOT INCLUDING .head
 	if (this->hed)
 	{
 		if (!this->wait_comp)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 12:17:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 15:50:24 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,8 @@ void	Server::set_paused(void)
 
 	int	nconn = this->ep->cli_cnt(EPC_CONN);
 	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, "pause  ... ", nconn);
+	WSLOG(LVL_TMP, TGT_SERV, "pause  ...  ", this->port);
+	WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", nconn);
 #if 0 // FREED_FD
 	this->freed_fd = this->ep->cli_cnt(EPC_CONN);
 
@@ -99,6 +100,7 @@ void	Server::set_paused(void)
 	if (this->freed_fd > 6)
 		this->freed_fd = 6;
 #endif
+	// the idea : cede these to a CGI that needs to get started
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
 }
@@ -133,7 +135,7 @@ int	Server::accept_conn(void)
 	if (conn_fd < 0)
 	{
 		acc_err++;
-		this->set_paused();
+		this->set_paused(); // failed : accept()
 		return (0);
 	}	
 
@@ -207,26 +209,34 @@ bool	Server::timeo  (WsTime & now)
 	}
 #endif
 	this->sfd_close();
-	if (this->accept_conn() > 0)
-	{
-		WSCOL(WSL_GREEN);
-		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted!");
-	}
+	// if (this->accept_conn() > 0)
+	// {
+	// 	WSCOL(WSL_GREEN);
+	// 	WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted!");
+	// }
 	if (this->sfd_open() < 0)
 	{
 		// unable to open all spare_fds
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "stay paused");
+		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "stay paused ", this->port);
 		this->ep->cli_info();
 		return (false);
 	}
+	// no guarantee they'll get started .. before we get the next one 
+	if (this->accept_conn() > 0)
+	{
+		WSCOL(WSL_GREEN);
+		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted! ", this->port);
+	}
+	// free (3) for CGI .. 
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!)");
+	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!) ", this->port);
 
 	this->freed_fd = 0;
 	this->paused = 0;
 	this->mod_evt(EPOLLIN);
+
 	return (false);
 }
 

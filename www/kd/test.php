@@ -8,7 +8,7 @@
     // print_r($_SERVER); // ENV shows up here
 
     print("PHP : hello, world!\n");  
-    echo getcwd();
+    // echo getcwd();
     // gets through FCGI
     // Q: ignore exit status ... 
     // exit (11);
