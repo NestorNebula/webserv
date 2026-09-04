@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 12:03:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 15:50:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <arpa/inet.h>	
 # include <fcntl.h>
 
+# include "SizeDefs.hpp"
+# include "WsTime.hpp"
 # include "Epoll.hpp"
 # include "EpollClient.hpp"
 
@@ -33,10 +35,6 @@
 	
 # ifndef SERV_BACKLOG
 #  define SERV_BACKLOG 512
-# endif
-
-# ifndef SERV_PAUSE
-#  define SERV_PAUSE 1
 # endif
 
 # ifndef SPARE_FD

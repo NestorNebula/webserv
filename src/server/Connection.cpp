@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:24:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 15:53:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,8 +221,17 @@ ssize_t	Connection::pollin(void)
 				{
 					WSCOL(WSL_CYAN);
 					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "exec failed", retry_cgi);
-					this->serv.set_paused();
+					this->serv.set_paused(); // failed : CGI
 					retry_cgi++;
+					// ah -- but not retriggered in time
+					// must retrigger .. soon (!)
+					// only makese sense to re-try .. 
+					// once another has FLUSHED
+					// PROBLEM : all open (fd) filled with Conn
+					// ANSWER : one must give way 
+					// that' sthe ykey
+					// cgi -- must try again
+					// BEFORE Server ... 
 					this->mod_evt(0);
 				}
 				return (0); // send error

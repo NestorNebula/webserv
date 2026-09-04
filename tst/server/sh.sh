@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=16
+R=4
 
 while getopts "c:r:" o; do
     case "${o}" in
