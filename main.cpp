@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 12:50:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 18:50:43 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int main (int argc, char ** argv, char **envp)
            WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
-           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_CONN | TGT_FCGI_PARSE);
+           WsLog::tgt = TGT_CGI_HEAD; // SERV_ALL & ~(TGT_EPC | TGT_CONN | TGT_FCGI_PARSE);
            break;
         case 'a':
            WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA |  TGT_CGI | TGT_FCGI_PARSE);
@@ -51,18 +51,18 @@ int main (int argc, char ** argv, char **envp)
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't detect working directory");
         return (0);
     }
-    if (!setWorkingDirectory(argv[1], conf_root)) 
+    if (!setWorkingDirectory(argv[1], conf_root))
     {
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't setup working directory");
         return 0;
     }
-    
+
     ConfigParser parser(conf_root);
-    try 
+    try
     {
         parser.parseFile(getConfigFileName(argv[1]));
-    } 
-    catch (std::exception &e) 
+    }
+    catch (std::exception &e)
     {
         WSLOG(LVL_ERR, TGT_MAIN, "ex: main\n", e.what());
         return 0;
@@ -72,11 +72,11 @@ int main (int argc, char ** argv, char **envp)
 
     int     err = 0;
     Epoll   *ep = NULL;
-    
+
     try
     {
         ep = new Epoll(envp);
-       
+
         err = ep->serve(servers);
         if (err)
           err = ep->loop();

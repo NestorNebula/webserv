@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:16:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:38:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,18 @@
 
 #include <string>
 
-FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) : 
-	EpollClient(_ep, EPC_FCGI, _fd), 
+FcgiPipe::FcgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourceFcgi * _rsrc) :
+	EpollClient(_ep, EPC_FCGI, _fd),
 	conn(_conn),
 	rsrc(_rsrc)
 {
 	sock_non_block(this->fd);
 }
-	
+
 FcgiPipe::~FcgiPipe()
 {
 	WSLOG(LVL_DBG, TGT_FCGI, " (~) Fcgi ", this->fd);
-	try 
+	try
 	{
 		if (this->conn)
 		{
@@ -50,17 +50,17 @@ bool	FcgiPipe::timeo(WsTime & now)
 		return (false);
 	if ((this->lact + CGI_TIMEOUT).after(now))
 		return (false);
-		
+
 	this->lact = now;
 
 	this->mod_evt(-EPOLLOUT);
-	
+
 	WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : fcgi ", this->get_fd());
 	if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
 	}
-	
+
 	if (this->rsrc)
 	{
 		if (rsrc->done == RSRC_DONE_IO)
@@ -69,7 +69,7 @@ bool	FcgiPipe::timeo(WsTime & now)
 			WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
-		
+
 		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504);  // CGI_ERR : gateway timeout
 	}
@@ -103,14 +103,14 @@ ssize_t	FcgiPipe::pollout(void)
 	WSLOG(LVL_DBG, TGT_FCGI, "send:  POLLOUT");
 
 	ssize_t	err;
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
 		return (-1);
-		
+
 	WSLOG(LVL_DBG, TGT_FCGI, "send");
-		
+
 	switch(rsrc->get_req_body())
 	{
 	case REQ_WAIT_HEAD:
@@ -121,27 +121,27 @@ ssize_t	FcgiPipe::pollout(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "body     : waiting");
 		this->mod_evt(-EPOLLOUT);
 		return (0);
-	case REQ_COMPLETE: 
+	case REQ_COMPLETE:
 		// WSLOG(LVL_DBG, TGT_FCGI, "req      : complete");
 		// may still need to send END_STDIN
 	default:
 		break;
 	}
-	
+
 	if ((rsrc->body.size() == 0) && (fcgi.req.size() == 0))
 	{
 		rsrc->set_done(RSRC_DONE_IP);
 		this->mod_evt(-EPOLLOUT);
 		this->mod_evt(EPOLLIN);
 	}
-	
+
 	// WSLOG(LVL_DBG, TGT_FCGI, "body: ", rsrc->body.size());
 	// WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	// WSLOG(LVL_DBG, TGT_FCGI, "body:\n", rsrc->body);
-	
+
 	fcgi.req_body(rsrc->body);
 
-	
+
 	err = this->send(fcgi.req);
 	WSLOG(LVL_DBG, TGT_FCGI, "req : ", fcgi.req.size());
 	if (err < 0)
@@ -165,7 +165,7 @@ ssize_t	FcgiPipe::pollin(void)
 {
 	ssize_t	err = 0;
 
-	WSLOG(LVL_DBG, TGT_FCGI, "recv:  POLLIN");	
+	WSLOG(LVL_DBG, TGT_FCGI, "recv:  POLLIN");
 
 	if (this->conn == NULL)
 		return (-1);
@@ -189,13 +189,13 @@ ssize_t	FcgiPipe::pollin(void)
 		rsrc->set_done(RSRC_DONE_OP);
 		return (0);
 	}
-	
+
 	if (fcgi.rsp_recv(this->ibuf, err) < 0)
 	{
 		WSLOG(LVL_ERR, TGT_FCGI_PARSE, "parse: failed");
 		return (-1);
 	}
-		
+
 	switch (this->rsrc->recv_data((char*) fcgi.rsp.c_str(), fcgi.rsp.size()))
 	{
 	case RSRC_RESP_INIT:
@@ -205,11 +205,14 @@ ssize_t	FcgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_HEAD:
 		break;
+	case RSRC_RESP_DONE:
+		rsrc->set_done(RSRC_DONE_OP);
+		err = 0;
 	case RSRC_RESP_BODY:
 	default:
 		break;
 	}
-	
+
 	fcgi.rsp.clear();
 	return (err);
 }
@@ -218,10 +221,10 @@ int		FcgiPipe::rdhup(void)
 {
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_FCGI, "RDHUP");
-	
+
 	if (this->rsrc == NULL)
 		return (-1);
-	
+
 // this is where we betray our complete lack of mastery of what is going on here.
 	rsrc->set_done(RSRC_DONE_IP);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
@@ -234,7 +237,7 @@ int		FcgiPipe::rdhup(void)
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: should never get here!");
 		return (0);
 	}
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	this->conn->mod_evt(EPOLLOUT);
@@ -242,7 +245,7 @@ int		FcgiPipe::rdhup(void)
 	if (rsrc->set_done(0) == -1)
 		return (-1);
 
-	if (this->rsrc->resp_data()) 
+	if (this->rsrc->resp_data())
 	{
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_FCGI, "rdhup: resp.size() ", this->rsrc->resp.size());
@@ -263,7 +266,7 @@ int		FcgiPipe::hup(void)
 }
 
 void	FcgiPipe::rsrc_closed(void)
-{ 
+{
 	// mod_evt (?)
 	this->conn = NULL;
 	this->rsrc = NULL;

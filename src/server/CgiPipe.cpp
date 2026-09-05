@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:26:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:46:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 #include "Server.hpp"
 #include "Request.hpp"
 
-CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) : 
-	EpollClient(_ep, EPC_CGI, _fd), 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) :
+	EpollClient(_ep, EPC_CGI, _fd),
 	conn(_conn),
 	rsrc(_rsrc)
 {
@@ -28,7 +28,7 @@ CgiPipe::~CgiPipe()
 {
 	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe ", this->fd);
 	fd_close(&this->fd);
-	try 
+	try
 	{
 		if (this->conn)
 		{
@@ -55,7 +55,7 @@ bool	CgiPipe::timeo(WsTime & now)
 		return (false);
 
 	this->lact = now;
-	
+
 	WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : pipe ", this->get_fd());
 	if (this->conn)
 	{
@@ -71,7 +71,7 @@ bool	CgiPipe::timeo(WsTime & now)
 			WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
-		
+
 		rsrc->set_done(RSRC_DONE_ERR);
 		this->rsrc->set_err(504);  // CGI_ERR : gateway timeout
 	}
@@ -91,9 +91,9 @@ bool	CgiPipe::timeo(WsTime & now)
 ssize_t	CgiPipe::pollout(void)
 {
 	WSLOG(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
-	
+
 	ssize_t	err;
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
@@ -140,9 +140,9 @@ ssize_t	CgiPipe::pollout(void)
 ssize_t	CgiPipe::pollin(void)
 {
 	ssize_t	err = 0;
-	
+
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
@@ -151,7 +151,7 @@ ssize_t	CgiPipe::pollin(void)
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv");
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
-	
+
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
@@ -166,7 +166,7 @@ ssize_t	CgiPipe::pollin(void)
 	}
 	// this->ibuf[err] = '\0';
 	// WSLOG(LVL_DBG, TGT_CGI_SEND, "recv:\n", std::string(ibuf));
-	
+
 	switch (this->rsrc->recv_data(this->ibuf, err))
 	{
 	case RSRC_RESP_INIT:
@@ -175,6 +175,12 @@ ssize_t	CgiPipe::pollin(void)
 		this->mod_evt(-EPOLLIN);
 		break;
 	case RSRC_RESP_HEAD:
+		break;
+	case RSRC_RESP_DONE:
+		rsrc->set_done(RSRC_DONE_IO);
+		// not stopping cgi ...
+		// still hitting RLEN with FULL BODY
+		// return (err);
 		break;
 	case RSRC_RESP_BODY:
 	default:
@@ -198,7 +204,7 @@ int		CgiPipe::hup(void)
 }
 
 void	CgiPipe::rsrc_closed(void)
-{ 
+{
 	// mod_evt (?)
 	this->conn = NULL;
 	this->rsrc = NULL;
@@ -260,7 +266,7 @@ int	cgi_pipes::dup_io(void)
 		this->shutdown();
 		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stdout)"));
 	}
-	return (0);		
+	return (0);
 }
 
 int	cgi_pipes::dup_err(void)

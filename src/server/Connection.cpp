@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 12:07:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 18:45:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	// WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
 // KEEP_ALIVE : check req_cnt
-	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try
 	{
 		this->serv.conn_closed();
@@ -513,6 +513,8 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		delete (fcgi);
 		// ASSUMES : fail = "Too many open files"
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return(SYSCALL_ERR);
 	}
 
@@ -524,6 +526,8 @@ int	Connection::exec_cgi(void)
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 
@@ -586,6 +590,8 @@ int	Connection::exec_cgi(void)
 	{
 		pipes.shutdown();
 		delete (pcgi);
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;

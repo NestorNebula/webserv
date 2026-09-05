@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 09:30:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:28:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@ ResourceFcgi::~ResourceFcgi()
 }
 
 int	ResourceFcgi::init(Epoll *ep, CgiEnv *cgienv, Connection *conn, std::string &sock_path)
-{	
+{
 	int fd = FcgiConn::make_sock(sock_path);
 	if (fd < 0)
 		return (-1);
-	
+
 	this->fcgi = new FcgiPipe(ep, fd, conn, this);
 	int err = this->fcgi->init(cgienv);
 	if (err < 0)
@@ -58,13 +58,13 @@ int	ResourceFcgi::status(void)
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (RSP_ERROR);
 	}
-		
-	if (!this->hed)
+
+	if (this->head_size == 0)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		if (this->fcgi)
 		{
-			this->fcgi->mod_evt(EPOLLOUT);	
+			this->fcgi->mod_evt(EPOLLOUT);
 			return (RSP_WAIT_HEAD);
 		}
 		else
@@ -74,9 +74,9 @@ int	ResourceFcgi::status(void)
 		}
 	}
 
-	if (!this->wait_comp && this->resp_data()) 
+	if (!this->wait_comp && this->resp_data())
 		return (1);
-	
+
 	if (this->wait(0) != -1)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
@@ -90,20 +90,20 @@ int	ResourceFcgi::status(void)
 		}
 		if (this->ka) // DONE
 			return (RSP_KPALIVE);
-		return (RSP_COMPLETE); 
+		return (RSP_COMPLETE);
 	}
 	// STILL RUNNING
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 	if (this->fcgi)
 		this->fcgi->mod_evt(EPOLLIN);
-	return (RSP_WAIT_BODY); 
+	return (RSP_WAIT_BODY);
 }
 
 int	ResourceFcgi::wait(int opt)
 {
 	(void)opt;
-	
+
 	if (this->done & RSRC_DONE_ERR)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (error)");
@@ -117,7 +117,7 @@ int	ResourceFcgi::wait(int opt)
 	if (this->done == RSRC_DONE_IO)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
-		if (this->hed == 0)
+		if (this->head_size == 0)
 		{
 			this->set_err(500); // #kd (603)
 			return (0);

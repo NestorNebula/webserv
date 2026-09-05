@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:34:59 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:28:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ ResourcePiped::~ResourcePiped()
 	WSLOG(LVL_DBG, TGT_RSRC, " (~) ResourcePiped");
 	WSLOG(LVL_DBG, TGT_RSRC, "stat: " , this->stat);
 	WSLOG(LVL_DBG, TGT_RSRC, "pid : " , this->pid);
-	
+
 	try
-	{	
+	{
 		this->conn_closed();
 		this->conn = NULL;
 		if (!this->failed)
@@ -44,9 +44,9 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_RSRC, "init:  PIPE");
-	
+
 	this->pid = _pid;
-	
+
 	int cgifd_ip = dup(pipes->p1[1]);
 	if (cgifd_ip < 0)
 	{
@@ -59,7 +59,7 @@ int	ResourcePiped::init(Epoll *ep, pid_t _pid, cgi_pipes *pipes, Connection *con
 		close(cgifd_ip);
 		this->set_failed();
 		return (WsLog::_errno(LVL_SYSERR, TGT_RSRC, "dup (pipes)"));
-	}	
+	}
 
 	this->ip = new CgiPipe(ep, cgifd_ip, conn, this);
 	err = this->ip->ini_evt(EPOLLOUT);
@@ -113,16 +113,16 @@ int	ResourcePiped::status(void)
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (RSP_ERROR);
 	}
-	if (!this->hed && this->ip)
+	if ((this->head_size == 0) && this->ip)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
-		this->ip->mod_evt(EPOLLOUT);	
+		this->ip->mod_evt(EPOLLOUT);
 		return (RSP_WAIT_HEAD);
 	}
 
 	if (!this->wait_comp && this->resp_data())
 		return (1);
-	
+
 	if (this->wait(WNOHANG) != -1)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (exited)");
@@ -136,24 +136,24 @@ int	ResourcePiped::status(void)
 		}
 		if (this->ka) // DONE
 			return (RSP_KPALIVE);
-		return (RSP_COMPLETE); 
+		return (RSP_COMPLETE);
 	}
-	
+
 	WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (need data)");
 
 	if (this->op)
 		this->op->mod_evt(EPOLLIN);
-	return (RSP_WAIT_BODY); 
+	return (RSP_WAIT_BODY);
 }
 
 int	ResourcePiped::wait(int opt)
 {
 	int	err;
-	
+
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "pid : ", this->pid);
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "xit : ", this->xit);
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "stat: ", this->stat);
- 
+
 	if (this->stat != -1)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_INFO, "STAT: ", this->stat);
@@ -171,30 +171,30 @@ int	ResourcePiped::wait(int opt)
 		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: nohang i/o ", this->failed);
 		return (this->stat); // (-1) : still active
 	}
-	
+
 	if ((this->ip == NULL) && (this->op == NULL))
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: null i/o ", this->failed);
 		opt = 0;
 	}
 	err = waitpid(this->pid, &this->stat, opt);
-	
+
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "wait: ", err);
 	WSLOG(LVL_DBG, TGT_RSRC_WAIT, "stat: ", stat);
 
 	if (err == 0)
 		return (this->stat); // WNOHANG // (-1) : still active
-		
+
 	this->pid = 0;
-	
+
 	if (err < 0)
 		WsLog::_errno(LVL_SYSERR, TGT_RSRC, "waitpid");
-		
+
 	if (WIFEXITED(stat))
 	{
 		this->xit = WEXITSTATUS(stat);
 		WSLOG(LVL_DBG, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "exit: ", xit);
-		
+
 		if (xit < 255)
 		{
 			WSLOG(LVL_DBG, TGT_RSRC, "exit:  ", std::strerror(xit));
@@ -219,7 +219,7 @@ int	ResourcePiped::wait(int opt)
 	{
 		WSLOG(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
-	if (this->hed == 0)
+	if (this->head_size == 0)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC, "wait : error: 605");
 		WSLOG(LVL_DBG, TGT_RSRC, "stat : ", stat);
@@ -270,7 +270,7 @@ int	ResourcePiped::rem(EpollClient *epc)
 		WSLOG(LVL_DBG, TGT_RSRC, "rem : (done)");
 		err = RSRC_DONE_IO;
 		this->wait(0);
-	}	
+	}
 	return (err);
 }
 
