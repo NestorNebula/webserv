@@ -23,7 +23,7 @@ class Session {
 public:
   Session(ServerConfig &server)
       : _next(RDSOCK), _server(server), _route(NULL), _resource(NULL),
-        _keepalive(false), _sent(0) {
+        _keepalive(false), _sent(0), _retry_res(0) {
     WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
@@ -38,6 +38,7 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
+    RETRY, // Retry to handle the Request
   } Action;
 
   Action nextAction() const { return _next; }
@@ -78,6 +79,8 @@ public:
   // Reset session state and clears all its data
   void reset();
 
+  void manageSession();
+
 private:
   Session(const Session &);
   Session &operator=(const Session &);
@@ -96,7 +99,6 @@ private:
 
   void throwIfNotAction(Action action) const;
   static const std::string &actionToStr(Action action);
-  void manageSession();
 
   void handleRequest();
   void preValidateRequest();
@@ -116,6 +118,8 @@ private:
   void setResponseStatus(Response::StatusCode code);
 
   Stream::streamsize _sent;
+
+  int _retry_res;
 
   std::string _responseStr;
 };
