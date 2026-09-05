@@ -404,7 +404,7 @@ void Session::prepareErrorResource() {
   delete _resource;
   WSLOG(LVL_INFO, TGT_SESS, "Generating Error page Resource using ",
            errPage);
-  _resource = new StaticResource(errPage);
+  _resource = new ErrorResource(errPage, _server.def_err);
   _resourcePath = errPage;
 }
 
