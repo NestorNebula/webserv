@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/04 22:25:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/04 22:56:07 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,7 @@ void	ConfigParser::parseServer()
 // #kd - Default Error String
 #if 1
 	std::map<std::string, std::string>::const_iterator	it;
-	it = server.error_pages.find("default");		
+	it = server.error_pages.find("default");
 	std::ifstream rd(it->second.c_str());
 	if (rd)
 	{
