@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:44:07 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 12:05:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,13 @@
 # include "WsTime.hpp"
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 60
+#  define CONN_TIMEOUT 3
 # endif
+
+# ifndef KA_TIMEOUT
+#  define KA_TIMEOUT 5
+# endif
+
 
 # ifndef CGI_TIMEOUT
 #  define CGI_TIMEOUT 60
@@ -26,19 +31,19 @@
 # ifndef CGI_RETRY_INTERVAL
 #  if EXTRA_TIME
 #   define CGI_RETRY_INTERVAL (0.25f)
-#  else 
-#   define CGI_RETRY_INTERVAL 1)
+#  else
+#   define CGI_RETRY_INTERVAL (1)
 #  endif
 # endif
 
-# ifndef CGI_RETRY_COUNT
-#  define CGI_RETRY_COUNT 8
+# ifndef MAX_RETRIES
+#  define MAX_RETRIES 5
 # endif
 
 # ifndef SERV_PAUSE
 #  if EXTRA_TIME
 #   define SERV_PAUSE (0.5f)
-#  else 
+#  else
 #   define SERV_PAUSE (2)
 #  endif
 # endif

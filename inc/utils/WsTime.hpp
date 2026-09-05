@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/03 10:45:16 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:23:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 11:09:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #  define EXTRA_TIME 1
 # endif
 
-#define NSEC 1000000000L
+# define NSEC 1000000000L
 
 class TimeSpec
 {
@@ -29,7 +29,7 @@ private:
 public:
     TimeSpec(void)
     {
-        this->t.tv_sec = 0;
+        this->t.tv_sec  = 0;
         this->t.tv_nsec = 0;
     }
     TimeSpec(struct timespec v)
@@ -38,7 +38,7 @@ public:
     }
     TimeSpec(time_t v)
     {
-        this->t.tv_sec = v;
+        this->t.tv_sec  = v;
         this->t.tv_nsec = 0;
     }
 	TimeSpec (const TimeSpec & that)
@@ -49,14 +49,14 @@ public:
     {
         if (this == &that)
             return (*this);
-        this->t.tv_sec = that.t.tv_sec;
+        this->t.tv_sec  = that.t.tv_sec;
         this->t.tv_nsec = that.t.tv_nsec;
         return (*this);
     }
 
     void    normalize(void)
     {
-        if (this->t.tv_nsec < 0)
+        while (this->t.tv_nsec < 0)
         {
             this->t.tv_sec--;
             this->t.tv_nsec += NSEC;
@@ -70,8 +70,8 @@ public:
     }
     bool operator == (TimeSpec const& that)
     {
-        return 
-            (this->t.tv_sec == that.t.tv_sec)
+        return
+            (this->t.tv_sec  == that.t.tv_sec)
             &&
             (this->t.tv_nsec == that.t.tv_nsec);
     }
@@ -82,11 +82,11 @@ public:
     TimeSpec operator + (const double secs) const
     {
         TimeSpec tmp = *this;
-        
+
         double ipart;
         double fpart = std::modf(secs, &ipart);
-        
-        tmp.t.tv_sec += ipart;
+
+        tmp.t.tv_sec  += ipart;
         tmp.t.tv_nsec += (fpart * NSEC);
         tmp.normalize();
         return (tmp);
@@ -94,11 +94,11 @@ public:
     TimeSpec operator - (const double secs) const
     {
         TimeSpec tmp = *this;
-        
+
         double ipart;
         double fpart = std::modf(secs, &ipart);
-        
-        tmp.t.tv_sec -= ipart;
+
+        tmp.t.tv_sec  -= ipart;
         tmp.t.tv_nsec -= (fpart * NSEC);
         tmp.normalize();
         return (tmp);
@@ -120,11 +120,12 @@ public:
         return (this->t.tv_nsec > that.t.tv_nsec);
     }
 };
+
 # if EXTRA_TIME
 typedef TimeSpec wstime_t;
 # else
 typedef time_t wstime_t;
-#endif
+# endif
 
 class WsTime
 {
@@ -133,9 +134,9 @@ private:
     TimeSpec    t;
 # else
     wstime_t    t;
-#endif
+# endif
 public:
-    
+
     WsTime(void)
     {
         this->t = 0;
@@ -160,9 +161,9 @@ public:
     {
 # if EXTRA_TIME
         clock_gettime(CLOCK_MONOTONIC, (struct timespec*) &t);
-# else 
+# else
         std::time(&t);
-#endif
+# endif
     }
     bool    not_set(void)
     {

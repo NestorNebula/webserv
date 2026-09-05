@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/04 10:20:42 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 12:07:16 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,7 +238,7 @@ void Session::manageSession() {
         WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", retry_res);
         _next = Session::RETRY;
       }
-      else 
+      else
       if (_next != DOCGI) {
         handleResponse();
         _next = WRSOCK;
@@ -381,11 +381,18 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
-// #kd - Session::RETRY      
+// #kd - Session::RETRY
 #if 1
+      if (retry_res++ > MAX_RETRIES)
+      {
+        retry_res = 0;
+        setResponseStatus(500);
+      }
+      else
+      {
       _response.clear();
-      retry_res++;
       _next = RDSOCK;
+      }
 #else
       setResponseStatus(500); // CGI_ERR
 #endif
