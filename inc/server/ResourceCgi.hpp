@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:23:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:30:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ enum
 	RSRC_RESP_INIT = 0,
 	RSRC_RESP_HEAD,
 	RSRC_RESP_BODY,
+	RSRC_RESP_DONE,
 	RSRC_RESP_ERR
 };
 
@@ -57,11 +58,12 @@ protected:
 	ResourceCgi				(const ResourceCgi & ) {}
 	ResourceCgi & operator=	(const ResourceCgi & ) { return (*this); }
 public:
-	ResourceCgi(void) :  
+	ResourceCgi(void) :
 		done(0),
 		error(0),
 		ka(false),
-		hed(0),
+		head_size(0),
+		clen(0),
 		wait_comp(false),
 		failed(false),
 		conn(NULL)
@@ -69,35 +71,37 @@ public:
 	virtual ~ResourceCgi() {}
 
 	int				get_req_body(void);
-	
+
 	int				recv_data(char *buf, int siz);
 	bool			resp_data(void);
-	
+
 	std::string &	get_resp(void);
 	int				set_err(int e);
 	int				set_done(int d);
-	
+
 	virtual void	push_body(void) = 0;
 	virtual int		status(void) = 0;
 	virtual void	conn_closed(void) = 0;
 	virtual int		rem(EpollClient *epc) = 0;
-	
+
 	std::string		body; // HTTP Request
 	std::string		resp; // CGI  Output
 	int				done;
 	int				error;
 	bool			ka;
-	
+
 protected:
-	int				hed; // what else did we want here (?)
+	int				head_size;
+	size_t			clen;
+	size_t			body_size(void);
 	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
 	bool			failed;
-	
+
 private:
 	int				chk_rsp_hed(void);
-	
+
 protected:
 	Connection		*conn;
 };

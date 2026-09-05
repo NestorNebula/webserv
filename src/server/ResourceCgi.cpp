@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:36:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 19:46:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,24 +55,6 @@ bool	ResourceCgi::resp_data(void)
 
 }
 
-int		ResourceCgi::recv_data(char *buf, int siz)
-{
-	this->resp.append(buf, siz);
-	
-	WSLOG(LVL_NONE, TGT_RSRC, "resp");
-	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
-
-	// SHOULD : check against content-length header
-	// but : NOT INCLUDING .head
-	if (this->hed)
-	{
-		if (!this->wait_comp)
-			conn->mod_evt(EPOLLOUT);
-		return (RSRC_RESP_BODY);
-	}
-	return (this->chk_rsp_hed());
-}
-
 static bool	icmp(char a, char b)
 {
 	return std::tolower(static_cast<unsigned char>(a)) ==
@@ -102,12 +84,12 @@ static std::string hedval_str(std::string & str, const char *key)
 }
 
 
-// WAIT_COMP WORK HERE 
+// WAIT_COMP WORK HERE
 // called by : recv_data
 // CLARIFY : the rules for
-	// keep-alive 
+	// keep-alive
 
-// parse_rsp_hed ... 
+// parse_rsp_hed ...
 // build .. from passed headers
 
 
@@ -117,11 +99,47 @@ static std::string hedval_str(std::string & str, const char *key)
 
 // this is where we should SET WAIT_COMPLETE
 
-// CONSIDER : CHUNKED (!) .. if 
+// CONSIDER : CHUNKED (!) .. if
 // no content-length
-// OR 
+// OR
 // content->length TOO LONG
 
+// if cgi ends .. and not all PROMISED clen has been delivered,
+// we have a problem
+// wait comp .. should be able to detect that ..
+// ATTN : must subtract head_size
+
+size_t	ResourceCgi::body_size(void)
+{
+	if (this->head_size == 0)
+		return (0);
+	return (this->resp.size() - this->head_size);
+}
+
+int		ResourceCgi::recv_data(char *buf, int siz)
+{
+	this->resp.append(buf, siz);
+
+	WSLOG(LVL_NONE, TGT_RSRC, "resp", this->resp.size());
+	WSLOG(LVL_NONE, TGT_RSRC, "****\n", resp);
+
+	// SHOULD : check against content-length header
+	// but : NOT INCLUDING .head
+
+	if (this->head_size)
+	{
+		if (!this->wait_comp)
+			conn->mod_evt(EPOLLOUT);
+
+		if (this->clen && (this->body_size() > this->clen))
+		{
+			this->wait_comp = false;
+			return (RSRC_RESP_DONE);
+		}
+		return (RSRC_RESP_BODY);
+	}
+	return (this->chk_rsp_hed());
+}
 
 int		ResourceCgi::chk_rsp_hed(void)
 {
@@ -129,36 +147,45 @@ int		ResourceCgi::chk_rsp_hed(void)
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
 
-	this->hed = 1;
-	
+	this->head_size = pos + 4;
+
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
+
+// Session : sets keep-alive .. for .. HTTP/1.1
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: ", this->wait_comp);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "(ka): ", this->ka);
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, head_size));
 
 	std::string stat_str = hedval_str(resp, "Status");
 	std::string conn_str = hedval_str(resp, "Connection");
 	std::string clen_str = hedval_str(resp, "Content-Length");
 
+	this->clen = std::atoi(clen_str.c_str());
+
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat: ", stat_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "conn: ", conn_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: ", clen_str);
 
-// because .. true by default (?)
-	// if (clen_str.size())
-	// 	this->wait_comp = false;
-		
+	if (this->clen) // AND .. it is less than .. something
+		this->wait_comp = true;
+
+	this->wait_comp = true; // NO CLEN .. but turn OFF if TOO BIG
+
 // KEEP_ALIVE : rsp_hed .. add if CGI returned (content-length)
 	if (false) // clen_str.size() && this->ka)
 	{
-		// and : connection not already set -- 
-		// which a CGI script should never do .. 
+		// and : connection not already set --
+		// which a CGI script should never do ..
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  keep-alive");
 		std::string kastr = std::string("Connection: Keep-Alive\r\n");
 		resp.insert(0, kastr);
 	}
-	else if (true) // !this->wait_comp)
+	else if (!this->wait_comp)
 	{
 		// WSCOL(WSL_RED);
+		// maybe not .. if .. wait_comp
+
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  close");
 		std::string conn_close("Connection: close\r\n");
 		resp.insert(0, conn_close);
@@ -180,8 +207,10 @@ int		ResourceCgi::chk_rsp_hed(void)
 	}
 	resp.insert(0, stat_hed);
 
-	// pos = resp.find("\r\n\r\n");
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp.substr(0, pos));
+	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "RESP:\n", resp.substr(0, head_size));
+
+	pos = resp.find("\r\n\r\n");
+	this->head_size = pos + 4;
 	return (RSRC_RESP_HEAD);
 }
 
@@ -189,33 +218,45 @@ int		ResourceCgi::chk_rsp_hed(void)
 
 // very important part of wait_comp
 // only called if wait_comp
-// which we only set when ... 
+// which we only set when ...
 // so .. we assume .. no content-length was provided
 void	ResourceCgi::chk_rsp_len(void)
 {
-	if (this->hed == 0)
+	if (this->head_size == 0)
 		return;
-		
+
 	size_t	pos = resp.find("\r\n\r\n");
 
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN\n", resp.substr(0, pos));
-	
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN : head\n", resp.substr(0, head_size));
+
+	// size_t body_size = resp.size() - this->head_size;
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN : body", this->body_size());
+
+// should have this .. from chk_rsp_hed
 	std::string clen_str = hedval_str(resp, "Content-Length");
-	if (clen_str.size())
+	// size_t		clen_val = std::atoi(clen_str.c_str());
+
+	if (this->clen && (this->body_size() < this->clen))
 	{
+		this->set_err(666);
+		return;
+	}
+	if (this->clen)
+	{
+		// in header ..
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_DBG, TGT_CGI_HEAD, "have content-length\n", clen_str);
 		return;
 	}
 
-// insert  REAL CLEN 
-	size_t clen = (resp.size() - pos - 4);
+// insert  REAL CLEN
+	this->clen = (resp.size() - head_size);
 
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: resp ", clen);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: resp ", this->clen);
 
-	clen_str = std::string("\r\nContent-Length:") + toString(clen);
-	
+	clen_str = std::string("\r\nContent-Length:") + toString(this->clen);
+
 	WSCOL(WSL_GREEN);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "add  content-length ", clen_str);
 
@@ -239,8 +280,9 @@ void	ResourceCgi::chk_rsp_len(void)
 		resp.insert(pos, conn_close);
 	}
 	pos = resp.find("\r\n\r\n");
+	this->head_size = pos + 4;
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "DONE");
-	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, pos));
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "resp:\n", resp.substr(0, head_size));
 }
 
 int	ResourceCgi::set_err(int e)

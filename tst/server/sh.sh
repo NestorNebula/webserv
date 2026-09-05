@@ -124,7 +124,7 @@ if [ "$1" == "u" ]; then
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
-# WORK HERE 
+# WORK HERE
 # FCGI : not 100%
 # END STDIN .. still has (left)
 
@@ -157,9 +157,9 @@ if [ "$1" ]; then
 	exit 0
 fi
 
-# My understanding of the bug and the fix is that if the data is chunked and no Content-Length is specified, Apache will add that header before it gets to PHP, so PHP will read the data. 
+# My understanding of the bug and the fix is that if the data is chunked and no Content-Length is specified, Apache will add that header before it gets to PHP, so PHP will read the data.
 
-# -H "Transfer-Encoding: chunked" 
+# -H "Transfer-Encoding: chunked"
 # curl -i -X POST -F @www/files/earth.jpg http://127.0.0.1:7777/php/ul.php
 # echo
 # exit 0
@@ -167,15 +167,15 @@ fi
 # -H "Connection: keep-alive" \
 
 	# -d "p1=post-one&p2=post-two" \
-curl -X POST http://localhost:8082/body.php -i \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	 -H "Transfer-Encoding: chunked" \
-	-d @../../www/kd/infinite.php
-echo
-exit 0
+# curl -X POST http://localhost:8082/body.php -i \
+# 	-H "Content-Type: application/x-www-form-urlencoded" \
+# 	 -H "Transfer-Encoding: chunked" \
+# 	-d @../../www/kd/infinite.php
+# echo
+# exit 0
 
 
-curl -X GET 'http://localhost:8082/html/contact.html' -i
+curl -X GET 'http://localhost:8082/test.php' -i
 echo
 exit 0
 
@@ -292,7 +292,7 @@ exit 0
 # chunked - needs to be parsed before passing to CGI
 # not the same as form (?)
 # "pure" upload .. "PUT"
-# we do not respond to this properly 
+# we do not respond to this properly
 # not actually a (cgi) thing (?)
 # NB : not a FORM
 # Content-Type: application/x-www-form-urlencoded
@@ -301,9 +301,9 @@ exit 0
 
 
 
-# NB: (-d) not part of a FORM .. 
+# NB: (-d) not part of a FORM ..
 # cgi .. not looking for more data
-# content-length is STRANGE here 
+# content-length is STRANGE here
 
 # curl -X POST http://localhost:8081/test.php -i \
 # 	-d @www/files/earth.jpg
