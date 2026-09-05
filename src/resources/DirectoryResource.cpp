@@ -11,9 +11,11 @@
 /* ************************************************************************** */
 
 #include "DirectoryResource.hpp"
+#include <algorithm>
 #include <dirent.h>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 void DirectoryResource::generate() {
   if (_state != DEFAULT)
@@ -36,6 +38,19 @@ Stream &DirectoryResource::stream() {
 }
 
 void DirectoryResource::buildList() {
+  std::vector<std::string> elem;
+
+  dirent *dirFile;
+  while ((dirFile = readdir(_dir)) != NULL) {
+    std::string name(dirFile->d_name);
+    if (name != "." && name != "..") {
+      if (dirFile->d_type == DT_DIR)
+        name += '/';
+      elem.push_back(name);
+    }
+  }
+  std::sort(elem.begin(), elem.end());
+
   *_stream << "<!DOCTYPE html>\n"
               "<html lang=\"en\">\n"
               "<head>\n"
@@ -61,19 +76,14 @@ void DirectoryResource::buildList() {
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
 
-  dirent *dirFile;
-  while ((dirFile = readdir(_dir)) != NULL) {
-    std::string name(dirFile->d_name);
-    if (name != "." && name != "..") {
-      if (dirFile->d_type == DT_DIR)
-        name += '/';
+  for (size_t k = 0; k < elem.size(); k++) {
       *_stream << "<li>\n"
                   "<a class=\"file-link\" href=\""
-               << name << "\">" << name
+               << elem[k] << "\">" << elem[k] 
                << "</a>\n"
                   "</li>\n";
-    }
   }
+
   *_stream << "</ul>\n"
               "<hr>\n"
               "</section>\n"
