@@ -1,0 +1,11 @@
+# *.hpp filter=42update
+# *.cpp filter=42update
+
+# git config filter.42update.clean "sed -e '\#^/\*   Updated:*#d' -e '\#^/\*   By:*#d'"
+# git config filter.42update.smudge cat
+
+*.hpp diff=42ignore
+*.cpp diff=42ignore
+
+  # does not appear in (diff) .. but (modified) still detected ..
+# git config diff.42ignore.textconv "sed -e '\#^/\*   Updated:*#d' -e '\#^/\*   By:*#d'"

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 19:46:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 20:39:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,15 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	return (this->chk_rsp_hed());
 }
 
+// LOTS NOT TIGHT HERE ...
+// conn  : TIMEO : conn in rdhup
+// conn  : TIMEO : conn out rdhup
+// is that because -- HTTP/1.1 -- assumed keep-alive ??
+// Test from siege.conf
+// keep-alive : can suck for siege ..
+// want a DEFINE ..
+
+// yup
 int		ResourceCgi::chk_rsp_hed(void)
 {
 	size_t	pos = resp.find("\r\n\r\n");
