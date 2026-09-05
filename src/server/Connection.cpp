@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:29:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/05 12:07:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,19 @@
 #include "ResourceFcgi.hpp"
 #include "ResourcePiped.hpp"
 
-Connection::Connection	(const Connection & that) : 
-	EpollClient(that), 
-	sess(that.serv.get_conf()), 
-	serv(that.serv), 
+Connection::Connection	(const Connection & that) :
+	EpollClient(that),
+	sess(that.serv.get_conf()),
+	serv(that.serv),
 	req_cnt(0)
 {
 
 }
 
-Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
-	EpollClient(_ep, EPC_CONN, _fd), 
+Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
+	EpollClient(_ep, EPC_CONN, _fd),
 	sess(_serv.get_conf()),
-	serv(_serv), 
+	serv(_serv),
 	retry_cgi(0),
 	res_cgi(NULL),
 	req_cnt(0)
@@ -43,7 +43,7 @@ Connection::~Connection()
 // KEEP_ALIVE : check req_cnt
 	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
 	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
-	try 
+	try
 	{
 		this->serv.conn_closed();
 		if (this->res_cgi)
@@ -64,13 +64,23 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-
+// sess  : Request Resource resolved: ./html/contact.html
+// sess  : Checking operation is possible on Session Resource
+// sess  : Operation possible on Session Resource
+// sess  : Preparing Session Resource generation
+// sess  : Processing upload Request
+// res   : BuiltinResource constructor for code  [403]
+// sess  : Generating Session Resource
+// res   : Generating BuiltinResource for code  [403]
+// res   : BuiltinResource called with wrong code, teapot found
+// res   : BuiltinResource error for code  [418]
+// res   : BuiltinResource destructor for code  [418]
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		WSCOL(WSL_YELLOW);
 		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
 		sess.manageSession();
-		switch (sess.nextAction()) 
+		switch (sess.nextAction())
 		{
 		case Session::WRSOCK:
 			this->req_cnt++;
@@ -88,12 +98,12 @@ bool	Connection::timeo(WsTime & now)
 		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
-			if (retry_cgi >= CGI_RETRY_COUNT)
+			if (retry_cgi >= MAX_RETRIES)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 // if (Connection) blocks all available (fd) ..
-// we'd rather sacrifice JUST ONE ...				
+// we'd rather sacrifice JUST ONE ...
 				this->set_err(504); // #kd (610)
 			}
 			retry_cgi++;
@@ -109,42 +119,43 @@ bool	Connection::timeo(WsTime & now)
 
 	if ((this->lact + CONN_TIMEOUT).after(now))
 		return (false);
-		
-	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", 
-		// this->get_fd()); 
+
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ",
+		// this->get_fd());
 		evt_type(this->evt.events));
 	// Request Timeout -- not necessarily
 	// perhaps .. only if "pollin"
 	// timeout .. on .. keep-alive ..
-	// which is .. waiting for more mp3 data ... 
-	// Brave 
+	// which is .. waiting for more mp3 data ...
+	// Brave
 	// php -- still re-setting EPOLLIN
-	// keep-alive (file!) is strange here 
-// conn  : TIMEO : conn in rdhup 
-// conn  : TIMEO : conn in rdhup 
-// conn  : TIMEO : conn out rdhup 
+	// keep-alive (file!) is strange here
+// conn  : TIMEO : conn in rdhup
+// conn  : TIMEO : conn in rdhup
+// conn  : TIMEO : conn out rdhup
 
 // keep-alive (?)
-// which has not sent all data .. 
-// sess._next .. 
+// which has not sent all data ..
+// sess._next ..
 		// EPOLLIN is the one to test
 	// or .. if request is not complete ..
 // sess  : Session::getRequest called while Session is in WRSOCK
 // Session::getRequest should only be called in DOCGI mode. Returning raw request
 
+// keep-alive : should just shut-down
 	// if (!this->sess.getRequest().isComplete())
 	if (this->sess.nextAction() == Session::RDSOCK)
 	{
-		this->set_err(408); 
+		this->set_err(408);
 		return (true);
 	}
 	if (this->evt.events & EPOLLOUT)
 	{
 		this->lact = now;
 		return (false);
-	}	
-	// this->set_err(408); 
+	}
+	// this->set_err(408);
 	return (false);
 }
 
@@ -197,7 +208,7 @@ static void sess_log_next(Session &sess)
       break;
     }
 }
-#endif 
+#endif
 
 ssize_t	Connection::pollin(void)
 {
@@ -214,10 +225,10 @@ ssize_t	Connection::pollin(void)
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv", err);
 			return (err);
 		}
-		if (err == 0) 
+		if (err == 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-			this->mod_evt(EPOLLOUT); 
+			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
@@ -234,9 +245,9 @@ ssize_t	Connection::pollin(void)
 		default:
 			break;
 		}
-		
-		// may have got rdhup .. but still need to retry .. 
-		switch (sess.nextAction()) 
+
+		// may have got rdhup .. but still need to retry ..
+		switch (sess.nextAction())
 		{
 		case Session::RETRY:
 			WSCOL(WSL_CYAN);
@@ -255,13 +266,13 @@ ssize_t	Connection::pollin(void)
 					retry_cgi++;
 					// ah -- but not retriggered in time
 					// must retrigger .. soon (!)
-					// only makese sense to re-try .. 
+					// only makese sense to re-try ..
 					// once another has FLUSHED
 					// PROBLEM : all open (fd) filled with Conn
-					// ANSWER : one must give way 
-					// that' sthe ykey
+					// ANSWER : one must give way
+					// that is the key
 					// cgi -- must try again
-					// BEFORE Server ... 
+					// BEFORE Server ...
 					this->mod_evt(0);
 				}
 				return (0); // send error
@@ -333,10 +344,10 @@ ssize_t	Connection::pollout(void)
 			}
 
 			std::string & RESP = res->get_resp();
-			
+
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 			err = this->send(RESP);
 		}
 		else
@@ -353,12 +364,12 @@ ssize_t	Connection::pollout(void)
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 					// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 					err = this->send(RESP);
 				}
 			}
 		}
-		
+
 		if (err < 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
@@ -370,7 +381,7 @@ ssize_t	Connection::pollout(void)
 			return (0);
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
-		
+
 		// sess_log_next(sess);
 		switch (sess.nextAction())
 		{
@@ -426,7 +437,7 @@ void	Connection::reset(void)
 
 void	Connection::set_addr(struct sockaddr_in *a)
 {
-	this->addr = *a; 
+	this->addr = *a;
 	this->astr = addr_2_str(a);
 }
 
@@ -466,9 +477,9 @@ int	Connection::exec_cgi(void)
 {
 	if (this->res_cgi)
 		return (0);
-		
+
 	this->req_cnt++;
-	
+
 	int			err;
 
 	CgiEnv *cgienv = new CgiEnv;
@@ -483,8 +494,8 @@ int	Connection::exec_cgi(void)
 	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
 	if (
 		(cgienv->lang == CGI_PHP) &&
-		!fcgi_sock.empty() && 
-		!access(fcgi_sock.c_str(), R_OK | W_OK)	
+		!fcgi_sock.empty() &&
+		!access(fcgi_sock.c_str(), R_OK | W_OK)
 	)
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -507,23 +518,23 @@ int	Connection::exec_cgi(void)
 
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
-	
+
 	cgi_pipes	pipes;
-	
+
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
 		return (SYSCALL_ERR);
 	}
-	
+
 	pid_t pid = fork();
 	if (pid < 0)
 	{
+		pipes.shutdown();
 		delete (cgienv);
 		WsLog::_errno(LVL_SYSERR, TGT_CONN, "fork");
 		return (SYSCALL_ERR);
-		
-	}	
+	}
 	if (pid == 0)
 	{
 		err = pipes.dup_io();
@@ -542,7 +553,7 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		
+
 		const char **envp = cgienv->gen();
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
@@ -556,19 +567,19 @@ int	Connection::exec_cgi(void)
 				pipes.shutdown();
 				delete (cgienv);
 				delete (this->ep);
-				exit(1);				
+				exit(1);
 			}
 		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
-		
+
 		pipes.shutdown();
 		delete (cgienv);
-		delete (this->ep); 
-	
+		delete (this->ep);
+
 		exit (err);
-	}		
+	}
 	delete (cgienv);
-	
+
 	ResourcePiped * pcgi = new ResourcePiped;
 	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)

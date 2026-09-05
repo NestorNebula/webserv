@@ -1,0 +1,2527 @@
+==18840== Memcheck, a memory error detector
+==18840== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==18840== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
+==18840== Command: /usr/bin/python3 test.py
+==18840== Parent PID: 18428
+==18840=====18833== 
+==18833== Process terminating with default action of signal 2 (SIGINT)
+==18833==    at 0x401BCB2: __open_nocancel (open64_nocancel.c:45)
+==18833==    by 0x400630E: open_verify.constprop.0 (dl-load.c:1536)
+==18833==    by 0x40097B8: _dl_map_object (dl-load.c:2139)
+==18833==    by 0x400DDC0: openaux (dl-deps.c:64)
+==18833==    by 0x401ABF5: _dl_catch_exception (dl-error-skeleton.c:208)
+==18833==    by 0x400E138: _dl_map_object_deps (dl-deps.c:248)
+==18833==    by 0x4003F58: dl_main (rtld.c:1850)
+==18833==    by 0x4019B6E: _dl_sysdep_start (dl-sysdep.c:252)
+==18833==    by 0x4002033: _dl_start_final (rtld.c:485)
+==18833==    by 0x4002033: _dl_start (rtld.c:575)
+==18833==    by 0x4001097: ??? (in /usr/lib/x86_64-linux-gnu/ld==18829==1==18833==    by 0x1: ???
+==18833==    by 0x1FFF000CA2: ???
+==18833== Jump to the invalid address stated on the next ==188==1883==18836== Open file de==18833==    b==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 264:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 263:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 261:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 260:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 259:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 258:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 257:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 256:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 255:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 254:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 253:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 252: 127.0.0.1:8082 <-> unbound
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 251:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 250: 127.0.0.1:8082 <-> 127.0.0.1:41258
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 249:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 248: 127.0.0.1:8082 <-> 127.0.0.1:41254
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 247: 127.0.0.1:8081 <-> 127.0.0.1:51048
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 246:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 245: 127.0.0.1:8082 <-> 127.0.0.1:41250
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 244:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 243:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 242: 127.0.0.1:8081 <-> 127.0.0.1:51042
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 241: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 240:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 239: 127.0.0.1:8082 <-> 127.0.0.1:41236
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 238:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 237: 127.0.0.1:8081 <-> 127.0.0.1:55260
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 236: 127.0.0.1:8082 <-> 127.0.0.1:41222
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 235: 127.0.0.1:8081 <-> 127.0.0.1:55256
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open file descriptor 234:
+==18836==    <inherited from parent>
+==18836== 
+==18836== Open AF_INET socket 233: 127.0.0.1:8082 <-> unbound
+==18836==    <inherited from parent>
+==18836== 
+:==18829==    <inherited from parent>===18829== 
+==18829== Open file descriptor 220:
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 219:
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open AF_INET socket 218: 127.0.0.1:8081 <-> 127.0.0.1:60216
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 217:
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open AF_INET socket 216: 127.0.0.1:8081 <-> 127.0.0.1:60226
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 215:
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open AF_INET socket 214: 127.0.0.1:8081 <-> 127.0.0.1:60228
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 213:
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 212: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18829==    <inherited from parent>
+==18829== 
+==18829== Open file descriptor 211:
+==18829==    <inherited from parent>
+==18829== 
+==1882==18821== Open AF_INET socket 210: 127.0.0.1:8082 <-> unbound
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 209: 127.0.0.1:8081 <-> 127.0.0.1:60182
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 208:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 207: 127.0.0.1:8081 <-> 127.0.0.1:60190
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 206:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 205: 127.0.0.1:8081 <-> 127.0.0.1:60204
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 204:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 203:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 202: 127.0.0.1:8081 <-> 127.0.0.1:60168
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 201:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 200: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 199:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 198: 127.0.0.1:8081 <-> 127.0.0.1:60162
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 197:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 196: 127.0.0.1:8082 <-> 127.0.0.1:41086
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 195:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 194: 127.0.0.1:8082 <-> 127.0.0.1:41084
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 193: 127.0.0.1:8081 <-> 127.0.0.1:60142
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 192:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 191: 127.0.0.1:8081 <-> 127.0.0.1:60146
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 190:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 189: 127.0.0.1:8082 <-> 127.0.0.1:41096
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 188:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 187:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 186: 127.0.0.1:8081 <-> 127.0.0.1:60128
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 185:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 184: 127.0.0.1:8081 <-> 127.0.0.1:60154
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 183:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 182: 127.0.0.1:8081 <-> 127.0.0.1:60114
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 181:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 180: 127.0.0.1:8082 <-> 127.0.0.1:41044
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 179:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 178: 127.0.0.1:8082 <-> 127.0.0.1:41042
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 177:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 176: 127.0.0.1:8081 <-> 127.0.0.1:60078
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 175:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 174: 127.0.0.1:8081 <-> 127.0.0.1:60092
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 173: 127.0.0.1:8082 <-> 127.0.0.1:41046
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 172:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 171: 127.0.0.1:8081 <-> 127.0.0.1:60076
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 170:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 169:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 168: 127.0.0.1:8081 <-> 127.0.0.1:60098
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 167:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 166: 127.0.0.1:8081 <-> 127.0.0.1:60072
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 165:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 164: 127.0.0.1:8082 <-> 127.0.0.1:41020
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 163:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 162: 127.0.0.1:8081 <-> 127.0.0.1:60060
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 161:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 160: 127.0.0.1:8082 <-> 127.0.0.1:41008
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 159: 127.0.0.1:8081 <-> 127.0.0.1:60040
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 158:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 157: 127.0.0.1:8082 <-> 127.0.0.1:41010
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 156:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 155: 127.0.0.1:8082 <-> 127.0.0.1:40994
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 154: 127.0.0.1:8081 <-> 127.0.0.1:60032
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 153:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 152: 127.0.0.1:8081 <-> 127.0.0.1:60054
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 151:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 150: 127.0.0.1:8081 <-> 127.0.0.1:60016
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 149:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 148: 127.0.0.1:8082 <-> 127.0.0.1:40976
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 147: 127.0.0.1:8081 <-> 127.0.0.1:60006
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 146:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 145: 127.0.0.1:8082 <-> 127.0.0.1:40974
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 144:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 143: 127.0.0.1:8081 <-> 127.0.0.1:59990
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 142: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 141:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 140: 127.0.0.1:8082 <-> 127.0.0.1:40968
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 139:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 138: 127.0.0.1:8081 <-> 127.0.0.1:59988
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 137:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 136: 127.0.0.1:8082 <-> unbound
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 135: 127.0.0.1:8081 <-> 127.0.0.1:59972
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 134:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 133: 127.0.0.1:8082 <-> 127.0.0.1:40956
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 132:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 131:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 130: 127.0.0.1:8081 <-> 127.0.0.1:59962
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 129:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 128: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 127:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 126: 127.0.0.1:8082 <-> 127.0.0.1:40946
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 125:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 124: 127.0.0.1:8081 <-> 127.0.0.1:59954
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 123:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 122: 127.0.0.1:8082 <-> 127.0.0.1:40930
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 121: 127.0.0.1:8081 <-> 127.0.0.1:59936
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 120:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 119: 127.0.0.1:8082 <-> unbound
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 118:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 117: 127.0.0.1:8082 <-> 127.0.0.1:40924
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 116:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 115:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 114: 127.0.0.1:8081 <-> 127.0.0.1:59934
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 113:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 112: 127.0.0.1:8081 <-> 127.0.0.1:59938
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 111:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 110: 127.0.0.1:8081 <-> 127.0.0.1:59924
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 109:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 108: 127.0.0.1:8082 <-> 127.0.0.1:40894
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 107:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 106: 127.0.0.1:8082 <-> 127.0.0.1:40878
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 105: 127.0.0.1:8081 <-> 127.0.0.1:59900
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 104:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 103: 127.0.0.1:8081 <-> 127.0.0.1:59916
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 102:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 101:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 100: 127.0.0.1:8082 <-> 127.0.0.1:40906
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 99:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 98: 127.0.0.1:8081 <-> 127.0.0.1:59884
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 97:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 96: 127.0.0.1:8081 <-> 127.0.0.1:59920
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 95:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 94: 127.0.0.1:8081 <-> 127.0.0.1:59878
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 93:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 92: 127.0.0.1:8082 <-> 127.0.0.1:40834
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 91: 127.0.0.1:8081 <-> 127.0.0.1:59856
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 90:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 89: 127.0.0.1:8082 <-> 127.0.0.1:40856
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 88:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 87: 127.0.0.1:8082 <-> 127.0.0.1:40822
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 86:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 85: 127.0.0.1:8081 <-> 127.0.0.1:59850
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 84:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 83:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 82: 127.0.0.1:8081 <-> 127.0.0.1:59862
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 81: 127.0.0.1:8081 <-> 127.0.0.1:59838
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 80:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 79: 127.0.0.1:8082 <-> 127.0.0.1:40796
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 78:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 77:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 76: 127.0.0.1:8082 <-> 127.0.0.1:40804
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 75:
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open AF_INET socket 74: 127.0.0.1:8082 <-> 127.0.0.1:40810
+==18821==    <inherited from parent>
+==18821== 
+==18821== Open file descriptor 73:
+ <inherited from parent>
+==18820== 
+==18820== Open file descriptor 109:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 108: 127.0.0.1:8082 <-> 127.0.0.1:40894
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 107:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 106: 127.0.0.1:8082 <-> 127.0.0.1:40878
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 105: 127.0.0.1:8081 <-> 127.0.0.1:59900
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 104:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 103: 127.0.0.1:8081 <-> 127.0.0.1:59916
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 102:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 101:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 100: 127.0.0.1:8082 <-> 127.0.0.1:40906
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 99:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 98: 127.0.0.1:8081 <-> 127.0.0.1:59884
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 97:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 96: 127.0.0.1:8081 <-> 127.0.0.1:59920
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 95:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 94: 127.0.0.1:8081 <-> 127.0.0.1:59878
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 93:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 92: 127.0.0.1:8082 <-> 127.0.0.1:40834
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 91: 127.0.0.1:8081 <-> 127.0.0.1:59856
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 90:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 89: 127.0.0.1:8082 <-> 127.0.0.1:40856
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 88:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 87: 127.0.0.1:8082 <-> 127.0.0.1:40822
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 86:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 85: 127.0.0.1:8081 <-> 127.0.0.1:59850
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 84:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 83:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 82: 127.0.0.1:8081 <-> 127.0.0.1:59862
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 81: 127.0.0.1:8081 <-> 127.0.0.1:59838
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 80:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 79: 127.0.0.1:8082 <-> 127.0.0.1:40796
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 78:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 77:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 76: 127.0.0.1:8082 <-> 127.0.0.1:40804
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 75:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 74: 127.0.0.1:8082 <-> 127.0.0.1:40810
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 73:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 72: 127.0.0.1:8081 <-> 127.0.0.1:59786
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 71:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 70: 127.0.0.1:8081 <-> 127.0.0.1:59806
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 69:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 68: 127.0.0.1:8081 <-> 127.0.0.1:59818
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 67: 127.0.0.1:8081 <-> 127.0.0.1:59778
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 66:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 65: 127.0.0.1:8081 <-> 127.0.0.1:59826
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 64:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 63:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 62: 127.0.0.1:8082 <-> 127.0.0.1:40768
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 61:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 60: 127.0.0.1:8081 <-> 127.0.0.1:59766
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 59:
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open AF_INET socket 58: 127.0.0.1:8081 <-> 127.0.0.1:59788
+==18820==    <inherited from parent>
+==18820== 
+==18820== Open file descriptor 57:
+==18820==    <inherited from parent>
+==18820== 
+    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 141:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 140: 127.0.0.1:8082 <-> 127.0.0.1:40968
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 139:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 138: 127.0.0.1:8081 <-> 127.0.0.1:59988
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 137:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 136: 127.0.0.1:8082 <-> unbound
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 135: 127.0.0.1:8081 <-> 127.0.0.1:59972
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 134:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 133: 127.0.0.1:8082 <-> 127.0.0.1:40956
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 132:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 131:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 130: 127.0.0.1:8081 <-> 127.0.0.1:59962
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 129:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 128: /media/kdonlon/data/Documents/42/webserv/git/www/kd/files/earth.jpg
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 127:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 126: 127.0.0.1:8082 <-> 127.0.0.1:40946
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 125:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 124: 127.0.0.1:8081 <-> 127.0.0.1:59954
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 123:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 122: 127.0.0.1:8082 <-> 127.0.0.1:40930
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 121: 127.0.0.1:8081 <-> 127.0.0.1:59936
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 120:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 119: 127.0.0.1:8082 <-> unbound
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 118:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 117: 127.0.0.1:8082 <-> 127.0.0.1:40924
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 116:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 115:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 114: 127.0.0.1:8081 <-> 127.0.0.1:59934
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 113:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 112: 127.0.0.1:8081 <-> 127.0.0.1:59938
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 111:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 110: 127.0.0.1:8081 <-> 127.0.0.1:59924
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 109:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 108: 127.0.0.1:8082 <-> 127.0.0.1:40894
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 107:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 106: 127.0.0.1:8082 <-> 127.0.0.1:40878
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 105: 127.0.0.1:8081 <-> 127.0.0.1:59900
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 104:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 103: 127.0.0.1:8081 <-> 127.0.0.1:59916
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 102:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 101:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 100: 127.0.0.1:8082 <-> 127.0.0.1:40906
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 99:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 98: 127.0.0.1:8081 <-> 127.0.0.1:59884
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 97:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 96: 127.0.0.1:8081 <-> 127.0.0.1:59920
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 95:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 94: 127.0.0.1:8081 <-> 127.0.0.1:59878
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 93:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 92: 127.0.0.1:8082 <-> 127.0.0.1:40834
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 91: 127.0.0.1:8081 <-> 127.0.0.1:59856
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 90:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 89: 127.0.0.1:8082 <-> 127.0.0.1:40856
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 88:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 87: 127.0.0.1:8082 <-> 127.0.0.1:40822
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 86:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 85: 127.0.0.1:8081 <-> 127.0.0.1:59850
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 84:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 83:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 82: 127.0.0.1:8081 <-> 127.0.0.1:59862
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 81: 127.0.0.1:8081 <-> 127.0.0.1:59838
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 80:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 79: 127.0.0.1:8082 <-> 127.0.0.1:40796
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 78:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 77:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 76: 127.0.0.1:8082 <-> 127.0.0.1:40804
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 75:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 74: 127.0.0.1:8082 <-> 127.0.0.1:40810
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 73:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 72: 127.0.0.1:8081 <-> 127.0.0.1:59786
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 71:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 70: 127.0.0.1:8081 <-> 127.0.0.1:59806
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 69:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 68: 127.0.0.1:8081 <-> 127.0.0.1:59818
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 67: 127.0.0.1:8081 <-> 127.0.0.1:59778
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 66:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 65: 127.0.0.1:8081 <-> 127.0.0.1:59826
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 64:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 63:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 62: 127.0.0.1:8082 <-> 127.0.0.1:40768
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 61:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 60: 127.0.0.1:8081 <-> 127.0.0.1:59766
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 59:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 58: 127.0.0.1:8081 <-> 127.0.0.1:59788
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 57:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 56: 127.0.0.1:8081 <-> 127.0.0.1:59750
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 55:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 54: 127.0.0.1:8082 <-> 127.0.0.1:40750
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 53: 127.0.0.1:8081 <-> 127.0.0.1:59728
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 52:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 51: 127.0.0.1:8082 <-> 127.0.0.1:40756
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 50:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 49: 127.0.0.1:8082 <-> 127.0.0.1:40738
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 48:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 47:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 46: 127.0.0.1:8081 <-> 127.0.0.1:59724
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 45:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 44: 127.0.0.1:8081 <-> 127.0.0.1:59740
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 43:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 42: 127.0.0.1:8081 <-> 127.0.0.1:59716
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 41: 127.0.0.1:8082 <-> 127.0.0.1:40694
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 40:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 39: 127.0.0.1:8082 <-> 127.0.0.1:40696
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 38:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 37: 127.0.0.1:8081 <-> 127.0.0.1:59686
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 36:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 35:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 34: 127.0.0.1:8081 <-> 127.0.0.1:59688
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 33: 127.0.0.1:8082 <-> 127.0.0.1:40714
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 32: 127.0.0.1:8081 <-> 127.0.0.1:59670
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 31:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 30: 127.0.0.1:8082 <-> 127.0.0.1:40616
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 29:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 28: 127.0.0.1:8082 <-> 127.0.0.1:40610
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 27: 127.0.0.1:8081 <-> 127.0.0.1:59646
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 26: 127.0.0.1:8081 <-> 127.0.0.1:59656
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 25: 127.0.0.1:8081 <-> 127.0.0.1:59700
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 24: 127.0.0.1:8081 <-> 127.0.0.1:59632
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 23: 127.0.0.1:8081 <-> 127.0.0.1:59668
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 22: 127.0.0.1:8081 <-> 127.0.0.1:59636
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 21: 127.0.0.1:8082 <-> 127.0.0.1:40608
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 20: 127.0.0.1:8081 <-> 127.0.0.1:59626
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 19: 0.0.0.0:8082 <-> unbound
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 18: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 17: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 16: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 15: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 14: 0.0.0.0:8081 <-> unbound
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 13: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 12: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 11: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 10: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open AF_INET socket 9: 0.0.0.0:8080 <-> unbound
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 8: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 7: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 6: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 5: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 4: /media/kdonlon/data/Documents/42/webserv/git/www/kd/vlog
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 3: /media/kdonlon/data/Documents/42/webserv/git/vlog
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 2: /dev/null
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 1:
+==18818==    <inherited from parent>
+==18818== 
+==18818== Open file descriptor 0:
+==18818==    <inherited from parent>
+==18818== 
+==18818== 
+==18818== HEAP SUMMARY:
+==18818==     in use at exit: 816,365 bytes in 4,983 blocks
+==18818==   total heap usage: 6,114 allocs, 1,131 frees, 1,161,919 bytes allocated
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 1 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3BD374: zend_register_interfaces (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D6438: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 2 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3BD3DC: zend_register_interfaces (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D6438: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 3 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C07B8: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 4 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C08BC: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 5 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0957: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 6 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0A58: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 7 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0AA8: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 8 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0AF8: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 9 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0B48: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 10 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0B98: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 11 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3C0BE8: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D643D: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 12 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D8BD0: zend_do_inheritance_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A62C3: zend_register_internal_class_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3CCE23: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D644C: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 13 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x20FA6C: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x2101C3: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 14 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x20FADB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x2101C3: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 8 bytes in 1 blocks are still reachable in loss record 15 of 671
+==18818==    at 0x48386AF: malloc (vg_replace_malloc.c:306)
+==18818==    by 0x483ADE7: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D9E64: zend_do_implement_interface (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x21002B: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x2101C3: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 16 bytes in 1 blocks are still reachable in loss record 16 of 671
+==18818==    at 0x483AD7B: realloc (vg_replace_malloc.c:834)
+==18818==    by 0x3D7586: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A6247: zend_class_implements (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3CCCC8: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3D644C: zend_register_default_classes (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B89BA: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A4257: zend_startup_module_ex (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A42EB: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3B14F2: zend_hash_apply (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A45C9: zend_startup_modules (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33F2DD: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818== 
+==18818== 24 bytes in 1 blocks are possibly lost in loss record 17 of 671
+==18818==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18818==    by 0x376368: __zend_malloc (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3901F9: zend_register_constant (in /usr/bin/php-cgi7.4)
+==18818==    by 0x39047B: zend_register_long_constant (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3904C1: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A069D: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33EC8E: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x209926: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x5042D79: (below main) (libc-start.c:308)
+==18818== 
+==18818== 24 bytes in 1 blocks are possibly lost in loss record 18 of 671
+==18818==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18818==    by 0x376368: __zend_malloc (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3901F9: zend_register_constant (in /usr/bin/php-cgi7.4)
+==18818==    by 0x39047B: zend_register_long_constant (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3904DF: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x3A069D: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x33EC8E: php_module_startup (in /usr/bin/php-cgi7.4)
+==18818==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x209926: ??? (in /usr/bin/php-cgi7.4)
+==18818==    by 0x5042D79: (below main) (libc-start.c:308)
+==18818== 
+==18818== 24 bytes in 1 blocks are possibly lost in loss record 19 of 671
+==18818==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+4: ??? (in /usr/bin/php-cgi7.4)
+==18696==    by 0x209926: ??? (in /usr/bin/php-cgi7.4)
+==18696==    by 0x5042D79: (below main) (libc-start.c:308)
+==18696== 
+==18696== 24 bytes in 1 blocks are possibly lost in loss record 67 of 277
+==18696==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18696==    by 0x376368: __zend_malloc (in /usr/bin/php-cgi7.4)
+==18696==    by 0x3901F9: zend_register_constant (in /usr/bin/php-cgi7.4)
+==18696==    by 0x39047B: zend_register_long_constant (in /usr/bin/php-cgi7.4)
+==18696==    by 0x350F6F: php_output_register_constants (in /usr/bin/php-cgi7.4)
+==18696==    by 0x33F21D: php_module_startup (in /usr/bin/php-cgi7.4)
+==18696==    by 0x42C764: ??? (in /usr/bin/php-cgi7.4)
+==18696==    by 0x209926: ??? (in /usr/bin/php-cgi7.4)
+==18696==    by 0x5042D79: (below main) (libc-start.c:308)
+==18696== 
+==18696== 24 bytes in 1 blocks are possibly lost in loss record 68 of 277
+==18696==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18696==    by 0x376368: __zend_malloc (in /usr/bin/php-cgi7.4)
+==18696==    by 0x3901F9: zend_register_constant (in /usr/bin/php-cgi7.4)
+==18696==    by 0x39047B: zend_register_long_constant (in /usr/bin/php-cgi7.4)
+==18696==    by 0x350F8D: php_output_register_constants (in /usr/bin/php-cgi7.4)
+==18696==    by 0x33F21D: php_module_startup (in /usr/bin/php-cgi7.4)
+   by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18698==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18698== 
+==18698== 32 bytes in 1 blocks are still reachable in loss record 29 of 129
+==18698==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18698==    by 0x4C2093: PyThread_allocate_lock (in /usr/bin/python3.9)
+==18698==    by 0x60D35B: PyInterpreterState_New (in /usr/bin/python3.9)
+==18698==    by 0x608FDF: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18698==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18698==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18698== 
+==18698== 32 bytes in 1 blocks are still reachable in loss record 30 of 129
+==18698==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18698==    by 0x4C2BAF: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18698==    by 0x609270: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18698==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18698==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18698== 
+==18698== 32 bytes in 1 blocks are still reachable in loss record 31 of 129
+==18698==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18698==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18698==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18698==    by 0x6094B4: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18698==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18698==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18698== 
+==18698== 64 bytes in 1 blocks are still reachable in loss record 32 of 129
+==18698==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18698==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18698==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18698==    by 0x60AC5E: PyConfig_Read (in /usr/bin/python3.9)
+==18698==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18698==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18698==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18698==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18698== 
+==18698== 64 bytes in 1 blocks are still reachable in loss record 33 of 129
+==18698==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18698==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18698==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18698==    by 0x60B004: PyConfig_Read (in /usr/bin/python3.9)
+==18698==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18698==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 11 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60AB64: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 12 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60AB8F: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 13 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6092E3: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 14 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x609306: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 15 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x609329: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 16 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60934C: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 17 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60C3B6: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60F1C2: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 20 bytes in 1 blocks are still reachable in loss record 18 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60C3EF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60F1C2: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 19 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x609D1C: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 20 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60AF92: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 21 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60AFC9: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 22 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x609225: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 23 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6093B9: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 24 bytes in 1 blocks are still reachable in loss record 24 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6093F9: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 25 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C2093: PyThread_allocate_lock (in /usr/bin/python3.9)
+==18793==    by 0x6074DE: _PyRuntimeState_Init (in /usr/bin/python3.9)
+==18793==    by 0x4C1F90: _PyRuntime_Initialize (in /usr/bin/python3.9)
+==18793==    by 0x607394: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 26 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C2093: PyThread_allocate_lock (in /usr/bin/python3.9)
+==18793==    by 0x6074F8: _PyRuntimeState_Init (in /usr/bin/python3.9)
+==18793==    by 0x4C1F90: _PyRuntime_Initialize (in /usr/bin/python3.9)
+==18793==    by 0x607394: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 27 of 129
+==18793==    at 0x483AD7B: realloc (vg_replace_malloc.c:834)
+==18793==    by 0x4C2521: PyWideStringList_Insert (in /usr/bin/python3.9)
+==18793==    by 0x4C242F: PyWideStringList_Append (in /usr/bin/python3.9)
+==18793==    by 0x60AA7F: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 28 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60ADAA: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 29 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C2093: PyThread_allocate_lock (in /usr/bin/python3.9)
+==18793==    by 0x60D35B: PyInterpreterState_New (in /usr/bin/python3.9)
+==18793==    by 0x608FDF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 30 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C2BAF: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x609270: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 32 bytes in 1 blocks are still reachable in loss record 31 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6094B4: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 64 bytes in 1 blocks are still reachable in loss record 32 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60AC5E: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 64 bytes in 1 blocks are still reachable in loss record 33 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60B004: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 64 bytes in 1 blocks are still reachable in loss record 34 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6093D6: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 64 bytes in 1 blocks are still reachable in loss record 35 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60941C: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 36 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x609B8D: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 37 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60AAD4: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 38 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60ABBA: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 39 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x609208: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 40 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x60929D: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 41 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6092C0: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 42 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60C37D: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60F1C2: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 68 bytes in 1 blocks are still reachable in loss record 43 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x60C422: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60F1C2: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 92 bytes in 2 blocks are still reachable in loss record 44 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C27BA: _Py_DecodeUTF8Ex (in /usr/bin/python3.9)
+==18793==    by 0x4C22C0: Py_DecodeLocale (in /usr/bin/python3.9)
+==18793==    by 0x4C224D: _PyArgv_AsWstrList (in /usr/bin/python3.9)
+==18793==    by 0x608A71: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608A2A: PyConfig_SetBytesArgv (in /usr/bin/python3.9)
+==18793==    by 0x6073E0: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 92 bytes in 2 blocks are still reachable in loss record 45 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x60999D: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 92 bytes in 2 blocks are still reachable in loss record 46 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x60D123: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608F6E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 92 bytes in 2 blocks are still reachable in loss record 47 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x6094ED: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 232 bytes in 1 blocks are still reachable in loss record 48 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x60B993: _Py_abspath (in /usr/bin/python3.9)
+==18793==    by 0x60B87E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x609CC0: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 232 bytes in 1 blocks are still reachable in loss record 49 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x609491: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 264 bytes in 1 blocks are still reachable in loss record 50 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C27BA: _Py_DecodeUTF8Ex (in /usr/bin/python3.9)
+==18793==    by 0x4C22C0: Py_DecodeLocale (in /usr/bin/python3.9)
+==18793==    by 0x60BDCE: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60BB0E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60A0DE: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 264 bytes in 1 blocks are still reachable in loss record 51 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2B64: PyConfig_SetString (in /usr/bin/python3.9)
+==18793==    by 0x6091C8: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 264 bytes in 1 blocks are still reachable in loss record 52 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x60D519: ??? (in /usr/bin/python3.9)
+==18793==    by 0x609013: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 516 bytes in 1 blocks are still reachable in loss record 53 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C597C: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB1CF: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DAB7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 520 bytes in 1 blocks are still reachable in loss record 54 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4923: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4D02F8: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60E87B: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 520 bytes in 1 blocks are still reachable in loss record 55 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4E3164: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E16DD: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E0E19: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E13C1: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E0F49: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E13C1: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4E0BE0: PyMarshal_ReadObjectFromString (in /usr/bin/python3.9)
+==18793==    by 0x6119D5: PyImport_ImportFrozenModuleObject (in /usr/bin/python3.9)
+==18793==    by 0x61196C: PyImport_ImportFrozenModule (in /usr/bin/python3.9)
+==18793==    by 0x60F207: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793== 
+==18793== 552 bytes in 1 blocks are still reachable in loss record 56 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x60C490: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60F1C2: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 552 bytes in 4 blocks are still reachable in loss record 57 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2504: PyWideStringList_Insert (in /usr/bin/python3.9)
+==18793==    by 0x4C242F: PyWideStringList_Append (in /usr/bin/python3.9)
+==18793==    by 0x60AA7F: PyConfig_Read (in /usr/bin/python3.9)
+==18793==    by 0x608F36: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 552 bytes in 4 blocks are still reachable in loss record 58 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C25A6: _PyMem_RawWcsdup (in /usr/bin/python3.9)
+==18793==    by 0x4C2BCE: _PyWideStringList_Copy (in /usr/bin/python3.9)
+==18793==    by 0x609270: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608FFF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 561 bytes in 1 blocks are still reachable in loss record 59 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C597C: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB1CF: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DA4B: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 60 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB7AF: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60D9F1: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 61 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DBD7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 62 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DC31: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 63 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CAF3C: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DC9D: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 64 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DCC1: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 65 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DCD3: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 66 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CA9F2: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DCF7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 67 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CAF3C: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DD09: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 68 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DD2D: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 69 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DD63: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 70 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CA9F2: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DD99: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 71 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB1EB: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DDCF: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 72 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CA9F2: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DDE1: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 73 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DE4D: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 74 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CA9F2: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60DE71: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 75 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4D74BC: PyDict_SetItemString (in /usr/bin/python3.9)
+==18793==    by 0x60F912: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4D717B: PyStructSequence_InitType2 (in /usr/bin/python3.9)
+==18793==    by 0x60E025: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 76 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60F962: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60E122: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 77 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB270: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x60FC83: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60E122: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 78 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CB270: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x6102C6: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60E122: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 79 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x610620: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60E122: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 80 of 129
+==18793==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18793==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18793==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18793==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18793==    by 0x4D7159: PyStructSequence_InitType2 (in /usr/bin/python3.9)
+==18793==    by 0x60E1AC: ??? (in /usr/bin/python3.9)
+==18793==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18793==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18793==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18793==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18793== 
+==18793== 576 bytes in 1 blocks are still reachable in loss record 81 of 129
+on3.9)
+==18692==    by 0x60D966: ??? (in /usr/bin/python3.9)
+)
+==18690==    by 0x4C4923: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CC680: PyTuple_New (in /usr/bin/python3.9)
+==18690==    by 0x4E0DEC: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4E13C1: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4E0BE0: PyMarshal_ReadObjectFromString (in /usr/bin/python3.9)
+==18690==    by 0x4FDF49: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4E82FE: _PyEval_EvalFrameDefault (in /usr/bin/python3.9)
+==18690==    by 0x4E4A0D: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4FEE50: _PyFunction_Vectorcall (in /usr/bin/python3.9)
+==18690==    by 0x4E6554: _PyEval_EvalFrameDefault (in /usr/bin/python3.9)
+==18690==    by 0x4FEC92: _PyFunction_Vectorcall (in /usr/bin/python3.9)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 86 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CAF3C: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60D9CD: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 87 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CAF3C: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60D9DF: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 88 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CB7AF: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DA6F: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 89 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CABE1: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DAC9: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 90 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DADB: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 91 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CA5B1: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DAED: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 92 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CA5B1: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DB11: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 93 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DB59: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 94 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CA9F2: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DBFB: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 95 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DC1F: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
+==18690==    by 0x4A4DD79: (below main) (libc-start.c:308)
+==18690== 
+==18690== 1,112 bytes in 1 blocks are still reachable in loss record 96 of 128
+==18690==    at 0x483877F: malloc (vg_replace_malloc.c:307)
+==18690==    by 0x4C4AEA: PyObject_Malloc (in /usr/bin/python3.9)
+==18690==    by 0x4C9087: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CDCE7: ??? (in /usr/bin/python3.9)
+==18690==    by 0x4CB6D6: PyType_Ready (in /usr/bin/python3.9)
+==18690==    by 0x60DC55: ??? (in /usr/bin/python3.9)
+==18690==    by 0x60904E: ??? (in /usr/bin/python3.9)
+==18690==    by 0x608ABD: Py_InitializeFromConfig (in /usr/bin/python3.9)
+==18690==    by 0x6073F5: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607340: ??? (in /usr/bin/python3.9)
+==18690==    by 0x607328: Py_BytesMain (in /usr/bin/python3.9)
