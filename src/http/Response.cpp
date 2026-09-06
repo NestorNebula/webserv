@@ -62,8 +62,7 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 }
 
 bool Response::isReady() const {
-  return !_version.empty() && _code && !_reason.empty() &&
-         (!_resource || hasBody());
+  return !_version.empty() && _code && (!_resource || hasBody());
 }
 
 bool Response::hasBody() const { return _resource && _resource->done(); }
