@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:23:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 08:59:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 
 # if NOLOG
 #  define WSLOG(...)
-#  define WSCOL(...) 
+#  define WSCOL(...)
 #else
 #  define WSLOG WsLog::_
 #  define WSCOL WsLog::color
@@ -100,7 +100,9 @@ typedef long unsigned int log_tgt;
 # define TGT_TIMEO		(1UL << 25)
 # define TGT_RETRY		(1UL << 26)
 
-# define TGT_SERV_ALL	((1UL << 27) - 1)
+# define TGT_KEEPA		(1UL << 27)
+
+# define TGT_SERV_ALL	((1UL << 28) - 1)
 
 
 
@@ -153,7 +155,7 @@ private:
 
 public:
 	static log_lvl  	lvl;
-	static log_tgt  	tgt; 
+	static log_tgt  	tgt;
 	static std::string	col;
 
 	static void color(int c);
