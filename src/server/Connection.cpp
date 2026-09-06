@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 20:17:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 08:59:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,11 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	// WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, "req cnt: ", this->req_cnt);
 // KEEP_ALIVE : check req_cnt
-	WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
+	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
+	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try
 	{
 		this->serv.conn_closed();
