@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/06 13:40:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 22:59:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete() || (_next != RDSOCK && _next != DOCGI)) {
     std::ostringstream oss;
-    oss << "Session::write called while Request is complete and Session is in "
+    oss << "Session::write " << count << " called while Request is complete and Session is in "
       << Session::actionToStr(_next)
       << "\nSession::write should be called for non-complete Request "
       << "in RDSOCK/DOCGI mode. Nothing written";
@@ -235,7 +235,7 @@ void Session::manageSession() {
       if (retry_res)
       {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", retry_res);
+        WSLOG(LVL_ERR, TGT_SESS, "sess: retry ", retry_res);
         _next = Session::RETRY;
       }
       else
@@ -398,14 +398,14 @@ void Session::handleResource() {
 #endif
       delete _resource;
       _resource = NULL;
-      WSLOG(LVL_TMP, TGT_SESS, "Error when generating Session Resource");
+      WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
 // #kd - Session::RETRY
       if (retry_res)
       {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", retry_res);
+        WSLOG(LVL_ERR, TGT_SESS, "sess: retry SUCCESS ", retry_res);
         retry_res = 0;
       }
     }
@@ -564,6 +564,8 @@ void Session::setResponseHeaders() {
       if (!lmDate.empty())
         headers.insert("Last-Modified", lmDate);
     }
+// #kd
+    headers.insert("Cache-Control", "no-cache");
   }
 
   // Location

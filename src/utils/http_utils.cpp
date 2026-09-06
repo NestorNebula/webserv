@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 07:27:39 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/05 18:55:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:20:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,9 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[609] = "kd - testing";
     reasons[610] = "kd - testing";
     reasons[611] = "kd - testing";
+    reasons[612] = "kd - testing";
+    reasons[621] = "kd - testing";
+    reasons[622] = "kd - testing";
     reasons[666] = "kd - testing";
 
   }
