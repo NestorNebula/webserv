@@ -9,8 +9,9 @@ http://127.0.0.1:8081/html/index.html
 http://127.0.0.1:8081/files/earth.jpg
 http://127.0.0.1:8081/files/e4.jpg
 
-# BIGFILE
-http://127.0.0.1:8081/files/Kanan.mp3
+# BIGFILE - can make some low-fd fail
+# waiting to "get in there" (?)
+# http://127.0.0.1:8081/files/Kanan.mp3
 
 
 

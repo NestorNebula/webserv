@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:38:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 22:59:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ Epoll::~Epoll()
 
 void	Epoll::cleanup()
 {
-	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
 	const int	*typ = cli_typ;
@@ -109,7 +109,7 @@ void	Epoll::cleanup()
 				}
 				catch(const std::exception& e)
 				{
-					WSLOG(LVL_TMP, TGT_EPOLL, " (~) EpollClient\n", e.what());
+					WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
 				}		
 				this->clients.erase(it++);
 			}
@@ -120,7 +120,7 @@ void	Epoll::cleanup()
 		}
 		typ++;
 	}
-	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	this->clients.clear();
 	
@@ -307,13 +307,13 @@ int	Epoll::cli_info(void)
 			it++;
 		}
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "serv: ", epc_serv);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "serv: ", epc_serv);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "conn: ", epc_conn);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "conn: ", epc_conn);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
 	}
 	return (epc_cgi + epc_fcgi);
 }

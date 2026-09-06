@@ -34,12 +34,12 @@
     print("p1 : " . $p1 . PHP_EOL);
     print("p2 : " . $p2 . PHP_EOL);
 
-    // print("\nENV\n\n");
-    // foreach  ($_SERVER as $k => $v)
-    //     print ("$k = $v\n");
+    print("\nENV\n\n");
+    foreach  ($_SERVER as $k => $v)
+        print ("$k = $v\n");
 
-    // $chk_hed = 'REMOTE_ADDR';
-    // print("\n$chk_hed : " . $_SERVER[$chk_hed] . PHP_EOL);
+    $chk_hed = 'REMOTE_ADDR';
+    print("\n$chk_hed : " . $_SERVER[$chk_hed] . PHP_EOL);
 
 // POST Content-Length of 14976173 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 

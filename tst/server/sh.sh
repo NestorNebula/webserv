@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=12
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -176,7 +176,7 @@ fi
 
 # curl --http1.0 -X POST 'http://localhost:8082/ka.php' -i
 
-curl -X POST 'http://localhost:8082/bigaudio.php' -i
+curl -X POST 'http://localhost:8082/test.php' -i
 echo
 # curl -X GET 'http://localhost:8082/exit.php' -i
 # echo
