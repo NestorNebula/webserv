@@ -427,7 +427,7 @@ void Session::prepareDirectoryResource() {
     _resource = new StaticResource(_resourcePath);
   } else if (_route->autoindex) {
     WSLOG(LVL_INFO, TGT_SESS, "Preparing DirectoryResource");
-    _resource = new DirectoryResource(_resourcePath);
+    _resource = new DirectoryResource(_resourcePath, _request.getURL());
   } else {
     setResponseStatus(403);
     prepareErrorResource();
