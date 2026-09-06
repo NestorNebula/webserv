@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:12:39 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 19:28:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 16:37:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ int	ResourceFcgi::status(void)
 		return (RSP_ERROR);
 	}
 
-	if (this->head_size == 0)
+	if (!this->have_head)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		if (this->fcgi)
@@ -117,7 +117,7 @@ int	ResourceFcgi::wait(int opt)
 	if (this->done == RSRC_DONE_IO)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI, "wait:  (done)");
-		if (this->head_size == 0)
+		if (!this->have_head)
 		{
 			this->set_err(500); // #kd (603)
 			return (0);
