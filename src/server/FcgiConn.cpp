@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:36:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 12:31:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,19 +153,17 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
 
-		hed->data(&data);
+		hed->data(&data); // parse into (data) struct
 
 		if (hed->head.type == FCGI_END_REQUEST)
 		{
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
 			// // FCGI_EndRequestBody
-			// char *body = (chk + FCGI_HEADER_LEN);
-			// int *app_stat = (int*) body;
-			// char prot_stat = body[4];
-			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat A ", *app_stat);
-			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat P ", prot_stat);
-
+			// char *end_body = (chk + FCGI_HEADER_LEN);
+			// for (int i=0; i < 8; i++)
+			// 	std::cerr << "head [" << i << "] = " << (int) end_body[i] << std::endl;
+			// std::cerr << std::endl;
 			return (2);
 		}
 

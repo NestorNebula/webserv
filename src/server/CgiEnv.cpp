@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:19:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 14:36:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,8 +142,8 @@ int     CgiEnv::from_conn(Connection & conn)
 		// or "multipart/form-data".
 		// If CONTENT_TYPE is blank, the script can reject the request 
 		// with a 415 'Unsupported Media Type' error, where supported by the protocol.
-		WSLOG(LVL_ERR, TGT_CGI_ENV, "missing : content-type");
-		return (conn.set_err(415)); // Unsupported Media Type
+		WSLOG(LVL_DBG, TGT_CGI_ENV, "missing : content-type");
+		// return (conn.set_err(415)); // Unsupported Media Type
 	}
 	
 	if (req.hasHeader("Content-length"))
@@ -197,7 +197,6 @@ const char	**CgiEnv::gen(void)
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
-		// ATTN : fork => dup_err
 		// WSCOL(WSL_GREEN);
 		// WSLOG(LVL_TMP, TGT_CGI_ENV, "(kv) : ", it->c_str());
 		*ins++ = it->c_str();

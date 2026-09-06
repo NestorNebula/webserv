@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:16:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 19:28:21 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 16:37:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ int	ResourcePiped::status(void)
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (error)");
 		return (RSP_ERROR);
 	}
-	if ((this->head_size == 0) && this->ip)
+	if (!this->have_head && this->ip)
 	{
 		WSLOG(LVL_DBG, TGT_RSRC_STAT, "stat:  (no head)");
 		this->ip->mod_evt(EPOLLOUT);
@@ -219,14 +219,13 @@ int	ResourcePiped::wait(int opt)
 	{
 		WSLOG(LVL_INFO, (TGT_RSRC_WAIT | TGT_RSRC_INFO), "STAT: ", stat);
 	}
-	if (this->head_size == 0)
+	if (!this->have_head)
 	{
-		WSLOG(LVL_DBG, TGT_RSRC, "wait : error: 605");
 		WSLOG(LVL_DBG, TGT_RSRC, "stat : ", stat);
 		// WSLOG(LVL_DBG, TGT_RSRC, "req:\n", this->body);
 		// WSLOG(LVL_DBG, TGT_RSRC, "rsp:\n", this->resp);
 
-		// do not set error if we are going to retry
+			// do not set error if we are going to retry
 		if (this->stat || (this->conn && !this->conn->retry_cgi))
 		{
 			// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "hed : ", 0);
@@ -234,6 +233,12 @@ int	ResourcePiped::wait(int opt)
 			this->set_err(500); // #kd (605)
 		}
 	}
+	else if (this->stat && (this->conn && !this->conn->retry_cgi))
+	{
+		// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "hed : ", 0);
+		// WSLOG(LVL_TMP, TGT_RSRC_WAIT, "stat: ", stat);
+		this->set_err(500); // #kd (605)
+	}	
 	else if (this->wait_comp)
 		this->chk_rsp_len();
 	return (this->stat);

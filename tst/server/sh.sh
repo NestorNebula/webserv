@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=4
+R=8
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -174,12 +174,17 @@ fi
 # echo
 # exit 0
 
+# curl --http1.0 -X POST 'http://localhost:8082/ka.php' -i
 
-curl -X GET 'http://localhost:8082/test.php' -i
+curl -X POST 'http://localhost:8082/bigaudio.php' -i
 echo
+# curl -X GET 'http://localhost:8082/exit.php' -i
+# echo
+# curl -X GET 'http://localhost:8082/exit.pl' -i
+# echo
+# curl -X GET 'http://localhost:8082/exit.py' -i
+# echo
 exit 0
-
-
 
 curl -X GET 'http://localhost:8082/test.php?g1=QUERY&g2=both' -i \
 	-d "p1=siege-post-one&p2=siege-post-two"

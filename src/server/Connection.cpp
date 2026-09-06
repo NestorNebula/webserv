@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 08:59:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 16:31:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,6 @@ Connection::~Connection()
 {
 	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, " (~) Connection ", this->fd);
 	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, "req cnt: ", this->req_cnt);
-// KEEP_ALIVE : check req_cnt
-	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
 	try
 	{
 		this->serv.conn_closed();
@@ -288,7 +285,7 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::KPALIVE:
 			WSCOL(WSL_PURPLE);
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (ip)");
 			// no reset here (?)
 			return (0);
 		case Session::CLOSE:
@@ -328,7 +325,7 @@ ssize_t	Connection::pollout(void)
 // KEEP_ALIVE
 			case RSP_KPALIVE:
 				WSCOL(WSL_PURPLE);
-				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (rsp) ", this->req_cnt);
 				this->reset();
 				return (0);
 			case RSP_WAIT_HEAD:
@@ -346,7 +343,7 @@ ssize_t	Connection::pollout(void)
 			std::string & RESP = res->get_resp();
 
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "data");
 			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 			err = this->send(RESP);
 		}
@@ -387,7 +384,7 @@ ssize_t	Connection::pollout(void)
 		{
 		case Session::KPALIVE:
 			WSCOL(WSL_PURPLE);
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (op) ", this->req_cnt);
 			this->reset();
 			return (0);
 		case Session::CLOSE:

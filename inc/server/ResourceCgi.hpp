@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/05 19:30:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 16:26:58 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,11 @@ public:
 		done(0),
 		error(0),
 		ka(false),
-		head_size(0),
+		have_head(false),
+		stat(0),
 		clen(0),
+		clos(0),
+		chnk(0),
 		wait_comp(false),
 		failed(false),
 		conn(NULL)
@@ -85,15 +88,20 @@ public:
 	virtual int		rem(EpollClient *epc) = 0;
 
 	std::string		body; // HTTP Request
-	std::string		resp; // CGI  Output
 	int				done;
 	int				error;
 	bool			ka;
 
 protected:
-	int				head_size;
+	bool			have_head;
+	std::string		resp_head; // CGI  Output
+	std::string		resp_body; // CGI  Output
+	int				stat;
 	size_t			clen;
-	size_t			body_size(void);
+	int				clos;
+	int				chnk;
+	void			make_head(void);
+	
 	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);
