@@ -57,9 +57,9 @@ void DirectoryResource::buildList() {
               "<meta charset=\"utf-8\">\n"
               "<meta name=\"viewport\" content=\"width=device-width, "
               "initial-scale=1.0\" />\n"
-              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />"
+              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />\n"
               "<title>Directory listing for "
-           << _dirpath
+           << _dirURI 
            << "</title>\n"
               "</head>\n"
               "<body>\n"
@@ -71,7 +71,7 @@ void DirectoryResource::buildList() {
               "</header>\n"
               "<section id=\"dir-list-section\">\n"
               "<h1>Directory listing for "
-           << _dirpath
+           << _dirURI 
            << "</h1>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
