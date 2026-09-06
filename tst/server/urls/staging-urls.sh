@@ -46,11 +46,11 @@ http://127.0.0.1:8082/stat.php
 # http://127.0.0.1:8082/vids/dff.mp4
 
 
-http://127.0.0.1:8081/bigimage.php
-http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8081/bigimage.php
+# http://127.0.0.1:8082/bigimage.php
 
 
-# BIGFILE
+# BIGFILE - can slow down low-fd
 # http://127.0.0.1:8081/bigaudio.php
 # http://127.0.0.1:8082/bigaudio.php
 
@@ -58,6 +58,7 @@ http://127.0.0.1:8082/bigimage.php
 
 
 http://127.0.0.1:8082/files/earth.jpg
+# http://127.0.0.1:8082/files/e4.jpg
 # BIGFILE
 # http://127.0.0.1:8082/files/Kanan.mp3
 

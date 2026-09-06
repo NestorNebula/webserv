@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 11:30:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:29:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 
 Server::~Server()
 {
-	WSLOG(LVL_TMP, TGT_SERV, " (~) Server");
-	WSLOG(LVL_TMP, TGT_SERV, "acc cnt : ", acc_cnt);
-	WSLOG(LVL_TMP, TGT_SERV, "acc err : ", acc_err);
-	WSLOG(LVL_TMP, TGT_SERV, "acc fail: ", acc_fail);
+	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
+	WSLOG(LVL_DBG, TGT_SERV, "acc cnt : ", acc_cnt);
+	WSLOG(LVL_DBG, TGT_SERV, "acc err : ", acc_err);
+	WSLOG(LVL_DBG, TGT_SERV, "acc fail: ", acc_fail);
 	this->sfd_close();
 };
 
@@ -87,9 +87,8 @@ void	Server::set_paused(void)
 		
 	this->paused = 1;
 
-	
 	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, this->port, "pause  ...  ");
+	WSLOG(LVL_DBG, TGT_RETRY, this->port, "pause  ...  ");
 	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
 	
 	// the idea : cede these to a CGI that needs to get started
@@ -103,7 +102,7 @@ void	Server::conn_closed(void)
 		return;
 	this->freed_fd++;
 
-	if (this->freed_fd > 4)
+	if (this->freed_fd > 6)
 		this->lact = this->lact - SERV_PAUSE;
 }
 
@@ -185,19 +184,19 @@ bool	Server::timeo  (WsTime & now)
 	if (this->sfd_open() < 0)
 	{
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, this->port, "stay paused");
+		WSLOG(LVL_DBG, TGT_RETRY, this->port, "stay paused");
 		this->ep->cli_info();
 		return (false);
 	}
 	if (this->accept_conn() > 0)
 	{
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, this->port, "accepted!");
+		WSLOG(LVL_DBG, TGT_RETRY, this->port, "accepted!");
 	}
 	// free (3) for CGI .. 
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, this->port, "resume (!)");
+	WSLOG(LVL_DBG, TGT_RETRY, this->port, "resume (!)");
 
 	this->freed_fd = 0;
 	this->paused = 0;

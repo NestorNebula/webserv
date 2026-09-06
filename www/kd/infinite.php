@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: text/plain');
 
-header('Content-Length: 10');
+// header('Content-Length: 10');
 
 // RULE : cgi WITHOUT CONTENT LENGTH .. 
 // SHOULD : buffer 

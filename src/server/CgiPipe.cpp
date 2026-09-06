@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 15:55:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:19:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,12 @@ bool	CgiPipe::timeo(WsTime & now)
 		}
 
 		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(504);  // CGI_ERR : gateway timeout
+		this->rsrc->set_err(611);  // CGI_ERR : gateway timeout
 	}
 	else if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(504); // CGI_ERR : gateway timeout
+		this->conn->set_err(612); // CGI_ERR : gateway timeout
 	}
 	else
 	{
@@ -125,7 +125,7 @@ ssize_t	CgiPipe::pollout(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_SEND, "send");
-		return (this->rsrc->set_err(500)); // #kd (611)
+		return (this->rsrc->set_err(500));
 	}
 	if (err == 0)
 	{
@@ -155,12 +155,12 @@ ssize_t	CgiPipe::pollin(void)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
-		return (this->rsrc->set_err(500)); // #kd (611)
+		return (this->rsrc->set_err(500));
 	}
 	if (err == 0)
 	{
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_CGI_RECV, "recv:  ZERO");
+		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
 		return (-1);
 	}

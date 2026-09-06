@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 16:49:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:04:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,36 +88,44 @@ static std::string hedval_str(std::string & str, const char *key)
 
 int		ResourceCgi::recv_data(char *buf, int siz)
 {
-	if (this->have_head)
+	if (!this->have_head)
 	{
-		this->resp_body.append(buf, siz);
-		if (!this->wait_comp)
+		this->resp_head.append(buf, siz);
+		return (this->chk_rsp_hed());
+	}
+		
+	this->resp_body.append(buf, siz);
+	if (!this->wait_comp)
+	{
+		conn->mod_evt(EPOLLOUT);
+	}
+	else
+	{
+		if (this->resp_body.size() > 512000)
 		{
-			conn->mod_evt(EPOLLOUT);
-		}
-		else
-		{
-			if (this->resp_body.size() > 1000000)
+			WSCOL(WSL_CYAN);
+			WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: OFF");
+
+			// start CHUNKED
+			if (this->clen)
 			{
-				WSCOL(WSL_CYAN);
-				WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: OFF");
 				this->wait_comp = false;
 				this->ka = false;
-				// this->clen = 0;
 				this->make_head();
 				conn->mod_evt(EPOLLOUT);
 			}
+			else
+			{
+				// too much data without knowing clen
+				WSCOL(WSL_RED);
+				WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: MAXXED");
+				this->set_err(500);
+				return (RSRC_RESP_ERR);
+			}
 		}
-		// without - very slow .. and timeous triggered 
-
-
-		// if body_size > 
-		// if clen == 0 && this->resp_body.size() > SOMETHING
-			// not allowed -- bad script -- big files MUST have content-length header
-		return (RSRC_RESP_BODY);
 	}
-	this->resp_head.append(buf, siz);
-	return (this->chk_rsp_hed());
+	return (RSRC_RESP_BODY);
+
 }
 
 int		ResourceCgi::chk_rsp_hed(void)
@@ -144,18 +152,23 @@ int		ResourceCgi::chk_rsp_hed(void)
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "conn: ", conn_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: ", clen_str);
 
-	// strip and save here 
-	// re-insert
-	// either at rsp_len OR when we turn wait_comp OFF 
-
 	this->stat = std::atoi(stat_str.c_str());
 	this->clen = std::atoi(clen_str.c_str());
 
-	if (this->clen) // AND .. it is less than .. something
+#if 0 // WITH_KEEPALIVE
+	if (this->clen)
+	{
+		// assume (clen) bytes will be delivered by script
+		this->make_head();
+	}
+	else
+	{
 		this->wait_comp = true;
-
-	this->wait_comp = true; // NO CLEN .. but turn OFF if TOO BIG
-
+	}
+#else
+	this->ka = false;
+	this->wait_comp = true;
+#endif
 	this->have_head = true;
 	return (RSRC_RESP_HEAD);
 }
@@ -167,6 +180,8 @@ void	ResourceCgi::make_head(void)
 // clen
 	std::string hed_str;
 	
+	hed_str = std::string("Cache-Control: no-cache\r\n");
+	resp_head.insert(0, hed_str);
 	if (this->clen)
 	{
 		hed_str = std::string("Content-Length: ") + toString(this->clen) + "\r\n";

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 16:31:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:23:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,21 +61,11 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-// sess  : Request Resource resolved: ./html/contact.html
-// sess  : Checking operation is possible on Session Resource
-// sess  : Operation possible on Session Resource
-// sess  : Preparing Session Resource generation
-// sess  : Processing upload Request
-// res   : BuiltinResource constructor for code  [403]
-// sess  : Generating Session Resource
-// res   : Generating BuiltinResource for code  [403]
-// res   : BuiltinResource called with wrong code, teapot found
-// res   : BuiltinResource error for code  [418]
-// res   : BuiltinResource destructor for code  [418]
+		
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
 		sess.manageSession();
 		switch (sess.nextAction())
 		{
@@ -92,13 +82,13 @@ bool	Connection::timeo(WsTime & now)
 	{
 		this->lact = now;
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
 			if (retry_cgi >= MAX_RETRIES)
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+				WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 // if (Connection) blocks all available (fd) ..
 // we'd rather sacrifice JUST ONE ...
 				this->set_err(504); // #kd (610)
@@ -108,7 +98,7 @@ bool	Connection::timeo(WsTime & now)
 		}
 		// success
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		this->retry_cgi = 0;
 		this->mod_evt(EPOLLIN);
 		return (0);
@@ -118,7 +108,7 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ",
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ",
 		// this->get_fd());
 		evt_type(this->evt.events));
 	// Request Timeout -- not necessarily
@@ -248,7 +238,7 @@ ssize_t	Connection::pollin(void)
 		{
 		case Session::RETRY:
 			WSCOL(WSL_CYAN);
-			WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "sess: RETRY");
+			WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "sess: RETRY");
 			this->mod_evt(0);
 			break;
 		case Session::DOCGI:
@@ -295,8 +285,9 @@ ssize_t	Connection::pollin(void)
 	}
 	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
-		this->set_err(404); // File Not Found
+		WSCOL(WSL_RED);
+		WSLOG(LVL_ERR, TGT_CONN, "ex: pollin\n", e.what());
+		this->set_err(500); // #kd CGI_ERR
 	}
 	return (0);
 }
@@ -396,8 +387,9 @@ ssize_t	Connection::pollout(void)
 	}
 	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
-		this->set_err(404); // File Not Found
+		WSCOL(WSL_RED);
+		WSLOG(LVL_ERR, TGT_CONN, "ex: pollout\n", e.what());
+		this->set_err(500); // #kd CGI_ERR
 	}
 	return (0);
 }
@@ -504,14 +496,14 @@ int	Connection::exec_cgi(void)
 			delete (cgienv);
 			this->res_cgi = fcgi;
 // KEEP_ALIVE : set from Request (fcgi)
-			this->res_cgi->ka = this->sess.getRequest().keepalive();
+			this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
 			return (err);
 		}
 		delete (cgienv);
 		delete (fcgi);
 		// ASSUMES : fail = "Too many open files"
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return(SYSCALL_ERR);
 	}
 
@@ -524,7 +516,7 @@ int	Connection::exec_cgi(void)
 	{
 		delete (cgienv);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 
@@ -588,11 +580,11 @@ int	Connection::exec_cgi(void)
 		pipes.shutdown();
 		delete (pcgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
 // KEEP_ALIVE : set from Request (cgi)
-	this->res_cgi->ka = this->sess.getRequest().keepalive();
+	this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
 	return (err);
 }
