@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 10:14:17 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/06 14:31:20 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/07 11:15:58 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include <fstream>
 #include <sstream>
 
-RouteConfig::RouteConfig() : autoindex(false), upload(false), max_body_size (0)  {}
-ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(false), pycgi_dir("") { host = "127.0.0.1"; }
+RouteConfig::RouteConfig() : autoindex(false), autoindex_set(false), upload(false), max_body_size (0)  {}
+ServerConfig::ServerConfig() : port(0), max_body_size(1048576), upload(false), autoindex(false), pycgi_dir("") { host = "127.0.0.1"; }
 ConfigParser::ConfigParser(const std::string &conf_file_root) : _pos(0), _conf_file_root(conf_file_root) {}
 ConfigParser::~ConfigParser() {}
 

@@ -6,7 +6,7 @@
 /*   By: mamarti <mamarti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 14:41:11 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/06 14:37:42 by mamarti          ###   ########.fr       */
+/*   Updated: 2026/09/07 11:18:03 by mamarti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,10 @@ void	ConfigParser::parseRoute(ServerConfig& current_server)
 	if (directives.count("root"))
     	route.root = directives["root"];
 	if (directives.count("autoindex"))
+	{
 		route.autoindex = parseOnOff(directives["autoindex"]);
+		route.autoindex_set = true;
+	}
 	if (directives.count("upload"))
 		route.upload = parseOnOff(directives["upload"]);
 	if (directives.count("max_body_size"))
@@ -170,6 +173,8 @@ void	ConfigParser::parseServer()
 		server.root = this->_conf_file_root + directives["root"];
 	if (directives.count("upload"))
 		server.upload = parseOnOff(directives["upload"]);
+	if (directives.count("autoindex"))
+		server.autoindex = parseOnOff(directives["autoindex"]);
 	if (directives.count("upload_dir"))
 		server.upload_dir = directives["upload_dir"];
 	if (directives.count("methods"))
@@ -201,6 +206,8 @@ void	ConfigParser::parseServer()
 			server.routes[i].max_body_size = server.max_body_size;
 		if (server.routes[i].index.empty())
 			server.routes[i].index = server.index;
+		if (!server.routes[i].autoindex_set)
+			server.routes[i].autoindex = server.autoindex;
 		std::map<std::string, std::string>::iterator	ite;
 		for (ite = server.error_pages.begin(); ite != server.error_pages.end(); ++ite)
 		{
