@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:31:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:39:02 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ void Session::manageSession() {
       handleResource();
       if (_retry_res) {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
+        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
       } else if (_next != DOCGI) {
         handleResponse();
@@ -373,9 +373,9 @@ void Session::handleResource() {
     if (_resource->failed()) {
 // #kd - Session::RETRY
 #if 1
-      if (retry_res++ > MAX_RETRIES)
+      if (_retry_res++ > MAX_RETRIES)
       {
-        retry_res = 0;
+        _retry_res = 0;
         setResponseStatus(500);
       }
       else
@@ -393,7 +393,7 @@ void Session::handleResource() {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
       if (_retry_res) {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
     }

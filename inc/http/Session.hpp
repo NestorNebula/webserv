@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:28:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:34:33 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ private:
   Session(const Session &);
   Session &operator=(const Session &);
 
+  Action _next;
 
   ServerConfig &_server;
   RouteConfig *_route;
@@ -98,6 +99,7 @@ private:
 
   void throwIfNotAction(Action action) const;
   static const std::string &actionToStr(Action action);
+
   void handleRequest();
   void preValidateRequest();
   void validateRequest();
