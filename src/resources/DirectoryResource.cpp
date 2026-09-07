@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:32:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:44:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-
-// #kd - Alphabetical Directory
-#include <vector>
-#include <algorithm>
 
 void DirectoryResource::generate() {
   if (_state != DEFAULT)
@@ -87,6 +83,7 @@ void DirectoryResource::buildList() {
                << "</a>\n"
                   "</li>\n";
   }
+
   *_stream << "</ul>\n"
               "<hr>\n"
               "</section>\n"

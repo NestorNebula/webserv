@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/03 10:45:16 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 12:29:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:45:45 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <cmath>
 
 # ifndef EXTRA_TIME
-#  define EXTRA_TIME 1
+#  define EXTRA_TIME 0
 # endif
 
 # define NSEC 1000000000L
