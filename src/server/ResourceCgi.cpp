@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:04:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:23:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,12 +101,10 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	}
 	else
 	{
-		if (this->resp_body.size() > 512000)
+		if (this->resp_body.size() > CGI_MAX_BUF)
 		{
 			WSCOL(WSL_CYAN);
 			WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: OFF");
-
-			// start CHUNKED
 			if (this->clen)
 			{
 				this->wait_comp = false;
@@ -116,7 +114,6 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 			}
 			else
 			{
-				// too much data without knowing clen
 				WSCOL(WSL_RED);
 				WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: MAXXED");
 				this->set_err(500);
@@ -125,7 +122,6 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 		}
 	}
 	return (RSRC_RESP_BODY);
-
 }
 
 int		ResourceCgi::chk_rsp_hed(void)
@@ -175,9 +171,6 @@ int		ResourceCgi::chk_rsp_hed(void)
 
 void	ResourceCgi::make_head(void)
 {
-// stat
-// conn
-// clen
 	std::string hed_str;
 	
 	hed_str = std::string("Cache-Control: no-cache\r\n");

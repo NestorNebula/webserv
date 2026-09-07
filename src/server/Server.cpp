@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:29:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:23:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ void	Server::set_paused(void)
 	WSLOG(LVL_DBG, TGT_RETRY, this->port, "pause  ...  ");
 	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
 	
-	// the idea : cede these to a CGI that needs to get started
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
 }

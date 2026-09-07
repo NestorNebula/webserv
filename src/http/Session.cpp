@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/06 22:59:10 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:18:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -564,8 +564,6 @@ void Session::setResponseHeaders() {
       if (!lmDate.empty())
         headers.insert("Last-Modified", lmDate);
     }
-// #kd
-    headers.insert("Cache-Control", "no-cache");
   }
 
   // Location

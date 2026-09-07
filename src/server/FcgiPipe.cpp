@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:20:37 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:21:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,12 +71,12 @@ bool	FcgiPipe::timeo(WsTime & now)
 		}
 
 		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(621);  // CGI_ERR : gateway timeout
+		this->rsrc->set_err(504);  // CGI_ERR
 	}
 	else if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_FCGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(622); // CGI_ERR : gateway timeout
+		this->conn->set_err(504); // CGI_ERR
 	}
 	else
 	{
@@ -225,7 +225,6 @@ int		FcgiPipe::rdhup(void)
 	if (this->rsrc == NULL)
 		return (-1);
 
-// this is where we betray our complete lack of mastery of what is going on here.
 	rsrc->set_done(RSRC_DONE_IP);
 	WSLOG(LVL_DBG, TGT_FCGI, "rdhup: done ", rsrc->done);
 
@@ -267,7 +266,6 @@ int		FcgiPipe::hup(void)
 
 void	FcgiPipe::rsrc_closed(void)
 {
-	// mod_evt (?)
 	this->conn = NULL;
 	this->rsrc = NULL;
 }

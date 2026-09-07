@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:37:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:20:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ int	EpollClient::mod_evt(int e)
 	// WSLOG(LVL_WARN, TGT_EPC, "cur  : ", (evt.events & ~(EPOLLRDHUP)));
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
-	
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	

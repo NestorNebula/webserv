@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 14:36:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:17:30 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	std::string path_rel = joinPaths(conf.conf_file_root, info.scriptPath);
 	script.parse(path_rel);
 
-	// WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
 	// this should have been checked before we got here
+	// WSLOG(LVL_DBG, TGT_CGI_ENV, "script: ", script.path);
 	if (access(script.path.c_str(), F_OK | R_OK))
 	{
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);

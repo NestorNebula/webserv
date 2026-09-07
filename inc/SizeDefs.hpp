@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:23:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:24:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,6 @@
 # ifndef CONN_TIMEOUT
 #  define CONN_TIMEOUT 60
 # endif
-
-# ifndef KA_TIMEOUT
-#  define KA_TIMEOUT 5
-# endif
-
 
 # ifndef CGI_TIMEOUT
 #  define CGI_TIMEOUT 60
@@ -46,6 +41,11 @@
 #  else
 #   define SERV_PAUSE (2)
 #  endif
+# endif
+
+
+# ifndef CGI_MAX_BUF
+#  define CGI_MAX_BUF 512000
 # endif
 
 # define DEF_BUF_SIZ 8192

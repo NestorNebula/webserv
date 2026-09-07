@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:23:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:24:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-		
+// RETRY : static resource
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		WSCOL(WSL_YELLOW);
@@ -78,6 +78,7 @@ bool	Connection::timeo(WsTime & now)
 		}
 		return (false);
 	}
+// RETRY : CGI resource 
 	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		this->lact = now;
@@ -89,14 +90,11 @@ bool	Connection::timeo(WsTime & now)
 			{
 				WSCOL(WSL_RED);
 				WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
-// if (Connection) blocks all available (fd) ..
-// we'd rather sacrifice JUST ONE ...
-				this->set_err(504); // #kd (610)
+				this->set_err(504);
 			}
 			retry_cgi++;
 			return (0);
 		}
-		// success
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		this->retry_cgi = 0;
@@ -108,41 +106,32 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ",
-		// this->get_fd());
-		evt_type(this->evt.events));
-	// Request Timeout -- not necessarily
-	// perhaps .. only if "pollin"
-	// timeout .. on .. keep-alive ..
-	// which is .. waiting for more mp3 data ...
-	// Brave
-	// php -- still re-setting EPOLLIN
-	// keep-alive (file!) is strange here
-// conn  : TIMEO : conn in rdhup
-// conn  : TIMEO : conn in rdhup
-// conn  : TIMEO : conn out rdhup
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", evt_type(this->evt.events));
 
-// keep-alive (?)
-// which has not sent all data ..
-// sess._next ..
-		// EPOLLIN is the one to test
-	// or .. if request is not complete ..
-// sess  : Session::getRequest called while Session is in WRSOCK
-// Session::getRequest should only be called in DOCGI mode. Returning raw request
-
-// keep-alive : should just shut-down
-	// if (!this->sess.getRequest().isComplete())
-	if (this->sess.nextAction() == Session::RDSOCK)
-	{
-		this->set_err(408);
-		return (true);
-	}
 	if (this->evt.events & EPOLLOUT)
 	{
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn writing");
 		this->lact = now;
 		return (false);
 	}
-	// this->set_err(408);
+
+	if (this->sess.nextAction() == Session::RDSOCK)
+	{
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
+		// if (this->req_cnt) // keep-alive timeout 
+		// {
+		// 	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
+		// 	this->sess._next = Session::CLOSE;
+		// 	this->mod_evt(EPOLLOUT);
+		// }		
+		// else
+		{
+			WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
+			this->set_err(408); // but not delivered .. 
+		}
+		return (true);
+	}
 	return (false);
 }
 
@@ -232,8 +221,6 @@ ssize_t	Connection::pollin(void)
 		default:
 			break;
 		}
-
-		// may have got rdhup .. but still need to retry ..
 		switch (sess.nextAction())
 		{
 		case Session::RETRY:
@@ -251,15 +238,6 @@ ssize_t	Connection::pollin(void)
 					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "exec failed", retry_cgi);
 					this->serv.set_paused(); // failed : CGI
 					retry_cgi++;
-					// ah -- but not retriggered in time
-					// must retrigger .. soon (!)
-					// only makese sense to re-try ..
-					// once another has FLUSHED
-					// PROBLEM : all open (fd) filled with Conn
-					// ANSWER : one must give way
-					// that is the key
-					// cgi -- must try again
-					// BEFORE Server ...
 					this->mod_evt(0);
 				}
 				return (0); // send error
@@ -287,7 +265,7 @@ ssize_t	Connection::pollin(void)
 	{
 		WSCOL(WSL_RED);
 		WSLOG(LVL_ERR, TGT_CONN, "ex: pollin\n", e.what());
-		this->set_err(500); // #kd CGI_ERR
+		this->set_err(500); // CGI_ERR
 	}
 	return (0);
 }
@@ -313,7 +291,6 @@ ssize_t	Connection::pollout(void)
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
 				return (-1);
-// KEEP_ALIVE
 			case RSP_KPALIVE:
 				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (rsp) ", this->req_cnt);
@@ -389,7 +366,7 @@ ssize_t	Connection::pollout(void)
 	{
 		WSCOL(WSL_RED);
 		WSLOG(LVL_ERR, TGT_CONN, "ex: pollout\n", e.what());
-		this->set_err(500); // #kd CGI_ERR
+		this->set_err(500); // CGI_ERR
 	}
 	return (0);
 }
@@ -467,8 +444,6 @@ int	Connection::exec_cgi(void)
 	if (this->res_cgi)
 		return (0);
 
-	this->req_cnt++;
-
 	int			err;
 
 	CgiEnv *cgienv = new CgiEnv;
@@ -477,7 +452,7 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (this->set_err(500)); // #kd (601)
+		return (this->set_err(500));
 	}
 
 	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
@@ -495,13 +470,12 @@ int	Connection::exec_cgi(void)
 			WSLOG(LVL_DBG, TGT_CONN, "init:  FCGI");
 			delete (cgienv);
 			this->res_cgi = fcgi;
-// KEEP_ALIVE : set from Request (fcgi)
 			this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
+			this->req_cnt++;
 			return (err);
 		}
 		delete (cgienv);
 		delete (fcgi);
-		// ASSUMES : fail = "Too many open files"
 		WSCOL(WSL_CYAN);
 		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return(SYSCALL_ERR);
@@ -584,7 +558,7 @@ int	Connection::exec_cgi(void)
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
-// KEEP_ALIVE : set from Request (cgi)
 	this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
+	this->req_cnt++;
 	return (err);
 }

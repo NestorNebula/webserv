@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/06 23:19:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:19:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,12 @@ bool	CgiPipe::timeo(WsTime & now)
 		}
 
 		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(611);  // CGI_ERR : gateway timeout
+		this->rsrc->set_err(504);  // CGI_ERR
 	}
 	else if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(612); // CGI_ERR : gateway timeout
+		this->conn->set_err(504); // CGI_ERR
 	}
 	else
 	{
@@ -119,8 +119,6 @@ ssize_t	CgiPipe::pollout(void)
 	default:
 		break;
 	}
-
-	// WSLOG(LVL_DBG, TGT_CGI_SEND, "body:\n", rsrc->body);
 	err = this->send(rsrc->body);
 	if (err < 0)
 	{
@@ -164,9 +162,6 @@ ssize_t	CgiPipe::pollin(void)
 		rsrc->set_done(RSRC_DONE_OP);
 		return (-1);
 	}
-	// this->ibuf[err] = '\0';
-	// WSLOG(LVL_DBG, TGT_CGI_SEND, "recv:\n", std::string(ibuf));
-
 	switch (this->rsrc->recv_data(this->ibuf, err))
 	{
 	case RSRC_RESP_INIT:
@@ -178,9 +173,6 @@ ssize_t	CgiPipe::pollin(void)
 		break;
 	case RSRC_RESP_DONE:
 		rsrc->set_done(RSRC_DONE_IO);
-		// not stopping cgi ...
-		// still hitting RLEN with FULL BODY
-		// return (err);
 		break;
 	case RSRC_RESP_BODY:
 	default:
@@ -205,7 +197,6 @@ int		CgiPipe::hup(void)
 
 void	CgiPipe::rsrc_closed(void)
 {
-	// mod_evt (?)
 	this->conn = NULL;
 	this->rsrc = NULL;
 }
