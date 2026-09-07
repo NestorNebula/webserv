@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:10:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:20:09 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ int	EpollClient::mod_evt(int e)
 	// WSLOG(LVL_WARN, TGT_EPC, "cur  : ", (evt.events & ~(EPOLLRDHUP)));
 	// if (e == (int) (evt.events & ~(EPOLLRDHUP)))
 	// 	return (0);
-	
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
 	
@@ -147,7 +146,7 @@ ssize_t	EpollClient::recv(void)
 	
 	WSLOG(LVL_DBG, TGT_EPC_RECV, "read: ", err);
 	if (err < 0)
-		return (WsLog::_errno(LVL_ERR, TGT_EPC_RECV, "read"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_EPC_RECV, "read"));
 	if (err == 0)
 	{
 		WSLOG(LVL_DBG, TGT_EPC_RECV, "read:  ZERO");
@@ -169,7 +168,7 @@ ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 
 	WSLOG(LVL_DBG, TGT_EPC_SEND, "sent: ", err);
 	if (err < 0)
-		return (WsLog::_errno(LVL_ERR, TGT_EPC_SEND, "write"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_EPC_SEND, "write"));
 	if (err == 0)
 	{
 		WSLOG(LVL_DBG, TGT_EPC_SEND, "send:  ZERO");
