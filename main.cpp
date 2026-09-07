@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:08:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 11:12:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "WsTime.hpp"
 int main (int argc, char ** argv, char **envp)
 {
-    WsLog::kd();
+    // WsLog::kd();
     // WsLog::nh();
     // WsLog::mm();
 
@@ -29,6 +29,7 @@ int main (int argc, char ** argv, char **envp)
         std::cerr << "usage: webserv <config>\n";
         return 0;
     }
+#if 0 // DEBUGGING
     if (argc > 2)
     {
         switch(argv[2][0])
@@ -48,6 +49,7 @@ int main (int argc, char ** argv, char **envp)
            break;
         }
     }
+#endif
     std::string conf_root;
     if (env_pwd(envp, conf_root))
     {
