@@ -6,8 +6,11 @@ import os
 import cgi
 import cgitb
 
+form = cgi.FieldStorage()
 
-print("Status: 202", end="\r\n\r\n");
-print("two-oh-two");
+code = form.getvalue("code", "200")
+
+print("Status: ", code, end="\r\n\r\n");
+print("Status: ", code);
 
 

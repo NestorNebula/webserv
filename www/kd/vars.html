@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/styles.css" />
+	<script src="/js/contact.js" defer></script>
+  <script lang="javascript">
+    function send_form(lang)
+    {
+      var f = document.getElementById('vars-form');
+      var g1 = document.getElementById('g1');
+      var g2 = document.getElementById('g2');
+      
+      var path = 'test.php';
+      if (lang == 'py')
+        path = 'test.py';
+      else if (lang == 'pl')
+        path = 'test.pl';
+      
+      path += "?g1=" + g1.value;
+      path += "&g2=" + g2.value;
+        f.action = path;
+    }
+  </script>
+    <title>Webserv - Contact Us</title>
+  </head>
+
+  <body>
+    <header>
+    <section id="contact">
+      <p>Set variables to be passed to a CGI script via POST</p>
+      <form id="vars-form" action="test.php" method="post">
+        <div class="input-container">
+          <label for="g1">get (1)</label>
+          <input type="text" id="g1" name="g1" value="" />
+        </div>
+        <div class="input-container">
+          <label for="g2">get (2)</label>
+          <input type="text" id="g2" name="g2" value="" />
+        </div>
+        <div class="input-container">
+          <label for="p1">post (1)</label>
+          <input type="text" id="p1" name="p1" value="" />
+        </div>
+        <div class="input-container">
+          <label for="p2">post (2)</label>
+          <input type="text" id="p2" name="p2" value="" />
+        </div>
+        <button class="request" onclick="send_form('php');">
+              <p class="method">POST - PHP</p>
+		    </button>
+        <button class="request" onclick="send_form('py');">
+              <p class="method">POST - python</p>
+		    </button>
+        <button class="request" onclick="send_form('pl');">
+              <p class="method">POST - perl</p>
+		    </button>
+      </form>
+    </section>
+    <footer>
+      <div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>
+      <a
+        href="https://github.com/NestorNebula/webserv"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img id="gh-icon" src="/assets/icons/github.svg" alt="GitHub" />
+      </a>
+      <div>2026</div>
+    </footer>
+  </body>
+</html>

@@ -2,6 +2,7 @@ function displayCookie() {
   const cookie = getCookie("wstimecookie");
   const firstVisit = document.getElementById("cookie-first-visit");
   const lastVisit = document.getElementById("cookie-last-visit");
+  const counter = document.getElementById("cookie-counter");
   const cookieError = document.getElementById("cookie-error");
 
   if (!cookieError || !firstVisit || !lastVisit)
@@ -21,6 +22,19 @@ function displayCookie() {
     return setError(cookieError, "Invalid date format");
   firstVisit.textContent = "First Visit: " + firstTime.toLocaleString();
   lastVisit.textContent = "Last Visit: " + lastTime.toLocaleString();
+
+  cnt = parseInt(getCookie('counter'));
+  if (!cnt)
+    cnt = 1;
+  else
+    cnt = cnt + 1;
+  // alert(location.hostname);
+  var d = new Date();
+  d.setTime(d.getTime() + (7 * 86400000));
+
+  document.cookie = "counter=" + cnt + ";domain=" + location.hostname + ";path=/; expires=" + d.toUTCString();
+
+  counter.textContent = "You have visited this page " + cnt + " times.";
 }
 
 function getCookie(name = "cookie") {
@@ -39,3 +53,16 @@ function setError(errorElement, error = "Error in cookie processing") {
 }
 
 displayCookie();
+
+// `visitCount=${count}; max-age=31536000; path=/; domain=example.com`
+
+
+// document.cookie = "counter=0"
+// browser.cookies.set(
+// {
+//   name : "counter",
+//   value: 0,
+//   path : "/",
+//   domain :"localhost:8081"
+// }
+// );

@@ -11,7 +11,6 @@ form = cgi.FieldStorage()
 code = form.getvalue("code", "0")
 
 print("Content-Type: text/plain", end="\r\n\r\n");
-print("PYTHON : will exit (" + code + ")\r\n");
+rint("PYTHON : code has errors\r\n");
 
-exit (int(code));
 

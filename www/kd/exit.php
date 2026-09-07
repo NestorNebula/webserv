@@ -1,10 +1,9 @@
 <?php
-header('Content-type: text/plain');
-header('Connection:close');
-// header('Connection: keep-alive');
-// header('Content-Length: 0');
-	$x = -1;
-	echo "PHP : will exit ($x)\n";
-	exit($x);
-	// die();
-?>
+	header('Content-type: text/plain');
+	header('Connection:close');
+
+	$code = $_GET['code'] ?? 0;
+
+	echo "PHP : will exit ($code)\n";
+	exit(intval($code));
+?>''

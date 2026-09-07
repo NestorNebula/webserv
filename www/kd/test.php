@@ -1,16 +1,18 @@
 <?php
+    define('WSEOL', PHP_EOL);
+    header('Content-type: text/plain');
+    header('Set-Cookie: counter=deleted; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 
     $g1 = $_GET['g1'] ?? 'g1-default';
     $g2 = $_GET['g2'] ?? 'g2-default';
 
-    header('Content-type: text/plain');
     // exit(66);
     // print("\r\n");
     // print_r($_GET);
     // print_r($_POST);
     // print_r($_SERVER); // ENV shows up here
 
-    print("PHP : hello, world!\n");  
+    print("PHP : hello, world!" . WSEOL . WSEOL);  
     // echo getcwd();
     // gets through FCGI
     // Q: ignore exit status ... 
@@ -23,20 +25,20 @@
     $g1 = $_GET['g1'] ?? 'g1-default';
     $g2 = $_GET['g2'] ?? 'g2-default';
 
-    print("\nGET VARS\n");
-    print("g1 : " . $g1 . PHP_EOL);
-    print("g2 : " . $g2 . PHP_EOL);
+    print(WSEOL . "GET VARS" . WSEOL);
+    print("g1 : " . $g1 . WSEOL);
+    print("g2 : " . $g2 . WSEOL);
 
-    print("\nPOST VARS\n");
+    print(WSEOL . "POST VARS" . WSEOL);
     $p1 = $_POST['p1'] ?? 'p1-default';
     $p2 = $_POST['p2'] ?? 'p2-default';
 
-    print("p1 : " . $p1 . PHP_EOL);
-    print("p2 : " . $p2 . PHP_EOL);
+    print("p1 : " . $p1 . WSEOL);
+    print("p2 : " . $p2 . WSEOL);
 
-    print("\nENV\n\n");
+    print(WSEOL . "ENV" . WSEOL . WSEOL);
     foreach  ($_SERVER as $k => $v)
-        print ("$k = $v\n");
+        print ("$k = $v" . WSEOL);
 
     $chk_hed = 'REMOTE_ADDR';
     print("\n$chk_hed : " . $_SERVER[$chk_hed] . PHP_EOL);
