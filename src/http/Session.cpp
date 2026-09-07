@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:48:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:59:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
   if (_request.isComplete() || (_next != RDSOCK && _next != DOCGI)) {
     std::ostringstream oss;
-    oss << "Session::write " << count << " called while Request is complete and Session is in "
+    oss << "Session::write called while Request is complete and Session is in "
       << Session::actionToStr(_next)
       << "\nSession::write should be called for non-complete Request "
       << "in RDSOCK/DOCGI mode. Nothing written";
@@ -46,7 +46,7 @@ Stream::streamsize Session::write(const char *buf, Stream::streamsize count) {
     manageSession();
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-    setError(500); // #kd (601)
+    setError(500);
   }
   return count;
 }
@@ -149,7 +149,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
     if (_response.getCode() == 500)
       _next = CLOSE;
     else
-      setError(500); // #kd (602)
+      setError(500);
   }
   return r;
 }
@@ -227,7 +227,7 @@ void Session::manageSession() {
       handleResource();
       if (_retry_res) {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry ", _retry_res);
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
         _next = Session::RETRY;
       } else if (_next != DOCGI) {
         handleResponse();
@@ -371,8 +371,6 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
-// #kd - Session::RETRY
-#if 1
       if (_retry_res++ > MAX_RETRIES)
       {
         _retry_res = 0;
@@ -380,12 +378,11 @@ void Session::handleResource() {
       }
       else
       {
-      _response.clear();
-      _next = RDSOCK;
+        _response.clear();
+        _retry_res++;
+        _next = RDSOCK;
       }
-#else
-      setResponseStatus(500); // CGI_ERR
-#endif
+
       delete _resource;
       _resource = NULL;
       WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
@@ -393,7 +390,7 @@ void Session::handleResource() {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
       if (_retry_res) {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
     }
@@ -453,7 +450,7 @@ void Session::handleUpload() {
     return setResponseStatus(403);
   std::ofstream ofs(uploadFile.c_str());
   if (!ofs.is_open())
-    return setResponseStatus(500); // #kd (607)
+    return setResponseStatus(500);
   Stream *bodyStream = _request.hasBody() ? _request.getBody() : NULL;
   WSLOG(LVL_INFO, TGT_SESS, "Starting file upload on: ", uploadFile);
   if (bodyStream) {
@@ -466,7 +463,7 @@ void Session::handleUpload() {
       WSLOG(LVL_ERR, TGT_SESS, "Error during file upload, aborting");
       ofs.close();
       std::remove(uploadFile.c_str());
-      return setResponseStatus(500); // #kd (609)
+      return setResponseStatus(500);
     }
   }
   ofs.close();

@@ -6,7 +6,6 @@
 
 *.dSYM/
 
-demo/
 build/
 bin/
 
@@ -14,8 +13,6 @@ compile_commands.json
 
 .vscode/
 .idea/
-
-pycgi/__pycache__/*
 
 demo
 webserv
