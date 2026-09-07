@@ -7,6 +7,9 @@ PROC=webserv
 function usage()
 {
     echo "limit.sh : NUM | list"
+	echo
+	echo "Use this script to limit the number of fds allowed for webserv"
+    echo
 }
 
 function current()
@@ -24,15 +27,16 @@ if [[ -z $PID ]]; then
     PROC=valgrind.bin
     PID=$(pidof $PROC)
     if [[ -z $PID ]]; then
-        exit 0
+        usage
+        exit
     fi
     echo "using : $PROC"
 fi
 
 if [[ -z $1 ]]; then
     usage
-    echo
     current
+    exit
 fi
 
 if [[ "$1" == "list" ]];then
@@ -47,8 +51,6 @@ fi
 
 if ! [[ "$1" =~ ^[0-9]+$ ]]; then
     usage
-    echo
-    current
 fi
 
 # NB : can't increase without (sudo)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:23:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 13:35:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 		if (this->resp_body.size() > CGI_MAX_BUF)
 		{
 			WSCOL(WSL_CYAN);
-			WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: OFF");
+			WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: OFF");
 			if (this->clen)
 			{
 				this->wait_comp = false;
@@ -115,7 +115,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 			else
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_TMP, TGT_CGI_HEAD, "wait: MAXXED");
+				WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: MAXXED");
 				this->set_err(500);
 				return (RSRC_RESP_ERR);
 			}

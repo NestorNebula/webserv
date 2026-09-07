@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:19:46 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 17:40:57 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ static void sigpipe_handler(int signo)
 {
     (void)signo;
 	
-	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
-	WSLOG(LVL_ERR, TGT_EPOLL, "SIGPIPE");
+	WSLOG(LVL_SYSERR, TGT_EPOLL, "\n\n\n\n");
+	WSLOG(LVL_SYSERR, TGT_EPOLL, "SIGPIPE");
 }
 
 static const char *evt_name[] =

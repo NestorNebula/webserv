@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 12:28:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 17:47:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int main (int argc, char ** argv, char **envp)
         std::cerr << "usage: webserv <config>\n";
         return 0;
     }
-#if 0 // DEBUGGING
+#if 1 // DEBUGGING
     if (argc > 2)
     {
         switch(argv[2][0])
@@ -39,12 +39,14 @@ int main (int argc, char ** argv, char **envp)
            WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
-           WsLog::tgt = 
+            WsLog::lvl = LVL_ALL;
+            WsLog::tgt = 
             // TGT_CGI_HEAD |
-            TGT_RETRY | TGT_TIMEO | TGT_KEEPA;
+            TGT_RETRY | TGT_TIMEO;
             // TGT_SERV_ALL & ~(TGT_EPC | TGT_EPOLL_EVT | TGT_EPOLL_CTL | TGT_CONN | TGT_FCGI_PARSE);
-           break;
+            break;
         case 'a':
+            WsLog::lvl = LVL_ALL;
            WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA |  TGT_CGI | TGT_FCGI_PARSE);
            break;
         }

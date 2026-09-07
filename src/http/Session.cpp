@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:59:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 17:55:49 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,8 +226,9 @@ void Session::manageSession() {
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
       if (_retry_res) {
+// #kd
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
+        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
       } else if (_next != DOCGI) {
         handleResponse();
@@ -385,12 +386,14 @@ void Session::handleResource() {
 
       delete _resource;
       _resource = NULL;
-      WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
+// #kd
+      WSLOG(LVL_DBG, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
       if (_retry_res) {
+// #kd
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
     }
@@ -540,6 +543,8 @@ void Session::setResponseHeaders() {
   else
     headers.insert("Connection", "close");
 
+  headers.insert("Cache-Control", "no-cache");
+
   // Last-Modified
   if (_response.getCode() == 200 && _next != DOCGI) {
     struct stat statbuf;
@@ -591,6 +596,8 @@ void Session::setResponseHeaders() {
     std::ostringstream oss;
     bool update = false;
     if (_request.hasHeader("Cookie")) {
+      // #kd : we may have OTHER COOKIES
+      std::cerr << "COOKIE" << std::endl << _request.getHeaders().get("Cookie") << std::endl;
       std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
       if (std::count(cookie.begin(), cookie.end(), '|') == 1) {
         std::string::size_type pos = cookie.find('|');
