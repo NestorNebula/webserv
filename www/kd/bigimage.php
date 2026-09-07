@@ -1,12 +1,10 @@
 <?php
 
-    $path = './files/e4.jpg';
+    $path = './files/earth.jpg';
     $fsiz = filesize($path);
-    
-    header('Content-Type: image/jpg');
-    // header('Content-Length: ' . $fsiz);
-// 177450
 
+    header('Content-Type: image/jpg');
+    header('Content-Length: ' . $fsiz);
     $fp = fopen($path, "rb");
 
     while (!feof($fp))
