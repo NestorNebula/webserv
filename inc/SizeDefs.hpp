@@ -6,12 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/27 07:57:08 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:24:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SIZE_DEFS_HPP
 # define SIZE_DEFS_HPP
+
+# include "WsTime.hpp"
 
 # ifndef CONN_TIMEOUT
 #  define CONN_TIMEOUT 60
@@ -21,12 +23,30 @@
 #  define CGI_TIMEOUT 60
 # endif
 
-
-# ifndef RES_CGI_WAIT_COMPLETE
-    // .. except if content-length > xxx
-#  define RES_CGI_WAIT_COMPLETE 0
+# ifndef CGI_RETRY_INTERVAL
+#  if EXTRA_TIME
+#   define CGI_RETRY_INTERVAL (0.1f)
+#  else
+#   define CGI_RETRY_INTERVAL (1)
+#  endif
 # endif
 
+# ifndef MAX_RETRIES
+#  define MAX_RETRIES 30
+# endif
+
+# ifndef SERV_PAUSE
+#  if EXTRA_TIME
+#   define SERV_PAUSE (0.25f)
+#  else
+#   define SERV_PAUSE (2)
+#  endif
+# endif
+
+
+# ifndef CGI_MAX_BUF
+#  define CGI_MAX_BUF 512000
+# endif
 
 # define DEF_BUF_SIZ 8192
 
@@ -48,6 +68,10 @@
 
 # ifndef RSP_READ_SIZ
 #  define RSP_READ_SIZ (DEF_BUF_SIZ)
+# endif
+
+# ifndef SYSCALL_ERR
+#  define SYSCALL_ERR (-2)
 # endif
 
 #endif
