@@ -241,7 +241,8 @@ std::string decodeURI(const std::string &uri) {
     if (h1 == std::string::npos || h2 == std::string::npos)
       return std::string();
     unsigned char value = h1 * hexa.size() + h2;
-    if (unreserved.find(std::toupper(value)) == std::string::npos)
+    if (unreserved.find(std::toupper(value)) == std::string::npos
+        && value != ' ')
       decoded.push_back(*it);
     else {
       decoded.push_back(value);
@@ -312,4 +313,14 @@ std::string getCookie(const std::string &cookies, const std::string &key) {
     }
   }
   return val;
+}
+
+std::string findLocation(const std::string &resourcePath, const ServerConfig &server) {
+  for (std::vector<RouteConfig>::const_iterator it = server.routes.begin(), ite = server.routes.end();
+      it != ite; it++) {
+    if (resourcePath.compare(0, it->root.size(), it->root) == 0 &&
+        (resourcePath.size() == it->root.size() || resourcePath[it->root.size()] == '/'))
+      return joinPaths(it->path, resourcePath.substr(it->root.size()));
+  }
+  return std::string();
 }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 09:49:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:28:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class Session {
 public:
   Session(ServerConfig &server)
       : _next(RDSOCK), _server(server), _route(NULL), _resource(NULL),
-        _keepalive(false), _sent(0), retry_res(0) { // #kd - Session::RETRY
+        _keepalive(false), _sent(0), _retry_res(0) {
     WSLOG(LVL_DBG, TGT_SESS, "Session constructor");
   }
   ~Session() {
@@ -38,8 +38,7 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
-// #kd - Session::RETRY
-    RETRY,
+    RETRY, // Retry to handle the Request
   } Action;
 
   Action nextAction() const { return _next; }
@@ -80,7 +79,8 @@ public:
   // Reset session state and clears all its data
   void reset();
 
-  Action _next;
+  void manageSession();
+
 private:
   Session(const Session &);
   Session &operator=(const Session &);
@@ -98,9 +98,6 @@ private:
 
   void throwIfNotAction(Action action) const;
   static const std::string &actionToStr(Action action);
-  public:
-  void manageSession();
-private:
   void handleRequest();
   void preValidateRequest();
   void validateRequest();
@@ -120,8 +117,7 @@ private:
 
   Stream::streamsize _sent;
 
-// #kd - Session::RETRY
-  int retry_res;
-  
+  int _retry_res;
+
   std::string _responseStr;
 };

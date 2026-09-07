@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 09:32:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:32:48 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WsLog.hpp"
 
-log_lvl     WsLog::lvl = LVL_NONE;
-log_tgt     WsLog::tgt = TGT_NONE;
+log_lvl     WsLog::lvl = LVL_MAIN;
+log_tgt     WsLog::tgt = TGT_ALL;
 std::string WsLog::col;
 
 static const std::string tgt_str[] =

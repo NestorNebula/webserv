@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 10:18:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:31:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,13 +189,8 @@ void Session::setError(Response::StatusCode code) {
     _next = WRSOCK;
   } catch (std::exception &e) {
     WSLOG(LVL_ERR, TGT_SESS_WR, e.what());
-// #kd - uncertain why I needed this
-// without : better,but "Incomplete reponse"
-// something connected to : fail on low-file-limit (?)
-    if (code != 500) // #kd (606)
-    {
-      setError(500); // #kd (606)
-    }
+    if (code != 500)
+      setError(500);
     else
       _next = CLOSE;
   }
@@ -226,20 +221,15 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
   switch (_next) {
   case RDSOCK:
-// #kd - Session::RETRY
   case RETRY:
     handleRequest();
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
-// #kd - Session::RETRY
-      if (retry_res)
-      {
+      if (_retry_res) {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_ERR, TGT_SESS, "sess: retry ", retry_res);
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
         _next = Session::RETRY;
-      }
-      else
-      if (_next != DOCGI) {
+      } else if (_next != DOCGI) {
         handleResponse();
         _next = WRSOCK;
       }
@@ -284,10 +274,6 @@ void Session::preValidateRequest() {
     return setResponseStatus(505);
   if (_request.hasMethod() && _request.getMethod() == METHOD_UNKNOWN)
     return setResponseStatus(501);
-  if (_request.hasBody() &&
-      static_cast<unsigned int>(_request.getBody()->size()) >
-          _server.max_body_size)
-    return setResponseStatus(413);
   WSLOG(LVL_INFO, TGT_SESS, "Session Request pre-validation successful");
 }
 
@@ -310,6 +296,8 @@ void Session::resolveResource() {
   if (!_route)
     return setResponseStatus(404);
   WSLOG(LVL_INFO, TGT_SESS, "Request route found: ", _route->path);
+  if (_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+    return setResponseStatus(413);
   if (!_route->redirect.empty())
     return setResponseStatus(301);
   if (!isAllowedMethod(_request.getMethod(), *_route))
@@ -373,6 +361,8 @@ void Session::handleResource() {
       break;
     }
   }
+  if (!_resource && _response.getCode() >= 400)
+    prepareErrorResource();
   if (!_resource && _response.getCode() != 204)
     _resource = new BuiltinResource(_response.getCode());
   // Generate Resource
@@ -401,12 +391,10 @@ void Session::handleResource() {
       WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
-// #kd - Session::RETRY
-      if (retry_res)
-      {
+      if (_retry_res) {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_ERR, TGT_SESS, "sess: retry SUCCESS ", retry_res);
-        retry_res = 0;
+        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
+        _retry_res = 0;
       }
     }
   }
@@ -416,16 +404,14 @@ void Session::prepareErrorResource() {
   std::map<std::string, std::string> errPages =
       !_route ? _server.error_pages : _route->error_pages;
   std::string codeStr = toString(_response.getCode());
-  std::string errPage =
-      joinPaths(_server.root, errPages.find(codeStr) != errPages.end()
+  std::string errPage = (errPages.find(codeStr) != errPages.end()
                                   ? errPages[codeStr]
                                   : errPages["default"]);
   if (!isAccessibleFile(errPage, R_OK))
-    errPage = joinPaths(_server.root, errPages["default"]);
+    errPage = errPages["default"];
   delete _resource;
   WSLOG(LVL_INFO, TGT_SESS, "Generating Error page Resource using ",
            errPage);
-// #kd - Default Error String
   _resource = new ErrorResource(errPage, _server.def_err);
   _resourcePath = errPage;
 }
@@ -449,7 +435,7 @@ void Session::prepareDirectoryResource() {
     _resource = new StaticResource(_resourcePath);
   } else if (_route->autoindex) {
     WSLOG(LVL_INFO, TGT_SESS, "Preparing DirectoryResource");
-    _resource = new DirectoryResource(_resourcePath);
+    _resource = new DirectoryResource(_resourcePath, _request.getURL());
   } else {
     setResponseStatus(403);
     prepareErrorResource();
@@ -458,8 +444,8 @@ void Session::prepareDirectoryResource() {
 
 void Session::handleUpload() {
   WSLOG(LVL_INFO, TGT_SESS, "Processing upload Request");
-  std::string uploadDir = joinPaths(_route->root, _route->upload_dir);
-  if (!isDirectory(uploadDir))
+  std::string uploadDir = _route->upload_dir;
+  if (!isDirectory(uploadDir)) 
     return setResponseStatus(400);
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
@@ -507,7 +493,8 @@ void Session::handleDelete() {
 void Session::handleResponse() {
   WSLOG(LVL_INFO, TGT_SESS, "Preparing Session Response");
   // Add Response details and missing fields
-  if (!_request.hasVersion() || !isValidVersion(_request.getVersion()))
+  if (!_request.hasVersion() || !isValidVersion(_request.getVersion()) ||
+      _response.getCode() == 505)
     _response.setVersion("HTTP/1.0");
   else
     _response.setVersion(_request.getVersion());
@@ -547,7 +534,8 @@ void Session::setResponseHeaders() {
     else
       headers.insert("Content-Type", getMimeType(_resourcePath));
     headers.insert("Content-Length", toString(_resource->stream().size()));
-  }
+  } else if (_response.getCode() != 204)
+    headers.insert("Content-Length", "0");
 
   // Connection
   if (_keepalive)
@@ -581,12 +569,13 @@ void Session::setResponseHeaders() {
       location = location + '?' + _request.getQuery();
     headers.insert("Location", location);
   } else if (_response.getCode() == 201) {
-    std::string location(_route->path);
-    location = joinPaths(location, _route->upload_dir);
-    location =
-        joinPaths(location, _request.getURL().substr(_route->path.size()));
-    location = normalizeURI(location);
-    headers.insert("Location", encodeURI(location));
+    std::string location = findLocation(
+        joinPaths(_route->upload_dir, _request.getURL().substr(_route->path.size())),
+        _server);
+    if (!location.empty()) {
+      location = normalizeURI(location);
+      headers.insert("Location", encodeURI(location));
+    }
   }
 
   // Allow

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 12:42:35 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/06 21:18:31 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:29:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,27 +62,7 @@ Stream::streamsize Response::readBody(char *buf, Stream::streamsize bufsize) {
 }
 
 bool Response::isReady() const {
-
-  
-  bool ok = !_version.empty() && _code && !_reason.empty() &&
-         (!_resource || hasBody());
-  if (!ok)
-  {
-
-  WSCOL(WSL_RED);
-  if (_version.empty())
-    WSLOG(LVL_ERR, TGT_RESP, "version empty");
-  if (!_code)
-    WSLOG(LVL_ERR, TGT_RESP, "no code");
-  if (_reason.empty())
-    WSLOG(LVL_ERR, TGT_RESP, "reason empty");
-  if (!(!_resource || hasBody()))
-    WSLOG(LVL_ERR, TGT_RESP, "body problem");
-
-  WSCOL(WSL_RED);
-  WSLOG(LVL_ERR, TGT_RESP, "code: ", _code);
-  }
-  return (ok);
+  return !_version.empty() && _code && (!_resource || hasBody());
 }
 
 bool Response::hasBody() const { return _resource && _resource->done(); }

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:56:01 by mamarti           #+#    #+#             */
-/*   Updated: 2026/09/04 22:56:44 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:28:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ struct ServerConfig {
 	size_t						max_body_size;
 	std::string					root;
 	bool						upload;
+	bool						autoindex;
 	std::string					upload_dir;
 	std::string					conf_file_root;
 	std::set<HttpMethod>		methods;
@@ -39,7 +40,6 @@ struct ServerConfig {
 
 	std::string pycgi_dir;
 	std::string fcgi_sock;
-// #kd - Default Error String
 	std::string	def_err;
 
 	ServerConfig();

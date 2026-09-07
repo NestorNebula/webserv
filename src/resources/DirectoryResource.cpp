@@ -6,14 +6,16 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/04 09:24:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:32:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "DirectoryResource.hpp"
+#include <algorithm>
 #include <dirent.h>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 // #kd - Alphabetical Directory
 #include <vector>
@@ -40,11 +42,8 @@ Stream &DirectoryResource::stream() {
 }
 
 void DirectoryResource::buildList() {
-
-// #kd - Alphabetical Directory
-#if 1 // SORT_DIR
   std::vector<std::string> elem;
-  
+
   dirent *dirFile;
   while ((dirFile = readdir(_dir)) != NULL) {
     std::string name(dirFile->d_name);
@@ -55,7 +54,6 @@ void DirectoryResource::buildList() {
     }
   }
   std::sort(elem.begin(), elem.end());
-#endif
 
   *_stream << "<!DOCTYPE html>\n"
               "<html lang=\"en\">\n"
@@ -63,9 +61,9 @@ void DirectoryResource::buildList() {
               "<meta charset=\"utf-8\">\n"
               "<meta name=\"viewport\" content=\"width=device-width, "
               "initial-scale=1.0\" />\n"
-              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />"
+              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />\n"
               "<title>Directory listing for "
-           << _dirpath
+           << _dirURI 
            << "</title>\n"
               "</head>\n"
               "<body>\n"
@@ -77,36 +75,18 @@ void DirectoryResource::buildList() {
               "</header>\n"
               "<section id=\"dir-list-section\">\n"
               "<h1>Directory listing for "
-           << _dirpath
+           << _dirURI 
            << "</h1>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
 
-// #kd - Alphabetical Directory
-#if 1 // SORT_DIR
-  for (size_t k=0; k < elem.size(); k++)
-  {
+  for (size_t k = 0; k < elem.size(); k++) {
       *_stream << "<li>\n"
                   "<a class=\"file-link\" href=\""
-               << elem[k] << "\">" << elem[k]
-               << "</a>\n"
-                  "</li>\n";    
-  }
-#else
-  dirent *dirFile;
-  while ((dirFile = readdir(_dir)) != NULL) {
-    std::string name(dirFile->d_name);
-    if (name != "." && name != "..") {
-      if (dirFile->d_type == DT_DIR)
-        name += '/';
-      *_stream << "<li>\n"
-                  "<a class=\"file-link\" href=\""
-               << name << "\">" << name
+               << elem[k] << "\">" << elem[k] 
                << "</a>\n"
                   "</li>\n";
-    }
   }
-#endif
   *_stream << "</ul>\n"
               "<hr>\n"
               "</section>\n"

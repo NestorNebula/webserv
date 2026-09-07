@@ -18,9 +18,9 @@
 
 class DirectoryResource : public Resource {
 public:
-  DirectoryResource(const std::string &dirpath)
-      : _dirpath(dirpath), _state(DEFAULT), _dir(opendir(dirpath.c_str())),
-        _stream(NULL) {
+  DirectoryResource(const std::string &dirpath, const std::string &dirURI = "")
+      : _dirpath(dirpath), _dirURI(dirURI.empty() ? dirpath : dirURI),
+        _state(DEFAULT), _dir(opendir(dirpath.c_str())), _stream(NULL) {
     WSLOG(LVL_DBG, TGT_DIR_RES,
              "DirectoryResource constructor for: ", dirpath);
   }
@@ -49,6 +49,7 @@ private:
   DirectoryResource &operator=(const DirectoryResource &);
 
   std::string _dirpath;
+  std::string _dirURI;
   InternalState _state;
   DIR *_dir;
   Stream *_stream;
