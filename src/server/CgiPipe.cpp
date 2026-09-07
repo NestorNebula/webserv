@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:27:32 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:17:01 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:19:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 #include "Server.hpp"
 #include "Request.hpp"
 
-CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) : 
-	EpollClient(_ep, EPC_CGI, _fd), 
+CgiPipe::CgiPipe (Epoll *_ep, int _fd, Connection * _conn, ResourcePiped * _rsrc) :
+	EpollClient(_ep, EPC_CGI, _fd),
 	conn(_conn),
 	rsrc(_rsrc)
 {
@@ -28,7 +28,7 @@ CgiPipe::~CgiPipe()
 {
 	WSLOG(LVL_DBG, TGT_CGI, " (~) CgiPipe ", this->fd);
 	fd_close(&this->fd);
-	try 
+	try
 	{
 		if (this->conn)
 		{
@@ -55,7 +55,7 @@ bool	CgiPipe::timeo(WsTime & now)
 		return (false);
 
 	this->lact = now;
-	
+
 	WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : pipe ", this->get_fd());
 	if (this->conn)
 	{
@@ -71,14 +71,14 @@ bool	CgiPipe::timeo(WsTime & now)
 			WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : done");
 			return (false);
 		}
-		
+
 		rsrc->set_done(RSRC_DONE_ERR);
-		this->rsrc->set_err(504);  // CGI_ERR : gateway timeout
+		this->rsrc->set_err(504);  // CGI_ERR
 	}
 	else if (this->conn)
 	{
 		WSLOG(LVL_DBG, TGT_CGI | TGT_TIMEO, "TIMEO : conn ", conn->get_fd());
-		this->conn->set_err(504); // CGI_ERR : gateway timeout
+		this->conn->set_err(504); // CGI_ERR
 	}
 	else
 	{
@@ -91,9 +91,9 @@ bool	CgiPipe::timeo(WsTime & now)
 ssize_t	CgiPipe::pollout(void)
 {
 	WSLOG(LVL_DBG, TGT_CGI_SEND, "send:  POLLOUT");
-	
+
 	ssize_t	err;
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
@@ -119,13 +119,11 @@ ssize_t	CgiPipe::pollout(void)
 	default:
 		break;
 	}
-
-	// WSLOG(LVL_DBG, TGT_CGI_SEND, "body:\n", rsrc->body);
 	err = this->send(rsrc->body);
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_SEND, "send");
-		return (this->rsrc->set_err(500)); // #kd (611)
+		return (this->rsrc->set_err(500));
 	}
 	if (err == 0)
 	{
@@ -140,9 +138,9 @@ ssize_t	CgiPipe::pollout(void)
 ssize_t	CgiPipe::pollin(void)
 {
 	ssize_t	err = 0;
-	
+
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  POLLIN");
-	
+
 	if (this->conn == NULL)
 		return (-1);
 	if (this->rsrc == NULL)
@@ -151,22 +149,19 @@ ssize_t	CgiPipe::pollin(void)
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv");
 	err = this->recv();
 	WSLOG(LVL_DBG, TGT_CGI_RECV, "recv: ", err);
-	
+
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_CGI_RECV, "recv: err");
-		return (this->rsrc->set_err(500)); // #kd (611)
+		return (this->rsrc->set_err(500));
 	}
 	if (err == 0)
 	{
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_CGI_RECV, "recv:  ZERO");
+		WSLOG(LVL_DBG, TGT_CGI_RECV, "recv:  ZERO");
 		rsrc->set_done(RSRC_DONE_OP);
 		return (-1);
 	}
-	// this->ibuf[err] = '\0';
-	// WSLOG(LVL_DBG, TGT_CGI_SEND, "recv:\n", std::string(ibuf));
-	
 	switch (this->rsrc->recv_data(this->ibuf, err))
 	{
 	case RSRC_RESP_INIT:
@@ -175,6 +170,9 @@ ssize_t	CgiPipe::pollin(void)
 		this->mod_evt(-EPOLLIN);
 		break;
 	case RSRC_RESP_HEAD:
+		break;
+	case RSRC_RESP_DONE:
+		rsrc->set_done(RSRC_DONE_IO);
 		break;
 	case RSRC_RESP_BODY:
 	default:
@@ -198,8 +196,7 @@ int		CgiPipe::hup(void)
 }
 
 void	CgiPipe::rsrc_closed(void)
-{ 
-	// mod_evt (?)
+{
 	this->conn = NULL;
 	this->rsrc = NULL;
 }
@@ -228,12 +225,12 @@ int	cgi_pipes::init(void)
 	if (pipe(p1) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "pipe()"));
 	}
 	if (pipe(p2) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "pipe()"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "pipe()"));
 	}
 	return (0);
 }
@@ -243,24 +240,24 @@ int	cgi_pipes::dup_io(void)
 	if (p1[0] == -1)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup_io"));
 	}
 	if (dup2(p1[0], STDIN_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdin)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stdin)"));
 	}
 	if (p2[1] == -1)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup_io"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup_io"));
 	}
 	if (dup2(p2[1], STDOUT_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stdout)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stdout)"));
 	}
-	return (0);		
+	return (0);
 }
 
 int	cgi_pipes::dup_err(void)
@@ -269,12 +266,12 @@ int	cgi_pipes::dup_err(void)
 	if (dnfd < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "open (/dev/null)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "open (/dev/null)"));
 	}
 	if (dup2(dnfd, STDERR_FILENO) < 0)
 	{
 		this->shutdown();
-		return (WsLog::_errno(LVL_ERR, TGT_CGI, "dup2 (stderr)"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_CGI, "dup2 (stderr)"));
 	}
 	fd_close(&dnfd);
 	return (0);

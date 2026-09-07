@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 12:17:48 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:23:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
 
 Server::~Server()
 {
-	WSLOG(LVL_TMP, TGT_SERV, " (~) Server");
-	WSLOG(LVL_TMP, TGT_SERV, "acc cnt : ", acc_cnt);
-	WSLOG(LVL_TMP, TGT_SERV, "acc err : ", acc_err);
-	WSLOG(LVL_TMP, TGT_SERV, "acc fail: ", acc_fail);
+	WSLOG(LVL_DBG, TGT_SERV, " (~) Server");
+	WSLOG(LVL_DBG, TGT_SERV, "acc cnt : ", acc_cnt);
+	WSLOG(LVL_DBG, TGT_SERV, "acc err : ", acc_err);
+	WSLOG(LVL_DBG, TGT_SERV, "acc fail: ", acc_fail);
 	this->sfd_close();
 };
 
@@ -87,18 +87,10 @@ void	Server::set_paused(void)
 		
 	this->paused = 1;
 
-	int	nconn = this->ep->cli_cnt(EPC_CONN);
 	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, "pause  ... ", nconn);
-#if 0 // FREED_FD
-	this->freed_fd = this->ep->cli_cnt(EPC_CONN);
-
-	WSCOL(WSL_RED);
-	WSLOG(LVL_TMP, TGT_SERV, "pause  ... ", this->freed_fd);
+	WSLOG(LVL_DBG, TGT_RETRY, this->port, "pause  ...  ");
+	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
 	
-	if (this->freed_fd > 6)
-		this->freed_fd = 6;
-#endif
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
 }
@@ -109,18 +101,8 @@ void	Server::conn_closed(void)
 		return;
 	this->freed_fd++;
 
-	if (this->freed_fd > 4)
+	if (this->freed_fd > 6)
 		this->lact = this->lact - SERV_PAUSE;
-#if 0 // FREED_FD
-
-	this->freed_fd--;
-	WSCOL(WSL_PURPLE);
-	WSLOG(LVL_TMP, TGT_SERV, "close  ... ", this->freed_fd);
-	if (this->freed_fd <= 0)
-	{
-		this->lact = this->lact - SERV_PAUSE;
-	}
-#endif
 }
 
 int	Server::accept_conn(void)
@@ -133,7 +115,7 @@ int	Server::accept_conn(void)
 	if (conn_fd < 0)
 	{
 		acc_err++;
-		this->set_paused();
+		this->set_paused(); // failed : accept()
 		return (0);
 	}	
 
@@ -196,37 +178,29 @@ bool	Server::timeo  (WsTime & now)
 		return (false);
 
 	this->lact = now; 
-
-#if 0 // FREED_FD
-	if (this->freed_fd > 0)
+	
+	this->sfd_close();
+	if (this->sfd_open() < 0)
 	{
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "freed ", this->freed_fd);
+		WSLOG(LVL_DBG, TGT_RETRY, this->port, "stay paused");
 		this->ep->cli_info();
 		return (false);
 	}
-#endif
-	this->sfd_close();
 	if (this->accept_conn() > 0)
 	{
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_ERR, TGT_SERV | TGT_TIMEO, "accepted!");
+		WSLOG(LVL_DBG, TGT_RETRY, this->port, "accepted!");
 	}
-	if (this->sfd_open() < 0)
-	{
-		// unable to open all spare_fds
-		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "stay paused");
-		this->ep->cli_info();
-		return (false);
-	}
+	// free (3) for CGI .. 
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_TMP, TGT_SERV | TGT_TIMEO, "resume (!)");
+	WSLOG(LVL_DBG, TGT_RETRY, this->port, "resume (!)");
 
 	this->freed_fd = 0;
 	this->paused = 0;
 	this->mod_evt(EPOLLIN);
+
 	return (false);
 }
 
@@ -242,7 +216,7 @@ int	Server::sfd_open(void)
 		this->spare_fd[i] = open("/dev/null", O_RDONLY);
 		if (this->spare_fd[i] < 0)
 		{
-			WSLOG(LVL_TMP, TGT_SERV, "sfd fail: ", i);
+			WSLOG(LVL_DBG, TGT_SERV, "sfd fail: ", i);
 			sfd_close();
 			return (-1);
 			// return (i > 0) ? (0) : (-1);

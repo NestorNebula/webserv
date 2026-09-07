@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 13:24:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:24:11 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,19 @@
 #include "ResourceFcgi.hpp"
 #include "ResourcePiped.hpp"
 
-Connection::Connection	(const Connection & that) : 
-	EpollClient(that), 
-	sess(that.serv.get_conf()), 
-	serv(that.serv), 
+Connection::Connection	(const Connection & that) :
+	EpollClient(that),
+	sess(that.serv.get_conf()),
+	serv(that.serv),
 	req_cnt(0)
 {
 
 }
 
-Connection::Connection (Epoll *_ep, int _fd, Server &_serv) : 
-	EpollClient(_ep, EPC_CONN, _fd), 
+Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
+	EpollClient(_ep, EPC_CONN, _fd),
 	sess(_serv.get_conf()),
-	serv(_serv), 
+	serv(_serv),
 	retry_cgi(0),
 	res_cgi(NULL),
 	req_cnt(0)
@@ -38,12 +38,9 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 
 Connection::~Connection()
 {
-	WSLOG(LVL_DBG, TGT_CONN, " (~) Connection ", this->fd);
-	WSLOG(LVL_DBG, TGT_CONN, "req cnt: ", this->req_cnt);
-// KEEP_ALIVE : check req_cnt
-	// WSLOG(LVL_TMP, TGT_CONN, " (~) Connection ", this->fd);
-	// WSLOG(LVL_TMP, TGT_CONN, "req cnt: ", this->req_cnt);
-	try 
+	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, " (~) Connection ", this->fd);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_KEEPA, "req cnt: ", this->req_cnt);
+	try
 	{
 		this->serv.conn_closed();
 		if (this->res_cgi)
@@ -64,13 +61,13 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
-
+// RETRY : static resource
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
 		sess.manageSession();
-		switch (sess.nextAction()) 
+		switch (sess.nextAction())
 		{
 		case Session::WRSOCK:
 			this->req_cnt++;
@@ -81,27 +78,25 @@ bool	Connection::timeo(WsTime & now)
 		}
 		return (false);
 	}
+// RETRY : CGI resource 
 	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		this->lact = now;
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
-			if (retry_cgi >= CGI_RETRY_COUNT)
+			if (retry_cgi >= MAX_RETRIES)
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
-// if (Connection) blocks all available (fd) ..
-// we'd rather sacrifice JUST ONE ...				
-				this->set_err(504); // #kd (610)
+				WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+				this->set_err(504);
 			}
 			retry_cgi++;
 			return (0);
 		}
-		// success
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_TMP, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		this->retry_cgi = 0;
 		this->mod_evt(EPOLLIN);
 		return (0);
@@ -109,13 +104,35 @@ bool	Connection::timeo(WsTime & now)
 
 	if ((this->lact + CONN_TIMEOUT).after(now))
 		return (false);
-		
-	WSCOL(WSL_RED);
-	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->get_fd());
-	// Request Timeout -- not necessarily
-	// perhaps .. only if "pollin"
-	this->set_err(408); 
-	return (true);
+
+	WSCOL(WSL_YELLOW);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->req_cnt);
+	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", evt_type(this->evt.events));
+
+	if (this->evt.events & EPOLLOUT)
+	{
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn writing");
+		this->lact = now;
+		return (false);
+	}
+
+	if (this->sess.nextAction() == Session::RDSOCK)
+	{
+		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
+		// if (this->req_cnt) // keep-alive timeout 
+		// {
+		// 	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
+		// 	this->sess._next = Session::CLOSE;
+		// 	this->mod_evt(EPOLLOUT);
+		// }		
+		// else
+		{
+			WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
+			this->set_err(408); // but not delivered .. 
+		}
+		return (true);
+	}
+	return (false);
 }
 
 int	Connection::set_err(int e)
@@ -167,7 +184,7 @@ static void sess_log_next(Session &sess)
       break;
     }
 }
-#endif 
+#endif
 
 ssize_t	Connection::pollin(void)
 {
@@ -184,10 +201,10 @@ ssize_t	Connection::pollin(void)
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv", err);
 			return (err);
 		}
-		if (err == 0) 
+		if (err == 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  ZERO");
-			this->mod_evt(EPOLLOUT); 
+			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
@@ -204,13 +221,11 @@ ssize_t	Connection::pollin(void)
 		default:
 			break;
 		}
-		
-		// may have got rdhup .. but still need to retry .. 
-		switch (sess.nextAction()) 
+		switch (sess.nextAction())
 		{
 		case Session::RETRY:
 			WSCOL(WSL_CYAN);
-			WSLOG(LVL_TMP, TGT_CONN | TGT_RETRY, "sess: RETRY");
+			WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "sess: RETRY");
 			this->mod_evt(0);
 			break;
 		case Session::DOCGI:
@@ -221,7 +236,7 @@ ssize_t	Connection::pollin(void)
 				{
 					WSCOL(WSL_CYAN);
 					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "exec failed", retry_cgi);
-					this->serv.set_paused();
+					this->serv.set_paused(); // failed : CGI
 					retry_cgi++;
 					this->mod_evt(0);
 				}
@@ -231,13 +246,14 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::WRSOCK:
 			this->req_cnt++;
+			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
 			break;
 		case Session::KPALIVE:
 			WSCOL(WSL_PURPLE);
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (ip)");
+			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (ip)");
 			// no reset here (?)
 			return (0);
 		case Session::CLOSE:
@@ -247,8 +263,9 @@ ssize_t	Connection::pollin(void)
 	}
 	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN, "ex: pollin\n", e.what());
-		this->set_err(404); // File Not Found
+		WSCOL(WSL_RED);
+		WSLOG(LVL_ERR, TGT_CONN, "ex: pollin\n", e.what());
+		this->set_err(500); // CGI_ERR
 	}
 	return (0);
 }
@@ -274,10 +291,9 @@ ssize_t	Connection::pollout(void)
 			case RSP_COMPLETE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "res : (< 0)");
 				return (-1);
-// KEEP_ALIVE
 			case RSP_KPALIVE:
 				WSCOL(WSL_PURPLE);
-				WSLOG(LVL_DBG, TGT_CONN, "keep-alive (rsp) ", this->req_cnt);
+				WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (rsp) ", this->req_cnt);
 				this->reset();
 				return (0);
 			case RSP_WAIT_HEAD:
@@ -293,10 +309,10 @@ ssize_t	Connection::pollout(void)
 			}
 
 			std::string & RESP = res->get_resp();
-			
+
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);	
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "data");
+			// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 			err = this->send(RESP);
 		}
 		else
@@ -313,12 +329,12 @@ ssize_t	Connection::pollout(void)
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
 					// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
-					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);			
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 					err = this->send(RESP);
 				}
 			}
 		}
-		
+
 		if (err < 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
@@ -330,13 +346,13 @@ ssize_t	Connection::pollout(void)
 			return (0);
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
-		
+
 		// sess_log_next(sess);
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
 			WSCOL(WSL_PURPLE);
-			WSLOG(LVL_DBG, TGT_CONN, "keep-alive (op) ", this->req_cnt);
+			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (op) ", this->req_cnt);
 			this->reset();
 			return (0);
 		case Session::CLOSE:
@@ -348,8 +364,9 @@ ssize_t	Connection::pollout(void)
 	}
 	catch(const std::exception& e)
 	{
-		WSLOG(LVL_DBG, TGT_CONN, "ex: pollout\n", e.what());
-		this->set_err(404); // File Not Found
+		WSCOL(WSL_RED);
+		WSLOG(LVL_ERR, TGT_CONN, "ex: pollout\n", e.what());
+		this->set_err(500); // CGI_ERR
 	}
 	return (0);
 }
@@ -386,7 +403,7 @@ void	Connection::reset(void)
 
 void	Connection::set_addr(struct sockaddr_in *a)
 {
-	this->addr = *a; 
+	this->addr = *a;
 	this->astr = addr_2_str(a);
 }
 
@@ -426,9 +443,7 @@ int	Connection::exec_cgi(void)
 {
 	if (this->res_cgi)
 		return (0);
-		
-	this->req_cnt++;
-	
+
 	int			err;
 
 	CgiEnv *cgienv = new CgiEnv;
@@ -437,14 +452,14 @@ int	Connection::exec_cgi(void)
 	{
 		WSLOG(LVL_DBG, TGT_CGI, "cgienv: FAIL");
 		delete (cgienv);
-		return (this->set_err(500)); // #kd (601)
+		return (this->set_err(500));
 	}
 
 	std::string &fcgi_sock = this->serv.get_conf().fcgi_sock;
 	if (
 		(cgienv->lang == CGI_PHP) &&
-		!fcgi_sock.empty() && 
-		!access(fcgi_sock.c_str(), R_OK | W_OK)	
+		!fcgi_sock.empty() &&
+		!access(fcgi_sock.c_str(), R_OK | W_OK)
 	)
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
@@ -455,35 +470,38 @@ int	Connection::exec_cgi(void)
 			WSLOG(LVL_DBG, TGT_CONN, "init:  FCGI");
 			delete (cgienv);
 			this->res_cgi = fcgi;
-// KEEP_ALIVE : set from Request (fcgi)
-			this->res_cgi->ka = this->sess.getRequest().keepalive();
+			this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
+			this->req_cnt++;
 			return (err);
 		}
 		delete (cgienv);
 		delete (fcgi);
-		// ASSUMES : fail = "Too many open files"
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return(SYSCALL_ERR);
 	}
 
 	WSCOL(WSL_YELLOW);
 	WSLOG(LVL_DBG, TGT_CONN, "php :  pipe");
-	
+
 	cgi_pipes	pipes;
-	
+
 	if (pipes.init() < 0)
 	{
 		delete (cgienv);
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
-	
+
 	pid_t pid = fork();
 	if (pid < 0)
 	{
+		pipes.shutdown();
 		delete (cgienv);
-		WsLog::_errno(LVL_ERR, TGT_CONN, "fork");
+		WsLog::_errno(LVL_SYSERR, TGT_CONN, "fork");
 		return (SYSCALL_ERR);
-		
-	}	
+	}
 	if (pid == 0)
 	{
 		err = pipes.dup_io();
@@ -502,7 +520,7 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		
+
 		const char **envp = cgienv->gen();
 		std::string & cwd = cgienv->get("CWD");
 		if (cwd.size())
@@ -512,33 +530,35 @@ int	Connection::exec_cgi(void)
 			err = chdir(cwd.c_str());
 			if (err < 0)
 			{
-				WsLog::_errno(LVL_ERR, TGT_CGI_ENV, "chdir");
+				WsLog::_errno(LVL_SYSERR, TGT_CGI_ENV, "chdir");
 				pipes.shutdown();
 				delete (cgienv);
 				delete (this->ep);
-				exit(1);				
+				exit(1);
 			}
 		}
 		err = execve(cgienv->args[0], (char* const*) cgienv->args, (char* const*) envp);
-		
+
 		pipes.shutdown();
 		delete (cgienv);
-		delete (this->ep); 
-	
+		delete (this->ep);
+
 		exit (err);
-	}		
+	}
 	delete (cgienv);
-	
+
 	ResourcePiped * pcgi = new ResourcePiped;
 	err = pcgi->init(this->ep, pid, &pipes, this);
 	if (err < 0)
 	{
 		pipes.shutdown();
 		delete (pcgi);
+		WSCOL(WSL_CYAN);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
-// KEEP_ALIVE : set from Request (cgi)
-	this->res_cgi->ka = this->sess.getRequest().keepalive();
+	this->res_cgi->ka = this->sess.getRequest().keepalive(); //  && !retry_cgi;
+	this->req_cnt++;
 	return (err);
 }
