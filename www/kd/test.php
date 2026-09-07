@@ -1,6 +1,9 @@
 <?php
+
+    $g1 = $_GET['g1'] ?? 'g1-default';
+    $g2 = $_GET['g2'] ?? 'g2-default';
+
     header('Content-type: text/plain');
-    header('Connection:close');
     // exit(66);
     // print("\r\n");
     // print_r($_GET);
@@ -8,7 +11,7 @@
     // print_r($_SERVER); // ENV shows up here
 
     print("PHP : hello, world!\n");  
-    echo getcwd();
+    // echo getcwd();
     // gets through FCGI
     // Q: ignore exit status ... 
     // exit (11);
@@ -79,6 +82,7 @@
         // move_uploaded_file($_FILES['file']['tmp_name'], getcwd()."/uploads/php-" . $_FILES['file']['name']);
     }
     echo getcwd();
+
 
 
 // CWD is the working directory where php-fpm is started (or configured to change to).
