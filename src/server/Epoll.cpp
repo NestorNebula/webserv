@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 11:43:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:19:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ Epoll::~Epoll()
 
 void	Epoll::cleanup()
 {
-	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	const int cli_typ[] = {EPC_CGI, EPC_FCGI, EPC_CONN, EPC_SERV, -1};
 	const int	*typ = cli_typ;
@@ -109,7 +109,7 @@ void	Epoll::cleanup()
 				}
 				catch(const std::exception& e)
 				{
-					WSLOG(LVL_TMP, TGT_EPOLL, " (~) EpollClient\n", e.what());
+					WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
 				}		
 				this->clients.erase(it++);
 			}
@@ -120,7 +120,7 @@ void	Epoll::cleanup()
 		}
 		typ++;
 	}
-	WSLOG(LVL_TMP, TGT_EPOLL, " (~) Epoll ", clients.size());
+	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	this->clients.clear();
 	
@@ -156,7 +156,7 @@ int	Epoll::add(EpollClient *cli)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_ADD, cli->get_fd(), cli->get_evt());
 	if (err < 0)
 	{
-		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: add");
+		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: add");
 		delete (cli);
 	}
 	else 
@@ -188,7 +188,7 @@ int	Epoll::mod(EpollClient *cli)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
-		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
+		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
 	}
 	return (err);
 }
@@ -207,7 +207,7 @@ int	Epoll::del(EpollClient *cli)
 	err = epoll_ctl(this->epfd, EPOLL_CTL_DEL, cli->get_fd(), NULL);
 	if (err < 0)
 	{
-		WsLog::_errno(LVL_ERR, TGT_EPOLL_CTL, "epoll_ctl: del");
+		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: del");
 	}
 	return (err);
 }
@@ -274,7 +274,7 @@ int		Epoll::cli_cnt(int typ)
 }
 int	Epoll::cli_info(void)
 {
-	WSLOG(LVL_TMP, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
+	// WSLOG(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
 	
 	int epc_serv = 0;
 	int epc_conn = 0;
@@ -307,13 +307,13 @@ int	Epoll::cli_info(void)
 			it++;
 		}
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "serv: ", epc_serv);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "serv: ", epc_serv);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "conn: ", epc_conn);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "conn: ", epc_conn);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "cgi : ", epc_cgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_TMP, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
+		WSLOG(LVL_DBG, TGT_EPOLL_CNT, "fcgi: ", epc_fcgi);
 	}
 	return (epc_cgi + epc_fcgi);
 }
@@ -323,7 +323,7 @@ int	Epoll::exec(void)
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 	{
-		WsLog::_errno(LVL_ERR, TGT_EPOLL, "epoll_wait");
+		WsLog::_errno(LVL_SYSERR, TGT_EPOLL, "epoll_wait");
 		// return (0) : bad exit (?)
 		return (-1);
 	}

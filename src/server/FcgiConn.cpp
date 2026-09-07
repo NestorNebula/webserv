@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/03 21:13:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:20:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int FcgiConn::make_sock(std::string &sock_path)
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
-		return (WsLog::_errno(LVL_ERR, TGT_FCGI, "socket"));
+		return (WsLog::_errno(LVL_SYSERR, TGT_FCGI, "socket"));
 	
     int err = connect(fd, (struct sockaddr*) &fpm, sizeof(struct sockaddr_un));
     if (err < 0)
@@ -153,19 +153,17 @@ int FcgiConn::rsp_recv(char * buf, int siz)
 
 		FcgiMsg * hed = (FcgiMsg*) chk;
 
-		hed->data(&data);
+		hed->data(&data); // parse into (data) struct
 
 		if (hed->head.type == FCGI_END_REQUEST)
 		{
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: end ", end - chk);
 			WSLOG(LVL_DBG, TGT_FCGI_PARSE, "parse: len ", data.len);
 			// // FCGI_EndRequestBody
-			// char *body = (chk + FCGI_HEADER_LEN);
-			// int *app_stat = (int*) body;
-			// char prot_stat = body[4];
-			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat A ", *app_stat);
-			// WSLOG(LVL_TMP, TGT_FCGI_PARSE, "parse: stat P ", prot_stat);
-
+			// char *end_body = (chk + FCGI_HEADER_LEN);
+			// for (int i=0; i < 8; i++)
+			// 	std::cerr << "head [" << i << "] = " << (int) end_body[i] << std::endl;
+			// std::cerr << std::endl;
 			return (2);
 		}
 
