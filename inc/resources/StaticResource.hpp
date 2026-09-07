@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StaticResource.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/06/25 14:02:21 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/07 13:07:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ public:
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource constructor for: ", filepath);
   }
-  ~StaticResource() {
+  virtual ~StaticResource() {
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource destructor for: ", _filepath);
     delete _stream;
