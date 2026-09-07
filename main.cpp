@@ -6,18 +6,20 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/08/27 08:23:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:08:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WsLog.hpp"
 #include "FilePath.hpp"
+#include "FilePath.hpp"
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"
+#include "Epoll.hpp"
 
+#include "WsTime.hpp"
 int main (int argc, char ** argv, char **envp)
-{   
-    
+{
     WsLog::kd();
     // WsLog::nh();
     // WsLog::mm();
@@ -36,33 +38,34 @@ int main (int argc, char ** argv, char **envp)
            WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
            break;
         case 'k':
-           WsLog::tgt = TGT_SERV_ALL & ~(TGT_EPC | TGT_FCGI_PARSE);
+           WsLog::tgt = 
+            // TGT_CGI_HEAD |
+            TGT_RETRY | TGT_TIMEO | TGT_KEEPA;
+            // TGT_SERV_ALL & ~(TGT_EPC | TGT_EPOLL_EVT | TGT_EPOLL_CTL | TGT_CONN | TGT_FCGI_PARSE);
            break;
         case 'a':
-           WsLog::tgt = TGT_ALL; //  & ~(TGT_CGI_HEAD | TGT_CGI_DATA);
+           WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA |  TGT_CGI | TGT_FCGI_PARSE);
            break;
         }
     }
-// #kd - conf_file_root
     std::string conf_root;
     if (env_pwd(envp, conf_root))
     {
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't detect working directory");
         return (0);
     }
-    if (!setWorkingDirectory(argv[1], conf_root)) 
+    if (!setWorkingDirectory(argv[1], conf_root))
     {
         WSLOG(LVL_ERR, TGT_MAIN, "couldn't setup working directory");
         return 0;
     }
-    
-// #kd - conf_file_root
+
     ConfigParser parser(conf_root);
-    try 
+    try
     {
         parser.parseFile(getConfigFileName(argv[1]));
-    } 
-    catch (std::exception &e) 
+    }
+    catch (std::exception &e)
     {
         WSLOG(LVL_ERR, TGT_MAIN, "ex: main\n", e.what());
         return 0;
@@ -72,11 +75,11 @@ int main (int argc, char ** argv, char **envp)
 
     int     err = 0;
     Epoll   *ep = NULL;
-    
+
     try
     {
         ep = new Epoll(envp);
-       
+
         err = ep->serve(servers);
         if (err)
           err = ep->loop();
