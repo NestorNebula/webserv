@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:53:54 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 13:07:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ public:
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource constructor for: ", filepath);
   }
-// #kd 
   virtual ~StaticResource() {
     WSLOG(LVL_DBG, TGT_STAT_RES,
              "StaticResource destructor for: ", _filepath);
