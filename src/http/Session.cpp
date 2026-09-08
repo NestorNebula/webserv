@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 17:55:49 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/08 17:21:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -445,7 +445,7 @@ void Session::prepareDirectoryResource() {
 void Session::handleUpload() {
   WSLOG(LVL_INFO, TGT_SESS, "Processing upload Request");
   std::string uploadDir = _route->upload_dir;
-  if (!isDirectory(uploadDir)) 
+  if (!isDirectory(uploadDir))
     return setResponseStatus(400);
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
@@ -542,7 +542,7 @@ void Session::setResponseHeaders() {
     headers.insert("Connection", "keep-alive");
   else
     headers.insert("Connection", "close");
-
+// #kd
   headers.insert("Cache-Control", "no-cache");
 
   // Last-Modified
@@ -596,8 +596,6 @@ void Session::setResponseHeaders() {
     std::ostringstream oss;
     bool update = false;
     if (_request.hasHeader("Cookie")) {
-      // #kd : we may have OTHER COOKIES
-      std::cerr << "COOKIE" << std::endl << _request.getHeaders().get("Cookie") << std::endl;
       std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
       if (std::count(cookie.begin(), cookie.end(), '|') == 1) {
         std::string::size_type pos = cookie.find('|');

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 14:55:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/08 17:54:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ bool	Connection::timeo(WsTime & now)
 		}
 		return (false);
 	}
-// RETRY : CGI resource 
+// RETRY : CGI resource
 	if (retry_cgi && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		this->lact = now;
@@ -119,21 +119,21 @@ bool	Connection::timeo(WsTime & now)
 	if (this->sess.nextAction() == Session::RDSOCK)
 	{
 		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
-		// if (this->req_cnt) // keep-alive timeout 
+		// if (this->req_cnt) // keep-alive timeout
 		// {
 		// 	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
 		// 	this->sess._next = Session::CLOSE;
 		// 	this->mod_evt(EPOLLOUT);
-		// }		
+		// }
 		// else
-// something still not right .. 
-// Error .. does not necessarily CLOSE 
+// something still not right ..
+// Error .. does not necessarily CLOSE
 // so .. it's in some state ..
-// on the next request 
+// on the next request
 		{
 			WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
-			this->set_err(431); // but not delivered .. 
-			// until next request .. 
+			this->set_err(431); // but not delivered ..
+			// until next request ..
 			this->mod_evt(EPOLLOUT);
 		}
 		return (true);
@@ -241,7 +241,7 @@ ssize_t	Connection::pollin(void)
 				if (err == SYSCALL_ERR)
 				{
 					WSCOL(WSL_CYAN);
-					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "exec failed", retry_cgi);
+					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 					this->serv.set_paused(); // failed : CGI
 					retry_cgi++;
 					this->mod_evt(0);
@@ -483,7 +483,7 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		delete (fcgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return(SYSCALL_ERR);
 	}
 
@@ -496,7 +496,7 @@ int	Connection::exec_cgi(void)
 	{
 		delete (cgienv);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 
@@ -518,7 +518,7 @@ int	Connection::exec_cgi(void)
 			delete (this->ep);
 			exit(1);
 		}
-		pipes.dup_err();
+		pipes.dup_err(); // cgi_err_log
 		if (err < 0)
 		{
 			pipes.shutdown();
@@ -560,7 +560,7 @@ int	Connection::exec_cgi(void)
 		pipes.shutdown();
 		delete (pcgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;

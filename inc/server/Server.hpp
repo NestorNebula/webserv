@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 22:22:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/08 15:41:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include <iostream>
 # include <string>
 # include <unistd.h>
-# include <arpa/inet.h>	
+# include <arpa/inet.h>
 # include <fcntl.h>
 
 # include "SizeDefs.hpp"
@@ -32,9 +32,9 @@
 	// error with an indication of ECONNREFUSED or, if the underlying
 	// protocol supports retransmission, the request may be ignored so
 	// that a later reattempt at connection succeeds.
-	
+
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 512
+#  define SERV_BACKLOG 1024
 # endif
 
 # ifndef SPARE_FD
@@ -57,10 +57,10 @@ public:
 	int					rdhup  (void);
 	int					hup    (void);
 	bool				timeo  (WsTime &);
-	
+
 	unsigned short		get_port(void)	const;
 	ServerConfig		&get_conf() { return (this->conf); }
-	
+
 	void				set_paused(void);
 	void				conn_closed(void);
 private:
@@ -69,7 +69,7 @@ private:
 	ServerConfig		conf;
 	struct sockaddr_in	addr;
 	unsigned short		port;
-	
+
 	int		init(void);
 	int		acc_cnt;
 	int		acc_err;

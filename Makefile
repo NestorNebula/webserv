@@ -32,6 +32,10 @@ ifdef TEST
 DEFS += -DTEST="$(TEST)"
 endif
 
+ifdef EXTRA_TIME
+DEFS += -DEXTRA_TIME="$(EXTRA_TIME)"
+endif
+
 FILES = \
 	utils/WsLog.cpp \
 	utils/helpers.cpp \

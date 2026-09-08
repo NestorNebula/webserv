@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 13:35:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/08 18:12:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,12 @@ static std::string hedval_str(std::string & str, const char *key)
         return (val);
     if (it != str.begin() && *(it-1) != '\n')
 		return (val);
-		
+
 	size_t line_beg = it - str.begin();
     std::stringstream	line(str.substr(line_beg));
     line >> kstr >> val;
 	std::transform(val.begin(), val.end(), val.begin(), ::tolower);
-	
+
 	size_t line_end = str.find('\n', line_beg);
 	str.erase(line_beg, line_end - line_beg + 1);
 
@@ -93,7 +93,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 		this->resp_head.append(buf, siz);
 		return (this->chk_rsp_hed());
 	}
-		
+
 	this->resp_body.append(buf, siz);
 	if (!this->wait_comp)
 	{
@@ -103,10 +103,10 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 	{
 		if (this->resp_body.size() > CGI_MAX_BUF)
 		{
-			WSCOL(WSL_CYAN);
-			WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: OFF");
 			if (this->clen)
 			{
+				WSCOL(WSL_CYAN);
+				WSLOG(LVL_WARN, TGT_CGI_HEAD, "cgi : stream");
 				this->wait_comp = false;
 				this->ka = false;
 				this->make_head();
@@ -115,7 +115,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 			else
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: MAXXED");
+				WSLOG(LVL_WARN, TGT_CGI_HEAD, "cgi : buffer overload");
 				this->set_err(500);
 				return (RSRC_RESP_ERR);
 			}
@@ -129,32 +129,46 @@ int		ResourceCgi::chk_rsp_hed(void)
 	size_t	pos = this->resp_head.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (RSRC_RESP_INIT);
-		
+
 	this->resp_body = this->resp_head.substr(pos + 4);
 	this->resp_head.erase(pos + 4);
-	
+
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "HEAD");
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "wait: ", this->wait_comp);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "(ka): ", this->ka);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "head: ", this->resp_head.size());
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "body: ", this->resp_body.size());
-	// WSLOG(LVL_DBG, TGT_CGI_HEAD, "head:\n", resp_head);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "head:\n", resp_head);
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "body:\n", resp_body);
 
+
+	std::string http_str = hedval_str(resp_head, "HTTP");
 	std::string stat_str = hedval_str(resp_head, "Status");
 	std::string conn_str = hedval_str(resp_head, "Connection");
 	std::string clen_str = hedval_str(resp_head, "Content-Length");
 
+	WSLOG(LVL_DBG, TGT_CGI_HEAD, "http: ", http_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "stat: ", stat_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "conn: ", conn_str);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "clen: ", clen_str);
 
-	this->stat = std::atoi(stat_str.c_str());
+	if (http_str.size())
+	{
+// php-fpm
+		this->stat = std::atoi(http_str.c_str());
+		if (this->stat != 200)
+		{
+			this->set_err(this->stat);
+			return (RSRC_RESP_ERR);
+		}
+	}
+	else
+		this->stat = std::atoi(stat_str.c_str());
 	this->clen = std::atoi(clen_str.c_str());
 
-#if 0 // WITH_KEEPALIVE
+#if 1 // WITH_KEEPALIVE
 	if (this->clen)
 	{
-		// assume (clen) bytes will be delivered by script
 		this->make_head();
 	}
 	else
@@ -172,15 +186,15 @@ int		ResourceCgi::chk_rsp_hed(void)
 void	ResourceCgi::make_head(void)
 {
 	std::string hed_str;
-	
+
 	hed_str = std::string("Cache-Control: no-cache\r\n");
 	resp_head.insert(0, hed_str);
-	if (this->clen)
+	// KEEP-ALIVE
+	// if (this->clen) // always (?)
 	{
 		hed_str = std::string("Content-Length: ") + toString(this->clen) + "\r\n";
 		resp_head.insert(0, hed_str);
 	}
-	
 	if (this->ka)
 	{
 		WSCOL(WSL_GREEN);
@@ -197,21 +211,24 @@ void	ResourceCgi::make_head(void)
 	}
 
 	if (this->stat)
+	{
+		// this->set_err(this->stat);
+		// return;
 		hed_str = std::string("HTTP/1.0 ") + toString(this->stat) + "\r\n";
+	}
 	else
 		hed_str = std::string("HTTP/1.0 200 OK\r\n");
 	resp_head.insert(0, hed_str);
-
 }
 
 void	ResourceCgi::chk_rsp_len(void)
 {
 	if (!this->have_head)
 		return;
-		
+
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN : head\n", this->resp_head);
 	WSLOG(LVL_DBG, TGT_CGI_HEAD, "RLEN : body", this->resp_body.size());
-	
+
 	if (this->clen)
 	{
 		WSCOL(WSL_YELLOW);
