@@ -183,6 +183,8 @@ void Session::setError(Response::StatusCode code) {
 
   try {
     _response.clear();
+    if (code < 400)
+      code = 418;
     setResponseStatus(code);
     handleResource();
     handleResponse();
