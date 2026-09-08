@@ -47,13 +47,13 @@ if [[ "$1" =~ "p" ]]; then
 fi
 
 if [[ "$1" =~ "y" ]]; then
-	# siege http://localhost:8082/test.py --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# siege http://localhost:8082/cgi-vars/vars.py --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	siege -f urls/python.sh --internet --verbose --reps=$R --concurrent=$C  -b
 	echo
 fi
 
 if [[ "$1" =~ "l" ]]; then
-	# siege http://localhost:8082/test.pl --internet --verbose --reps=$R --concurrent=$C --no-parser -b
+	# siege http://localhost:8082/cgi-vars/vars.pl --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	siege -f urls/perl.sh --internet --verbose --reps=$R --concurrent=$C  -b
 	echo
 fi
@@ -76,7 +76,7 @@ if [[ "$1" =~ "t" ]]; then
 fi
 
 if [ "$1" == "a" ]; then
-	curl -X GET http://127.0.0.1:8082/bigaudio.php --output data.mp3
+	curl -X GET http://127.0.0.1:8082/cgi-big/bigaudio.php --output data.mp3
 	echo
 	exit 0
 
@@ -86,7 +86,7 @@ if [ "$1" == "a" ]; then
 fi
 
 if [ "$1" == "j" ]; then
-	curl -X GET http://127.0.0.1:8082/bigimage.php --output data-cgi.jpg
+	curl -X GET http://127.0.0.1:8082/cgi-big/bigimage.php --output data-cgi.jpg
 	echo
 
 	# curl -X GET http://127.0.0.1:8082/files/earth.jpg --output data-file.jpg
@@ -95,7 +95,7 @@ if [ "$1" == "j" ]; then
 fi
 
 if [ "$1" == "v" ]; then
-	curl -X GET http://localhost:8082/bigvideo.php -i --output data.mkv
+	curl -X GET http://localhost:8082/cgi-big/bigvideo.php -i --output data.mkv
 	echo
 	exit 0
 
@@ -108,19 +108,17 @@ fi
 if [ "$1" == "u" ]; then
 
 	WWW=../../www/kd
-	rm -f $WWW/php/upload*
-	rm -f $WWW/pl/upload*
-	rm -f $WWW/py/upload*
+	rm -f $WWW/cgi-uploads/upload*
 	rm -f $WWW/uploads/*
 
-	ls -l $WWW/p*
+	ls -l $WWW/cgi-uploads/upload* 2>/dev/null
 
 	FILES=
 	FILES+="tiny.jpg "
-	# FILES+="mid.jpg "
-	# FILES+="earth.jpg "
-	# FILES+="e4.jpg "
-	# FILES+="Kanan.mp3 "
+	FILES+="mid.jpg "
+	FILES+="earth.jpg "
+	FILES+="e4.jpg "
+	FILES+="Kanan.mp3 "
 
 	for FILE in $FILES; do
 # ATTN : Kanan : content-length
@@ -128,25 +126,27 @@ if [ "$1" == "u" ]; then
 # FCGI : not 100%
 # END STDIN .. still has (left)
 
-		curl -X POST http://localhost:8082/php/ul.php -i \
+		curl -X POST http://localhost:8082/cgi-uploads/ul.php \
 			-F file=@$WWW/files/$FILE
 		echo ; echo ; echo
-		curl -X POST http://localhost:8082/pl/ul.pl -i \
+		curl -X POST http://localhost:8082/cgi-uploads/ul.pl \
 			-F file=@$WWW/files/$FILE
 		echo ; echo ; echo
-		curl -X POST http://localhost:8082/py/ul.py -i \
+		curl -X POST http://localhost:8082/cgi-uploads/ul.py \
 			-F file=@$WWW/files/$FILE
 		echo ; echo ; echo ;
-		curl -X POST http://localhost:8082/uploads/FILE -i \
-			-F file=@$WWW/files/$FILE
 
-		# curl -X POST http://localhost:8080/uploads/$FILE -i \
-		# 	-H "Content-Type:application/octet-stream" \
-		# 	--data-binary @$WWW/files/$FILE
-		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/uploads/$FILE \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo ;
+
+		curl -X POST http://localhost:8082/uploads/$FILE -i \
+			-H "Content-Type:application/octet-stream" \
+			--data-binary @$WWW/files/$FILE
+		echo ; echo ; echo
 	done
 
-	ls -l $WWW/p*
+	ls -l $WWW/cgi-uploads/upload* 2>/dev/null
 	ls -l $WWW/uploads
 
 	exit 0
@@ -176,22 +176,22 @@ fi
 
 # curl --http1.0 -X POST 'http://localhost:8082/ka.php' -i
 
-curl -X POST 'http://localhost:8082/test.php' -i
+curl -X POST 'http://localhost:8082/errors/infinite.php' -i
 echo
-# curl -X GET 'http://localhost:8082/exit.php' -i
+# curl -X GET 'http://localhost:8082/cgi-codes/exit.php' -i
 # echo
-# curl -X GET 'http://localhost:8082/exit.pl' -i
+# curl -X GET 'http://localhost:8082/cgi-codes/exit.pl' -i
 # echo
-# curl -X GET 'http://localhost:8082/exit.py' -i
+# curl -X GET 'http://localhost:8082/cgi-codes/exit.py' -i
 # echo
 exit 0
 
-curl -X GET 'http://localhost:8082/test.php?g1=QUERY&g2=both' -i \
+curl -X GET 'http://localhost:8082/cgi-vars/vars.php?g1=QUERY&g2=both' -i \
 	-d "p1=siege-post-one&p2=siege-post-two"
 echo
 exit 0
 
-curl -X POST 'http://localhost:8082/stat.php?g1=QUERY' -i \
+curl -X POST 'http://localhost:8082/cgi-codes/stat.php?g1=QUERY' -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
@@ -211,17 +211,10 @@ exit 0
 # echo
 # exit 0
 
-# curl -X GET http://localhost:8081/suck.py -i
-# echo
-# curl -X GET http://localhost:8082/suck.pl -i
+# curl -X GET http://localhost:8081/timeout.php -i
 # echo
 # exit 0
-
-
-# curl -X GET http://localhost:8081/to.php -i
-# echo
-# exit 0
-# test.php?g1=gee-one&g2=gee-two' -i \
+# vars/vars.php?g1=gee-one&g2=gee-two' -i \
 # curl -X GET 'http://localhost:8082/index.html' -i \
 # 	 -d "p1=post-one&p2=post-two"
 # echo
@@ -246,7 +239,7 @@ exit 0
 
 	# -H "Content-Type: application/x-www-form-urlencoded" \
 	# -H "Transfer-Encoding: chunked" \
-curl -X POST http://localhost:8082/test.php \
+curl -X POST http://localhost:8082/cgi-vars/vars.php \
 	-F p1=chunked_one \
 	-F p2=chunked_two \
 	-F file=@www/files/earth.jpg
@@ -265,19 +258,19 @@ curl -X GET 'http://localhost:8080/index.html' -i
 echo
 exit 0
 
-curl -X POST http://localhost:8082/test.pl -i \
+curl -X POST http://localhost:8082/cgi-vars/vars.pl -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
 
-curl -X POST http://localhost:8082/test.py -i \
+curl -X POST http://localhost:8082/cgi-vars/vars.py -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
 
 
 
-# POST /test.php HTTP/1.1
+# POST /cgi-vars/vars.php HTTP/1.1
 # Host: localhost:8081
 # User-Agent: curl/8.11.1
 # Accept: */*
@@ -310,7 +303,7 @@ exit 0
 # cgi .. not looking for more data
 # content-length is STRANGE here
 
-# curl -X POST http://localhost:8081/test.php -i \
+# curl -X POST http://localhost:8081/cgi-vars/vars.php -i \
 # 	-d @www/files/earth.jpg
 # echo
 # exit 0
@@ -320,7 +313,7 @@ exit 0
 # Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
 # Expect: 100-continue
 
-# curl -X POST http://localhost:8082/test.php \
+# curl -X POST http://localhost:8082/cgi-vars/vars.php \
 # 	-F file=@www/files/earth.jpg
 # echo
 # exit 0

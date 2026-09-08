@@ -15,4 +15,4 @@ http://127.0.0.1:8081/files/e4.jpg
 
 
 
-# http://127.0.0.1:8082/bigvideo.php
+# http://127.0.0.1:8082/cgi-big/bigvideo.php

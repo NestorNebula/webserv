@@ -1,14 +1,14 @@
-# http://127.0.0.1:8080/test.pl
-# http://127.0.0.1:8081/test.pl
-# http://127.0.0.1:8082/test.pl
+# http://127.0.0.1:8080/cgi-vars/vars.pl
+# http://127.0.0.1:8081/cgi-vars/vars.pl
+# http://127.0.0.1:8082/cgi-vars/vars.pl
 
-# http://127.0.0.1:8080/test.py
-http://127.0.0.1:8081/test.py
-http://127.0.0.1:8082/test.py
+# http://127.0.0.1:8080/cgi-vars/vars.py
+http://127.0.0.1:8081/cgi-vars/vars.py
+http://127.0.0.1:8082/cgi-vars/vars.py
 
-# http://127.0.0.1:8080/test.php
-http://127.0.0.1:8081/test.php
-http://127.0.0.1:8082/test.php
+# http://127.0.0.1:8080/cgi-vars/vars.php
+http://127.0.0.1:8081/cgi-vars/vars.php
+http://127.0.0.1:8082/cgi-vars/vars.php
 
 # http://127.0.0.1:8080/ka.php
 http://127.0.0.1:8081/ka.php
@@ -34,25 +34,25 @@ http://127.0.0.1:8082/ka.py
 # http://127.0.0.1:8081/notfound.php
 # http://127.0.0.1:8082/notfound.php
 
-# http://127.0.0.1:8080/exit.php
-# http://127.0.0.1:8081/exit.php
-# http://127.0.0.1:8082/exit.php # dangerous
+# http://127.0.0.1:8080/cgi-codes/exit.php
+# http://127.0.0.1:8081/cgi-codes/exit.php
+# http://127.0.0.1:8082/cgi-codes/exit.php # dangerous
 
-# http://127.0.0.1:8080/stat.php
-# http://127.0.0.1:8081/stat.php
-http://127.0.0.1:8082/stat.php
+# http://127.0.0.1:8080/cgi-codes/stat.php
+# http://127.0.0.1:8081/cgi-codes/stat.php
+http://127.0.0.1:8082/cgi-codes/stat.php
 
 # (siege) MEMORY PROBLEM
 # http://127.0.0.1:8082/vids/dff.mp4
 
 
-# http://127.0.0.1:8081/bigimage.php
-# http://127.0.0.1:8082/bigimage.php
+# http://127.0.0.1:8081/cgi-big/bigimage.php
+# http://127.0.0.1:8082/cgi-big/bigimage.php
 
 
 # BIGFILE - can slow down low-fd
-# http://127.0.0.1:8081/bigaudio.php
-# http://127.0.0.1:8082/bigaudio.php
+# http://127.0.0.1:8081/cgi-big/bigaudio.php
+# http://127.0.0.1:8082/cgi-big/bigaudio.php
 
 
 
