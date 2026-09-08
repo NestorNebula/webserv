@@ -1,13 +1,9 @@
-
 use strict;
 use warnings;
 use CGI;
 
 my $cgi = CGI->new;
 
-my $code = $cgi->param('code');
-
 print("Content-Type: text/plain\r\n\r\n");
-print("PERL : will exit (", $code, ")\r\n");
-exit ($code);
-
+print("You won't see me\r\n");
+rint("PERL : code has errors\r\n");

@@ -1,10 +1,10 @@
 <?php
+    header('Content-Type: audio/mp3');
 
-    $path = './files/earth.jpg';
+    $path = '../files/Kanan.mp3';
     $fsiz = filesize($path);
-
-    header('Content-Type: image/jpg');
     header('Content-Length: ' . $fsiz);
+
     $fp = fopen($path, "rb");
 
     while (!feof($fp))

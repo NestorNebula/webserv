@@ -41,16 +41,3 @@ while (my ($k,$v)=each %ENV)
     print "$k = $v\n";
 }
 print("\n");
-
-# if ($f)
-# {
-#     print("\nFILE\n");
-#     print($f, "\n");
-
-#     my $fp = $cgi->upload('file');
-#     print($fp);
-#     open UPLOADFILE, ">./uploads/pl-$f";
-#     binmode UPLOADFILE;
-#     while ( <$fp> ) { print UPLOADFILE; }
-#     close UPLOADFILE;
-# }

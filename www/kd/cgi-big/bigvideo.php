@@ -1,7 +1,7 @@
 <?php
-    header('Content-Type: audio/mp3');
+    header('Content-Type: video/x-matroska');
 
-    $path = './files/Kanan.mp3';
+    $path = '/home/kdonlon/Videos/toxic.mp4';
     $fsiz = filesize($path);
     header('Content-Length: ' . $fsiz);
 

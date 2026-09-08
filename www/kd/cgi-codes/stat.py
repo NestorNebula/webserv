@@ -10,7 +10,8 @@ form = cgi.FieldStorage()
 
 code = form.getvalue("code", "200")
 
+print("Content-Type: text/plain", end="\r\n");
 print("Status: ", code, end="\r\n\r\n");
-print("Status: ", code);
+print("PYTHON Status: ", code);
 
 

@@ -1,3 +1,3 @@
-<?
+<?php
 What happens now (?)
 ?
