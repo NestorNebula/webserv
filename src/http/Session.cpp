@@ -604,7 +604,7 @@ void Session::setResponseHeaders() {
     }
     if (!update)
       oss << cookieName << '=' << now << '|' << now;
-    oss << "; Path=/";
+    oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
     headers.insert("Set-Cookie", oss.str());
   }
 
