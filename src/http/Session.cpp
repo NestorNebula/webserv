@@ -586,6 +586,7 @@ void Session::setResponseHeaders() {
 
   // Set-Cookie
   if (_request.getMethod() == METHOD_GET && _response.getCode() == 200) {
+    // Time Cookie
     std::string cookieName = "wstimecookie";
     std::time_t now = std::time(NULL);
     std::ostringstream oss;
@@ -606,6 +607,29 @@ void Session::setResponseHeaders() {
       oss << cookieName << '=' << now << '|' << now;
     oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
     headers.insert("Set-Cookie", oss.str());
+
+    // Counter Cookie
+    std::string cookieFile = "cookie.html";
+    if (_resourcePath.size() >= cookieFile.size() &&
+      _resourcePath.compare(_resourcePath.size() - cookieFile.size(), 
+        std::string::npos, cookieFile) == 0) {
+      oss.str("");
+      update = false;
+      cookieName = "counter";
+      if (_request.hasHeader("Cookie")) {
+        std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
+        bool err = false;
+        long counter = getLong(cookie, &err, 0, LONG_MAX);
+        if (!err) {
+          oss << cookieName << '=' << counter + 1;
+          update = true;
+        }
+      }
+      if (!update)
+          oss << cookieName << "=1";
+      oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
+      headers.insert("Set-Cookie", oss.str());
+    }
   }
 
   _response.addHeaders(headers.begin(), headers.end());
