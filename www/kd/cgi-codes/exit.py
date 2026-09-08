@@ -14,4 +14,5 @@ print("Content-Type: text/plain", end="\r\n\r\n");
 print("PYTHON : will exit (" + code + ")\r\n");
 
 exit (int(code));
+print("you should not be here\r\n");
 

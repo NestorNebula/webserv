@@ -1,7 +1,7 @@
 <?php
     define('WSEOL', PHP_EOL);
     header('Content-type: text/plain');
-    header('Set-Cookie: counter=deleted; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+    // header('Set-Cookie: counter=deleted; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 
     $g1 = $_GET['g1'] ?? 'g1-default';
     $g2 = $_GET['g2'] ?? 'g2-default';
@@ -12,10 +12,10 @@
     // print_r($_POST);
     // print_r($_SERVER); // ENV shows up here
 
-    print("PHP : hello, world!" . WSEOL . WSEOL);  
+    print("PHP : hello, world!" . WSEOL . WSEOL);
     // echo getcwd();
     // gets through FCGI
-    // Q: ignore exit status ... 
+    // Q: ignore exit status ...
     // exit (11);
 
 
@@ -49,7 +49,7 @@
     {
         print_r($_FILES['file']); // Array
 
-            // partial -- 
+            // partial --
             // can't close CONN until FCGI has flushed its body
         // switch ($_FILES['file']['error']) {
         //     case UPLOAD_ERR_OK:
