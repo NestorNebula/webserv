@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=12
+R=8
 
 while getopts "c:r:" o; do
     case "${o}" in
@@ -60,20 +60,14 @@ fi
 
 if [[ "$1" =~ "f" ]]; then
 	siege -f urls/fnf.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
-	# siege -f fnf.sh -R ~/.siege/ka.conf --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
-
 
 if [[ "$1" =~ "x" ]]; then
 	siege -f urls/exit.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
 	echo
 fi
 
-if [[ "$1" =~ "t" ]]; then
-	siege -f urls/stat.sh --internet --verbose --reps=$R --concurrent=$C --no-parser -b
-	echo
-fi
 
 if [ "$1" == "a" ]; then
 	curl -X GET http://127.0.0.1:8082/cgi-big/bigaudio.php --output data.mp3
@@ -105,9 +99,9 @@ if [ "$1" == "v" ]; then
 fi
 
 
+WWW=../../www/kd
 if [ "$1" == "u" ]; then
 
-	WWW=../../www/kd
 	rm -f $WWW/cgi-uploads/upload*
 	rm -f $WWW/uploads/*
 
@@ -115,26 +109,22 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	FILES+="tiny.jpg "
-	FILES+="mid.jpg "
-	FILES+="earth.jpg "
-	FILES+="e4.jpg "
-	FILES+="Kanan.mp3 "
+	# FILES+="mid.jpg "
+	# FILES+="earth.jpg "
+	# FILES+="e4.jpg "
+	# FILES+="Kanan.mp3 "
 
 	for FILE in $FILES; do
-# ATTN : Kanan : content-length
-# WORK HERE
-# FCGI : not 100%
-# END STDIN .. still has (left)
 
-		curl -X POST http://localhost:8082/cgi-uploads/ul.php \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/cgi-uploads/ul.pl \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
-		curl -X POST http://localhost:8082/cgi-uploads/ul.py \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo ;
+		# curl -X POST http://localhost:8082/cgi-uploads/ul.php \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/cgi-uploads/ul.pl \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
+		# curl -X POST http://localhost:8082/cgi-uploads/ul.py \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo ;
 
 		# curl -X POST http://localhost:8082/uploads/$FILE \
 		# 	-F file=@$WWW/files/$FILE
@@ -142,7 +132,14 @@ if [ "$1" == "u" ]; then
 
 		curl -X POST http://localhost:8082/uploads/$FILE -i \
 			-H "Content-Type:application/octet-stream" \
+			-H "Transfer-Encoding: chunked" \
 			--data-binary @$WWW/files/$FILE
+
+		# curl -X POST http://localhost:8082/uploads/$FILE -i \
+		# 	-H "Content-Type: application/x-www-form-urlencoded" \
+		# 	-H "Transfer-Encoding: chunked" \
+		# 	-F file=@$WWW/files/$FILE
+
 		echo ; echo ; echo
 	done
 
@@ -156,6 +153,41 @@ fi
 if [ "$1" ]; then
 	exit 0
 fi
+
+
+
+
+# Chunked transfer encoding allows a server to maintain an HTTP persistent connection for dynamically generated content. In this case, the HTTP Content-Length header cannot be used to delimit the content and the next HTTP request/response, as the content size is not yet known. Chunked encoding has the benefit that it is not necessary to generate the full content before writing the header, as it allows streaming of content as chunks and explicitly signaling the end of the content, making the connection available for the next HTTP request/response.
+# Chunked encoding allows the sender to send additional header fields after the message body. This is important in cases where values of a field cannot be known until the content has been produced, such as when the content of the message must be digitally signed. Without chunked encoding, the sender would have to buffer the content until it was complete in order to calculate a field value and send it before the content.
+
+
+# chunked - needs to be parsed before passing to CGI
+# not the same as form (?)
+# "pure" upload .. "PUT"
+# we do not respond to this properly
+# not actually a (cgi) thing (?)
+# NB : not a FORM
+# Content-Type: application/x-www-form-urlencoded
+
+# -H "Transfer-Encoding: chunked" \
+
+# NB: (-d) not part of a FORM ..
+# cgi .. not looking for more data
+# content-length is STRANGE here
+
+# req   : Sending data to closed request
+
+curl -X POST http://localhost:8082/cgi-uploads/ul.php \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	-H "Transfer-Encoding: chunked" \
+	-F file=@$WWW/files/earth.jpg
+
+# curl -X POST http://localhost:8081/cgi-vars/vars.php -i \
+# 	-d @www/files/earth.jpg
+echo
+exit 0
+
+
 
 # My understanding of the bug and the fix is that if the data is chunked and no Content-Length is specified, Apache will add that header before it gets to PHP, so PHP will read the data.
 
@@ -176,9 +208,17 @@ fi
 
 # curl --http1.0 -X POST 'http://localhost:8082/ka.php' -i
 
-curl -X POST 'http://localhost:8082/errors/infinite.php' -i
+# curl -X POST 'http://localhost:8082/cgi-codes/stat.php' -i \
+# 	-F "code=1"
+# echo
+
+
+# fastcgi .. error .. returns HTTP HEADE (!)
+# could be a pref thing
+curl -X POST 'http://localhost:8082/cgi-codes/exit.php' -i \
+	-F "code=1"
 echo
-# curl -X GET 'http://localhost:8082/cgi-codes/exit.php' -i
+
 # echo
 # curl -X GET 'http://localhost:8082/cgi-codes/exit.pl' -i
 # echo
@@ -267,56 +307,4 @@ curl -X POST http://localhost:8082/cgi-vars/vars.py -i \
 	-d "p1=post-one&p2=post-two"
 echo
 exit 0
-
-
-
-# POST /cgi-vars/vars.php HTTP/1.1
-# Host: localhost:8081
-# User-Agent: curl/8.11.1
-# Accept: */*
-# Content-Length: 14976177
-# Content-Type: multipart/form-data; boundary=------------------------smD1LXy5p8xuKzGBs2H6e1
-# Expect: 100-continue
-
-# PHP Warning:  PHP Request Startup: POST Content-Length of 14976177 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
-
-
-
-
-# Chunked transfer encoding allows a server to maintain an HTTP persistent connection for dynamically generated content. In this case, the HTTP Content-Length header cannot be used to delimit the content and the next HTTP request/response, as the content size is not yet known. Chunked encoding has the benefit that it is not necessary to generate the full content before writing the header, as it allows streaming of content as chunks and explicitly signaling the end of the content, making the connection available for the next HTTP request/response.
-# Chunked encoding allows the sender to send additional header fields after the message body. This is important in cases where values of a field cannot be known until the content has been produced, such as when the content of the message must be digitally signed. Without chunked encoding, the sender would have to buffer the content until it was complete in order to calculate a field value and send it before the content.
-
-
-# chunked - needs to be parsed before passing to CGI
-# not the same as form (?)
-# "pure" upload .. "PUT"
-# we do not respond to this properly
-# not actually a (cgi) thing (?)
-# NB : not a FORM
-# Content-Type: application/x-www-form-urlencoded
-
-# -H "Transfer-Encoding: chunked" \
-
-
-
-# NB: (-d) not part of a FORM ..
-# cgi .. not looking for more data
-# content-length is STRANGE here
-
-# curl -X POST http://localhost:8081/cgi-vars/vars.php -i \
-# 	-d @www/files/earth.jpg
-# echo
-# exit 0
-
-
-# Transfer-Encoding: chunked
-# Content-Type: multipart/form-data; boundary=------------------------d75ef80967bc104b
-# Expect: 100-continue
-
-# curl -X POST http://localhost:8082/cgi-vars/vars.php \
-# 	-F file=@www/files/earth.jpg
-# echo
-# exit 0
-
-
 

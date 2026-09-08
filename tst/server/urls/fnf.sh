@@ -10,10 +10,3 @@ http://127.0.0.1:8080/notfound.php
 http://127.0.0.1:8081/notfound.php
 http://127.0.0.1:8082/notfound.php
 
-
-
-# http://127.0.0.1:8082/vids/dff.mp4
-# http://127.0.0.1:8082/cgi-big/bigvideo.php
-
-# http://127.0.0.1:8082/cgi-big/bigimage.php
-# http://127.0.0.1:8082/cgi-big/bigaudio.php
