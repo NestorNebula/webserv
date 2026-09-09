@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/08 18:12:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 19:29:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ int		ResourceCgi::chk_rsp_hed(void)
 		this->stat = std::atoi(stat_str.c_str());
 	this->clen = std::atoi(clen_str.c_str());
 
-#if 1 // WITH_KEEPALIVE
+#if 0 // WITH_KEEPALIVE
 	if (this->clen)
 	{
 		this->make_head();
