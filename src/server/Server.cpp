@@ -6,29 +6,90 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 10:28:15 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 18:56:10 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "Socket.hpp"
+#include "helpers.hpp"
 
-Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+#include <stdio.h>
+
+static int uaddr_set(void * addr, const char * str = NULL, unsigned short p = 0)
+{
+	int	err;
+
+	std::string prt = toString(p);
+
+	struct addrinfo hint;
+    std::memset(&hint, '\0', sizeof hint);
+
+    hint.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
+	hint.ai_socktype = SOCK_STREAM;
+    hint.ai_family = PF_INET;
+	hint.ai_protocol = IPPROTO_TCP;
+
+	struct addrinfo * res = NULL;
+    err = getaddrinfo(str, prt.c_str(), &hint, &res);
+    if (err)
+    {
+		WSLOG(LVL_TMP, TGT_SERV, "addr : ", str);
+		WSLOG(LVL_TMP, TGT_SERV, "addr : ", gai_strerror(err));
+		freeaddrinfo(res);
+		return (-1);
+    }
+    struct addrinfo * chk = res;
+#if 0
+    while (chk)
+    {
+		std::cerr << "\tflags: " << chk->ai_flags << "\tfamily: " << chk->ai_family << "\tsocktype: " << chk->ai_socktype << "\tprotocol: " << chk->ai_protocol << std::endl;
+
+		struct sockaddr_in * inaddr = (struct sockaddr_in *) chk->ai_addr;
+		std::cerr << inaddr->sin_addr.s_addr << std::endl;
+		std::cerr << ntohs(inaddr->sin_port) << std::endl;
+
+    	chk = chk->ai_next;
+    }
+    chk = res;
+#endif
+    while (chk)
+    {
+    	// if (chk->ai_family == fam)
+    	{
+		   std::memcpy(addr, chk->ai_addr, chk->ai_addrlen);
+		   freeaddrinfo(res);
+		   return (0);
+    	}
+    	chk = chk->ai_next;
+    }
+
+	freeaddrinfo(res);
+	return (-1);
+}
+
+
+Server::Server (Epoll *_ep, const ServerConfig &_conf) :
 	EpollClient(_ep, EPC_SERV, -1),
 	conf(_conf),
-	port(p),
+	port(_conf.port),
 	acc_cnt(0),
 	acc_err(0),
 	acc_fail(0),
 	paused(0),
 	freed_fd(0)
 {
-	this->addr.sin_family		= AF_INET;
-	this->addr.sin_addr.s_addr	= INADDR_ANY;
-	this->addr.sin_port			= htons(this->port);
 	if (this->init() < 0)
-		throw (std::runtime_error("Server : construct failed"));
+	{
+		WSLOG(LVL_ERR, TGT_SERV, "host : ", conf.host);
+		WSLOG(LVL_ERR, TGT_SERV, "port :", conf.port);
+		throw (std::runtime_error("serv  : construct failed"));
+	}
 };
 
 Server::~Server()
@@ -44,11 +105,8 @@ int Server::init(void)
 {
 	int	err;
 
-	if (this->port == 0)
-	{
-		WSLOG(LVL_ERR, TGT_SERV, "bad port");
+	if (uaddr_set(&this->addr, conf.host.c_str(), conf.port) < 0)
 		return (-1);
-	}
 
 	if (this->sfd_open() < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "spare_fd"));
