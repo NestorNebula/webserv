@@ -25,13 +25,15 @@ void Request::append(const std::string &data) {
   //WSLOG(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
-    if (_state == BODY && hasHeader("Transfer-Encoding")) {
+    if (_state == BODY) {
       std::string::size_type oldSize = _raw.size();
-      handleChunkedBody();
-
-      if (_state == COMPLETE || _state == INVALID)
+      if (hasHeader("Transfer-Encoding")) {
+        handleChunkedBody();
+      } else {
+        handleBody();
+      }
+      if (_state == COMPLETE || _state == INVALID || oldSize == _raw.size())
         return;
-      if (oldSize == _raw.size()) break;
       continue;
     }
 
@@ -45,9 +47,6 @@ void Request::append(const std::string &data) {
       break;
     case HEADERS:
       handleHeaderLine(line, eol);
-      break;
-    case BODY:
-      handleBody();
       break;
     default:
       return;
