@@ -262,6 +262,9 @@ void Session::handleRequest() {
   if (!_request.isComplete() && !_request.isInvalid() &&
       !_request.headersComplete())
     return;
+  // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
+  if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
+    return;
   validateRequest();
   resolveResource();
   validateOperation();
