@@ -94,5 +94,4 @@ private:
   void setupBody();
   void handleBody(std::string body, std::string::size_type eol);
   void handleChunkedBody();
-  void handleBodyLine(std::string bodyLine, std::string::size_type eol);
 };
