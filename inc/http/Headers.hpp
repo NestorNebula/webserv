@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:29:47 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/06 11:32:27 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 11:01:05 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ typedef std::pair<std::string, std::string> Header;
 
 class Headers {
 public:
-  typedef std::map<std::string, std::string> Container;
+  typedef std::multimap<std::string, std::string> Container;
   typedef Container::size_type size_type;
 
   typedef Container::iterator iterator;

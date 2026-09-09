@@ -12,34 +12,55 @@ function usage()
     echo
 }
 
+PID=
+function get_pid()
+{
+    # PID=$(ps -eo pid,comm | grep webserv | awk '{print $1}')
+    if [[ $PID ]]; then
+        return
+
+    fi
+    echo "# pidof $PROC"
+    pidof $PROC
+    echo
+    PID=$(pidof $PROC)
+
+    if [[ -z $PID ]]; then
+        echo "$PROC : not running"
+        echo
+        PROC=valgrind.bin
+        echo "# pidof $PROC"
+        pidof $PROC
+        echo
+        PID=$(pidof $PROC)
+        if [[ -z $PID ]]; then
+            exit
+        fi
+        echo "using : $PROC"
+    fi
+
+}
+
 function current()
 {
-    echo "/proc/$PID/limits"
+    get_pid;
+
+    echo "# cat /proc/$PID/limits | grep 'open files'"
     cat /proc/$PID/limits | grep 'open files'
     echo
+    echo "# ls /proc/$PID/fd | wc -l"
     echo "Currently open : "$(ls /proc/$PID/fd | wc -l)
     exit 0;
 }
 
-# PID=$(ps -eo pid,comm | grep webserv | awk '{print $1}')
-PID=$(pidof $PROC)
-
-if [[ -z $PID ]]; then
-    echo "$PROC : not running"
-    PROC=valgrind.bin
-    PID=$(pidof $PROC)
-    if [[ -z $PID ]]; then
-        usage
-        exit
-    fi
-    echo "using : $PROC"
-fi
 
 if [[ -z $1 ]]; then
     usage
     current
     exit
 fi
+
+get_pid
 
 if [[ "$1" == "list" ]];then
     # ls -lG --hyperlink=always /proc/$PID/fd
@@ -58,7 +79,9 @@ fi
 # NB : can't increase without (sudo)
 
 CNT="$1"
+echo "# prlimit --pid $PID --nofile=$CNT"
 prlimit --pid $PID --nofile=$CNT
+echo
 
 current
 

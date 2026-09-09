@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 11:52:03 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/08 17:35:16 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 11:27:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,18 @@ void Request::append(const std::string &data) {
   //WSLOG(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
+    if (_state == BODY) {
+      std::string::size_type oldSize = _raw.size();
+      if (hasHeader("Transfer-Encoding")) {
+        handleChunkedBody();
+      } else {
+        handleBody();
+      }
+      if (_state == COMPLETE || _state == INVALID || oldSize == _raw.size())
+        return;
+      continue;
+    }
+
     std::string::size_type eol(_raw.find("\r\n"));
     std::string line =
         (eol != std::string::npos) ? _raw.substr(0, eol + 2) : _raw;
@@ -35,9 +47,6 @@ void Request::append(const std::string &data) {
       break;
     case HEADERS:
       handleHeaderLine(line, eol);
-      break;
-    case BODY:
-      handleBody(line, eol);
       break;
     default:
       return;
@@ -159,57 +168,83 @@ void Request::setupBody() {
   _bodySize = 0;
 }
 
-void Request::handleBody(std::string body, std::string::size_type eol) {
+void Request::handleBody() {
   if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
     TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
     delete _body;
     _body = bodyFile;
     _hasLargeBody = true;
   }
-  if (_headers.has("Content-Length")) {
-    if (body.size() > _remainingBody) {
-      _state = INVALID;
-      return;
-    }
-    *_body << body;
-    _bodySize += body.size();
-    _remainingBody -= body.size();
-    if (_remainingBody == 0) {
-      _state = COMPLETE;
-    } else if (eol != std::string::npos) {
-      _raw.erase(0, eol + 2);
-    } else
-      _raw.clear();
-  } else if (_headers.has("Transfer-Encoding"))
-    handleBodyLine(body, eol);
-  else
-    _state = INVALID;
+
+  if (_raw.size() >= _remainingBody) {
+    _body->write(_raw.c_str(), _remainingBody);
+    _bodySize += _remainingBody;
+    _raw.erase(0, _remainingBody);
+    _remainingBody = 0;
+  } else {
+    _body->write(_raw.c_str(), _raw.size());
+    _bodySize += _raw.size();
+    _remainingBody -= _raw.size();
+    _raw.clear();
+  }
+  if (_remainingBody == 0) {
+    _state = COMPLETE;
+  }
 }
 
-void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
-  if (eol == std::string::npos)
-    return;
-  if (bodyLine == "\r\n") {
-    _state = _remainingBody == 0 ? COMPLETE : INVALID;
-    _headers.remove("Transfer-Encoding");
-    _headers.insert("Content-Length", toString(_bodySize));
-    return;
+void Request::handleChunkedBody() {
+  if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
+    TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
+    delete _body;
+    _body = bodyFile;
+    _hasLargeBody = true;
   }
+
   if (_remainingBody == std::string::npos) {
-    bool err;
-    _remainingBody = getLong(bodyLine.c_str(), &err, 0, INT_MAX, 16, '\r');
+    std::string::size_type eol = _raw.find("\r\n");
+    if (eol == std::string::npos)
+      return;
+
+    bool err = false;
+    _chunkSize = getLong(_raw.substr(0, eol).c_str(), &err, 0, INT_MAX, 16);
     if (err) {
       _state = INVALID;
       return;
     }
-  } else if (eol != _remainingBody) {
-    _state = INVALID;
-  } else {
-    _body->write(bodyLine.c_str(), eol);
-    _bodySize += _remainingBody;
-    _remainingBody = std::string::npos;
+    _remainingBody = _chunkSize;
+
+    _raw.erase(0, eol + 2);
   }
-  _raw.erase(0, eol + 2);
+
+  if (_remainingBody > 0) {
+    std::string::size_type dataSize = (_raw.size() > _remainingBody)
+      ? _remainingBody
+      : _raw.size();
+
+    if (dataSize > 0) {
+      _body->write(_raw.c_str(), dataSize);
+      _bodySize += dataSize;
+      _remainingBody -= dataSize;
+      _raw.erase(0, dataSize);
+    }
+    if (_remainingBody > 0)
+      return;
+  }
+
+  if (_raw.size() < 2)
+    return;
+  if (_raw.find("\r\n") != 0) {
+    _state = INVALID;
+    return;
+  }
+  _raw.erase(0, 2);
+
+  if (_chunkSize == 0) {
+    _state = COMPLETE;
+    _headers.remove("Transfer-Encoding");
+    _headers.insert("Content-Length", toString(_bodySize));
+  }
+  _remainingBody = std::string::npos;
 }
 
 bool Request::keepalive() const {

@@ -26,13 +26,13 @@ function displayCookie() {
   cnt = parseInt(getCookie('counter'));
   if (!cnt)
     cnt = 1;
-  else
-    cnt = cnt + 1;
-  // alert(location.hostname);
-  var d = new Date();
-  d.setTime(d.getTime() + (7 * 86400000));
+  // else
+  //   cnt = cnt + 1;
+  // // alert(location.hostname);
+  // var d = new Date();
+  // d.setTime(d.getTime() + (7 * 86400000));
 
-  document.cookie = "counter=" + cnt + ";domain=" + location.hostname + ";path=/; expires=" + d.toUTCString();
+  // document.cookie = "counter=" + cnt + ";domain=" + location.hostname + ";path=/; expires=" + d.toUTCString();
 
   counter.textContent = "You have visited this page " + cnt + " times.";
 }

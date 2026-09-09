@@ -109,31 +109,31 @@ if [ "$1" == "u" ]; then
 
 	FILES=
 	FILES+="tiny.jpg "
-	# FILES+="mid.jpg "
-	# FILES+="earth.jpg "
-	# FILES+="e4.jpg "
-	# FILES+="Kanan.mp3 "
+	FILES+="mid.jpg "
+	FILES+="earth.jpg "
+	FILES+="e4.jpg "
+	FILES+="Kanan.mp3 "
 
 	for FILE in $FILES; do
 
-		# curl -X POST http://localhost:8082/cgi-uploads/ul.php \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/cgi-uploads/ul.php \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
 		# curl -X POST http://localhost:8082/cgi-uploads/ul.pl \
 		# 	-F file=@$WWW/files/$FILE
 		# echo ; echo ; echo
-		# curl -X POST http://localhost:8082/cgi-uploads/ul.py \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo ;
+		curl -X POST http://localhost:8082/cgi-uploads/ul.py \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo ;
 
 		# curl -X POST http://localhost:8082/uploads/$FILE \
 		# 	-F file=@$WWW/files/$FILE
 		# echo ; echo ; echo ;
 
-		curl -X POST http://localhost:8082/uploads/$FILE -i \
-			-H "Content-Type:application/octet-stream" \
-			-H "Transfer-Encoding: chunked" \
-			--data-binary @$WWW/files/$FILE
+		# curl -X POST http://localhost:8082/uploads/$FILE -i \
+		# 	-H "Content-Type:application/octet-stream" \
+		# 	-H "Transfer-Encoding: chunked" \
+		# 	--data-binary @$WWW/files/$FILE
 
 		# curl -X POST http://localhost:8082/uploads/$FILE -i \
 		# 	-H "Content-Type: application/x-www-form-urlencoded" \
@@ -199,12 +199,12 @@ fi
 # -H "Connection: keep-alive" \
 
 	# -d "p1=post-one&p2=post-two" \
-# curl -X POST http://localhost:8082/body.php -i \
-# 	-H "Content-Type: application/x-www-form-urlencoded" \
-# 	 -H "Transfer-Encoding: chunked" \
-# 	-d @../../www/kd/infinite.php
-# echo
-# exit 0
+curl -X POST http://localhost:8082/body.php -i \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	 -H "Transfer-Encoding: chunked" \
+	-d @../../www/kd/infinite.php
+echo
+exit 0
 
 # curl --http1.0 -X POST 'http://localhost:8082/ka.php' -i
 

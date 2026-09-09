@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/08 15:41:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 11:06:38 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 	// that a later reattempt at connection succeeds.
 
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 1024
+#  define SERV_BACKLOG 512
 # endif
 
 # ifndef SPARE_FD

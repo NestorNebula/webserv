@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/09 10:17:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 12:16:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,8 @@ void Session::setError(Response::StatusCode code) {
 
   try {
     _response.clear();
+    if (code < 400)
+      code = 418;
     setResponseStatus(code);
     handleResource();
     handleResponse();
@@ -266,6 +268,10 @@ void Session::handleRequest() {
   if (!_request.isComplete() && !_request.isInvalid() &&
       !_request.headersComplete())
     return;
+  // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
+  if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
+    return;
+
   validateRequest();
   resolveResource();
   validateOperation();
@@ -601,6 +607,7 @@ void Session::setResponseHeaders() {
 
   // Set-Cookie
   if (_request.getMethod() == METHOD_GET && _response.getCode() == 200) {
+    // Time Cookie
     std::string cookieName = "wstimecookie";
     std::time_t now = std::time(NULL);
     std::ostringstream oss;
@@ -619,8 +626,32 @@ void Session::setResponseHeaders() {
     }
     if (!update)
       oss << cookieName << '=' << now << '|' << now;
-    oss << "; Path=/";
+    oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
     headers.insert("Set-Cookie", oss.str());
+
+    // Counter Cookie
+    std::string cookieFile = "cookie.html";
+    if (_resourcePath.size() >= cookieFile.size() &&
+      _resourcePath.compare(_resourcePath.size() - cookieFile.size(),
+        std::string::npos, cookieFile) == 0) {
+      oss.str("");
+      update = false;
+      cookieName = "counter";
+      if (_request.hasHeader("Cookie")) {
+        std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
+        bool err = false;
+        long counter = getLong(cookie, &err, 0, LONG_MAX);
+        if (!err) {
+          oss << cookieName << '=' << counter + 1;
+          update = true;
+        }
+      }
+      if (!update)
+          oss << cookieName << "=1";
+      oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
+      headers.insert("Set-Cookie", oss.str());
+    }
+
   }
 
   _response.addHeaders(headers.begin(), headers.end());

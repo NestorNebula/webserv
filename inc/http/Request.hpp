@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/08 17:27:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/05 14:41:26 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ private:
   Stream *_body;
 
   std::string::size_type _remainingBody;
+  std::string::size_type _chunkSize;
   bool _hasLargeBody;
   std::string::size_type _bodySize;
 
@@ -91,6 +92,6 @@ private:
   void setMethod(const std::string &method);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
   void setupBody();
-  void handleBody(std::string body, std::string::size_type eol);
-  void handleBodyLine(std::string bodyLine, std::string::size_type eol);
+  void handleBody();
+  void handleChunkedBody();
 };
