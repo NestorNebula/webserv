@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 14:56:37 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:34:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 10:14:59 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
+// #kd
+#include "SizeDefs.hpp"
 
 class Session {
 public:
@@ -38,7 +40,9 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
+#if WITH_RETRY
     RETRY, // Retry to handle the Request
+#endif
   } Action;
 
   Action nextAction() const { return _next; }

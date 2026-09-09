@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/08 17:54:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 10:19:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	if (this->lact.after(now))
 		return (false);
+#if WITH_RETRY
 // RETRY : static resource
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
@@ -101,7 +102,7 @@ bool	Connection::timeo(WsTime & now)
 		this->mod_evt(EPOLLIN);
 		return (0);
 	}
-
+#endif
 	if ((this->lact + CONN_TIMEOUT).after(now))
 		return (false);
 
@@ -229,15 +230,18 @@ ssize_t	Connection::pollin(void)
 		}
 		switch (sess.nextAction())
 		{
+#if WITH_RETRY
 		case Session::RETRY:
 			WSCOL(WSL_CYAN);
 			WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "sess: RETRY");
 			this->mod_evt(0);
 			break;
+#endif
 		case Session::DOCGI:
 			err = this->exec_cgi();
 			if (err < 0)
 			{
+#if WITH_RETRY
 				if (err == SYSCALL_ERR)
 				{
 					WSCOL(WSL_CYAN);
@@ -246,6 +250,9 @@ ssize_t	Connection::pollin(void)
 					retry_cgi++;
 					this->mod_evt(0);
 				}
+#else
+				this->set_err(500);
+#endif
 				return (0); // send error
 			}
 			this->res_cgi->push_body();

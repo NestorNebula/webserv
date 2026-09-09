@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:23:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 10:28:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #include "Connection.hpp"
 #include "Socket.hpp"
 
-Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) : 
-	EpollClient(_ep, EPC_SERV, -1), 
+Server::Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf) :
+	EpollClient(_ep, EPC_SERV, -1),
 	conf(_conf),
 	port(p),
 	acc_cnt(0),
@@ -52,16 +52,16 @@ int Server::init(void)
 
 	if (this->sfd_open() < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "spare_fd"));
-	
+
 	this->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->fd < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "socket"));
-	
+
 	const int reuse = 1;
 	err = setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int));
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "setsockopt"));
-					
+
 	err = bind(this->fd, (struct sockaddr *) &addr, sizeof(addr));
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "bind"));
@@ -69,8 +69,8 @@ int Server::init(void)
 	err = sock_non_block(this->fd);
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block"));
-	
-	err = listen(this->fd, SERV_BACKLOG); 
+
+	err = listen(this->fd, SERV_BACKLOG);
 	if (err < 0)
 		return (WsLog::_errno(LVL_ERR, TGT_SERV, "listen"));
 
@@ -84,13 +84,13 @@ void	Server::set_paused(void)
 {
 	if (this->paused)
 		return;
-		
+
 	this->paused = 1;
 
 	WSCOL(WSL_RED);
 	WSLOG(LVL_DBG, TGT_RETRY, this->port, "pause  ...  ");
 	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
-	
+
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
 }
@@ -110,14 +110,17 @@ int	Server::accept_conn(void)
 	int					conn_fd;
 	struct sockaddr_in	conn_addr;
 	socklen_t			conn_asiz = sizeof(struct sockaddr_in);
-	
+
 	conn_fd = accept(this->fd, (struct sockaddr*) &conn_addr, &conn_asiz);
 	if (conn_fd < 0)
 	{
 		acc_err++;
+		WsLog::_errno(LVL_ERR, TGT_SERV, "accept");
+#if WITH_RETRY
 		this->set_paused(); // failed : accept()
+#endif
 		return (0);
-	}	
+	}
 
 	int err = sock_non_block(conn_fd);
 	if (err < 0)
@@ -126,9 +129,9 @@ int	Server::accept_conn(void)
 		WsLog::_errno(LVL_ERR, TGT_SERV, "sock non-block");
 		return (0);
 	}
-	
+
 	Connection *c = new Connection(this->ep, conn_fd, *this);
-	
+
 	err = c->ini_evt(EPOLLIN);
 	if (err < 0)
 	{
@@ -154,13 +157,13 @@ ssize_t	Server::pollout(void)
 	return (0);
 }
 
-int	Server::rdhup(void) 
+int	Server::rdhup(void)
 {
 	return (0);
 	// this->ep->cli_info();
 }
 
-int	Server::hup(void) 
+int	Server::hup(void)
 {
 	return (0);
 }
@@ -177,8 +180,8 @@ bool	Server::timeo  (WsTime & now)
 	if ((this->lact + SERV_PAUSE).after(now))
 		return (false);
 
-	this->lact = now; 
-	
+	this->lact = now;
+
 	this->sfd_close();
 	if (this->sfd_open() < 0)
 	{
@@ -192,7 +195,7 @@ bool	Server::timeo  (WsTime & now)
 		WSCOL(WSL_GREEN);
 		WSLOG(LVL_DBG, TGT_RETRY, this->port, "accepted!");
 	}
-	// free (3) for CGI .. 
+	// free (3) for CGI ..
 
 	WSCOL(WSL_GREEN);
 	WSLOG(LVL_DBG, TGT_RETRY, this->port, "resume (!)");

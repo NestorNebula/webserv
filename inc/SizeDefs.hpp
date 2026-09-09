@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/08 18:16:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 10:29:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,10 @@
 
 # ifndef SYSCALL_ERR
 #  define SYSCALL_ERR (-2)
+# endif
+
+# ifndef WITH_RETRY
+#  define WITH_RETRY 1
 # endif
 
 #endif

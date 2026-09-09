@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/08 17:21:41 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 10:17:41 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,16 +221,21 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
   switch (_next) {
   case RDSOCK:
+#if WITH_RETRY
   case RETRY:
+#endif
     handleRequest();
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
+#if WITH_RETRY
       if (_retry_res) {
 // #kd
         WSCOL(WSL_PURPLE);
         WSLOG(LVL_DBG, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
-      } else if (_next != DOCGI) {
+      } else
+#endif
+      if (_next != DOCGI) {
         handleResponse();
         _next = WRSOCK;
       }
@@ -372,6 +377,7 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
+#if WITH_RETRY
       if (_retry_res++ > MAX_RETRIES)
       {
         _retry_res = 0;
@@ -383,19 +389,23 @@ void Session::handleResource() {
         _retry_res++;
         _next = RDSOCK;
       }
-
+#else
+      setResponseStatus(500);
+#endif
       delete _resource;
       _resource = NULL;
 // #kd
       WSLOG(LVL_DBG, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
+#if WITH_RETRY
       if (_retry_res) {
 // #kd
         WSCOL(WSL_GREEN);
         WSLOG(LVL_DBG, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
+#endif
     }
   }
 }

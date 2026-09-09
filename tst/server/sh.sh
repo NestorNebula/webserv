@@ -177,15 +177,15 @@ fi
 
 # req   : Sending data to closed request
 
-curl -X POST http://localhost:8082/cgi-uploads/ul.php \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-H "Transfer-Encoding: chunked" \
-	-F file=@$WWW/files/earth.jpg
+# curl -X POST http://localhost:8082/cgi-uploads/ul.php \
+# 	-H "Content-Type: application/x-www-form-urlencoded" \
+# 	-H "Transfer-Encoding: chunked" \
+# 	-F file=@$WWW/files/earth.jpg
 
-# curl -X POST http://localhost:8081/cgi-vars/vars.php -i \
-# 	-d @www/files/earth.jpg
-echo
-exit 0
+# # curl -X POST http://localhost:8081/cgi-vars/vars.php -i \
+# # 	-d @www/files/earth.jpg
+# echo
+# exit 0
 
 
 
@@ -216,7 +216,7 @@ exit 0
 # fastcgi .. error .. returns HTTP HEADE (!)
 # could be a pref thing
 curl -X POST 'http://localhost:8082/cgi-codes/exit.php' -i \
-	-F "code=1"
+	-F "code=0"
 echo
 
 # echo
