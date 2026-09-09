@@ -65,25 +65,25 @@
 # http://127.0.0.1:8081/cgi-codes/stat.py
 
 http://127.0.0.1:8082/cgi-vars/vars.py
-http://127.0.0.1:8082/ka.py
+# http://127.0.0.1:8082/ka.py
 http://127.0.0.1:8082/cgi-codes/stat.py
 
 # PHP ONLY
 
-# http://127.0.0.1:8081/cgi-vars/vars.php
+http://127.0.0.1:8081/cgi-vars/vars.php
 # http://127.0.0.1:8081/ka.php
-# http://127.0.0.1:8081/cgi-codes/stat.php
+http://127.0.0.1:8081/cgi-codes/stat.php
 
-# http://127.0.0.1:8081/cgi-big/bigimage.php
+http://127.0.0.1:8081/cgi-big/bigimage.php
 # # BIGFILE
 # http://127.0.0.1:8081/cgi-big/bigaudio.php
 
 
 http://127.0.0.1:8082/cgi-vars/vars.php
-http://127.0.0.1:8082/ka.php
+# http://127.0.0.1:8082/ka.php
 http://127.0.0.1:8082/cgi-codes/stat.php
 
-# http://127.0.0.1:8082/cgi-big/bigimage.php
+http://127.0.0.1:8082/cgi-big/bigimage.php
 # BIGFILE
 # http://127.0.0.1:8082/cgi-big/bigaudio.php
 

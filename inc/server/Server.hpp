@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 11:06:38 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 16:12:23 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ private:
 	Server & operator =	(const Server & ) { return (*this); }
 
 public:
-	Server (Epoll *_ep, unsigned short p, const ServerConfig &_conf);
+	Server (Epoll *_ep, const ServerConfig &_conf);
 	~Server();
 
 	ssize_t				pollin (void);

@@ -49,7 +49,7 @@ function current()
     cat /proc/$PID/limits | grep 'open files'
     echo
     echo "# ls /proc/$PID/fd | wc -l"
-    echo "Currently open : "$(ls /proc/$PID/fd | wc -l)
+    echo "Currently open            "$(ls /proc/$PID/fd | wc -l)
     exit 0;
 }
 

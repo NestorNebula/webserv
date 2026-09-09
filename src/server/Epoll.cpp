@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 17:40:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 16:14:27 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ volatile sig_atomic_t stop = 0;
 static void sigint_handler(int signo)
 {
     (void)signo;
-	
+
 	WSLOG(LVL_ERR, TGT_EPOLL, "\n\n\n\n");
 	WSLOG(LVL_ERR, TGT_EPOLL, "SIGINT");
 
@@ -32,7 +32,7 @@ static void sigint_handler(int signo)
 static void sigpipe_handler(int signo)
 {
     (void)signo;
-	
+
 	WSLOG(LVL_SYSERR, TGT_EPOLL, "\n\n\n\n");
 	WSLOG(LVL_SYSERR, TGT_EPOLL, "SIGPIPE");
 }
@@ -57,7 +57,7 @@ std::string evt_type(int evt)
 		typ += "(-) ";
 		evt = -evt;
 	}
-	
+
 	if (evt & EPOLLIN)
 		typ += (evt_name[0]);
 	if (evt & EPOLLOUT)
@@ -103,14 +103,14 @@ void	Epoll::cleanup()
 		{
 			if ( (*it)->get_typ() == *typ)
 			{
-				try 
-				{	
+				try
+				{
 					delete (*it);
 				}
 				catch(const std::exception& e)
 				{
 					WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
-				}		
+				}
 				this->clients.erase(it++);
 			}
 			else
@@ -123,7 +123,7 @@ void	Epoll::cleanup()
 	WSLOG(LVL_DBG, TGT_EPOLL, " (~) Epoll ", clients.size());
 
 	this->clients.clear();
-	
+
 	if (this->epfd != -1)
 	{
 		close(this->epfd);
@@ -142,7 +142,7 @@ int	Epoll::add(EpollClient *cli)
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli add  : bad data ptr");
 		return (-1);
 	}
-	
+
 	int	err;
 
 	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli add  : ", cli->typ_str());
@@ -159,7 +159,7 @@ int	Epoll::add(EpollClient *cli)
 		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: add");
 		delete (cli);
 	}
-	else 
+	else
 	{
 		this->clients.insert(cli);
 	}
@@ -173,7 +173,7 @@ int	Epoll::mod(EpollClient *cli)
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : bad data ptr");
 		return (-1);
 	}
-	
+
 	int	err;
 
 	WSLOG(LVL_DBG, TGT_EPOLL_CTL, "cli mod  : ", cli->typ_str());
@@ -188,7 +188,7 @@ int	Epoll::mod(EpollClient *cli)
 	if (err < 0)
 	{
 		WSLOG(LVL_ERR, TGT_EPOLL_CTL, "cli mod  : ", cli->get_fd());
-		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");	
+		WsLog::_errno(LVL_SYSERR, TGT_EPOLL_CTL, "epoll_ctl: mod ");
 	}
 	return (err);
 }
@@ -270,12 +270,12 @@ int		Epoll::cli_cnt(int typ)
 		it++;
 	}
 
-	return (typ_cnt);	
+	return (typ_cnt);
 }
 int	Epoll::cli_info(void)
 {
 	// WSLOG(LVL_DBG, TGT_EPOLL_CNT, "ecnt  : ", this->clients.size());
-	
+
 	int epc_serv = 0;
 	int epc_conn = 0;
 	int epc_cgi  = 0;
@@ -319,7 +319,7 @@ int	Epoll::cli_info(void)
 }
 
 int	Epoll::exec(void)
-{	
+{
 	this->ecnt = epoll_wait(this->epfd, this->evts, EPOLL_MAX_EVT, this->toms);
 	if (this->ecnt < 0)
 	{
@@ -338,7 +338,7 @@ void	Epoll::check_timeo(void)
 {
 	WsTime	n;
 	n.set_now();
-	
+
 	std::set<EpollClient*>::iterator it;
 	it = this->clients.begin();
 	while (it != this->clients.end())
@@ -356,7 +356,7 @@ int	Epoll::loop(void)
 	int					e;
 	struct epoll_event	*evt;
 	EpollClient 		*epc;
-	
+
     while (!stop)
     {
         e = this->exec();
@@ -376,12 +376,12 @@ int	Epoll::loop(void)
 				WSLOG(LVL_WARN, TGT_EPOLL_EVT, "epc NULL");
 				continue;
 			}
-			
+
 			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "");
 			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt tgt  : ", epc->typ_str());
 			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt fd   : ", epc->get_fd()); // DBG_EPC_FD
 			WSLOG(LVL_DBG, TGT_EPOLL_EVT, "evt typ  : ", evt_type(evt->events));
-			
+
 			try
 			{
 				if (epc->event(evt) < 0)
@@ -398,7 +398,7 @@ int	Epoll::loop(void)
 				this->rem(epc);
 			}
         }
-		this->check_timeo();	
+		this->check_timeo();
     }
 	return (0);
 }
@@ -412,7 +412,7 @@ int	Epoll::serve(const std::vector<ServerConfig> &serv_list)
 	{
 		try
 		{
-			new Server(this, it->port, *it);
+			new Server(this, *it);
 			err = 1;
 		}
 		catch (const std::exception& e)

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 10:49:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 19:06:15 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # endif
 
 # ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 10
+#  define CGI_TIMEOUT 30
 # endif
 
 # ifndef CGI_RETRY_INTERVAL
