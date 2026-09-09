@@ -92,6 +92,6 @@ private:
   void setMethod(const std::string &method);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
   void setupBody();
-  void handleBody(std::string body, std::string::size_type eol);
+  void handleBody();
   void handleChunkedBody();
 };

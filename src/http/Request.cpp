@@ -47,7 +47,7 @@ void Request::append(const std::string &data) {
       handleHeaderLine(line, eol);
       break;
     case BODY:
-      handleBody(line, eol);
+      handleBody();
       break;
     default:
       return;
@@ -169,29 +169,28 @@ void Request::setupBody() {
   _bodySize = 0;
 }
 
-void Request::handleBody(std::string body, std::string::size_type eol) {
+void Request::handleBody() {
   if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
     TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
     delete _body;
     _body = bodyFile;
     _hasLargeBody = true;
   }
-  if (_headers.has("Content-Length")) {
-    if (body.size() > _remainingBody) {
-      _state = INVALID;
-      return;
-    }
-    *_body << body;
-    _bodySize += body.size();
-    _remainingBody -= body.size();
-    if (_remainingBody == 0) {
-      _state = COMPLETE;
-    } else if (eol != std::string::npos) {
-      _raw.erase(0, eol + 2);
-    } else
-      _raw.clear();
-  } else
-    _state = INVALID;
+
+  if (_raw.size() >= _remainingBody) {
+    _body->write(_raw.c_str(), _remainingBody);
+    _bodySize += _remainingBody;
+    _raw.erase(0, _remainingBody);
+    _remainingBody = 0;
+  } else {
+    _body->write(_raw.c_str(), _raw.size());
+    _bodySize += _raw.size();
+    _remainingBody -= _raw.size();
+    _raw.clear();
+  }
+  if (_remainingBody == 0) {
+    _state = COMPLETE;
+  }
 }
 
 void Request::handleChunkedBody() {
