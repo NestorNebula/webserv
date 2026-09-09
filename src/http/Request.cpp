@@ -190,9 +190,7 @@ void Request::handleBody(std::string body, std::string::size_type eol) {
       _raw.erase(0, eol + 2);
     } else
       _raw.clear();
-  } else if (_headers.has("Transfer-Encoding"))
-    handleBodyLine(body, eol);
-  else
+  } else
     _state = INVALID;
 }
 
@@ -249,32 +247,6 @@ void Request::handleChunkedBody() {
     _headers.insert("Content-Length", toString(_bodySize));
   }
   _remainingBody = std::string::npos;
-}
-
-void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
-  if (eol == std::string::npos)
-    return;
-  if (bodyLine == "\r\n") {
-    _state = _remainingBody == 0 ? COMPLETE : INVALID;
-    _headers.remove("Transfer-Encoding");
-    _headers.insert("Content-Length", toString(_bodySize));
-    return;
-  }
-  if (_remainingBody == std::string::npos) {
-    bool err;
-    _remainingBody = getLong(bodyLine.c_str(), &err, 0, INT_MAX, 16, '\r');
-    if (err) {
-      _state = INVALID;
-      return;
-    }
-  } else if (eol != _remainingBody) {
-    _state = INVALID;
-  } else {
-    _body->write(bodyLine.c_str(), eol);
-    _bodySize += _remainingBody;
-    _remainingBody = std::string::npos;
-  }
-  _raw.erase(0, eol + 2);
 }
 
 bool Request::keepalive() const {
