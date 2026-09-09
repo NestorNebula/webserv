@@ -34,6 +34,8 @@ else
 		ARG=k
 	elif [[ "$1" =~ "a" ]]; then
 		ARG=a
+	elif [[ "$1" =~ "e" ]]; then
+		ARG=e
 	fi
 
 	./webserv "$CONF" $ARG

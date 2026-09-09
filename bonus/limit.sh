@@ -14,7 +14,9 @@ function usage()
 
 function current()
 {
+    echo "/proc/$PID/limits"
     cat /proc/$PID/limits | grep 'open files'
+    echo
     echo "Currently open : "$(ls /proc/$PID/fd | wc -l)
     exit 0;
 }
