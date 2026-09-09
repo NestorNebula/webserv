@@ -25,6 +25,16 @@ void Request::append(const std::string &data) {
   //WSLOG(LVL_INFO, TGT_REQ, "Request received data: ", data);
   _raw += data;
   for (;;) {
+    if (_state == BODY && hasHeader("Transfer-Encoding")) {
+      std::string::size_type oldSize = _raw.size();
+      handleChunkedBody();
+
+      if (_state == COMPLETE || _state == INVALID)
+        return;
+      if (oldSize == _raw.size()) break;
+      continue;
+    }
+
     std::string::size_type eol(_raw.find("\r\n"));
     std::string line =
         (eol != std::string::npos) ? _raw.substr(0, eol + 2) : _raw;
@@ -184,6 +194,61 @@ void Request::handleBody(std::string body, std::string::size_type eol) {
     handleBodyLine(body, eol);
   else
     _state = INVALID;
+}
+
+void Request::handleChunkedBody() {
+  if (!_hasLargeBody && _bodySize > MAX_BODY_SIZE) {
+    TemporaryFileStream *bodyFile = new TemporaryFileStream(*_body);
+    delete _body;
+    _body = bodyFile;
+    _hasLargeBody = true;
+  }
+
+  if (_remainingBody == std::string::npos) {
+    std::string::size_type eol = _raw.find("\r\n");
+    if (eol == std::string::npos)
+      return;
+
+    bool err = false;
+    _chunkSize = getLong(_raw.substr(0, eol).c_str(), &err, 0, INT_MAX, 16);
+    if (err) {
+      _state = INVALID;
+      return;
+    }
+    _remainingBody = _chunkSize;
+
+    _raw.erase(0, eol + 2);
+  }
+
+  if (_remainingBody > 0) {
+    std::string::size_type dataSize = (_raw.size() > _remainingBody)
+      ? _remainingBody
+      : _raw.size();
+
+    if (dataSize > 0) {
+      _body->write(_raw.c_str(), dataSize);
+      _bodySize += dataSize;
+      _remainingBody -= dataSize;
+      _raw.erase(0, dataSize);
+    }
+    if (_remainingBody > 0)
+      return;
+  }
+
+  if (_raw.size() < 2)
+    return;
+  if (_raw.find("\r\n") != 0) {
+    _state = INVALID;
+    return;
+  }
+  _raw.erase(0, 2);
+
+  if (_chunkSize == 0) {
+    _state = COMPLETE;
+    _headers.remove("Transfer-Encoding");
+    _headers.insert("Content-Length", toString(_bodySize));
+  }
+  _remainingBody = std::string::npos;
 }
 
 void Request::handleBodyLine(std::string bodyLine, std::string::size_type eol) {
