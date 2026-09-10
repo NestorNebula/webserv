@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   TemporaryFileStream.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 11:12:28 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/04 12:52:24 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/10 10:26:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "TemporaryFileStream.hpp"
 #include "http_utils.hpp"
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include <algorithm>
 #include <cstring>
 #include <fstream>

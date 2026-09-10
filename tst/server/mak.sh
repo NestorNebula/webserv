@@ -12,7 +12,11 @@ if [[ "$1" =~ "c" ]]; then
 	exit 0
 fi
 
-EXTRA_TIME=1 make -j12  || exit 1
+
+# export EXTRA_TIME=0
+# export WITH_RETRY=0
+
+make -j12  || exit 1
 
 if [[ "$1" =~ "x" ]]; then
 	exit 0

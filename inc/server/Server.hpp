@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 16:12:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:39:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <arpa/inet.h>
 # include <fcntl.h>
 
-# include "SizeDefs.hpp"
+# include "WsDefs.hpp"
 # include "WsTime.hpp"
 # include "Epoll.hpp"
 # include "EpollClient.hpp"

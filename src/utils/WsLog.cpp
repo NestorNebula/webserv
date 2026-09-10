@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 10:34:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:53:04 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -484,3 +484,28 @@ void    WsLog::kd(void)
 // In single-threaded event loops (like Node.js or Python asyncio),
 // synchronous or heavy logging operations monopolize the thread.
 // The application fails to poll socket descriptors, delaying packet reads and handshakes.
+
+
+
+// switch(argv[2][0])
+// {
+// case '0':
+//    WsLog::lvl = LVL_MAIN;
+//    WsLog::tgt = TGT_ALL; //  & !TGT_CGI_ERR;
+//    break;
+// case 'e':
+//     WsLog::lvl = LVL_ALL;
+//     WsLog::tgt = TGT_RETRY | TGT_TIMEO;
+//     break;
+// case 'k':
+//     WsLog::lvl = LVL_ALL;
+//     WsLog::tgt =
+//     // TGT_CGI_HEAD |
+//     TGT_CONN | TGT_CGI | TGT_CGI_HEAD;
+//     // TGT_SERV_ALL & ~(TGT_EPC | TGT_EPOLL_EVT | TGT_EPOLL_CTL | TGT_CONN | TGT_FCGI_PARSE);
+//     break;
+// case 'a':
+//     WsLog::lvl = LVL_ALL;
+//    WsLog::tgt = TGT_ALL & ~(TGT_CGI_HEAD | TGT_CGI_DATA | TGT_FCGI_PARSE);
+//    break;
+// }

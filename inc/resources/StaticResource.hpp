@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 09:42:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 13:43:45 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:51:28 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ public:
       _state = DONE;
 // #kd
       WSCOL(WSL_CYAN);
-      WSLOG(LVL_DBG, TGT_RETRY, "using : ErrorResource::def_str");
+      WSLOG(LVL_WARN, TGT_RETRY, "using : ErrorResource::def_str");
     }
   }
 

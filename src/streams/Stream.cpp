@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Stream.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/29 10:46:38 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/01 12:40:42 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/10 10:19:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include "Stream.hpp"
 #include <algorithm>
 

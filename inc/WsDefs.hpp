@@ -1,26 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SizeDefs.hpp                                       :+:      :+:    :+:   */
+/*   WsDefs.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 19:22:11 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:35:17 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SIZE_DEFS_HPP
-# define SIZE_DEFS_HPP
+#ifndef WS_DEFS_HPP
+# define WS_DEFS_HPP
 
 # include "WsTime.hpp"
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT 60
+#  define CONN_TIMEOUT (60)
 # endif
 
 # ifndef CGI_TIMEOUT
-#  define CGI_TIMEOUT 10
+#  define CGI_TIMEOUT (30)
 # endif
 
 # ifndef CGI_RETRY_INTERVAL
@@ -32,7 +32,7 @@
 # endif
 
 # ifndef MAX_RETRIES
-#  define MAX_RETRIES 30
+#  define MAX_RETRIES (30)
 # endif
 
 # ifndef SERV_PAUSE
@@ -45,10 +45,10 @@
 
 
 # ifndef CGI_MAX_BUF
-#  define CGI_MAX_BUF 512000
+#  define CGI_MAX_BUF (512000)
 # endif
 
-# define DEF_BUF_SIZ 8192
+# define DEF_BUF_SIZ (8192)
 
 # ifndef EPC_BUF_SIZ
 #  define EPC_BUF_SIZ (DEF_BUF_SIZ)
@@ -75,7 +75,7 @@
 # endif
 
 # ifndef WITH_RETRY
-#  define WITH_RETRY 1
+#  define WITH_RETRY 0
 # endif
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 18:57:33 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:52:55 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ void	Server::set_paused(void)
 	this->paused = 1;
 
 	WSCOL(WSL_RED);
-	WSLOG(LVL_DBG, TGT_RETRY, this->port, "pause  ...  ");
+	WSLOG(LVL_WARN, TGT_RETRY, this->port, "pause  ...  ");
 	// WSLOG(LVL_TMP, TGT_SERV, "nconn  ...  ", this->ep->cli_cnt(EPC_CONN));
 
 	this->sfd_close();
@@ -244,19 +244,19 @@ bool	Server::timeo  (WsTime & now)
 	if (this->sfd_open() < 0)
 	{
 		WSCOL(WSL_PURPLE);
-		WSLOG(LVL_DBG, TGT_RETRY, this->port, "stay paused");
+		WSLOG(LVL_WARN, TGT_RETRY, this->port, "stay paused");
 		this->ep->cli_info();
 		return (false);
 	}
 	if (this->accept_conn() > 0)
 	{
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_DBG, TGT_RETRY, this->port, "accepted!");
+		WSLOG(LVL_WARN, TGT_RETRY, this->port, "accepted!");
 	}
 	// free (3) for CGI ..
 
 	WSCOL(WSL_GREEN);
-	WSLOG(LVL_DBG, TGT_RETRY, this->port, "resume (!)");
+	WSLOG(LVL_WARN, TGT_RETRY, this->port, "resume (!)");
 
 	this->freed_fd = 0;
 	this->paused = 0;

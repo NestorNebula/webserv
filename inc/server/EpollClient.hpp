@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:21:06 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/04 11:42:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:19:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <vector>
 # include "WsLog.hpp"
 # include "WsTime.hpp"
-# include "SizeDefs.hpp"
+# include "WsDefs.hpp"
 
 
 typedef enum
@@ -39,23 +39,23 @@ class EpollClient
 {
 protected:
     char	ibuf[EPC_BUF_SIZ];
-	
+
 private:
-	EpollClient & operator = (const EpollClient & ) 
+	EpollClient & operator = (const EpollClient & )
 		{ return (*this); }
 public:
-	EpollClient				 (const EpollClient & that) : 
+	EpollClient				 (const EpollClient & that) :
 		ep(that.ep), typ(that.typ), fd(that.fd) {}
-		
+
 	EpollClient (Epoll *_ep, epc_typ _typ, int _fd);
-	
+
 	virtual ~EpollClient();
 
 	ssize_t			recv(void);
 	ssize_t			send(const char *buf, ssize_t siz);
 	ssize_t			send(std::string & str);
 	ssize_t			send(std::string & str, ssize_t cnt);
-	
+
 	virtual ssize_t	pollin (void)	  = 0;
 	virtual ssize_t pollout(void)	  = 0;
 	virtual int		rdhup  (void)	  = 0;
@@ -70,7 +70,7 @@ public:
 	struct epoll_event	*get_evt(void);
 	epc_typ				get_typ(void);
     std::string 		typ_str (void);
-	
+
 	Epoll				*ep;
 protected:
 	epc_typ				typ;

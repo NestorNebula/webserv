@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:30:46 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:16:43 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:19:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESOURCE_CGI_HPP
 # define RESOURCE_CGI_HPP
 
-# include "SizeDefs.hpp"
+# include "WsDefs.hpp"
 # include "helpers.hpp"
 # include "Connection.hpp"
 # include "TemporaryFileStream.hpp"
@@ -101,7 +101,7 @@ protected:
 	int				clos;
 	int				chnk;
 	void			make_head(void);
-	
+
 	bool			wait_comp;
 	virtual int		wait(int opt) = 0;
 	void			chk_rsp_len(void);

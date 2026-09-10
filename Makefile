@@ -36,6 +36,10 @@ ifdef EXTRA_TIME
 DEFS += -DEXTRA_TIME="$(EXTRA_TIME)"
 endif
 
+ifdef WITH_RETRY
+DEFS += -DWITH_RETRY="$(WITH_RETRY)"
+endif
+
 FILES = \
 	utils/WsLog.cpp \
 	utils/helpers.cpp \

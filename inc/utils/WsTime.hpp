@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/03 10:45:16 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 19:31:06 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:42:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ public:
     void    set_now(void)
     {
 # if EXTRA_TIME
+        // ATTN : beyond-bonus function
         clock_gettime(CLOCK_MONOTONIC, (struct timespec*) &t);
 # else
         std::time(&t);

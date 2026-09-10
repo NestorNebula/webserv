@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/24 17:31:03 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 19:29:34 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:21:25 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ int		ResourceCgi::recv_data(char *buf, int siz)
 			if (this->clen)
 			{
 				WSCOL(WSL_CYAN);
-				WSLOG(LVL_WARN, TGT_CGI_HEAD, "cgi : stream");
+				WSLOG(LVL_DBG, TGT_CGI_HEAD, "cgi : stream");
 				this->wait_comp = false;
 				this->ka = false;
 				this->make_head();

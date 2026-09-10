@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/09 19:19:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:51:47 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "DirectoryResource.hpp"
 #include "HttpMethod.hpp"
 #include "Request.hpp"
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
@@ -233,7 +233,7 @@ void Session::manageSession() {
       if (_retry_res) {
 // #kd
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
       } else
 #endif
@@ -408,7 +408,7 @@ void Session::handleResource() {
       if (_retry_res) {
 // #kd
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_DBG, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
 #endif

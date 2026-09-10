@@ -1,7 +1,7 @@
 <?php
     header('Content-Type: video/x-matroska');
 
-    $path = '/home/kdonlon/Videos/toxic.mp4';
+    $path = '../files/ultra.mp4';
     $fsiz = filesize($path);
     header('Content-Length: ' . $fsiz);
 

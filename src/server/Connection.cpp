@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/09 10:19:25 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 11:13:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ bool	Connection::timeo(WsTime & now)
 	if ((sess.nextAction() == Session::RETRY) && ((this->lact + CGI_RETRY_INTERVAL).before(now)))
 	{
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
+		WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "sess: retry");
 		sess.manageSession();
 		switch (sess.nextAction())
 		{
@@ -84,20 +84,20 @@ bool	Connection::timeo(WsTime & now)
 	{
 		this->lact = now;
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		if (this->exec_cgi() < 0)
 		{
 			if (retry_cgi >= MAX_RETRIES)
 			{
 				WSCOL(WSL_RED);
-				WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+				WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 				this->set_err(504);
 			}
 			retry_cgi++;
 			return (0);
 		}
 		WSCOL(WSL_GREEN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+		WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 		this->retry_cgi = 0;
 		this->mod_evt(EPOLLIN);
 		return (0);
@@ -107,22 +107,22 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 
 	WSCOL(WSL_YELLOW);
-	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->req_cnt);
-	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", evt_type(this->evt.events));
+	WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", this->req_cnt);
+	// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn ", evt_type(this->evt.events));
 
 	if (this->evt.events & EPOLLOUT)
 	{
-		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn writing");
+		WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : conn writing");
 		this->lact = now;
 		return (false);
 	}
 
 	if (this->sess.nextAction() == Session::RDSOCK)
 	{
-		WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
+		// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
 		// if (this->req_cnt) // keep-alive timeout
 		// {
-		// 	WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
+		// 	WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
 		// 	this->sess._next = Session::CLOSE;
 		// 	this->mod_evt(EPOLLOUT);
 		// }
@@ -132,7 +132,7 @@ bool	Connection::timeo(WsTime & now)
 // so .. it's in some state ..
 // on the next request
 		{
-			WSLOG(LVL_DBG, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
+			// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
 			this->set_err(431); // but not delivered ..
 			// until next request ..
 			this->mod_evt(EPOLLOUT);
@@ -233,7 +233,7 @@ ssize_t	Connection::pollin(void)
 #if WITH_RETRY
 		case Session::RETRY:
 			WSCOL(WSL_CYAN);
-			WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "sess: RETRY");
+			WSLOG(LVL_WARN, TGT_CONN | TGT_RETRY, "sess: RETRY");
 			this->mod_evt(0);
 			break;
 #endif
@@ -245,7 +245,7 @@ ssize_t	Connection::pollin(void)
 				if (err == SYSCALL_ERR)
 				{
 					WSCOL(WSL_CYAN);
-					WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
+					WSLOG(LVL_WARN, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "retry", retry_cgi);
 					this->serv.set_paused(); // failed : CGI
 					retry_cgi++;
 					this->mod_evt(0);
@@ -490,7 +490,7 @@ int	Connection::exec_cgi(void)
 		delete (cgienv);
 		delete (fcgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
+		WSLOG(LVL_WARN, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return(SYSCALL_ERR);
 	}
 
@@ -503,7 +503,7 @@ int	Connection::exec_cgi(void)
 	{
 		delete (cgienv);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
+		WSLOG(LVL_WARN, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 
@@ -567,7 +567,7 @@ int	Connection::exec_cgi(void)
 		pipes.shutdown();
 		delete (pcgi);
 		WSCOL(WSL_CYAN);
-		WSLOG(LVL_DBG, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
+		WSLOG(LVL_WARN, TGT_CONN | TGT_RETRY, "cgi : ", this->fd, "fail ", retry_cgi);
 		return (SYSCALL_ERR);
 	}
 	this->res_cgi = pcgi;
