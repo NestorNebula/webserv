@@ -232,7 +232,7 @@ void Session::manageSession() {
 #if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
       } else
 #endif
@@ -399,13 +399,13 @@ void Session::handleResource() {
 
       delete _resource;
       _resource = NULL;
-      WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
+      WSLOG(LVL_DBG, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
 #if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
 #endif
