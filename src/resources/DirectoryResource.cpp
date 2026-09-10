@@ -70,9 +70,9 @@ void DirectoryResource::buildList() {
               "<p>for our HTTP server</p>\n"
               "</header>\n"
               "<section id=\"dir-list-section\">\n"
-              "<h1>Directory listing for "
+              "<h2>Directory listing for "
            << _dirURI 
-           << "</h1>\n"
+           << "</h2>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
 
