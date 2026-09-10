@@ -18,6 +18,7 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
+#include "WsDefs.hpp"
 
 class Session {
 public:
