@@ -35,10 +35,4 @@
     {
         echo "no file set\n";
     }
-
-// CWD is the working directory where php-fpm is started (or configured to change to).
-
-// In case of chroot CWD = "".
-
-// In any case the SCRIPT_NAME php script can be found with ./SCRIPT_NAME, from the CWD. So the undocumented not standardized SCRIPT_FILENAME should vanish! It breaks the CGI standard.
 ?>
