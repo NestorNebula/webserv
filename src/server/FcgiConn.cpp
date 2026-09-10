@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 16:27:08 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:20:23 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/08 14:25:34 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@ int FcgiConn::uid = 1;
 int FcgiConn::make_sock(std::string &sock_path)
 {
 	struct sockaddr_un fpm;
-	
+
 	fpm.sun_family = AF_UNIX;
 	std::memcpy(fpm.sun_path, sock_path.c_str(), sock_path.size() + 1);
 
 	int fd = socket(fpm.sun_family, SOCK_STREAM, 0);
 	if (fd < 0)
 		return (WsLog::_errno(LVL_SYSERR, TGT_FCGI, "socket"));
-	
+
     int err = connect(fd, (struct sockaddr*) &fpm, sizeof(struct sockaddr_un));
     if (err < 0)
 	{
@@ -69,7 +69,7 @@ int FcgiConn::req_init(CgiEnv * env)
 		kvit++;
 	}
 	msg.end_params();
-	
+
 	req.append(msg.buf.text(), msg.buf.size());
 
 	return (0);
@@ -78,12 +78,12 @@ int FcgiConn::req_init(CgiEnv * env)
 void FcgiConn::req_body(const char *buf, int siz)
 {
 	FcgiMsg		body;
-	
+
 	if (buf && siz)
 		body.add_stdin(buf, siz);
 	else
 		body.end_stdin();
-	
+
 	req.append(body.buf.text(), body.buf.size());
 }
 
@@ -102,14 +102,14 @@ int FcgiConn::rsp_data(char * buf, int cnt)
 	{
 	case FCGI_STDERR:
 		WSCOL(WSL_YELLOW);
-		WSLOG(LVL_DBG, TGT_FCGI, "push data : error");
-		WSLOG(LVL_DBG, TGT_FCGI, "**** ****\n", buf);
+		WSLOG(LVL_WARN, TGT_FCGI, "push data : error");
+		WSLOG(LVL_WARN, TGT_FCGI, "**** ****\n", buf);
 		break;
 	case FCGI_END_REQUEST:
-// After sending all its stdout and stderr data, 
-// the Responder application sends a FCGI_END_REQUEST record. 
-// The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE 
-// and the appStatus component to the status code that 
+// After sending all its stdout and stderr data,
+// the Responder application sends a FCGI_END_REQUEST record.
+// The application sets the protocolStatus component to FCGI_REQUEST_COMPLETE
+// and the appStatus component to the status code that
 // the CGI program would have returned via the exit system call.
 		WSLOG(LVL_DBG, TGT_FCGI, "push data : end cnt ", cnt);
 		WSLOG(LVL_DBG, TGT_FCGI, "push data : end len ", data.len);

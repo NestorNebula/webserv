@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 19:47:07 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:17:30 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/09 18:57:39 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,9 @@ std::string & CgiEnv::get(const char *key)
 }
 
 
-static void header_key(std::string &s) 
+static void header_key(std::string &s)
 {
-	for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++) 
+	for (std::string::iterator it = s.begin(), ite = s.end(); it != ite; it++)
 	{
 		if (*it == '-')
 			(*it = '_');
@@ -74,9 +74,9 @@ int     CgiEnv::from_conn(Connection & conn)
 		WSLOG(LVL_ERR, TGT_CGI_ENV, "URL not set");
 		return (conn.set_err(400)); // Bad Request
 	}
-	
+
 	info = sess.getCgiInfo();
-	
+
 	this->add("REQUEST_METHOD", methodToString(req.getMethod()).c_str());
 
 	std::string path_rel = joinPaths(conf.conf_file_root, info.scriptPath);
@@ -89,20 +89,20 @@ int     CgiEnv::from_conn(Connection & conn)
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "access: ", script.path);
 		return (conn.set_err(404)); // File Not Found
 	}
-	
-	this->add("CWD", script.fldr.c_str()); 
-	
+
+	this->add("CWD", script.fldr.c_str());
+
 	if (script.fext == std::string(".php"))
 	{
 		lang = CGI_PHP;
 // php-cgi: This PHP CGI binary was compiled with force-cgi-redirect enabled.
-// This means that a page will only be served up 
+// This means that a page will only be served up
 // if the REDIRECT_STATUS CGI variable is set
 		this->add("DOCUMENT_ROOT", script.fldr.c_str());
 		this->add("SCRIPT_NAME", script.file.c_str());
 		this->add("SCRIPT_FILENAME", script.path.c_str());
-		
-		this->add("REDIRECT_STATUS", "1");		
+
+		this->add("REDIRECT_STATUS", "1");
 	}
 	else if (script.fext == std::string(".py"))
 	{
@@ -127,8 +127,8 @@ int     CgiEnv::from_conn(Connection & conn)
 	}
 	this->args[0] = info.executablePath.c_str();
 	this->args[1] = script.file.c_str();
-	this->args[2] = NULL;	
-	
+	this->args[2] = NULL;
+
 	if (req.hasQuery())
 	{
 		this->add("QUERY_STRING", req.getQuery().c_str());
@@ -140,15 +140,15 @@ int     CgiEnv::from_conn(Connection & conn)
 		// If the output of a form is being processed, check that CONTENT_TYPE
 		// is "application/x-www-form-urlencoded"
 		// or "multipart/form-data".
-		// If CONTENT_TYPE is blank, the script can reject the request 
+		// If CONTENT_TYPE is blank, the script can reject the request
 		// with a 415 'Unsupported Media Type' error, where supported by the protocol.
 		WSLOG(LVL_DBG, TGT_CGI_ENV, "missing : content-type");
 		// return (conn.set_err(415)); // Unsupported Media Type
 	}
-	
+
 	if (req.hasHeader("Content-length"))
 		this->add("CONTENT_LENGTH", headers.find("Content-length")->second.c_str());
-	
+
 	Headers::const_iterator hit = headers.begin();
 	while (hit != headers.end())
 	{
@@ -159,17 +159,17 @@ int     CgiEnv::from_conn(Connection & conn)
 		this->add(hk.c_str(), hv.c_str());
 		hit++;
 	}
-	
+
 	this->add("REMOTE_ADDR", conn.get_addr().c_str());
 	// this->add("REMOTE_HOST", "remote host");
 	// this->add("REMOTE_USER", "remote user");
-	
+
 	this->add("SERVER_NAME", "webserv");
 	// SERVER_ADDR
-	this->add("SERVER_PORT", conn.serv.get_port());
+	this->add("SERVER_PORT", conn.serv.get_port()); // _conf
 	this->add("SERVER_PROTOCOL", "HTTP/1.0"); // conn.serv (?)
 	this->add("SERVER_SOFTWARE", "webserv");
-	
+
 	this->add("GATEWAY_INTERFACE", "CGI/1.0");
 
     return (0);
@@ -193,7 +193,7 @@ const char	**CgiEnv::gen(void)
 
 	res = new const char*[cnt + 1];
 	const char	**ins = res;
-	
+
 	std::vector<std::string>::iterator it = data.begin();
 	while (it != data.end())
 	{
