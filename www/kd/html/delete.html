@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/delete.js" defer></script>
+  <title>Webserv - Contact Us</title>
+</head>
+
+<body>
+  <header>
+    <h1>WEBSERV</h1>
+    <p>Demonstration Website</p>
+    <p>for our HTTP server</p>
+  </header>
+  <section id="delete">
+    <h2>Delete a File</h2>
+    <p>Enter the URI of a file you want to delete!</p>
+    <form id="delete-form" action="">
+      <div class="input-container">
+        <label for="uri">URI</label>
+        <input type="text" id="uri" name="uri" value="" required />
+      </div>
+      <button class="request" type="submit">
+        <p class="method">DELETE</p>
+        <p></p>
+        <p>Send deletion request</p>
+      </button>
+    </form>
+  </section>
+  <footer>
+    <div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>
+    <a href="https://github.com/NestorNebula/webserv" target="_blank" rel="noopener noreferrer">
+      <img id="gh-icon" src="/assets/icons/github.svg" alt="GitHub" />
+    </a>
+    <div>2026</div>
+  </footer>
+</body>
+
+</html>

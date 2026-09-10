@@ -32,6 +32,9 @@ EOF
 	echo "<h1>$CODE</h1>"
 	echo "<h2>$@</h2>"
 cat << EOF
+<button class="request" onclick="history.back();">
+	<p class="method">BACK</p>
+</button>
 		</section>
 	</main>
 	<footer>

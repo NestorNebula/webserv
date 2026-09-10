@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use CGI;
+
+my $cgi = CGI->new;
+
+my $g1 = $cgi->param('g1');
+my $g2 = $cgi->param('g2');
+
+# ATTN (!) compilation errors (!)
+# so .. I DO need to check return status
+my $p1 = $cgi->param('p1');
+#?? "default"
+my $p2 = $cgi->param('p2');
+
+my $f = $cgi->param('file');
+
+print("Content-Type: text/plain\r\n\r\n");
+print("Perl : hello, world!\n");
+
+
+# WRITE_FILE
+# open(FH, '>', "./whereami.pl.txt") or die $!;
+# print FH "from test.pl";
+# close(FH);
+
+print("\nGET VARS\n"); # not if POST
+print ("g1 : ", $g1, "\n");
+print ("g2 : ", $g2, "\n");
+
+print("\nPOST VARS\n");
+print ("p1 : ", $p1, "\n");
+print ("p2 : ", $p2, "\n");
+
+
+print ("\nENV\n\n");
+while (my ($k,$v)=each %ENV)
+{
+    print "$k = $v\n";
+}
+print("\n");
