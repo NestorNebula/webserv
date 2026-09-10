@@ -12,7 +12,7 @@
 
 #include "TemporaryFileStream.hpp"
 #include "http_utils.hpp"
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include <algorithm>
 #include <cstring>
 #include <fstream>

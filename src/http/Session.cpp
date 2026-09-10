@@ -15,7 +15,7 @@
 #include "DirectoryResource.hpp"
 #include "HttpMethod.hpp"
 #include "Request.hpp"
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
