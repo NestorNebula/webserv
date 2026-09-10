@@ -27,16 +27,7 @@ function get_pid()
 
     if [[ -z $PID ]]; then
         echo "$PROC : not running"
-        echo
-        PROC=valgrind.bin
-        echo "# pidof $PROC"
-        pidof $PROC
-        echo
-        PID=$(pidof $PROC)
-        if [[ -z $PID ]]; then
-            exit
-        fi
-        echo "using : $PROC"
+        exit
     fi
 
 }

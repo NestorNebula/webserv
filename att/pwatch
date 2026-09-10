@@ -1,0 +1,32 @@
+#!/bin/bash
+
+tput reset
+
+function usage()
+{
+	echo "pwatch.sh p|y|l"
+	echo
+	echo "p) COMMAND=php"
+	echo "y) COMMAND=python"
+	echo "l) COMMAND=perl"
+	echo
+	echo "executes"
+	echo
+	echo "watch -n1 'ps ax -o user,pid,cmd | grep COMMAND'"
+	echo
+	exit
+}
+
+if [[ -z "$1" ]]; then
+	usage
+fi
+
+CMD=
+case "$1" in
+	p)	CMD=php ;;
+	y)	CMD=pyhon ;;
+	l)	CMD=perl ;;
+	*)	usage ;;
+esac
+
+watch -n1 "ps ax -o user,pid,cmd | grep $CMD"
