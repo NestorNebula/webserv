@@ -223,15 +223,20 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
   switch (_next) {
   case RDSOCK:
+#if WITH_RETRY
   case RETRY:
+#endif
     handleRequest();
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
+#if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_PURPLE);
         WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
         _next = Session::RETRY;
-      } else if (_next != DOCGI) {
+      } else
+#endif
+      if (_next != DOCGI) {
         handleResponse();
         _next = WRSOCK;
       }
@@ -376,6 +381,7 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
+#if WITH_RETRY
       if (_retry_res++ > MAX_RETRIES)
       {
         _retry_res = 0;
@@ -387,17 +393,22 @@ void Session::handleResource() {
         _retry_res++;
         _next = RDSOCK;
       }
+#else
+      setResponseStatus(500);
+#endif
 
       delete _resource;
       _resource = NULL;
       WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
+#if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_GREEN);
         WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
+#endif
     }
   }
 }
