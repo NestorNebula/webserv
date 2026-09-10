@@ -38,7 +38,7 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
-#ifdef WITH_RETRY
+#if WITH_RETRY
     RETRY, // Retry to handle the Request
 #endif
   } Action;
