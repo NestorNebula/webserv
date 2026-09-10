@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include "Stream.hpp"
 #include <algorithm>
 
