@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:48 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:16:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 10:41:03 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,12 @@ public:
 	~Epoll();
 
 	int		loop(void);
-	
+
 	int		add(EpollClient *cli);
 	int		mod(EpollClient *cli);
 	int		del(EpollClient *cli);
 	int		rem(EpollClient *cli);
-	
+
 	int		serve(const std::vector<ServerConfig> &serv_list);
 
 	int		cli_cnt(int typ);
@@ -62,11 +62,11 @@ private:
 	int						ecnt;
 	struct epoll_event		evts[EPOLL_MAX_EVT];
 	static const int		toms = (EPOLL_TIMEOUT_MS);
-	
+
 	std::set<EpollClient*>	clients;
 
 	char 					**&envp;
-	
+
 	int					exec(void);
 	struct epoll_event	*get_evt(int idx);
 	EpollClient			*get_epc(void *cli);
