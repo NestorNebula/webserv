@@ -13,8 +13,8 @@ if [[ "$1" =~ "c" ]]; then
 fi
 
 
-# export EXTRA_TIME=0
-# export WITH_RETRY=0
+# export EXTRA_TIME=1
+# export WITH_RETRY=1
 
 make -j12  || exit 1
 

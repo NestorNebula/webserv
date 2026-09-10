@@ -8,8 +8,6 @@ http://127.0.0.1:8081/cgi-vars/vars.php
 http://127.0.0.1:8082/cgi-vars/vars.php
 
 
-# (siege) MEMORY PROBLEM
-# http://127.0.0.1:8082/vids/dff.mp4
 
 
 http://127.0.0.1:8081/cgi-big/bigimage.php
