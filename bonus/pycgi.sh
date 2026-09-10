@@ -2,10 +2,20 @@
 
 tput reset
 
-
 usage ()
 {
     echo "usage: ./pycgi.sh install|clean"
+    echo
+    echo "The cgi module was removed from Python 3.13. In order to use"
+    echo "CGI with Python 3.13 with webserv the legacy package must be"
+    echo "installed and explicitly added to the webserv config."
+    echo
+    echo "install"
+    echo "  download and unpack legacy-cgi-2.6 python package"
+    echo
+    echo "clean"
+    echo "  remove folder and tarball"
+    echo
     exit 0
 }
 
@@ -24,6 +34,13 @@ if [ "$1" == "install" ]; then
     if [ ! -d $PYCGI_FOLDER ]; then
         tar xvf $PYCGI_TARBALL
     fi
+    echo
+    echo "ADD"
+    echo
+    echo "pycgi_dir: $(pwd)/legacy-cgi-2.6"
+    echo
+    echo "to your webserv config to activate Python CGI"
+    echo
     exit 0
 fi
 

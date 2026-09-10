@@ -5,6 +5,28 @@ tput reset
 usage ()
 {
     echo "usage: ./fcgi.sh conf|start|stop|cmd|clean"
+    echo
+    echo "conf"
+    echo "    generate the necessary config files for running webserv with php-fpm"
+    echo
+
+    echo "start"
+    echo "    start php-fpm systemd --user service"
+    echo
+    echo "stop"
+    echo "   stop php-fpm systemd --user service"
+    echo
+    echo "cmd"
+    echo "    print the command to run php-fpm directly from the command line"
+    echo
+    echo "clean"
+    echo "    remove config files and .php-fpm directory"
+    echo
+    echo
+    echo "If your machine does not have php-fpm currently installed"
+    echo "    sudo apt install php-fpm"
+    echo "should probably do it."
+    echo
     exit 0
 }
 
@@ -17,8 +39,10 @@ FPM_DIR=$TGT_DIR/.php-fpm
 PHP_FPM_BIN=$(which php-fpm)
 if [[ -z $PHP_FPM_BIN ]]; then
     PHP_FPM_BIN=/usr/sbin/php-fpm7.4
-    # echo "php-fpm : not found"
-    # exit 0
+    if [[ -z $PHP_FPM_BIN ]]; then
+        echo "php-fpm : not found"
+        exit 0
+    fi
 fi
 
 
@@ -61,23 +85,31 @@ EOF
     echo "Generating and installing :"
     echo "$OFILE"
     sed -e "s#FPM_DIR#$FPM_DIR#" $SRC_DIR/www.conf.src > $OFILE
+
     echo
+    echo "ADD"
+    echo
+    echo "fcgi_sock: $(pwd)/.php-fpm/SOCK"
+    echo
+    echo "to your server config to activate FastCGI for webserv"
+    echo
+
     exit 0
 fi
 
 
 if [ "$1" == "start" ]; then
     echo "starting : php-fpm as systemd --user service"
-    systemctl --user daemon-reload 
+    systemctl --user daemon-reload
     systemctl --user start php-fpm.service
-    ./pwatch $2
+    # ./pwatch $2
     exit 0
 fi
 
 if [ "$1" == "stop" ]; then
     echo "stopping : php-fpm as systemd --user service"
     systemctl --user stop php-fpm.service
-    ./pwatch $2
+    # ./pwatch $2
     exit 0
 fi
 
