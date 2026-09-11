@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 08:14:03 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 13:06:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@
 	// protocol supports retransmission, the request may be ignored so
 	// that a later reattempt at connection succeeds.
 
-	// curious : larger backlog : more FAILS with low-fd-count
+	// curious
+	// smaller backlog : more reactive (?)
 
 # ifndef SERV_BACKLOG
 #  define SERV_BACKLOG 512
