@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   DirectoryResource.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 11:59:05 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:44:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/07/12 10:07:44 by nhoussie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ void DirectoryResource::buildList() {
               "<p>for our HTTP server</p>\n"
               "</header>\n"
               "<section id=\"dir-list-section\">\n"
-              "<h1>Directory listing for "
+              "<h2>Directory listing for "
            << _dirURI 
-           << "</h1>\n"
+           << "</h2>\n"
               "<hr>\n"
               "<ul class=\"dir-list\">\n";
 

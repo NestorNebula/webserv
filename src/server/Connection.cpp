@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 18:01:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 11:13:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,7 +251,7 @@ ssize_t	Connection::pollin(void)
 					this->mod_evt(0);
 				}
 #else
-				this->set_err(503); // Service Unavailable
+				this->set_err(500);
 #endif
 				return (0); // send error
 			}

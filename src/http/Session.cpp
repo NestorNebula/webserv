@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/10 10:51:47 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/07 12:59:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,7 +231,6 @@ void Session::manageSession() {
       handleResource();
 #if WITH_RETRY
       if (_retry_res) {
-// #kd
         WSCOL(WSL_PURPLE);
         WSLOG(LVL_WARN, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
@@ -271,7 +270,6 @@ void Session::handleRequest() {
   // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
   if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
     return;
-
   validateRequest();
   resolveResource();
   validateOperation();
@@ -398,15 +396,14 @@ void Session::handleResource() {
 #else
       setResponseStatus(500);
 #endif
+
       delete _resource;
       _resource = NULL;
-// #kd
       WSLOG(LVL_DBG, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
 #if WITH_RETRY
       if (_retry_res) {
-// #kd
         WSCOL(WSL_GREEN);
         WSLOG(LVL_WARN, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
@@ -461,7 +458,7 @@ void Session::prepareDirectoryResource() {
 void Session::handleUpload() {
   WSLOG(LVL_INFO, TGT_SESS, "Processing upload Request");
   std::string uploadDir = _route->upload_dir;
-  if (!isDirectory(uploadDir))
+  if (!isDirectory(uploadDir)) 
     return setResponseStatus(400);
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
@@ -558,8 +555,6 @@ void Session::setResponseHeaders() {
     headers.insert("Connection", "keep-alive");
   else
     headers.insert("Connection", "close");
-// #kd
-  headers.insert("Cache-Control", "no-cache");
 
   // Last-Modified
   if (_response.getCode() == 200 && _next != DOCGI) {
@@ -632,7 +627,7 @@ void Session::setResponseHeaders() {
     // Counter Cookie
     std::string cookieFile = "cookie.html";
     if (_resourcePath.size() >= cookieFile.size() &&
-      _resourcePath.compare(_resourcePath.size() - cookieFile.size(),
+      _resourcePath.compare(_resourcePath.size() - cookieFile.size(), 
         std::string::npos, cookieFile) == 0) {
       oss.str("");
       update = false;
@@ -651,7 +646,6 @@ void Session::setResponseHeaders() {
       oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
       headers.insert("Set-Cookie", oss.str());
     }
-
   }
 
   _response.addHeaders(headers.begin(), headers.end());

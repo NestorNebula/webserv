@@ -1,5 +1,5 @@
 function displayCookie() {
-  const cookie = getCookie("wstimecookie");
+  let cookie = getCookie("wstimecookie");
   const firstVisit = document.getElementById("cookie-first-visit");
   const lastVisit = document.getElementById("cookie-last-visit");
   const counter = document.getElementById("cookie-counter");
@@ -23,17 +23,14 @@ function displayCookie() {
   firstVisit.textContent = "First Visit: " + firstTime.toLocaleString();
   lastVisit.textContent = "Last Visit: " + lastTime.toLocaleString();
 
-  cnt = parseInt(getCookie('counter'));
-  if (!cnt)
-    cnt = 1;
-  // else
-  //   cnt = cnt + 1;
-  // // alert(location.hostname);
-  // var d = new Date();
-  // d.setTime(d.getTime() + (7 * 86400000));
-
-  // document.cookie = "counter=" + cnt + ";domain=" + location.hostname + ";path=/; expires=" + d.toUTCString();
-
+  cookie = getCookie('counter');
+  if (!cookie) {
+    cookieError.textContent = "Counter cookie not found";
+    return;
+  }
+  const cnt = parseInt(cookie, 10);
+  if (isNaN(cnt))
+    return setError(cookieError, "Invalid counter format");
   counter.textContent = "You have visited this page " + cnt + " times.";
 }
 

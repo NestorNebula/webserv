@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 11:24:31 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/10 17:57:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 07:06:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void StaticResource::generate() {
   _state = fs->is_open() ? DONE : FAIL;
   if (_state == FAIL) {
     WSCOL(WSL_CYAN);
-    WSLOG(LVL_WARN, TGT_STAT_RES, "Failed to open ", _filepath);
+    WSLOG(LVL_WARN, TGT_RETRY, "Failed to open ", _filepath);
   }
 }
 
