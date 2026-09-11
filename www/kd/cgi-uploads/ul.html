@@ -11,6 +11,12 @@
       var f = document.getElementById('vars-form');
       f.action = path;
     }
+    function validate()
+    {
+      if (!document.getElementById('file').value)
+        return (false);
+      return (true);
+    }
   </script>
     <title>Webserv - pass CODE to CGI</title>
   </head>
@@ -19,19 +25,19 @@
     <header>
     <section id="contact">
       <p>Select a file to upload using CGI</p>
-      <form id="vars-form" action="ul.php" method="post" enctype="multipart/form-data">
+      <form id="vars-form" action="ul.php" onsubmit="return validate();" method="post" enctype="multipart/form-data">
         <div class="input-container">
           <label for="file">FILE</label>
           <input type="file" id="file" name="file" value="" />
         </div>
         <div class="oneline">
-        <button class="" onclick="send_form('ul.php');">
+        <button class="" type="submit" onclick="send_form('ul.php');">
               <span class="method">PHP</span>
 		    </button>
-        <button class="" onclick="send_form('ul.py');">
+        <button class="" type="submit" onclick="send_form('ul.py');">
               <span class="method">PYTHON</span>
 		    </button>
-        <button class="" onclick="send_form('ul.pl');">
+        <button class="" type="submit" onclick="send_form('ul.pl');">
               <span class="method">PERL</span>
 		    </button>
         </div>
