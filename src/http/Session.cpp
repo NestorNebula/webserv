@@ -269,11 +269,11 @@ void Session::handleRequest() {
   if (!_request.isComplete() && !_request.isInvalid() &&
       !_request.headersComplete())
     return;
+  validateRequest();
+  resolveResource();
   // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
   if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
     return;
-  validateRequest();
-  resolveResource();
   validateOperation();
 }
 
@@ -321,7 +321,7 @@ void Session::resolveResource() {
 
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WSLOG(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  if (isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
+  if (!_request.hasHeader("Transfer-Encoding") && isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
     _next = DOCGI;
     return;
   }
