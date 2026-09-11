@@ -650,6 +650,10 @@ void Session::setResponseHeaders() {
     }
   }
 
+  // Cache-Control
+  if (dynamic_cast<DirectoryResource *>(_resource))
+    headers.insert("Cache-Control", "no-cache");
+
   _response.addHeaders(headers.begin(), headers.end());
 }
 
