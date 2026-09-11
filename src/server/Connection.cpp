@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 11:13:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 12:54:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,6 +268,8 @@ ssize_t	Connection::pollin(void)
 			WSCOL(WSL_PURPLE);
 			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (ip)");
 			// no reset here (?)
+			if (this->serv.get_paused())
+				return (-1);
 			return (0);
 		case Session::CLOSE:
 			return (-1);
@@ -307,6 +309,8 @@ ssize_t	Connection::pollout(void)
 			case RSP_KPALIVE:
 				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (rsp) ", this->req_cnt);
+				if (this->serv.get_paused())
+					return (-1);
 				this->reset();
 				return (0);
 			case RSP_WAIT_HEAD:
@@ -356,7 +360,7 @@ ssize_t	Connection::pollout(void)
 		if (err == 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
-			return (0);
+			// return (0); still need to check nextAction
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 
@@ -366,6 +370,8 @@ ssize_t	Connection::pollout(void)
 		case Session::KPALIVE:
 			WSCOL(WSL_PURPLE);
 			WSLOG(LVL_DBG, TGT_KEEPA, "keep-alive (op) ", this->req_cnt);
+			if (this->serv.get_paused())
+				return (-1);
 			this->reset();
 			return (0);
 		case Session::CLOSE:

@@ -3,7 +3,7 @@
 tput reset
 
 C=250
-R=8
+R=4
 
 function usage()
 {
@@ -22,6 +22,7 @@ function usage()
 	echo "c) cgi files"
 	echo "f) file-not-found"
 	echo "h) non-cgi files"
+	echo "p) php files"
 
 	echo
 	exit
@@ -47,6 +48,7 @@ case "$1" in
 	c)	URLS=urls/cgi.sh ;;
 	f)	URLS=urls/fnf.sh ;;
 	h)	URLS=urls/html.sh ;;
+	p)	URLS=urls/php.sh ;;
 	*)	usage ;;
 esac
 
