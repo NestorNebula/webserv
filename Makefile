@@ -1,9 +1,7 @@
 NAME=webserv
 
 CC=c++
-CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP -g3
-# -Wno-unused
-# -Wshadow=local
+CFLAGS=-Wall -Wextra -Werror -std=c++98 -MMD -MP
 
 GIT_DIR=.
 
