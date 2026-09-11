@@ -6,13 +6,13 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 17:52:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/10 18:05:54 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WsLog.hpp"
 
-log_lvl     WsLog::lvl = LVL_MAIN | LVL_WARN;
+log_lvl     WsLog::lvl = LVL_MAIN | LVL_WARN | LVL_ALL;
 log_tgt     WsLog::tgt = TGT_ALL;
 std::string WsLog::col;
 

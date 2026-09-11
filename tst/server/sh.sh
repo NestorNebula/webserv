@@ -119,9 +119,9 @@ if [ "$1" == "u" ]; then
 
 	for FILE in $FILES; do
 
-		# curl -X POST http://localhost:8082/cgi-uploads/ul.php \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8082/cgi-uploads/ul.php \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
 		# curl -X POST http://localhost:8082/cgi-uploads/ul.pl \
 		# 	-F file=@$WWW/files/$FILE
 		# echo ; echo ; echo
@@ -139,9 +139,9 @@ if [ "$1" == "u" ]; then
 		# 	--data-binary @$WWW/files/$FILE
 
 			# -H "Transfer-Encoding: chunked" \
-		curl -X POST http://localhost:8082/uploads/$FILE -i \
-			-H "Content-Type: application/x-www-form-urlencoded" \
-			-F file=@$WWW/files/$FILE
+		# curl -X POST http://localhost:8082/uploads/$FILE -i \
+		# 	-H "Content-Type: application/x-www-form-urlencoded" \
+		# 	-F file=@$WWW/files/$FILE
 
 		echo ; echo ; echo
 	done
