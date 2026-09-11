@@ -202,10 +202,7 @@ fi
 # -H "Connection: keep-alive" \
 
 	# -d "p1=post-one&p2=post-two" \
-curl -X POST http://localhost:8082/body.php -i \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	 -H "Transfer-Encoding: chunked" \
-	-d @../../www/kd/infinite.php
+curl -X GET http://localhost:8082/favicon.ico -i --output favi.ico
 echo
 exit 0
 
