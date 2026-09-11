@@ -84,6 +84,14 @@ button {
 	background-color: inherit;
 }
 
+input::file-selector-button
+{
+	border: 1px solid var(--badge-color);
+	background-color: inherit;
+	font: inherit;
+}
+
+
 button:hover {
 	cursor: pointer;
 }
