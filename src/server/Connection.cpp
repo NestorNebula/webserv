@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 07:57:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 12:54:19 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,7 +360,7 @@ ssize_t	Connection::pollout(void)
 		if (err == 0)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  ZERO");
-			return (0);
+			// return (0); still need to check nextAction
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 
