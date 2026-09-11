@@ -84,6 +84,7 @@ private:
   Stream *_body;
 
   std::string::size_type _remainingBody;
+  std::string::size_type _chunkSize;
   bool _hasLargeBody;
   std::string::size_type _bodySize;
 
@@ -91,6 +92,6 @@ private:
   void setMethod(const std::string &method);
   void handleHeaderLine(std::string headerLine, std::string::size_type eol);
   void setupBody();
-  void handleBody(std::string body, std::string::size_type eol);
-  void handleBodyLine(std::string bodyLine, std::string::size_type eol);
+  void handleBody();
+  void handleChunkedBody();
 };

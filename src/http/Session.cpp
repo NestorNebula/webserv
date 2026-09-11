@@ -15,7 +15,7 @@
 #include "DirectoryResource.hpp"
 #include "HttpMethod.hpp"
 #include "Request.hpp"
-#include "SizeDefs.hpp"
+#include "WsDefs.hpp"
 #include "StaticResource.hpp"
 #include "helpers.hpp"
 #include "http_utils.hpp"
@@ -183,6 +183,8 @@ void Session::setError(Response::StatusCode code) {
 
   try {
     _response.clear();
+    if (code < 400)
+      code = 418;
     setResponseStatus(code);
     handleResource();
     handleResponse();
@@ -221,15 +223,20 @@ void Session::throwIfNotAction(Action action) const {
 void Session::manageSession() {
   switch (_next) {
   case RDSOCK:
+#if WITH_RETRY
   case RETRY:
+#endif
     handleRequest();
     if (_request.isComplete() || _request.isInvalid() || _response.getCode()) {
       handleResource();
+#if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_PURPLE);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry ", _retry_res);
         _next = Session::RETRY;
-      } else if (_next != DOCGI) {
+      } else
+#endif
+      if (_next != DOCGI) {
         handleResponse();
         _next = WRSOCK;
       }
@@ -259,6 +266,9 @@ void Session::handleRequest() {
   preValidateRequest();
   if (!_request.isComplete() && !_request.isInvalid() &&
       !_request.headersComplete())
+    return;
+  // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
+  if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
     return;
   validateRequest();
   resolveResource();
@@ -371,6 +381,7 @@ void Session::handleResource() {
     _resource->generate();
     // Handle Resource errors
     if (_resource->failed()) {
+#if WITH_RETRY
       if (_retry_res++ > MAX_RETRIES)
       {
         _retry_res = 0;
@@ -382,17 +393,22 @@ void Session::handleResource() {
         _retry_res++;
         _next = RDSOCK;
       }
+#else
+      setResponseStatus(500);
+#endif
 
       delete _resource;
       _resource = NULL;
-      WSLOG(LVL_ERR, TGT_SESS, "Error when generating Session Resource");
+      WSLOG(LVL_DBG, TGT_SESS, "Error when generating Session Resource");
     } else {
       WSLOG(LVL_INFO, TGT_SESS, "Session Resource generated successfully");
+#if WITH_RETRY
       if (_retry_res) {
         WSCOL(WSL_GREEN);
-        WSLOG(LVL_TMP, TGT_SESS, "sess: retry SUCCESS ", _retry_res);
+        WSLOG(LVL_WARN, TGT_RETRY, "sess: retry SUCCESS ", _retry_res);
         _retry_res = 0;
       }
+#endif
     }
   }
 }
@@ -586,6 +602,7 @@ void Session::setResponseHeaders() {
 
   // Set-Cookie
   if (_request.getMethod() == METHOD_GET && _response.getCode() == 200) {
+    // Time Cookie
     std::string cookieName = "wstimecookie";
     std::time_t now = std::time(NULL);
     std::ostringstream oss;
@@ -604,8 +621,31 @@ void Session::setResponseHeaders() {
     }
     if (!update)
       oss << cookieName << '=' << now << '|' << now;
-    oss << "; Path=/";
+    oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
     headers.insert("Set-Cookie", oss.str());
+
+    // Counter Cookie
+    std::string cookieFile = "cookie.html";
+    if (_resourcePath.size() >= cookieFile.size() &&
+      _resourcePath.compare(_resourcePath.size() - cookieFile.size(), 
+        std::string::npos, cookieFile) == 0) {
+      oss.str("");
+      update = false;
+      cookieName = "counter";
+      if (_request.hasHeader("Cookie")) {
+        std::string cookie = getCookie(_request.getHeaders().get("Cookie"), cookieName);
+        bool err = false;
+        long counter = getLong(cookie, &err, 0, LONG_MAX);
+        if (!err) {
+          oss << cookieName << '=' << counter + 1;
+          update = true;
+        }
+      }
+      if (!update)
+          oss << cookieName << "=1";
+      oss << "; Path=/; Expires=" << getDate(now + 7 * 86400);
+      headers.insert("Set-Cookie", oss.str());
+    }
   }
 
   _response.addHeaders(headers.begin(), headers.end());

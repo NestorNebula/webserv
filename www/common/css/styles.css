@@ -97,7 +97,7 @@ body {
 }
 
 header {
-	font-size: 5rem;
+	font-size: 4rem;
 	text-align: center;
 	padding: 3rem;
 }
@@ -254,14 +254,14 @@ footer {
 	font-style: italic;
 }
 
-/* contact.html */
+/* contact.html, delete.html */
 
-#contact {
+#contact, #delete {
 	gap: 2.5rem;
 	font-size: 2.5rem;
 }
 
-#contact-form {
+#contact-form, #delete-form {
 	display: grid;
 	gap: 1.5rem;
 }

@@ -19,7 +19,7 @@ typedef std::pair<std::string, std::string> Header;
 
 class Headers {
 public:
-  typedef std::map<std::string, std::string> Container;
+  typedef std::multimap<std::string, std::string> Container;
   typedef Container::size_type size_type;
 
   typedef Container::iterator iterator;

@@ -18,6 +18,7 @@
 #include "ServerConfig.hpp"
 #include "Stream.hpp"
 #include "WsLog.hpp"
+#include "WsDefs.hpp"
 
 class Session {
 public:
@@ -38,7 +39,9 @@ public:
     WRSOCK,  // Write to Connection socket
     CLOSE,   // Close the Connection
     KPALIVE, // Keep the Connection alive
+#if WITH_RETRY
     RETRY, // Retry to handle the Request
+#endif
   } Action;
 
   Action nextAction() const { return _next; }
