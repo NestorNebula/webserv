@@ -33,6 +33,6 @@
     }
     else
     {
-        echo "no file set\n";
+        echo "PHP : no file set\n";
     }
 ?>

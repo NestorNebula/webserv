@@ -17,6 +17,10 @@
         return (false);
       return (true);
     }
+    function dirname(path)
+    {
+      return path.substring(0, path.lastIndexOf("/"));
+    }
   </script>
     <title>Webserv - pass CODE to CGI</title>
   </head>
@@ -42,6 +46,9 @@
 		    </button>
         </div>
       </form>
+    <button class="" onclick="location=dirname(location.href);" type="button">
+        <span class="method">files</span>
+    </button>
     </section>
     <footer>
       <div>© Kevin Donlon, Noa Houssier, Maxime Marti</div>
