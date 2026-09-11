@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 10:39:56 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 13:06:40 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@
 	// error with an indication of ECONNREFUSED or, if the underlying
 	// protocol supports retransmission, the request may be ignored so
 	// that a later reattempt at connection succeeds.
+
+	// curious
+	// smaller backlog : more reactive (?)
 
 # ifndef SERV_BACKLOG
 #  define SERV_BACKLOG 512
@@ -62,6 +65,7 @@ public:
 	ServerConfig		&get_conf() { return (this->conf); }
 
 	void				set_paused(void);
+	int					get_paused(void) const;
 	void				conn_closed(void);
 private:
 

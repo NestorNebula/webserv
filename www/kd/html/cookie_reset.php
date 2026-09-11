@@ -3,7 +3,7 @@
 
     header('Content-type: text/plain');
 
-    $exp = time() + 60*60*24*7;
+    $exp = time() - 60;
     setcookie("wstimecookie", 0, $exp, "/");
     setcookie("counter", 0, $exp, "/");
 
