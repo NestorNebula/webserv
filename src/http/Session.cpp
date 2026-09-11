@@ -523,7 +523,8 @@ void Session::handleResponse() {
   _keepalive =
       (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 &&
        (!_request.hasHeader("Connection") ||
-        _request.getHeaders().find("Connection")->second == "keep-alive"));
+        _request.getHeaders().find("Connection")->second == "keep-alive") &&
+      _request.isComplete());
   setResponseHeaders();
   // Ensure that Response is valid
   if (!_response.isReady())
