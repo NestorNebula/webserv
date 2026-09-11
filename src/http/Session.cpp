@@ -243,6 +243,8 @@ void Session::manageSession() {
     }
     break;
   case DOCGI:
+    if (_route && _request.hasBody() && _request.getBodySize() > _route->max_body_size)
+      return setError(413);
     if (_resource != NULL) {
       handleResponse();
       _next = WRSOCK;
