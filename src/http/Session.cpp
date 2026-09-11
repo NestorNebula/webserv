@@ -308,7 +308,11 @@ void Session::resolveResource() {
   if (!_route)
     return setResponseStatus(404);
   WSLOG(LVL_INFO, TGT_SESS, "Request route found: ", _route->path);
-  if (_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+  if ((_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+      || (_request.hasHeader("Content-Length") &&
+        static_cast<unsigned long>(getLong(
+            _request.getHeaders().find("Content-Length")->second, NULL, 0)) >
+            _route->max_body_size))
     return setResponseStatus(413);
   if (!_route->redirect.empty())
     return setResponseStatus(301);
