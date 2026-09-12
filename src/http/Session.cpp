@@ -337,9 +337,10 @@ void Session::validateOperation() {
   }
   WSLOG(LVL_INFO, TGT_SESS,
            "Checking operation is possible on Session Resource");
-  if (_request.getMethod() == METHOD_POST && _route->upload) {
-    if (isExistingFile(_resourcePath))
+  if (_request.getMethod() == METHOD_POST) {
+    if (!_route->upload)
       return setResponseStatus(403);
+    WSLOG(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
     return;
   }
   if (!isExistingFile(_resourcePath))
