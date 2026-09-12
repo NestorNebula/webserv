@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 12:54:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/12 15:25:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,8 +214,8 @@ ssize_t	Connection::pollin(void)
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
-		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
+		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 		// sess_log_next(sess);
 		switch(sess.nextAction())
 		{
