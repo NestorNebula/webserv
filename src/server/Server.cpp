@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:10 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 10:52:55 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 07:56:00 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ static int uaddr_set(void * addr, const char * str = NULL, unsigned short p = 0)
     err = getaddrinfo(str, prt.c_str(), &hint, &res);
     if (err)
     {
-		WSLOG(LVL_TMP, TGT_SERV, "addr : ", str);
-		WSLOG(LVL_TMP, TGT_SERV, "addr : ", gai_strerror(err));
+		WSLOG(LVL_ERR, TGT_SERV, "addr : ", str);
+		WSLOG(LVL_ERR, TGT_SERV, "addr : ", gai_strerror(err));
 		freeaddrinfo(res);
 		return (-1);
     }
@@ -151,6 +151,11 @@ void	Server::set_paused(void)
 
 	this->sfd_close();
 	this->mod_evt(-EPOLLIN);
+}
+
+int	Server::get_paused(void) const
+{
+	return (this->paused);
 }
 
 void	Server::conn_closed(void)

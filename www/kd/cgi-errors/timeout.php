@@ -7,7 +7,7 @@ flush();
 I'm not dead yet.
 <?php
 flush();
-sleep(20);
+sleep(60);
 ?>
 
 

@@ -9,10 +9,9 @@ import cgitb
 
 print("Content-Type: text/plain", end="\r\n\r\n");
 
-print("PYTHON : upload\n\n")
+print("PYTHON : upload\n")
 
 form = cgi.FieldStorage()
-
 
 if "file" in form:
     file_item = form["file"]
@@ -24,3 +23,5 @@ if "file" in form:
         print("path : ", file_path)
         with open(file_path, 'wb') as file:
             file.write(file_item.file.read())
+else:
+    print("PYTHON : no file set\n")

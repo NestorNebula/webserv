@@ -24,3 +24,7 @@ if ($f)
     while ( <$fp> ) { print UPLOADFILE; }
     close UPLOADFILE;
 }
+    else
+    {
+        print("PERL : no file set\n");
+    }

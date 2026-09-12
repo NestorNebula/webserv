@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/07 12:59:20 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/11 12:39:51 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ Stream::streamsize Session::read(char *buf, Stream::streamsize bufsize) {
     if (r < bufsize)
       _next = CLOSE;
     std::ostringstream oss;
-    oss << "Session sending " << r << "bytes of data";
+    oss << "Session sending " << r << " bytes of data";
     WSLOG(LVL_INFO, TGT_SESS_RD, oss.str());
     manageSession();
   } catch (std::exception &e) {
@@ -458,7 +458,7 @@ void Session::prepareDirectoryResource() {
 void Session::handleUpload() {
   WSLOG(LVL_INFO, TGT_SESS, "Processing upload Request");
   std::string uploadDir = _route->upload_dir;
-  if (!isDirectory(uploadDir)) 
+  if (!isDirectory(uploadDir))
     return setResponseStatus(400);
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
@@ -627,7 +627,7 @@ void Session::setResponseHeaders() {
     // Counter Cookie
     std::string cookieFile = "cookie.html";
     if (_resourcePath.size() >= cookieFile.size() &&
-      _resourcePath.compare(_resourcePath.size() - cookieFile.size(), 
+      _resourcePath.compare(_resourcePath.size() - cookieFile.size(),
         std::string::npos, cookieFile) == 0) {
       oss.str("");
       update = false;
