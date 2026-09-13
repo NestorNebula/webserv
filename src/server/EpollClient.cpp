@@ -6,14 +6,14 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 19:23:28 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/07 10:20:09 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 15:59:44 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EpollClient.hpp"
 #include "Epoll.hpp"
 
-static const char *epc_str[] = 
+static const char *epc_str[] =
 {
 	"serv",
 	"conn",
@@ -28,10 +28,10 @@ std::string EpollClient::typ_str(void)
 }
 
 
-EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) : 
+EpollClient::EpollClient(Epoll *_ep, epc_typ _typ, int _fd) :
 	ep(_ep),
-	typ(_typ), 
-	fd(_fd), 
+	typ(_typ),
+	fd(_fd),
 	lact(0),
 	error(0)
 {
@@ -75,7 +75,7 @@ int	EpollClient::mod_evt(int e)
 	// 	return (0);
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : CUR ", evt_type(evt.events));
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : MOD ", evt_type(e));
-	
+
 	if (e == 0)
 	{
 		if (evt.events == (e | EPOLLRDHUP))
@@ -99,8 +99,11 @@ int	EpollClient::mod_evt(int e)
 		}
 		evt.events |= e;
 	}
-	
+
 	evt.events |= EPOLLRDHUP;
+	// evt.events |= EPOLLPRI | EPOLLMSG;
+	// evt.events |= EPOLLRDNORM | EPOLLWRNORM;
+	// evt.events |= EPOLLRDBAND | EPOLLWRBAND;
 	// WSLOG(LVL_DBG, TGT_EPOLL_CTL, "mod_evt  : RES ", evt_type(evt.events));
 
 	return (this->ep->mod(this));
@@ -108,7 +111,8 @@ int	EpollClient::mod_evt(int e)
 
 int	EpollClient::event(struct epoll_event *e)
 {
-	int err;
+	int	oerr = 0;
+	int	ierr = 0;
 
 	if (e->events & EPOLLERR)
 	{
@@ -117,20 +121,23 @@ int	EpollClient::event(struct epoll_event *e)
 	}
 	if (e->events & EPOLLOUT)
 	{
-		err = this->pollout();
-		if (err >= 0)
+		oerr = this->pollout();
+		if (oerr >= 0)
 			lact.set_now();
-		else if (err < 0)
-			return (err);
-	}	
+		// else if (err < 0)
+		// 	return (err);
+	}
+	// need to do both (?) for proper shutdown (?)
 	if (e->events & EPOLLIN)
 	{
-		err = this->pollin();
-		if (err >= 0)
+		ierr = this->pollin();
+		if (ierr >= 0)
 			lact.set_now();
-		else if (err < 0)
-			return (err);
+		// else if (err < 0)
+		// 	return (err);
 	}
+	if (oerr < 0 || ierr < 0)
+		return (-1);
 	if (e->events & EPOLLRDHUP)
 		return (this->rdhup());
 	if (e->events == EPOLLHUP)
@@ -143,7 +150,7 @@ ssize_t	EpollClient::recv(void)
 	ssize_t	err = 0;
 
 	err = read(this->fd, this->ibuf, EPC_BUF_SIZ);
-	
+
 	WSLOG(LVL_DBG, TGT_EPC_RECV, "read: ", err);
 	if (err < 0)
 		return (WsLog::_errno(LVL_SYSERR, TGT_EPC_RECV, "read"));
@@ -157,7 +164,7 @@ ssize_t	EpollClient::recv(void)
 ssize_t	EpollClient::send(const char *buf, ssize_t siz)
 {
 	ssize_t err;
-	
+
 	WSLOG(LVL_DBG, TGT_EPC_SEND, "send: ", siz);
 	WSLOG(LVL_DBG, TGT_EPC_SEND, " fd : ", this->fd);
 
@@ -180,7 +187,7 @@ ssize_t	EpollClient::send(std::string & str)
 {
 	if (str.size() == 0)
 		return (0);
-		
+
 	ssize_t	err;
 
 	err = this->send(str.c_str(), str.size());
