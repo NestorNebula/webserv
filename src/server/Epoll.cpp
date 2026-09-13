@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 19:19:57 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/10 09:14:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 15:56:18 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,12 @@ static const char *evt_name[] =
 	"pri ",
 	"err ",
 	"hup ",
+	"pri ",
+	"msg ",
+	"rd-norm ",
+	"wr-norm ",
+	"rd-band ",
+	"wr-band ",
 	NULL
 };
 
@@ -70,6 +76,21 @@ std::string evt_type(int evt)
 		typ += (evt_name[4]);
 	if (evt & EPOLLHUP)
 		typ += (evt_name[5]);
+
+	if (evt & EPOLLPRI)
+		typ += (evt_name[6]);
+	if (evt & EPOLLMSG)
+		typ += (evt_name[7]);
+	if (evt & EPOLLRDNORM)
+		typ += (evt_name[8]);
+	if (evt & EPOLLWRNORM)
+		typ += (evt_name[9]);
+	if (evt & EPOLLRDBAND)
+		typ += (evt_name[10]);
+	if (evt & EPOLLWRBAND)
+		typ += (evt_name[11]);
+
+
 	return (typ);
 }
 
@@ -343,11 +364,31 @@ void	Epoll::check_timeo(void)
 	it = this->clients.begin();
 	while (it != this->clients.end())
 	{
+#if 0
+		if ((*it)->timeo(n))
+			WSLOG(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+		it++;
+#else
 		if ((*it)->timeo(n))
 		{
-			// WSLOG(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			WSLOG(LVL_DBG, TGT_EPC, "TIMEOUT  : ", (*it)->typ_str());
+			try
+			{
+				this->del(*it); // VERY IMPORTANT
+				delete (*it);
+				// this->rem(*it);
+			}
+			catch(const std::exception& e)
+			{
+				WSLOG(LVL_DBG, TGT_EPOLL, " (~) EpollClient\n", e.what());
+			}
+			this->clients.erase(it++);
 		}
-		it++;
+		else
+		{
+			++it;
+		}
+#endif
 	}
 }
 
