@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:21:04 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 13:06:40 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 14:13:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@
 	// smaller backlog : more reactive (?)
 
 # ifndef SERV_BACKLOG
-#  define SERV_BACKLOG 512
+#  define SERV_BACKLOG 256
 # endif
 
 # ifndef SPARE_FD
