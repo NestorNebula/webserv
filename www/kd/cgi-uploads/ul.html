@@ -9,9 +9,16 @@
     function send_form(path)
     {
       var f = document.getElementById('vars-form');
+      if (path == 'uploads')
+      {
+        const p = document.getElementById('file').value;
+        var fn = p.lastIndexOf("\\");
+        if (fn >= 0)
+          path = "../uploads/" + p.substring(fn + 1);
+      }
       f.action = path;
     }
-    function validate()
+    function validate(evt)
     {
       if (!document.getElementById('file').value)
         return (false);
@@ -43,6 +50,9 @@
 		    </button>
         <button class="" type="submit" onclick="send_form('ul.pl');">
               <span class="method">PERL</span>
+		    </button>
+        <button class="" type="submit" onclick="send_form('uploads');">
+              <span class="method">HTML</span>
 		    </button>
         </div>
       </form>

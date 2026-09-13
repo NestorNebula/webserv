@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 08:03:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 09:16:13 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,8 +260,6 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::WRSOCK:
 			this->req_cnt++;
-			// std::cerr << "SHUTDOWN : rd\n";
-			shutdown(this->fd, SHUT_RD);
 			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			break;

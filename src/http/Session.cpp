@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/12 16:55:26 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 08:35:52 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -661,7 +661,7 @@ void Session::setResponseHeaders() {
   }
 
   // Cache-Control
-  if (dynamic_cast<DirectoryResource *>(_resource))
+  // if (dynamic_cast<DirectoryResource *>(_resource))
     headers.insert("Cache-Control", "no-cache");
 
   _response.addHeaders(headers.begin(), headers.end());
