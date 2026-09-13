@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:31 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 07:56:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/12 16:26:21 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,9 @@ private:
 	std::string			astr;
 
 	int					req_cnt;
+
+
+	int INIT;
 };
 
 #endif

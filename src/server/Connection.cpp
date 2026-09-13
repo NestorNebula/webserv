@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/12 15:25:00 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 07:31:14 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ Connection::Connection	(const Connection & that) :
 	EpollClient(that),
 	sess(that.serv.get_conf()),
 	serv(that.serv),
-	req_cnt(0)
+	req_cnt(0),
+	INIT(0)
 {
 
 }
@@ -32,7 +33,8 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	serv(_serv),
 	retry_cgi(0),
 	res_cgi(NULL),
-	req_cnt(0)
+	req_cnt(0),
+	INIT(0)
 {
 };
 
@@ -133,7 +135,7 @@ bool	Connection::timeo(WsTime & now)
 // on the next request
 		{
 			// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
-			this->set_err(431); // but not delivered ..
+			this->set_err(408); // 431); // but not delivered ..
 			// until next request ..
 			this->mod_evt(EPOLLOUT);
 		}
@@ -216,6 +218,16 @@ ssize_t	Connection::pollin(void)
 		}
 
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
+// Retry-After:
+// In a 503 Service Unavailable response, this indicates how long the service is expected to be unavailable.
+// In a 429 Too Many Requests response, this indicates how long to wait before making a new request.
+		if (!INIT)
+		{
+			INIT = 1;
+			std::string tmp;
+			tmp.append(ibuf, err > 1024 ? 1024 : err);
+			WSLOG(LVL_TMP, TGT_CONN_RECV, "INIT\n", tmp);
+		}
 		// sess_log_next(sess);
 		switch(sess.nextAction())
 		{
@@ -259,6 +271,8 @@ ssize_t	Connection::pollin(void)
 			break;
 		case Session::WRSOCK:
 			this->req_cnt++;
+			// std::cerr << "SHUTDOWN : rd\n";
+			shutdown(this->fd, SHUT_RD);
 			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT);
 			break;
@@ -345,7 +359,7 @@ ssize_t	Connection::pollout(void)
 				{
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-					// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "data");
 					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 					err = this->send(RESP);
 				}

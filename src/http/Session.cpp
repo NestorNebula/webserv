@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/11 12:39:51 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/12 16:55:26 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,6 +243,8 @@ void Session::manageSession() {
     }
     break;
   case DOCGI:
+    if (_route && _request.hasBody() && _request.getBodySize() > _route->max_body_size)
+      return setError(413);
     if (_resource != NULL) {
       handleResponse();
       _next = WRSOCK;
@@ -267,11 +269,11 @@ void Session::handleRequest() {
   if (!_request.isComplete() && !_request.isInvalid() &&
       !_request.headersComplete())
     return;
+  validateRequest();
+  resolveResource();
   // Might not be ideal, but needed to propose a valid Content-Length header to the CGI
   if (_request.hasHeader("Transfer-Encoding") && (!_request.isComplete() && !_request.isInvalid()))
     return;
-  validateRequest();
-  resolveResource();
   validateOperation();
 }
 
@@ -306,7 +308,11 @@ void Session::resolveResource() {
   if (!_route)
     return setResponseStatus(404);
   WSLOG(LVL_INFO, TGT_SESS, "Request route found: ", _route->path);
-  if (_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+  if ((_request.hasBody() && _request.getBodySize() > _route->max_body_size)
+      || (_request.hasHeader("Content-Length") &&
+        static_cast<unsigned long>(getLong(
+            _request.getHeaders().find("Content-Length")->second, NULL, 0)) >
+            _route->max_body_size))
     return setResponseStatus(413);
   if (!_route->redirect.empty())
     return setResponseStatus(301);
@@ -315,7 +321,7 @@ void Session::resolveResource() {
 
   _resourcePath = resolvePath(_request.getURL(), *_route);
   WSLOG(LVL_INFO, TGT_SESS, "Request Resource resolved: ", _resourcePath);
-  if (isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
+  if (!_request.hasHeader("Transfer-Encoding") && isExistingFile(_resourcePath) && isCgi(_resourcePath, *_route)) {
     _next = DOCGI;
     return;
   }
@@ -331,9 +337,10 @@ void Session::validateOperation() {
   }
   WSLOG(LVL_INFO, TGT_SESS,
            "Checking operation is possible on Session Resource");
-  if (_request.getMethod() == METHOD_POST && _route->upload) {
-    if (isExistingFile(_resourcePath))
+  if (_request.getMethod() == METHOD_POST) {
+    if (!_route->upload)
       return setResponseStatus(403);
+    WSLOG(LVL_INFO, TGT_SESS, "Operation possible on Session Resource");
     return;
   }
   if (!isExistingFile(_resourcePath))
@@ -521,7 +528,12 @@ void Session::handleResponse() {
   _keepalive =
       (_response.getVersion() == "HTTP/1.1" && _response.getCode() != 400 &&
        (!_request.hasHeader("Connection") ||
-        _request.getHeaders().find("Connection")->second == "keep-alive"));
+        _request.getHeaders().find("Connection")->second == "keep-alive") &&
+      _request.isComplete());
+// // #kd
+//   if (_response.getCode() != 200)
+//     _keepalive = false;
+
   setResponseHeaders();
   // Ensure that Response is valid
   if (!_response.isReady())
@@ -647,6 +659,10 @@ void Session::setResponseHeaders() {
       headers.insert("Set-Cookie", oss.str());
     }
   }
+
+  // Cache-Control
+  if (dynamic_cast<DirectoryResource *>(_resource))
+    headers.insert("Cache-Control", "no-cache");
 
   _response.addHeaders(headers.begin(), headers.end());
 }

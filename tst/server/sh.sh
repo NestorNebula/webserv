@@ -117,12 +117,12 @@ if [ "$1" == "u" ]; then
 	# FILES+="e4.jpg "
 	FILES+="Kanan.mp3 "
 	# FILES+="dff95.mp4 "
-
+]
 	for FILE in $FILES; do
 
-		# curl -X POST http://localhost:8081/cgi-uploads/ul.php \
-		# 	-F file=@$WWW/files/$FILE
-		# echo ; echo ; echo
+		curl -X POST http://localhost:8081/cgi-uploads/ul.php \
+			-F file=@$WWW/files/$FILE
+		echo ; echo ; echo
 		# curl -X POST http://localhost:8081/cgi-uploads/ul.pl \
 		# 	-F file=@$WWW/files/$FILE
 		# echo ; echo ; echo
