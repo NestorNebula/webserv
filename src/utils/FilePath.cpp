@@ -18,6 +18,12 @@ bool setWorkingDirectory(const std::string &path, std::string &cwd)
     if (lastSlash == std::string::npos)
         return true;
     std::string directory = path.substr(0, lastSlash);
+    if (path[0] == '/') {
+      cwd = directory + std::string("/");
+      if (directory.empty())
+          directory = "/";
+      return chdir(directory.c_str()) == 0;
+    }
     cwd += directory + std::string("/");
     return chdir(directory.c_str()) == 0;
 }
