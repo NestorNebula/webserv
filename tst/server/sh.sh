@@ -117,7 +117,7 @@ if [ "$1" == "u" ]; then
 	# FILES+="e4.jpg "
 	FILES+="Kanan.mp3 "
 	# FILES+="dff95.mp4 "
-]
+
 	for FILE in $FILES; do
 
 		curl -X POST http://localhost:8081/cgi-uploads/ul.php \
@@ -140,10 +140,10 @@ if [ "$1" == "u" ]; then
 		# 	--data-binary @$WWW/files/$FILE
 
 			# -H "Transfer-Encoding: chunked" \
-		curl -X POST http://localhost:8082/uploads/$FILE -i \
-			-H "Content-Type: application/x-www-form-urlencoded" \
-			-F file=@$WWW/files/$FILE
-		echo ; echo ; echo
+		# curl -X POST http://localhost:8082/uploads/$FILE -i \
+		# 	-H "Content-Type: application/x-www-form-urlencoded" \
+		# 	-F file=@$WWW/files/$FILE
+		# echo ; echo ; echo
 	done
 
 	ls -l $WWW/cgi-uploads/upload* 2>/dev/null
