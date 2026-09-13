@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/20 17:56:17 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 09:16:57 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 10:03:06 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "WsTime.hpp"
 
 # ifndef CONN_TIMEOUT
-#  define CONN_TIMEOUT (60)
+#  define CONN_TIMEOUT (3)
 # endif
 
 # ifndef CGI_TIMEOUT

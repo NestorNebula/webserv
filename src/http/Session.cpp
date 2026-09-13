@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 08:32:42 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/13 08:35:52 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 10:33:22 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -530,10 +530,6 @@ void Session::handleResponse() {
        (!_request.hasHeader("Connection") ||
         _request.getHeaders().find("Connection")->second == "keep-alive") &&
       _request.isComplete());
-// // #kd
-//   if (_response.getCode() != 200)
-//     _keepalive = false;
-
   setResponseHeaders();
   // Ensure that Response is valid
   if (!_response.isReady())
@@ -661,7 +657,7 @@ void Session::setResponseHeaders() {
   }
 
   // Cache-Control
-  // if (dynamic_cast<DirectoryResource *>(_resource))
+  if (dynamic_cast<DirectoryResource *>(_resource))
     headers.insert("Cache-Control", "no-cache");
 
   _response.addHeaders(headers.begin(), headers.end());

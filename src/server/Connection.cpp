@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 09:16:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 10:31:35 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,8 +133,7 @@ bool	Connection::timeo(WsTime & now)
 // on the next request
 		{
 			// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
-			this->set_err(408); // 431); // but not delivered ..
-			// until next request ..
+			this->set_err(408);
 			this->mod_evt(EPOLLOUT);
 		}
 		return (true);
@@ -151,6 +150,7 @@ int	Connection::set_err(int e)
 		WSLOG(LVL_ERR, TGT_CONN, "err:  already set!");
 		WSLOG(LVL_ERR, TGT_CONN, "cur:  ", this->error);
 		WSLOG(LVL_ERR, TGT_CONN, "new:  ", e);
+		// this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		return (-1);
 	}
@@ -159,6 +159,7 @@ int	Connection::set_err(int e)
 	{
 		this->error = e; // why not (?)
 		this->sess.setError(e);
+		// this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 	}
 	catch(const std::exception& e)
@@ -401,18 +402,20 @@ ssize_t	Connection::pollout(void)
 int	Connection::rdhup(void)
 {
 	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
-	switch (sess.nextAction())
-	{
-	case Session::CLOSE:
-	case Session::RDSOCK:
-		return (-1);
-	case Session::KPALIVE:
-		break;
-	default:
-		this->mod_evt(EPOLLOUT);
-		break;
-	}
-	return (0);
+	this->mod_evt(EPOLLOUT);
+	return (-1);
+	// switch (sess.nextAction())
+	// {
+	// case Session::CLOSE:
+	// case Session::RDSOCK:
+	// 	return (-1);
+	// case Session::KPALIVE:
+	// 	break;
+	// default:
+	// 	this->mod_evt(EPOLLOUT);
+	// 	break;
+	// }
+	// return (0);
 }
 
 int	Connection::hup(void)

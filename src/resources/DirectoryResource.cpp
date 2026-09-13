@@ -43,7 +43,7 @@ void DirectoryResource::buildList() {
   dirent *dirFile;
   while ((dirFile = readdir(_dir)) != NULL) {
     std::string name(dirFile->d_name);
-    if (name != "." && name != "..") {
+    if (!name.empty() && name[0] != '.') {
       if (dirFile->d_type == DT_DIR)
         name += '/';
       elem.push_back(name);
