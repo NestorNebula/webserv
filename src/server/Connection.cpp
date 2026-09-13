@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 07:31:14 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 08:03:12 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ Connection::Connection	(const Connection & that) :
 	EpollClient(that),
 	sess(that.serv.get_conf()),
 	serv(that.serv),
-	req_cnt(0),
-	INIT(0)
+	req_cnt(0)
 {
 
 }
@@ -33,8 +32,7 @@ Connection::Connection (Epoll *_ep, int _fd, Server &_serv) :
 	serv(_serv),
 	retry_cgi(0),
 	res_cgi(NULL),
-	req_cnt(0),
-	INIT(0)
+	req_cnt(0)
 {
 };
 
@@ -218,16 +216,7 @@ ssize_t	Connection::pollin(void)
 		}
 
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
-// Retry-After:
-// In a 503 Service Unavailable response, this indicates how long the service is expected to be unavailable.
-// In a 429 Too Many Requests response, this indicates how long to wait before making a new request.
-		if (!INIT)
-		{
-			INIT = 1;
-			std::string tmp;
-			tmp.append(ibuf, err > 1024 ? 1024 : err);
-			WSLOG(LVL_TMP, TGT_CONN_RECV, "INIT\n", tmp);
-		}
+
 		// sess_log_next(sess);
 		switch(sess.nextAction())
 		{
@@ -352,6 +341,13 @@ ssize_t	Connection::pollout(void)
 			{
 			case Session::CLOSE:
 				return (-1);
+			case Session::KPALIVE:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  KPALIVE");
+				return (0);
+			case Session::RDSOCK:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  RDSOCK");
+				this->mod_evt(-EPOLLOUT);
+				return (0);
 			case Session::WRSOCK:
 			default:
 				std::string & RESP = sess.getResponse();
@@ -407,8 +403,18 @@ ssize_t	Connection::pollout(void)
 int	Connection::rdhup(void)
 {
 	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
-	this->mod_evt(EPOLLOUT);
-	return (-1);
+	switch (sess.nextAction())
+	{
+	case Session::CLOSE:
+	case Session::RDSOCK:
+		return (-1);
+	case Session::KPALIVE:
+		break;
+	default:
+		this->mod_evt(EPOLLOUT);
+		break;
+	}
+	return (0);
 }
 
 int	Connection::hup(void)

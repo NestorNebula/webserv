@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/12 16:15:50 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/13 08:16:56 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,10 @@
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"
 #include "Epoll.hpp"
-
 #include "WsTime.hpp"
+
 int main (int argc, char ** argv, char **envp)
 {
-    WsLog::kd();
 
     if (argc < 2)
     {
