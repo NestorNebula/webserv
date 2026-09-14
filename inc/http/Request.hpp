@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nhoussie <nhoussie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 08:56:52 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/07/05 14:41:26 by nhoussie         ###   ########.fr       */
+/*   Updated: 2026/09/13 15:48:53 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@
 
 class Request {
 public:
-  Request() : _state(EMPTY), _body(NULL), _bodySize(0) {
+// #kd
+// Conditional jump or move depends on uninitialised value(s)
+  Request() : _state(EMPTY), _method(METHOD_UNKNOWN), _body(NULL), _bodySize(0) {
     WSLOG(LVL_DBG, TGT_REQ, "Request constructor");
   }
   ~Request() {
@@ -73,7 +75,6 @@ private:
     COMPLETE,
     INVALID,
   } InternalState;
-
   std::string _raw;
   InternalState _state;
   HttpMethod _method;
