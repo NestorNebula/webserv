@@ -25,6 +25,8 @@ function usage()
 	echo "f) file-not-found"
 	echo "h) non-cgi files"
 	echo "p) php files"
+	echo "y) python files"
+	echo "l) perl files"
 
 	echo
 	exit
@@ -53,6 +55,8 @@ case "$1" in
 	f)	URLS=urls/fnf.sh ;;
 	h)	URLS=urls/html.sh ;;
 	p)	URLS=urls/php.sh ;;
+	y)	URLS=urls/python.sh ;;
+	l)	URLS=urls/perl.sh ;;
 	*)	usage ;;
 esac
 
