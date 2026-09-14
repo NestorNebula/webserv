@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/14 16:57:12 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/14 17:34:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "ResourceCgi.hpp"
 #include "ResourceFcgi.hpp"
 #include "ResourcePiped.hpp"
+#include "Socket.hpp"
 
 Connection::Connection	(const Connection & that) :
 	EpollClient(that),
@@ -574,7 +575,7 @@ int	Connection::exec_cgi(void)
 	if (
 		(cgienv->lang == CGI_PHP) &&
 		!fcgi_sock.empty() &&
-		!access(fcgi_sock.c_str(), R_OK | W_OK)
+		sock_file(fcgi_sock.c_str())
 	)
 	{
 		ResourceFcgi * fcgi = new ResourceFcgi;
