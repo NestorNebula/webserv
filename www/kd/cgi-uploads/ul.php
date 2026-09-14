@@ -2,13 +2,19 @@
 
     header('Content-type: text/plain');
 
-    print("PHP : upload\n\n");
-
     if (isset($_FILES['file']))
     {
         $file_name = $_FILES['file']['name'];
         $file_path = "./upload-php-" . $file_name;
+        if (file_exists($file_path))
+        {
+            header('Status: 409');
+            print("PHP  : upload\n\n");
+            print("PHP  : file exists\n");
+            return (0);
+        }
 
+        print("PHP  : upload\n\n");
         echo ("file : " . $file_name) . PHP_EOL;
         echo ("path : " . $file_path) . PHP_EOL;
         switch ($_FILES['file']['error']) {
@@ -33,6 +39,8 @@
     }
     else
     {
-        echo "PHP : no file set\n";
+        print("PHP : upload\n\n");
+        print("PHP : no file set\n");
+
     }
 ?>
