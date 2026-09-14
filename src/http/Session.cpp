@@ -466,7 +466,7 @@ void Session::handleUpload() {
   WSLOG(LVL_INFO, TGT_SESS, "Processing upload Request");
   std::string uploadDir = _route->upload_dir;
   if (!isDirectory(uploadDir))
-    return setResponseStatus(400);
+    return setResponseStatus(500);
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
   if (isExistingFile(uploadFile))
