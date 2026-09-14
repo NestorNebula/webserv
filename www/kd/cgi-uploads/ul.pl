@@ -11,10 +11,15 @@ my $f = $cgi->param('file');
 print("Content-Type: text/plain\r\n\r\n");
 
 print("PERL : upload\n\n");
-
 if ($f)
 {
     my $path = "./upload-pl-$f";
+    if (-e $path)
+    {
+        print("PERL : file exists\n");
+        exit(0);
+    }
+
     print("file : ", $f, "\n");
     print("path : ", $path, "\n");
 
@@ -24,7 +29,7 @@ if ($f)
     while ( <$fp> ) { print UPLOADFILE; }
     close UPLOADFILE;
 }
-    else
-    {
-        print("PERL : no file set\n");
-    }
+else
+{
+    print("PERL : no file set\n");
+}
