@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 11:56:36 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 15:43:28 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/14 09:29:32 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,6 +368,7 @@ void    WsLog::kd(void)
         // | TGT_TIMEO
         // | TGT_ALL
         | TGT_SERV_ALL
+
         // | TGT_EPC
         // | TGT_EPC_RECV
         // | TGT_EPC_SEND

@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/13 16:06:17 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/14 10:53:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,6 +213,8 @@ int	Connection::set_err(int e)
 }
 
 
+#define CLOSE_ON_CLOSE 1
+
 ssize_t	Connection::pollin(void)
 {
 	ssize_t	err;
@@ -224,7 +226,9 @@ ssize_t	Connection::pollin(void)
 		if (sess.nextAction() == Session::CLOSE)
 		{
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  CLOSE");
+#if CLOSE_ON_CLOSE
 			return (-1);
+#endif
 		}
 		err = this->recv();
 		if (err < 0)
@@ -251,7 +255,11 @@ ssize_t	Connection::pollin(void)
 			sess.write(this->ibuf, err);
 			break;
 		case Session::CLOSE:
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		default:
 			break;
 		}
@@ -292,8 +300,11 @@ ssize_t	Connection::pollin(void)
 			WSCOL(WSL_GREEN);
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "sess:  WRSOCK");
 			this->req_cnt++;
-			// ATTN : may have more upload data coming ...
+			// expect no more input data ...
+			// not true for UPLOAD => ERROR
+#if CLOSE_ON_CLOSE
 			this->mod_evt(-EPOLLIN);
+#endif
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
@@ -308,7 +319,11 @@ ssize_t	Connection::pollin(void)
 		case Session::CLOSE:
 			WSCOL(WSL_RED);
 			WSLOG(LVL_DBG, TGT_CONN_RECV, "sess:  CLOSE");
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		}
 		return (err);
 	}
@@ -376,7 +391,13 @@ ssize_t	Connection::pollout(void)
 			{
 			case Session::CLOSE:
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  CLOSE");
+#if CLOSE_ON_CLOSE
 				return (-1);
+#else
+				// this->mod_evt(EPOLLIN);
+				this->mod_evt(-EPOLLOUT);
+				return (0);
+#endif
 			case Session::KPALIVE:
 				WSCOL(WSL_PURPLE);
 				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  KPALIVE");
@@ -425,9 +446,13 @@ ssize_t	Connection::pollout(void)
 			return (0);
 		case Session::CLOSE:
 
-			WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  CLOSE");
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "sent:  CLOSE");
 			// ATTN : upload
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		default:
 			break;
 		}
