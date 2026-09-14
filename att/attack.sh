@@ -18,6 +18,8 @@ function usage()
 	echo "siege -f FILE_LIST --internet --verbose --reps=REPETITIONS --concurrent=CONCURRENT --no-parser -b"
 	echo
 	echo "a) a mix of all files"
+	echo "1) a mix on 8081"
+	echo "2) a mix on 8082"
 	echo "b) large non-cgi files"
 	echo "c) cgi files"
 	echo "f) file-not-found"
@@ -43,6 +45,8 @@ function attack()
 }
 
 case "$1" in
+	1)	URLS=urls/all81.sh ;;
+	2)	URLS=urls/all82.sh ;;
 	a)	URLS=urls/all.sh ;;
 	b)	URLS=urls/big.sh ;;
 	c)	URLS=urls/cgi.sh ;;
