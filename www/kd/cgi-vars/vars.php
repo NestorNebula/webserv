@@ -1,7 +1,6 @@
 <?php
     define('WSEOL', PHP_EOL);
     header('Content-type: text/plain');
-    // header('Set-Cookie: counter=deleted; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 
     $g1 = $_GET['g1'] ?? 'g1-default';
     $g2 = $_GET['g2'] ?? 'g2-default';
