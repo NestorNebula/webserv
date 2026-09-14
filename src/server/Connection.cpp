@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/11 12:54:19 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/14 10:53:01 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,38 @@ Connection::~Connection()
 		WSLOG(LVL_DBG, TGT_CONN, " (~) Connection\n", e.what());
 	}
 }
+
+#define DBG_SESS_NEXT 0
+
+#if DBG_SESS_NEXT
+static void sess_log_next(Session &sess)
+{
+    WSCOL(WSL_YELLOW);
+    switch(sess.nextAction())
+    {
+    case Session::RDSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
+      break;
+    case Session::DOCGI:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
+      break;
+    case Session::WRSOCK:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
+      break;
+    case Session::CLOSE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
+      break;
+    case Session::KPALIVE:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
+      break;
+#if WITH_RETRY
+    case Session::RETRY:
+      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RETRY");
+      break;
+#endif
+    }
+}
+#endif
 
 bool	Connection::timeo(WsTime & now)
 {
@@ -103,6 +135,7 @@ bool	Connection::timeo(WsTime & now)
 		return (0);
 	}
 #endif
+
 	if ((this->lact + CONN_TIMEOUT).after(now))
 		return (false);
 
@@ -117,27 +150,36 @@ bool	Connection::timeo(WsTime & now)
 		return (false);
 	}
 
+#if DBG_SESS_NEXT
+	sess_log_next(sess);
+#endif
+	if (this->sess.nextAction() == Session::CLOSE)
+	{
+		this->lact = now;
+		this->mod_evt(EPOLLOUT); // trigger fail (?)
+		return (true);
+	}
 	if (this->sess.nextAction() == Session::RDSOCK)
 	{
-		// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
-		// if (this->req_cnt) // keep-alive timeout
-		// {
-		// 	WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
-		// 	this->sess._next = Session::CLOSE;
-		// 	this->mod_evt(EPOLLOUT);
-		// }
-		// else
-// something still not right ..
-// Error .. does not necessarily CLOSE
-// so .. it's in some state ..
-// on the next request
+		WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : rdsock");
+		if (this->req_cnt) // keep-alive timeout
+		{
+			WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : keep-alive");
+			return (true);
+		}
+		else
 		{
 			// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
-			this->set_err(431); // but not delivered ..
-			// until next request ..
-			this->mod_evt(EPOLLOUT);
+			// It's like .. firefox opens sockets ..
+			// that it does not use right away ...
+			// so .. I send on this ..
+			// AND : do not CLOSE IMMEDIATELY (fucking upload)
+			// so .. strange
+			this->set_err(408);
+			this->mod_evt(-EPOLLIN);
+			this->mod_evt(EPOLLOUT); // set_err should have done this
+			return (false);
 		}
-		return (true);
 	}
 	return (false);
 }
@@ -151,6 +193,7 @@ int	Connection::set_err(int e)
 		WSLOG(LVL_ERR, TGT_CONN, "err:  already set!");
 		WSLOG(LVL_ERR, TGT_CONN, "cur:  ", this->error);
 		WSLOG(LVL_ERR, TGT_CONN, "new:  ", e);
+		// this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 		return (-1);
 	}
@@ -159,6 +202,7 @@ int	Connection::set_err(int e)
 	{
 		this->error = e; // why not (?)
 		this->sess.setError(e);
+		// this->mod_evt(-EPOLLIN);
 		this->mod_evt(EPOLLOUT);
 	}
 	catch(const std::exception& e)
@@ -168,30 +212,8 @@ int	Connection::set_err(int e)
 	return (-1);
 }
 
-#if 0
-static void sess_log_next(Session &sess)
-{
-    WSCOL(WSL_YELLOW);
-    switch(sess.nextAction())
-    {
-    case Session::RDSOCK:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  RDSOCK");
-      break;
-    case Session::DOCGI:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  DOCGI");
-      break;
-    case Session::WRSOCK:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  WRSOCK");
-      break;
-    case Session::CLOSE:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  CLOSE");
-      break;
-    case Session::KPALIVE:
-      WSLOG(LVL_DBG, TGT_CONN_SEND, "next:  KPALIVE");
-      break;
-    }
-}
-#endif
+
+#define CLOSE_ON_CLOSE 1
 
 ssize_t	Connection::pollin(void)
 {
@@ -200,8 +222,14 @@ ssize_t	Connection::pollin(void)
 	try
 	{
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  POLLIN");
-		// sess_log_next(sess);
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv");
+		if (sess.nextAction() == Session::CLOSE)
+		{
+			WSLOG(LVL_DBG, TGT_CONN_RECV, "recv:  CLOSE");
+#if CLOSE_ON_CLOSE
+			return (-1);
+#endif
+		}
 		err = this->recv();
 		if (err < 0)
 		{
@@ -214,9 +242,12 @@ ssize_t	Connection::pollin(void)
 			this->mod_evt(EPOLLOUT);
 			return (0);
 		}
+
 		WSLOG(LVL_DBG, TGT_CONN_RECV, "recv: ", err);
 
-		// sess_log_next(sess);
+#if DBG_SESS_NEXT
+		sess_log_next(sess);
+#endif
 		switch(sess.nextAction())
 		{
 		case Session::RDSOCK:
@@ -224,10 +255,18 @@ ssize_t	Connection::pollin(void)
 			sess.write(this->ibuf, err);
 			break;
 		case Session::CLOSE:
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		default:
 			break;
 		}
+
+#if DBG_SESS_NEXT
+		sess_log_next(sess);
+#endif
 		switch (sess.nextAction())
 		{
 #if WITH_RETRY
@@ -258,8 +297,14 @@ ssize_t	Connection::pollin(void)
 			this->res_cgi->push_body();
 			break;
 		case Session::WRSOCK:
+			WSCOL(WSL_GREEN);
+			WSLOG(LVL_DBG, TGT_CONN_RECV, "sess:  WRSOCK");
 			this->req_cnt++;
+			// expect no more input data ...
+			// not true for UPLOAD => ERROR
+#if CLOSE_ON_CLOSE
 			this->mod_evt(-EPOLLIN);
+#endif
 			this->mod_evt(EPOLLOUT);
 			break;
 		case Session::RDSOCK:
@@ -272,7 +317,13 @@ ssize_t	Connection::pollin(void)
 				return (-1);
 			return (0);
 		case Session::CLOSE:
+			WSCOL(WSL_RED);
+			WSLOG(LVL_DBG, TGT_CONN_RECV, "sess:  CLOSE");
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		}
 		return (err);
 	}
@@ -292,7 +343,9 @@ ssize_t	Connection::pollout(void)
 	{
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  POLLOUT");
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
-		// sess_log_next(sess);
+#if DBG_SESS_NEXT
+		sess_log_next(sess);
+#endif
 		if (sess.nextAction() == Session::DOCGI)
 		{
 			ResourceCgi *res = this->res_cgi;
@@ -337,7 +390,22 @@ ssize_t	Connection::pollout(void)
 			switch (sess.nextAction())
 			{
 			case Session::CLOSE:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  CLOSE");
+#if CLOSE_ON_CLOSE
 				return (-1);
+#else
+				// this->mod_evt(EPOLLIN);
+				this->mod_evt(-EPOLLOUT);
+				return (0);
+#endif
+			case Session::KPALIVE:
+				WSCOL(WSL_PURPLE);
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  KPALIVE");
+				return (0);
+			case Session::RDSOCK:
+				WSLOG(LVL_DBG, TGT_CONN_SEND, "send:  RDSOCK");
+				this->mod_evt(-EPOLLOUT);
+				return (0);
 			case Session::WRSOCK:
 			default:
 				std::string & RESP = sess.getResponse();
@@ -345,7 +413,7 @@ ssize_t	Connection::pollout(void)
 				{
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "send");
 					WSLOG(LVL_DBG, TGT_CONN_SEND, "resp: " , RESP.size());
-					// WSLOG(LVL_DBG, TGT_CONN_SEND, "resp");
+					// WSLOG(LVL_DBG, TGT_CONN_SEND, "data");
 					// WSLOG(LVL_DBG, TGT_CONN_SEND, "****\n", RESP);
 					err = this->send(RESP);
 				}
@@ -364,7 +432,9 @@ ssize_t	Connection::pollout(void)
 		}
 		WSLOG(LVL_DBG, TGT_CONN_SEND, "sent: ", err);
 
-		// sess_log_next(sess);
+#if DBG_SESS_NEXT
+		sess_log_next(sess);
+#endif
 		switch (sess.nextAction())
 		{
 		case Session::KPALIVE:
@@ -375,7 +445,14 @@ ssize_t	Connection::pollout(void)
 			this->reset();
 			return (0);
 		case Session::CLOSE:
+
+			WSLOG(LVL_DBG, TGT_CONN_SEND, "sent:  CLOSE");
+			// ATTN : upload
+#if CLOSE_ON_CLOSE
 			return (-1);
+#else
+			return (0);
+#endif
 		default:
 			break;
 		}
@@ -393,8 +470,27 @@ ssize_t	Connection::pollout(void)
 int	Connection::rdhup(void)
 {
 	WSLOG(LVL_DBG, TGT_CONN, "RDHUP");
+#if 0 // testing
+	switch (sess.nextAction())
+	{
+	case Session::CLOSE:
+		WSLOG(LVL_DBG, TGT_CONN, "- CLOSE");
+		return (-1);
+	case Session::RDSOCK:
+		WSLOG(LVL_DBG, TGT_CONN, "- RDSOCK");
+		return (-1);
+	case Session::KPALIVE:
+		WSLOG(LVL_DBG, TGT_CONN, "- KPALIVE");
+		break;
+	default:
+		this->mod_evt(EPOLLOUT);
+		break;
+	}
+	return (0);
+#else
 	this->mod_evt(EPOLLOUT);
 	return (-1);
+#endif
 }
 
 int	Connection::hup(void)
