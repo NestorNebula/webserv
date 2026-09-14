@@ -470,7 +470,7 @@ void Session::handleUpload() {
   std::string uploadFile =
       joinPaths(uploadDir, _request.getURL().substr(_route->path.size()));
   if (isExistingFile(uploadFile))
-    return setResponseStatus(403);
+    return setResponseStatus(409);
   std::ofstream ofs(uploadFile.c_str());
   if (!ofs.is_open())
     return setResponseStatus(500);

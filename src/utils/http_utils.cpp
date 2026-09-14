@@ -133,6 +133,7 @@ std::string getStatusReason(Response::StatusCode code) {
     reasons[404] = "Not Found";
     reasons[405] = "Method Not Allowed";
     reasons[408] = "Request Timeout";
+    reasons[409] = "Conflict";
     reasons[413] = "Content Too Large";
     reasons[431] = "Request Header Fields Too Large";
     reasons[500] = "Internal Server Error";
