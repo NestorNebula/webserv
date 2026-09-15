@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:24:22 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/14 16:57:24 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/15 11:56:46 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 
 int main (int argc, char ** argv, char **envp)
 {
+    WsLog::kd();
     if (argc < 2)
     {
         std::cerr << "usage: webserv <config>\n";
