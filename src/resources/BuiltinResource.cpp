@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/12 09:10:36 by nhoussie          #+#    #+#             */
-/*   Updated: 2026/09/15 14:05:39 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/15 14:33:37 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,35 +59,28 @@ void BuiltinResource::buildHTMLFromCode() {
   div << "</div>\n";
 
   *_stream << "<!DOCTYPE html>\n"
-              "<html lang=\"en\">\n"
-              "<head>\n"
-              "<meta charset=\"utf-8\">\n"
-              "<meta name=\"viewport\" content=\"width=device-width, "
-              "initial-scale=1.0\" />\n"
-              "<link rel=\"stylesheet\" href=\"/css/styles.css\" />\n"
-              "<title>"
-           << _code << " " << reason
-           << "</title>\n"
-              "</head>\n"
-              "<body>\n"
-
-<< "<header>\n"
-		<< "<h1>WEBSERV</h1>\n"
-		<< "<p>Demonstration Website</p>\n"
-		<< "<p>for our HTTP server</p>\n"
-    << "</h1>\n"
-<< "</header>\n"
-	<< "<main>\n"
-
-		<< "<h1 style=\"text-align:center;color:#16db65\">" << _code << " " << reason << "</h1>\n"
-           << div.str()
-
-  << "<button class=\"request\" onclick=\"history.back();\">"
-	<< "<p class=\"method\">BACK</p>"
-<< "</button>"
-	<< "</main>>\n"
-
-              // "<h1>"
-           << "</body>\n"
-              "</html>\n";
+"<html lang=\"en\">\n"
+  "<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<meta name=\"viewport\" content=\"width=device-width, "
+    "initial-scale=1.0\" />\n"
+    "<link rel=\"stylesheet\" href=\"/css/styles.css\" />\n"
+    "<title>" << _code << " " << reason<< "</title>\n"
+  "</head>\n"
+  "<body>\n"
+    << "<header>\n"
+      << "<h1>WEBSERV</h1>\n"
+        << "<p>Demonstration Website</p>\n"
+        << "<p>for our HTTP server</p>\n"
+      << "</h1>\n"
+    << "</header>\n"
+    << "<main>\n"
+      << "<h1 style=\"text-align:center;color:#16db65\">" << _code << " " << reason << "</h1>\n"
+      << div.str()
+      << "<button class=\"request\" onclick=\"history.back();\">"
+        << "<p class=\"method\">BACK</p>"
+      << "</button>"
+    << "</main>>\n"
+  << "</body>\n"
+"</html>\n";
 }
