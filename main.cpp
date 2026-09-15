@@ -20,7 +20,7 @@
 
 int main (int argc, char ** argv, char **envp)
 {
-    WsLog::kd();
+    // WsLog::kd();
     if (argc < 2)
     {
         std::cerr << "usage: webserv <config>\n";
