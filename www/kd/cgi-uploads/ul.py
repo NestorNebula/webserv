@@ -7,9 +7,9 @@ import os
 import cgi
 import cgitb
 
-print("Content-Type: text/plain", end="\r\n\r\n");
+print("Content-Type: text/html", end="\r\n\r\n");
 
-print("PYTHON : upload\n")
+print("PYTHON : upload", end="<br>")
 
 form = cgi.FieldStorage()
 
@@ -19,9 +19,16 @@ if "file" in form:
         file_name = file_item.filename
         file_path = './upload-py-' + file_name
 
-        print("file : ", file_name)
-        print("path : ", file_path)
+        if os.path.exists(file_path):
+            print("PYTHON : file exists<br>");
+            print("<a href='javascript:history.back();'>BACK</a><br>");
+            exit (0)
+
+        print("file : ", file_name, "<br>")
+        print("path : ", file_path, "<br>")
         with open(file_path, 'wb') as file:
             file.write(file_item.file.read())
 else:
-    print("PYTHON : no file set\n")
+    print("PYTHON : no file set<br>")
+
+print("<a href='javascript:history.back();'>BACK</a><br>");
