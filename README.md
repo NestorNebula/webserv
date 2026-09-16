@@ -114,28 +114,38 @@ Configuration files must follow the syntax and rules expected by the server. Inv
 ## CGI
 The server implements execution of scripts using the Common Gateway Interface (CGI).<br>
 It has been tested with: php-cgi, python3 and perl.
+
+Assign a CGI executable to be used for a given file extension with the directive
+
+    cgi .EXT: /path/to/cgi/executable/for/this/extension
+
 ### PHP
 php-cgi's behavior can be configured in the php.ini configuration file.
 ### Perl
-Scripts should include the directive
+Scripts should include the lines
 
     use CGI
 ### Python
-Scripts should include the directives
+Scripts should include the lines
 
     import cgi
     import cgitb
 
-ATTN : The CGI module has been removed as of Python 3.13.<br>
+<br>ATTN : The CGI module has been removed as of Python 3.13.<br>
 We provide a script `bonus/pycgi.sh` to download the legacy-cgi module.<br>
 
 `./pycgi.sh install` will download and upack the legacy-cgi tarball.<br>
 
-It must be explicitly added to the server's config with the directive `pycgi_dir: PATH/TO/legacy-cgi-2.6`
+It must be explicitly added to the server's config with the directive
+
+    pycgi_dir: PATH/TO/legacy-cgi-2.6s
 
 ## FastCGI
 The server can use FastCGI with php-fpm. The user is responsible for installing php-fpm on the machine.<br>
-The server's config should set the directive `fcgi_sock: PATH/TO/php-fpm/SOCK`<br>
+The server's config should set the directive
+
+    fcgi_sock: PATH/TO/php-fpm/SOCK
+
 We provide a script `bonus/fcgi.sh` to facilitate setup of php-fpm with webserv.
 
 `./fcgi.sh conf` will generate default configuration files for php-fpm and a corresponding systemd --user service.<br>
