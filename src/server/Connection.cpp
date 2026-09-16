@@ -6,7 +6,7 @@
 /*   By: kdonlon <kdonlon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 11:23:35 by kdonlon           #+#    #+#             */
-/*   Updated: 2026/09/14 17:38:13 by kdonlon          ###   ########.fr       */
+/*   Updated: 2026/09/16 13:21:20 by kdonlon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,11 +171,6 @@ bool	Connection::timeo(WsTime & now)
 		else
 		{
 			// WSLOG(LVL_WARN, TGT_CONN | TGT_TIMEO | TGT_RETRY, "TIMEO : error");
-			// It's like .. firefox opens sockets ..
-			// that it does not use right away ...
-			// so .. I send on this ..
-			// AND : do not CLOSE IMMEDIATELY (fucking upload)
-			// so .. strange
 			this->set_err(408);
 			this->mod_evt(-EPOLLIN);
 			this->mod_evt(EPOLLOUT); // set_err should have done this
