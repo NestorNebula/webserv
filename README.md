@@ -12,6 +12,7 @@ _This project has been created as part of the 42 curriculum by kdonlon, nhoussie
     - [Blocks](#blocks)
     - [Directives](#directives)
     - [Configuration Inheritance](#configuration-inheritance)
+  - [CGI](#cgi)
 - [Resources](#resources)
 
 ---
@@ -108,6 +109,48 @@ server {
 In this example, the `/data` route inherits `index` and `methods` from the `server` block and redefines `root`.
 
 Configuration files must follow the syntax and rules expected by the server. Invalid configuration files will result in a configuration error.
+
+
+## CGI
+The server implements execution of scripts using the Common Gateway Interface.<br>
+It has been tested with: php-cgi, python3 and perl.
+### PHP
+php-cgi's behavior can be configured in the php.ini configuration file.
+### Perl
+Scripts should include the directivee
+
+    use CGI
+### Python
+Scripts should include the directives
+
+    import cgi
+    import cgitb
+
+ATTN : The CGI module has been removed as of Python 3.13.<br>
+We provide a script `bonus/pycgi.sh` to download the legacy-cgi module.<br>
+
+`./pycgi.sh install`<br>
+will download and upack the legacy-cgi tarball.<br>
+
+It must be explicitly added to the server's config with `pycgi_dir: PATH/TO/legacy-cgi-2.6`
+
+## FastCGI
+The server can use FastCGI with php-fpm.<br>
+The server's config should set `fcgi_sock: PATH/TO/php-fpm/SOCK`<br>
+We provide a script `bonus/fcgi.sh` to facilitate setup of php-fpm.
+
+`./fcgi.sh conf`<br>
+will generate default configuration files for php-fpm and a corresponding systemd --user service. This should be done before using php-fpm with webserv.
+
+`./fcgi.sh start`<br>
+will launch php-fpm as a systemd --user service
+
+`./fcgi.sh stop`<br>
+will terminate the php-fpm systemd --user service
+
+`./fcgi.sh cmd`<br>
+will print out the command line for executing php-fpm with the generated config files.
+
 
 ## Resources
 
